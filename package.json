@@ -1,0 +1,15 @@
+{
+  "name": "kandanhycon",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "./node_modules/.bin/ts-node src/main.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "ts-node": "^6.0.0",
+    "typescript": "^2.8.1"
+  }
+}
