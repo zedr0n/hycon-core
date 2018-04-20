@@ -4,12 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "./node_modules/.bin/ts-node src/main.ts"
+    "start": "./node_modules/.bin/ts-node src/main.ts",
+    "protogen": "pbjs -t static-module -w commonjs -o src/serialization/proto.js proto/main.proto &&  pbts -o src/serialization/proto.d.ts src/serialization/proto.js && ./src/serialization/trim_null.sh"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "ts-node": "^6.0.0",
     "typescript": "^2.8.1"
+  },
+  "dependencies": {
+    "protobufjs": "^6.8.6"
   }
 }
