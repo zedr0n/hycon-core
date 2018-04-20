@@ -1,11 +1,16 @@
 {
     "compilerOptions": {
-        "module": "system",
+        "target": "es6",
+        "module": "commonjs",
         "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,
         "outFile": "hycon.js",
-        "sourceMap": true
+        "sourceMap": true,
+        "typeRoots": [
+            "./node_modules/@types",
+            "./types"
+        ]
     },
     "include": [
         "src/**/*"

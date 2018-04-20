@@ -1,6 +1,4 @@
 node_modules
-package-lock\.json
-
-src/serialization/proto\.d\.ts-e
-
 *.ts-e
+logs
+package-lock.json

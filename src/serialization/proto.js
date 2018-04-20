@@ -5649,4 +5649,925 @@ $root.BlockHeaders = (function() {
     return BlockHeaders;
 })();
 
+$root.DBState = (function() {
+
+    /**
+     * Properties of a DBState.
+     * @exports IDBState
+     * @interface IDBState
+     * @property {IAccount|null} [account] DBState account
+     * @property {IStateNode|null} [node] DBState node
+     * @property {number|null} [refCount] DBState refCount
+     */
+
+    /**
+     * Constructs a new DBState.
+     * @exports DBState
+     * @classdesc Represents a DBState.
+     * @implements IDBState
+     * @constructor
+     * @param {IDBState=} [properties] Properties to set
+     */
+    function DBState(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * DBState account.
+     * @member {IAccount|null|undefined} account
+     * @memberof DBState
+     * @instance
+     */
+    DBState.prototype.account = null;
+
+    /**
+     * DBState node.
+     * @member {IStateNode|null|undefined} node
+     * @memberof DBState
+     * @instance
+     */
+    DBState.prototype.node = null;
+
+    /**
+     * DBState refCount.
+     * @member {number} refCount
+     * @memberof DBState
+     * @instance
+     */
+    DBState.prototype.refCount = 0;
+
+    // OneOf field names bound to virtual getters and setters
+    var $oneOfFields;
+
+    /**
+     * DBState state.
+     * @member {"account"|"node"|"refCount"|undefined} state
+     * @memberof DBState
+     * @instance
+     */
+    Object.defineProperty(DBState.prototype, "state", {
+        get: $util.oneOfGetter($oneOfFields = ["account", "node", "refCount"]),
+        set: $util.oneOfSetter($oneOfFields)
+    });
+
+    /**
+     * Creates a new DBState instance using the specified properties.
+     * @function create
+     * @memberof DBState
+     * @static
+     * @param {IDBState=} [properties] Properties to set
+     * @returns {DBState} DBState instance
+     */
+    DBState.create = function create(properties) {
+        return new DBState(properties);
+    };
+
+    /**
+     * Encodes the specified DBState message. Does not implicitly {@link DBState.verify|verify} messages.
+     * @function encode
+     * @memberof DBState
+     * @static
+     * @param {IDBState} message DBState message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    DBState.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.account != null && message.hasOwnProperty("account"))
+            $root.Account.encode(message.account, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+        if (message.node != null && message.hasOwnProperty("node"))
+            $root.StateNode.encode(message.node, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+        if (message.refCount != null && message.hasOwnProperty("refCount"))
+            writer.uint32(/* id 3, wireType 0 =*/24).int32(message.refCount);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified DBState message, length delimited. Does not implicitly {@link DBState.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof DBState
+     * @static
+     * @param {IDBState} message DBState message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    DBState.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a DBState message from the specified reader or buffer.
+     * @function decode
+     * @memberof DBState
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {DBState} DBState
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    DBState.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.DBState();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.account = $root.Account.decode(reader, reader.uint32());
+                break;
+            case 2:
+                message.node = $root.StateNode.decode(reader, reader.uint32());
+                break;
+            case 3:
+                message.refCount = reader.int32();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a DBState message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof DBState
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {DBState} DBState
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    DBState.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a DBState message.
+     * @function verify
+     * @memberof DBState
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    DBState.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        var properties = {};
+        if (message.account != null && message.hasOwnProperty("account")) {
+            properties.state = 1;
+            {
+                var error = $root.Account.verify(message.account);
+                if (error)
+                    return "account." + error;
+            }
+        }
+        if (message.node != null && message.hasOwnProperty("node")) {
+            if (properties.state === 1)
+                return "state: multiple values";
+            properties.state = 1;
+            {
+                var error = $root.StateNode.verify(message.node);
+                if (error)
+                    return "node." + error;
+            }
+        }
+        if (message.refCount != null && message.hasOwnProperty("refCount")) {
+            if (properties.state === 1)
+                return "state: multiple values";
+            properties.state = 1;
+            if (!$util.isInteger(message.refCount))
+                return "refCount: integer expected";
+        }
+        return null;
+    };
+
+    /**
+     * Creates a DBState message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof DBState
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {DBState} DBState
+     */
+    DBState.fromObject = function fromObject(object) {
+        if (object instanceof $root.DBState)
+            return object;
+        var message = new $root.DBState();
+        if (object.account != null) {
+            if (typeof object.account !== "object")
+                throw TypeError(".DBState.account: object expected");
+            message.account = $root.Account.fromObject(object.account);
+        }
+        if (object.node != null) {
+            if (typeof object.node !== "object")
+                throw TypeError(".DBState.node: object expected");
+            message.node = $root.StateNode.fromObject(object.node);
+        }
+        if (object.refCount != null)
+            message.refCount = object.refCount | 0;
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a DBState message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof DBState
+     * @static
+     * @param {DBState} message DBState
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    DBState.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (message.account != null && message.hasOwnProperty("account")) {
+            object.account = $root.Account.toObject(message.account, options);
+            if (options.oneofs)
+                object.state = "account";
+        }
+        if (message.node != null && message.hasOwnProperty("node")) {
+            object.node = $root.StateNode.toObject(message.node, options);
+            if (options.oneofs)
+                object.state = "node";
+        }
+        if (message.refCount != null && message.hasOwnProperty("refCount")) {
+            object.refCount = message.refCount;
+            if (options.oneofs)
+                object.state = "refCount";
+        }
+        return object;
+    };
+
+    /**
+     * Converts this DBState to JSON.
+     * @function toJSON
+     * @memberof DBState
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    DBState.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return DBState;
+})();
+
+$root.Account = (function() {
+
+    /**
+     * Properties of an Account.
+     * @exports IAccount
+     * @interface IAccount
+     * @property {number|Long|null} [balance] Account balance
+     * @property {number|null} [nonce] Account nonce
+     */
+
+    /**
+     * Constructs a new Account.
+     * @exports Account
+     * @classdesc Represents an Account.
+     * @implements IAccount
+     * @constructor
+     * @param {IAccount=} [properties] Properties to set
+     */
+    function Account(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * Account balance.
+     * @member {number|Long} balance
+     * @memberof Account
+     * @instance
+     */
+    Account.prototype.balance = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+    /**
+     * Account nonce.
+     * @member {number} nonce
+     * @memberof Account
+     * @instance
+     */
+    Account.prototype.nonce = 0;
+
+    /**
+     * Creates a new Account instance using the specified properties.
+     * @function create
+     * @memberof Account
+     * @static
+     * @param {IAccount=} [properties] Properties to set
+     * @returns {Account} Account instance
+     */
+    Account.create = function create(properties) {
+        return new Account(properties);
+    };
+
+    /**
+     * Encodes the specified Account message. Does not implicitly {@link Account.verify|verify} messages.
+     * @function encode
+     * @memberof Account
+     * @static
+     * @param {IAccount} message Account message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Account.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.balance != null && message.hasOwnProperty("balance"))
+            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.balance);
+        if (message.nonce != null && message.hasOwnProperty("nonce"))
+            writer.uint32(/* id 2, wireType 0 =*/16).int32(message.nonce);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified Account message, length delimited. Does not implicitly {@link Account.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof Account
+     * @static
+     * @param {IAccount} message Account message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Account.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes an Account message from the specified reader or buffer.
+     * @function decode
+     * @memberof Account
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {Account} Account
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Account.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.Account();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.balance = reader.int64();
+                break;
+            case 2:
+                message.nonce = reader.int32();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes an Account message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof Account
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {Account} Account
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Account.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies an Account message.
+     * @function verify
+     * @memberof Account
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    Account.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.balance != null && message.hasOwnProperty("balance"))
+            if (!$util.isInteger(message.balance) && !(message.balance && $util.isInteger(message.balance.low) && $util.isInteger(message.balance.high)))
+                return "balance: integer|Long expected";
+        if (message.nonce != null && message.hasOwnProperty("nonce"))
+            if (!$util.isInteger(message.nonce))
+                return "nonce: integer expected";
+        return null;
+    };
+
+    /**
+     * Creates an Account message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof Account
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {Account} Account
+     */
+    Account.fromObject = function fromObject(object) {
+        if (object instanceof $root.Account)
+            return object;
+        var message = new $root.Account();
+        if (object.balance != null)
+            if ($util.Long)
+                (message.balance = $util.Long.fromValue(object.balance)).unsigned = false;
+            else if (typeof object.balance === "string")
+                message.balance = parseInt(object.balance, 10);
+            else if (typeof object.balance === "number")
+                message.balance = object.balance;
+            else if (typeof object.balance === "object")
+                message.balance = new $util.LongBits(object.balance.low >>> 0, object.balance.high >>> 0).toNumber();
+        if (object.nonce != null)
+            message.nonce = object.nonce | 0;
+        return message;
+    };
+
+    /**
+     * Creates a plain object from an Account message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof Account
+     * @static
+     * @param {Account} message Account
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    Account.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults) {
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, false);
+                object.balance = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.balance = options.longs === String ? "0" : 0;
+            object.nonce = 0;
+        }
+        if (message.balance != null && message.hasOwnProperty("balance"))
+            if (typeof message.balance === "number")
+                object.balance = options.longs === String ? String(message.balance) : message.balance;
+            else
+                object.balance = options.longs === String ? $util.Long.prototype.toString.call(message.balance) : options.longs === Number ? new $util.LongBits(message.balance.low >>> 0, message.balance.high >>> 0).toNumber() : message.balance;
+        if (message.nonce != null && message.hasOwnProperty("nonce"))
+            object.nonce = message.nonce;
+        return object;
+    };
+
+    /**
+     * Converts this Account to JSON.
+     * @function toJSON
+     * @memberof Account
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    Account.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return Account;
+})();
+
+$root.StateNode = (function() {
+
+    /**
+     * Properties of a StateNode.
+     * @exports IStateNode
+     * @interface IStateNode
+     * @property {Array.<INodeRef>|null} [nodeRefs] StateNode nodeRefs
+     */
+
+    /**
+     * Constructs a new StateNode.
+     * @exports StateNode
+     * @classdesc Represents a StateNode.
+     * @implements IStateNode
+     * @constructor
+     * @param {IStateNode=} [properties] Properties to set
+     */
+    function StateNode(properties) {
+        this.nodeRefs = [];
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * StateNode nodeRefs.
+     * @member {Array.<INodeRef>} nodeRefs
+     * @memberof StateNode
+     * @instance
+     */
+    StateNode.prototype.nodeRefs = $util.emptyArray;
+
+    /**
+     * Creates a new StateNode instance using the specified properties.
+     * @function create
+     * @memberof StateNode
+     * @static
+     * @param {IStateNode=} [properties] Properties to set
+     * @returns {StateNode} StateNode instance
+     */
+    StateNode.create = function create(properties) {
+        return new StateNode(properties);
+    };
+
+    /**
+     * Encodes the specified StateNode message. Does not implicitly {@link StateNode.verify|verify} messages.
+     * @function encode
+     * @memberof StateNode
+     * @static
+     * @param {IStateNode} message StateNode message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    StateNode.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.nodeRefs != null && message.nodeRefs.length)
+            for (var i = 0; i < message.nodeRefs.length; ++i)
+                $root.NodeRef.encode(message.nodeRefs[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified StateNode message, length delimited. Does not implicitly {@link StateNode.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof StateNode
+     * @static
+     * @param {IStateNode} message StateNode message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    StateNode.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a StateNode message from the specified reader or buffer.
+     * @function decode
+     * @memberof StateNode
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {StateNode} StateNode
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    StateNode.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StateNode();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                if (!(message.nodeRefs && message.nodeRefs.length))
+                    message.nodeRefs = [];
+                message.nodeRefs.push($root.NodeRef.decode(reader, reader.uint32()));
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a StateNode message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof StateNode
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {StateNode} StateNode
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    StateNode.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a StateNode message.
+     * @function verify
+     * @memberof StateNode
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    StateNode.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.nodeRefs != null && message.hasOwnProperty("nodeRefs")) {
+            if (!Array.isArray(message.nodeRefs))
+                return "nodeRefs: array expected";
+            for (var i = 0; i < message.nodeRefs.length; ++i) {
+                var error = $root.NodeRef.verify(message.nodeRefs[i]);
+                if (error)
+                    return "nodeRefs." + error;
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Creates a StateNode message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof StateNode
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {StateNode} StateNode
+     */
+    StateNode.fromObject = function fromObject(object) {
+        if (object instanceof $root.StateNode)
+            return object;
+        var message = new $root.StateNode();
+        if (object.nodeRefs) {
+            if (!Array.isArray(object.nodeRefs))
+                throw TypeError(".StateNode.nodeRefs: array expected");
+            message.nodeRefs = [];
+            for (var i = 0; i < object.nodeRefs.length; ++i) {
+                if (typeof object.nodeRefs[i] !== "object")
+                    throw TypeError(".StateNode.nodeRefs: object expected");
+                message.nodeRefs[i] = $root.NodeRef.fromObject(object.nodeRefs[i]);
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a StateNode message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof StateNode
+     * @static
+     * @param {StateNode} message StateNode
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    StateNode.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.arrays || options.defaults)
+            object.nodeRefs = [];
+        if (message.nodeRefs && message.nodeRefs.length) {
+            object.nodeRefs = [];
+            for (var j = 0; j < message.nodeRefs.length; ++j)
+                object.nodeRefs[j] = $root.NodeRef.toObject(message.nodeRefs[j], options);
+        }
+        return object;
+    };
+
+    /**
+     * Converts this StateNode to JSON.
+     * @function toJSON
+     * @memberof StateNode
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    StateNode.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return StateNode;
+})();
+
+$root.NodeRef = (function() {
+
+    /**
+     * Properties of a NodeRef.
+     * @exports INodeRef
+     * @interface INodeRef
+     * @property {Uint8Array|null} [address] NodeRef address
+     * @property {Uint8Array|null} [child] NodeRef child
+     */
+
+    /**
+     * Constructs a new NodeRef.
+     * @exports NodeRef
+     * @classdesc Represents a NodeRef.
+     * @implements INodeRef
+     * @constructor
+     * @param {INodeRef=} [properties] Properties to set
+     */
+    function NodeRef(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * NodeRef address.
+     * @member {Uint8Array} address
+     * @memberof NodeRef
+     * @instance
+     */
+    NodeRef.prototype.address = $util.newBuffer([]);
+
+    /**
+     * NodeRef child.
+     * @member {Uint8Array} child
+     * @memberof NodeRef
+     * @instance
+     */
+    NodeRef.prototype.child = $util.newBuffer([]);
+
+    /**
+     * Creates a new NodeRef instance using the specified properties.
+     * @function create
+     * @memberof NodeRef
+     * @static
+     * @param {INodeRef=} [properties] Properties to set
+     * @returns {NodeRef} NodeRef instance
+     */
+    NodeRef.create = function create(properties) {
+        return new NodeRef(properties);
+    };
+
+    /**
+     * Encodes the specified NodeRef message. Does not implicitly {@link NodeRef.verify|verify} messages.
+     * @function encode
+     * @memberof NodeRef
+     * @static
+     * @param {INodeRef} message NodeRef message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    NodeRef.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.address != null && message.hasOwnProperty("address"))
+            writer.uint32(/* id 1, wireType 2 =*/10).bytes(message.address);
+        if (message.child != null && message.hasOwnProperty("child"))
+            writer.uint32(/* id 2, wireType 2 =*/18).bytes(message.child);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified NodeRef message, length delimited. Does not implicitly {@link NodeRef.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof NodeRef
+     * @static
+     * @param {INodeRef} message NodeRef message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    NodeRef.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a NodeRef message from the specified reader or buffer.
+     * @function decode
+     * @memberof NodeRef
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {NodeRef} NodeRef
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    NodeRef.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.NodeRef();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.address = reader.bytes();
+                break;
+            case 2:
+                message.child = reader.bytes();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a NodeRef message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof NodeRef
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {NodeRef} NodeRef
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    NodeRef.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a NodeRef message.
+     * @function verify
+     * @memberof NodeRef
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    NodeRef.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.address != null && message.hasOwnProperty("address"))
+            if (!(message.address && typeof message.address.length === "number" || $util.isString(message.address)))
+                return "address: buffer expected";
+        if (message.child != null && message.hasOwnProperty("child"))
+            if (!(message.child && typeof message.child.length === "number" || $util.isString(message.child)))
+                return "child: buffer expected";
+        return null;
+    };
+
+    /**
+     * Creates a NodeRef message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof NodeRef
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {NodeRef} NodeRef
+     */
+    NodeRef.fromObject = function fromObject(object) {
+        if (object instanceof $root.NodeRef)
+            return object;
+        var message = new $root.NodeRef();
+        if (object.address != null)
+            if (typeof object.address === "string")
+                $util.base64.decode(object.address, message.address = $util.newBuffer($util.base64.length(object.address)), 0);
+            else if (object.address.length)
+                message.address = object.address;
+        if (object.child != null)
+            if (typeof object.child === "string")
+                $util.base64.decode(object.child, message.child = $util.newBuffer($util.base64.length(object.child)), 0);
+            else if (object.child.length)
+                message.child = object.child;
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a NodeRef message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof NodeRef
+     * @static
+     * @param {NodeRef} message NodeRef
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    NodeRef.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults) {
+            object.address = options.bytes === String ? "" : [];
+            object.child = options.bytes === String ? "" : [];
+        }
+        if (message.address != null && message.hasOwnProperty("address"))
+            object.address = options.bytes === String ? $util.base64.encode(message.address, 0, message.address.length) : options.bytes === Array ? Array.prototype.slice.call(message.address) : message.address;
+        if (message.child != null && message.hasOwnProperty("child"))
+            object.child = options.bytes === String ? $util.base64.encode(message.child, 0, message.child.length) : options.bytes === Array ? Array.prototype.slice.call(message.child) : message.child;
+        return object;
+    };
+
+    /**
+     * Converts this NodeRef to JSON.
+     * @function toJSON
+     * @memberof NodeRef
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    NodeRef.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return NodeRef;
+})();
+
 module.exports = $root;

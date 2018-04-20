@@ -1,8 +1,9 @@
-import { runInContext } from "vm";
+import { getLogger } from "log4js"
+
+const logger = getLogger("Server")
 
 export class Server {
     public run() {
-        // tslint:disable-next-line:no-console
-        console.log("Hello");
+        logger.info("Starting server...")
     }
 }

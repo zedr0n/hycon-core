@@ -3,3 +3,4 @@ import "node.proto";
 import "block.proto";
 import "blockHeader.proto";
 import "tx.proto";
+import "state.proto";
