@@ -1,10 +1,90 @@
 syntax = "proto3";
+import "block.proto";
+import "blockHeader.proto";
+import "tx.proto";
 
 message Node { 
+    oneof request {
+        NewTx newTx=1;
+        NewBlock newBlock=2;
+        GetHeaders getHeaders=3;
+        GetHeadersReturn getHeadersReturn=4;
+        GetBlocks getBlocks=5;
+        GetBlocksReturn getBlocksReturn=6;
+        GetBlocksByRange getBlocksByRange=7;
+        GetBlocksByRangeReturn getBlocksByRangeReturn=8;
+        GetHeadersByRange getHeadersByRange=9;
+        GetHeadersByRangeReturn getHeadersByRangeReturn=10;
+        Ping ping=11;
+        PingReturn pingResponse=12;
+    }
 }
 
-message HeaderRequest {    
+message Ping {
+    int64 nonce =1;
+}
+message PingReturn {
+    int64 nonce =1;
 }
 
-message HeaderRequest {    
+message NewTx {
+    repeated Tx txs=1;
+}
+
+
+message NewBlock {
+    repeated Block blocks=1;
+}
+
+
+message GetHeaders {    
+    int64 headerReqNum = 1;
+    int64 height = 2;
+    repeated bytes hashes = 3;
+}
+
+message GetHeadersReturn {
+    bool success =1;
+    BlockHeaders blocks = 2;
+}
+
+
+message GetBlocks {
+    repeated bytes hashes = 1;
+}
+
+message GetBlocksReturn {
+    bool success =1;
+    repeated Block blocks= 2;
+}
+
+message GetTxs {
+    int64 minFee=1;
+}
+
+message GetTxsReturn {
+    bool success =1;
+    repeated Tx blocks = 2;
+}
+
+
+message GetBlocksByRange {
+    int64 fromHeight= 1;
+    int64 count=2;
+}
+
+message GetBlocksByRangeReturn {
+    bool success =1;
+    repeated Block blocks= 2;
+}
+
+
+message GetHeadersByRange {    
+    int64 fromHeight= 1;
+    int64 count=2;
+}
+
+message GetHeadersByRangeReturn {
+    bool success =1;
+    BlockHeaders blocks = 2;
 }

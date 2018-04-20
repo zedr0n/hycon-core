@@ -15,6 +15,18 @@ $root.Node = (function() {
      * Properties of a Node.
      * @exports INode
      * @interface INode
+     * @property {INewTx|null} [newTx] Node newTx
+     * @property {INewBlock|null} [newBlock] Node newBlock
+     * @property {IGetHeaders|null} [getHeaders] Node getHeaders
+     * @property {IGetHeadersReturn|null} [getHeadersReturn] Node getHeadersReturn
+     * @property {IGetBlocks|null} [getBlocks] Node getBlocks
+     * @property {IGetBlocksReturn|null} [getBlocksReturn] Node getBlocksReturn
+     * @property {IGetBlocksByRange|null} [getBlocksByRange] Node getBlocksByRange
+     * @property {IGetBlocksByRangeReturn|null} [getBlocksByRangeReturn] Node getBlocksByRangeReturn
+     * @property {IGetHeadersByRange|null} [getHeadersByRange] Node getHeadersByRange
+     * @property {IGetHeadersByRangeReturn|null} [getHeadersByRangeReturn] Node getHeadersByRangeReturn
+     * @property {IPing|null} [ping] Node ping
+     * @property {IPingReturn|null} [pingResponse] Node pingResponse
      */
 
     /**
@@ -31,6 +43,116 @@ $root.Node = (function() {
                 if (properties[keys[i]] != null)
                     this[keys[i]] = properties[keys[i]];
     }
+
+    /**
+     * Node newTx.
+     * @member {INewTx|null|undefined} newTx
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.newTx = null;
+
+    /**
+     * Node newBlock.
+     * @member {INewBlock|null|undefined} newBlock
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.newBlock = null;
+
+    /**
+     * Node getHeaders.
+     * @member {IGetHeaders|null|undefined} getHeaders
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.getHeaders = null;
+
+    /**
+     * Node getHeadersReturn.
+     * @member {IGetHeadersReturn|null|undefined} getHeadersReturn
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.getHeadersReturn = null;
+
+    /**
+     * Node getBlocks.
+     * @member {IGetBlocks|null|undefined} getBlocks
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.getBlocks = null;
+
+    /**
+     * Node getBlocksReturn.
+     * @member {IGetBlocksReturn|null|undefined} getBlocksReturn
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.getBlocksReturn = null;
+
+    /**
+     * Node getBlocksByRange.
+     * @member {IGetBlocksByRange|null|undefined} getBlocksByRange
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.getBlocksByRange = null;
+
+    /**
+     * Node getBlocksByRangeReturn.
+     * @member {IGetBlocksByRangeReturn|null|undefined} getBlocksByRangeReturn
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.getBlocksByRangeReturn = null;
+
+    /**
+     * Node getHeadersByRange.
+     * @member {IGetHeadersByRange|null|undefined} getHeadersByRange
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.getHeadersByRange = null;
+
+    /**
+     * Node getHeadersByRangeReturn.
+     * @member {IGetHeadersByRangeReturn|null|undefined} getHeadersByRangeReturn
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.getHeadersByRangeReturn = null;
+
+    /**
+     * Node ping.
+     * @member {IPing|null|undefined} ping
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.ping = null;
+
+    /**
+     * Node pingResponse.
+     * @member {IPingReturn|null|undefined} pingResponse
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.pingResponse = null;
+
+    // OneOf field names bound to virtual getters and setters
+    var $oneOfFields;
+
+    /**
+     * Node request.
+     * @member {"newTx"|"newBlock"|"getHeaders"|"getHeadersReturn"|"getBlocks"|"getBlocksReturn"|"getBlocksByRange"|"getBlocksByRangeReturn"|"getHeadersByRange"|"getHeadersByRangeReturn"|"ping"|"pingResponse"|undefined} request
+     * @memberof Node
+     * @instance
+     */
+    Object.defineProperty(Node.prototype, "request", {
+        get: $util.oneOfGetter($oneOfFields = ["newTx", "newBlock", "getHeaders", "getHeadersReturn", "getBlocks", "getBlocksReturn", "getBlocksByRange", "getBlocksByRangeReturn", "getHeadersByRange", "getHeadersByRangeReturn", "ping", "pingResponse"]),
+        set: $util.oneOfSetter($oneOfFields)
+    });
 
     /**
      * Creates a new Node instance using the specified properties.
@@ -56,6 +178,30 @@ $root.Node = (function() {
     Node.encode = function encode(message, writer) {
         if (!writer)
             writer = $Writer.create();
+        if (message.newTx != null && message.hasOwnProperty("newTx"))
+            $root.NewTx.encode(message.newTx, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+        if (message.newBlock != null && message.hasOwnProperty("newBlock"))
+            $root.NewBlock.encode(message.newBlock, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+        if (message.getHeaders != null && message.hasOwnProperty("getHeaders"))
+            $root.GetHeaders.encode(message.getHeaders, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+        if (message.getHeadersReturn != null && message.hasOwnProperty("getHeadersReturn"))
+            $root.GetHeadersReturn.encode(message.getHeadersReturn, writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
+        if (message.getBlocks != null && message.hasOwnProperty("getBlocks"))
+            $root.GetBlocks.encode(message.getBlocks, writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
+        if (message.getBlocksReturn != null && message.hasOwnProperty("getBlocksReturn"))
+            $root.GetBlocksReturn.encode(message.getBlocksReturn, writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
+        if (message.getBlocksByRange != null && message.hasOwnProperty("getBlocksByRange"))
+            $root.GetBlocksByRange.encode(message.getBlocksByRange, writer.uint32(/* id 7, wireType 2 =*/58).fork()).ldelim();
+        if (message.getBlocksByRangeReturn != null && message.hasOwnProperty("getBlocksByRangeReturn"))
+            $root.GetBlocksByRangeReturn.encode(message.getBlocksByRangeReturn, writer.uint32(/* id 8, wireType 2 =*/66).fork()).ldelim();
+        if (message.getHeadersByRange != null && message.hasOwnProperty("getHeadersByRange"))
+            $root.GetHeadersByRange.encode(message.getHeadersByRange, writer.uint32(/* id 9, wireType 2 =*/74).fork()).ldelim();
+        if (message.getHeadersByRangeReturn != null && message.hasOwnProperty("getHeadersByRangeReturn"))
+            $root.GetHeadersByRangeReturn.encode(message.getHeadersByRangeReturn, writer.uint32(/* id 10, wireType 2 =*/82).fork()).ldelim();
+        if (message.ping != null && message.hasOwnProperty("ping"))
+            $root.Ping.encode(message.ping, writer.uint32(/* id 11, wireType 2 =*/90).fork()).ldelim();
+        if (message.pingResponse != null && message.hasOwnProperty("pingResponse"))
+            $root.PingReturn.encode(message.pingResponse, writer.uint32(/* id 12, wireType 2 =*/98).fork()).ldelim();
         return writer;
     };
 
@@ -90,6 +236,42 @@ $root.Node = (function() {
         while (reader.pos < end) {
             var tag = reader.uint32();
             switch (tag >>> 3) {
+            case 1:
+                message.newTx = $root.NewTx.decode(reader, reader.uint32());
+                break;
+            case 2:
+                message.newBlock = $root.NewBlock.decode(reader, reader.uint32());
+                break;
+            case 3:
+                message.getHeaders = $root.GetHeaders.decode(reader, reader.uint32());
+                break;
+            case 4:
+                message.getHeadersReturn = $root.GetHeadersReturn.decode(reader, reader.uint32());
+                break;
+            case 5:
+                message.getBlocks = $root.GetBlocks.decode(reader, reader.uint32());
+                break;
+            case 6:
+                message.getBlocksReturn = $root.GetBlocksReturn.decode(reader, reader.uint32());
+                break;
+            case 7:
+                message.getBlocksByRange = $root.GetBlocksByRange.decode(reader, reader.uint32());
+                break;
+            case 8:
+                message.getBlocksByRangeReturn = $root.GetBlocksByRangeReturn.decode(reader, reader.uint32());
+                break;
+            case 9:
+                message.getHeadersByRange = $root.GetHeadersByRange.decode(reader, reader.uint32());
+                break;
+            case 10:
+                message.getHeadersByRangeReturn = $root.GetHeadersByRangeReturn.decode(reader, reader.uint32());
+                break;
+            case 11:
+                message.ping = $root.Ping.decode(reader, reader.uint32());
+                break;
+            case 12:
+                message.pingResponse = $root.PingReturn.decode(reader, reader.uint32());
+                break;
             default:
                 reader.skipType(tag & 7);
                 break;
@@ -125,6 +307,125 @@ $root.Node = (function() {
     Node.verify = function verify(message) {
         if (typeof message !== "object" || message === null)
             return "object expected";
+        var properties = {};
+        if (message.newTx != null && message.hasOwnProperty("newTx")) {
+            properties.request = 1;
+            {
+                var error = $root.NewTx.verify(message.newTx);
+                if (error)
+                    return "newTx." + error;
+            }
+        }
+        if (message.newBlock != null && message.hasOwnProperty("newBlock")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.NewBlock.verify(message.newBlock);
+                if (error)
+                    return "newBlock." + error;
+            }
+        }
+        if (message.getHeaders != null && message.hasOwnProperty("getHeaders")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.GetHeaders.verify(message.getHeaders);
+                if (error)
+                    return "getHeaders." + error;
+            }
+        }
+        if (message.getHeadersReturn != null && message.hasOwnProperty("getHeadersReturn")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.GetHeadersReturn.verify(message.getHeadersReturn);
+                if (error)
+                    return "getHeadersReturn." + error;
+            }
+        }
+        if (message.getBlocks != null && message.hasOwnProperty("getBlocks")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.GetBlocks.verify(message.getBlocks);
+                if (error)
+                    return "getBlocks." + error;
+            }
+        }
+        if (message.getBlocksReturn != null && message.hasOwnProperty("getBlocksReturn")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.GetBlocksReturn.verify(message.getBlocksReturn);
+                if (error)
+                    return "getBlocksReturn." + error;
+            }
+        }
+        if (message.getBlocksByRange != null && message.hasOwnProperty("getBlocksByRange")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.GetBlocksByRange.verify(message.getBlocksByRange);
+                if (error)
+                    return "getBlocksByRange." + error;
+            }
+        }
+        if (message.getBlocksByRangeReturn != null && message.hasOwnProperty("getBlocksByRangeReturn")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.GetBlocksByRangeReturn.verify(message.getBlocksByRangeReturn);
+                if (error)
+                    return "getBlocksByRangeReturn." + error;
+            }
+        }
+        if (message.getHeadersByRange != null && message.hasOwnProperty("getHeadersByRange")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.GetHeadersByRange.verify(message.getHeadersByRange);
+                if (error)
+                    return "getHeadersByRange." + error;
+            }
+        }
+        if (message.getHeadersByRangeReturn != null && message.hasOwnProperty("getHeadersByRangeReturn")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.GetHeadersByRangeReturn.verify(message.getHeadersByRangeReturn);
+                if (error)
+                    return "getHeadersByRangeReturn." + error;
+            }
+        }
+        if (message.ping != null && message.hasOwnProperty("ping")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.Ping.verify(message.ping);
+                if (error)
+                    return "ping." + error;
+            }
+        }
+        if (message.pingResponse != null && message.hasOwnProperty("pingResponse")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.PingReturn.verify(message.pingResponse);
+                if (error)
+                    return "pingResponse." + error;
+            }
+        }
         return null;
     };
 
@@ -139,7 +440,68 @@ $root.Node = (function() {
     Node.fromObject = function fromObject(object) {
         if (object instanceof $root.Node)
             return object;
-        return new $root.Node();
+        var message = new $root.Node();
+        if (object.newTx != null) {
+            if (typeof object.newTx !== "object")
+                throw TypeError(".Node.newTx: object expected");
+            message.newTx = $root.NewTx.fromObject(object.newTx);
+        }
+        if (object.newBlock != null) {
+            if (typeof object.newBlock !== "object")
+                throw TypeError(".Node.newBlock: object expected");
+            message.newBlock = $root.NewBlock.fromObject(object.newBlock);
+        }
+        if (object.getHeaders != null) {
+            if (typeof object.getHeaders !== "object")
+                throw TypeError(".Node.getHeaders: object expected");
+            message.getHeaders = $root.GetHeaders.fromObject(object.getHeaders);
+        }
+        if (object.getHeadersReturn != null) {
+            if (typeof object.getHeadersReturn !== "object")
+                throw TypeError(".Node.getHeadersReturn: object expected");
+            message.getHeadersReturn = $root.GetHeadersReturn.fromObject(object.getHeadersReturn);
+        }
+        if (object.getBlocks != null) {
+            if (typeof object.getBlocks !== "object")
+                throw TypeError(".Node.getBlocks: object expected");
+            message.getBlocks = $root.GetBlocks.fromObject(object.getBlocks);
+        }
+        if (object.getBlocksReturn != null) {
+            if (typeof object.getBlocksReturn !== "object")
+                throw TypeError(".Node.getBlocksReturn: object expected");
+            message.getBlocksReturn = $root.GetBlocksReturn.fromObject(object.getBlocksReturn);
+        }
+        if (object.getBlocksByRange != null) {
+            if (typeof object.getBlocksByRange !== "object")
+                throw TypeError(".Node.getBlocksByRange: object expected");
+            message.getBlocksByRange = $root.GetBlocksByRange.fromObject(object.getBlocksByRange);
+        }
+        if (object.getBlocksByRangeReturn != null) {
+            if (typeof object.getBlocksByRangeReturn !== "object")
+                throw TypeError(".Node.getBlocksByRangeReturn: object expected");
+            message.getBlocksByRangeReturn = $root.GetBlocksByRangeReturn.fromObject(object.getBlocksByRangeReturn);
+        }
+        if (object.getHeadersByRange != null) {
+            if (typeof object.getHeadersByRange !== "object")
+                throw TypeError(".Node.getHeadersByRange: object expected");
+            message.getHeadersByRange = $root.GetHeadersByRange.fromObject(object.getHeadersByRange);
+        }
+        if (object.getHeadersByRangeReturn != null) {
+            if (typeof object.getHeadersByRangeReturn !== "object")
+                throw TypeError(".Node.getHeadersByRangeReturn: object expected");
+            message.getHeadersByRangeReturn = $root.GetHeadersByRangeReturn.fromObject(object.getHeadersByRangeReturn);
+        }
+        if (object.ping != null) {
+            if (typeof object.ping !== "object")
+                throw TypeError(".Node.ping: object expected");
+            message.ping = $root.Ping.fromObject(object.ping);
+        }
+        if (object.pingResponse != null) {
+            if (typeof object.pingResponse !== "object")
+                throw TypeError(".Node.pingResponse: object expected");
+            message.pingResponse = $root.PingReturn.fromObject(object.pingResponse);
+        }
+        return message;
     };
 
     /**
@@ -151,8 +513,71 @@ $root.Node = (function() {
      * @param {$protobuf.IConversionOptions} [options] Conversion options
      * @returns {Object.<string,*>} Plain object
      */
-    Node.toObject = function toObject() {
-        return {};
+    Node.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (message.newTx != null && message.hasOwnProperty("newTx")) {
+            object.newTx = $root.NewTx.toObject(message.newTx, options);
+            if (options.oneofs)
+                object.request = "newTx";
+        }
+        if (message.newBlock != null && message.hasOwnProperty("newBlock")) {
+            object.newBlock = $root.NewBlock.toObject(message.newBlock, options);
+            if (options.oneofs)
+                object.request = "newBlock";
+        }
+        if (message.getHeaders != null && message.hasOwnProperty("getHeaders")) {
+            object.getHeaders = $root.GetHeaders.toObject(message.getHeaders, options);
+            if (options.oneofs)
+                object.request = "getHeaders";
+        }
+        if (message.getHeadersReturn != null && message.hasOwnProperty("getHeadersReturn")) {
+            object.getHeadersReturn = $root.GetHeadersReturn.toObject(message.getHeadersReturn, options);
+            if (options.oneofs)
+                object.request = "getHeadersReturn";
+        }
+        if (message.getBlocks != null && message.hasOwnProperty("getBlocks")) {
+            object.getBlocks = $root.GetBlocks.toObject(message.getBlocks, options);
+            if (options.oneofs)
+                object.request = "getBlocks";
+        }
+        if (message.getBlocksReturn != null && message.hasOwnProperty("getBlocksReturn")) {
+            object.getBlocksReturn = $root.GetBlocksReturn.toObject(message.getBlocksReturn, options);
+            if (options.oneofs)
+                object.request = "getBlocksReturn";
+        }
+        if (message.getBlocksByRange != null && message.hasOwnProperty("getBlocksByRange")) {
+            object.getBlocksByRange = $root.GetBlocksByRange.toObject(message.getBlocksByRange, options);
+            if (options.oneofs)
+                object.request = "getBlocksByRange";
+        }
+        if (message.getBlocksByRangeReturn != null && message.hasOwnProperty("getBlocksByRangeReturn")) {
+            object.getBlocksByRangeReturn = $root.GetBlocksByRangeReturn.toObject(message.getBlocksByRangeReturn, options);
+            if (options.oneofs)
+                object.request = "getBlocksByRangeReturn";
+        }
+        if (message.getHeadersByRange != null && message.hasOwnProperty("getHeadersByRange")) {
+            object.getHeadersByRange = $root.GetHeadersByRange.toObject(message.getHeadersByRange, options);
+            if (options.oneofs)
+                object.request = "getHeadersByRange";
+        }
+        if (message.getHeadersByRangeReturn != null && message.hasOwnProperty("getHeadersByRangeReturn")) {
+            object.getHeadersByRangeReturn = $root.GetHeadersByRangeReturn.toObject(message.getHeadersByRangeReturn, options);
+            if (options.oneofs)
+                object.request = "getHeadersByRangeReturn";
+        }
+        if (message.ping != null && message.hasOwnProperty("ping")) {
+            object.ping = $root.Ping.toObject(message.ping, options);
+            if (options.oneofs)
+                object.request = "ping";
+        }
+        if (message.pingResponse != null && message.hasOwnProperty("pingResponse")) {
+            object.pingResponse = $root.PingReturn.toObject(message.pingResponse, options);
+            if (options.oneofs)
+                object.request = "pingResponse";
+        }
+        return object;
     };
 
     /**
@@ -167,6 +592,3110 @@ $root.Node = (function() {
     };
 
     return Node;
+})();
+
+$root.Ping = (function() {
+
+    /**
+     * Properties of a Ping.
+     * @exports IPing
+     * @interface IPing
+     * @property {number|Long|null} [nonce] Ping nonce
+     */
+
+    /**
+     * Constructs a new Ping.
+     * @exports Ping
+     * @classdesc Represents a Ping.
+     * @implements IPing
+     * @constructor
+     * @param {IPing=} [properties] Properties to set
+     */
+    function Ping(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * Ping nonce.
+     * @member {number|Long} nonce
+     * @memberof Ping
+     * @instance
+     */
+    Ping.prototype.nonce = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+    /**
+     * Creates a new Ping instance using the specified properties.
+     * @function create
+     * @memberof Ping
+     * @static
+     * @param {IPing=} [properties] Properties to set
+     * @returns {Ping} Ping instance
+     */
+    Ping.create = function create(properties) {
+        return new Ping(properties);
+    };
+
+    /**
+     * Encodes the specified Ping message. Does not implicitly {@link Ping.verify|verify} messages.
+     * @function encode
+     * @memberof Ping
+     * @static
+     * @param {IPing} message Ping message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Ping.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.nonce != null && message.hasOwnProperty("nonce"))
+            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.nonce);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified Ping message, length delimited. Does not implicitly {@link Ping.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof Ping
+     * @static
+     * @param {IPing} message Ping message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Ping.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a Ping message from the specified reader or buffer.
+     * @function decode
+     * @memberof Ping
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {Ping} Ping
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Ping.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.Ping();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.nonce = reader.int64();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a Ping message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof Ping
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {Ping} Ping
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Ping.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a Ping message.
+     * @function verify
+     * @memberof Ping
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    Ping.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.nonce != null && message.hasOwnProperty("nonce"))
+            if (!$util.isInteger(message.nonce) && !(message.nonce && $util.isInteger(message.nonce.low) && $util.isInteger(message.nonce.high)))
+                return "nonce: integer|Long expected";
+        return null;
+    };
+
+    /**
+     * Creates a Ping message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof Ping
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {Ping} Ping
+     */
+    Ping.fromObject = function fromObject(object) {
+        if (object instanceof $root.Ping)
+            return object;
+        var message = new $root.Ping();
+        if (object.nonce != null)
+            if ($util.Long)
+                (message.nonce = $util.Long.fromValue(object.nonce)).unsigned = false;
+            else if (typeof object.nonce === "string")
+                message.nonce = parseInt(object.nonce, 10);
+            else if (typeof object.nonce === "number")
+                message.nonce = object.nonce;
+            else if (typeof object.nonce === "object")
+                message.nonce = new $util.LongBits(object.nonce.low >>> 0, object.nonce.high >>> 0).toNumber();
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a Ping message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof Ping
+     * @static
+     * @param {Ping} message Ping
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    Ping.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults)
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, false);
+                object.nonce = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.nonce = options.longs === String ? "0" : 0;
+        if (message.nonce != null && message.hasOwnProperty("nonce"))
+            if (typeof message.nonce === "number")
+                object.nonce = options.longs === String ? String(message.nonce) : message.nonce;
+            else
+                object.nonce = options.longs === String ? $util.Long.prototype.toString.call(message.nonce) : options.longs === Number ? new $util.LongBits(message.nonce.low >>> 0, message.nonce.high >>> 0).toNumber() : message.nonce;
+        return object;
+    };
+
+    /**
+     * Converts this Ping to JSON.
+     * @function toJSON
+     * @memberof Ping
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    Ping.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return Ping;
+})();
+
+$root.PingReturn = (function() {
+
+    /**
+     * Properties of a PingReturn.
+     * @exports IPingReturn
+     * @interface IPingReturn
+     * @property {number|Long|null} [nonce] PingReturn nonce
+     */
+
+    /**
+     * Constructs a new PingReturn.
+     * @exports PingReturn
+     * @classdesc Represents a PingReturn.
+     * @implements IPingReturn
+     * @constructor
+     * @param {IPingReturn=} [properties] Properties to set
+     */
+    function PingReturn(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * PingReturn nonce.
+     * @member {number|Long} nonce
+     * @memberof PingReturn
+     * @instance
+     */
+    PingReturn.prototype.nonce = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+    /**
+     * Creates a new PingReturn instance using the specified properties.
+     * @function create
+     * @memberof PingReturn
+     * @static
+     * @param {IPingReturn=} [properties] Properties to set
+     * @returns {PingReturn} PingReturn instance
+     */
+    PingReturn.create = function create(properties) {
+        return new PingReturn(properties);
+    };
+
+    /**
+     * Encodes the specified PingReturn message. Does not implicitly {@link PingReturn.verify|verify} messages.
+     * @function encode
+     * @memberof PingReturn
+     * @static
+     * @param {IPingReturn} message PingReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    PingReturn.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.nonce != null && message.hasOwnProperty("nonce"))
+            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.nonce);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified PingReturn message, length delimited. Does not implicitly {@link PingReturn.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof PingReturn
+     * @static
+     * @param {IPingReturn} message PingReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    PingReturn.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a PingReturn message from the specified reader or buffer.
+     * @function decode
+     * @memberof PingReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {PingReturn} PingReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    PingReturn.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.PingReturn();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.nonce = reader.int64();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a PingReturn message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof PingReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {PingReturn} PingReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    PingReturn.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a PingReturn message.
+     * @function verify
+     * @memberof PingReturn
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    PingReturn.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.nonce != null && message.hasOwnProperty("nonce"))
+            if (!$util.isInteger(message.nonce) && !(message.nonce && $util.isInteger(message.nonce.low) && $util.isInteger(message.nonce.high)))
+                return "nonce: integer|Long expected";
+        return null;
+    };
+
+    /**
+     * Creates a PingReturn message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof PingReturn
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {PingReturn} PingReturn
+     */
+    PingReturn.fromObject = function fromObject(object) {
+        if (object instanceof $root.PingReturn)
+            return object;
+        var message = new $root.PingReturn();
+        if (object.nonce != null)
+            if ($util.Long)
+                (message.nonce = $util.Long.fromValue(object.nonce)).unsigned = false;
+            else if (typeof object.nonce === "string")
+                message.nonce = parseInt(object.nonce, 10);
+            else if (typeof object.nonce === "number")
+                message.nonce = object.nonce;
+            else if (typeof object.nonce === "object")
+                message.nonce = new $util.LongBits(object.nonce.low >>> 0, object.nonce.high >>> 0).toNumber();
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a PingReturn message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof PingReturn
+     * @static
+     * @param {PingReturn} message PingReturn
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    PingReturn.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults)
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, false);
+                object.nonce = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.nonce = options.longs === String ? "0" : 0;
+        if (message.nonce != null && message.hasOwnProperty("nonce"))
+            if (typeof message.nonce === "number")
+                object.nonce = options.longs === String ? String(message.nonce) : message.nonce;
+            else
+                object.nonce = options.longs === String ? $util.Long.prototype.toString.call(message.nonce) : options.longs === Number ? new $util.LongBits(message.nonce.low >>> 0, message.nonce.high >>> 0).toNumber() : message.nonce;
+        return object;
+    };
+
+    /**
+     * Converts this PingReturn to JSON.
+     * @function toJSON
+     * @memberof PingReturn
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    PingReturn.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return PingReturn;
+})();
+
+$root.NewTx = (function() {
+
+    /**
+     * Properties of a NewTx.
+     * @exports INewTx
+     * @interface INewTx
+     * @property {Array.<ITx>|null} [txs] NewTx txs
+     */
+
+    /**
+     * Constructs a new NewTx.
+     * @exports NewTx
+     * @classdesc Represents a NewTx.
+     * @implements INewTx
+     * @constructor
+     * @param {INewTx=} [properties] Properties to set
+     */
+    function NewTx(properties) {
+        this.txs = [];
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * NewTx txs.
+     * @member {Array.<ITx>} txs
+     * @memberof NewTx
+     * @instance
+     */
+    NewTx.prototype.txs = $util.emptyArray;
+
+    /**
+     * Creates a new NewTx instance using the specified properties.
+     * @function create
+     * @memberof NewTx
+     * @static
+     * @param {INewTx=} [properties] Properties to set
+     * @returns {NewTx} NewTx instance
+     */
+    NewTx.create = function create(properties) {
+        return new NewTx(properties);
+    };
+
+    /**
+     * Encodes the specified NewTx message. Does not implicitly {@link NewTx.verify|verify} messages.
+     * @function encode
+     * @memberof NewTx
+     * @static
+     * @param {INewTx} message NewTx message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    NewTx.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.txs != null && message.txs.length)
+            for (var i = 0; i < message.txs.length; ++i)
+                $root.Tx.encode(message.txs[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified NewTx message, length delimited. Does not implicitly {@link NewTx.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof NewTx
+     * @static
+     * @param {INewTx} message NewTx message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    NewTx.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a NewTx message from the specified reader or buffer.
+     * @function decode
+     * @memberof NewTx
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {NewTx} NewTx
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    NewTx.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.NewTx();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                if (!(message.txs && message.txs.length))
+                    message.txs = [];
+                message.txs.push($root.Tx.decode(reader, reader.uint32()));
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a NewTx message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof NewTx
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {NewTx} NewTx
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    NewTx.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a NewTx message.
+     * @function verify
+     * @memberof NewTx
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    NewTx.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.txs != null && message.hasOwnProperty("txs")) {
+            if (!Array.isArray(message.txs))
+                return "txs: array expected";
+            for (var i = 0; i < message.txs.length; ++i) {
+                var error = $root.Tx.verify(message.txs[i]);
+                if (error)
+                    return "txs." + error;
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Creates a NewTx message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof NewTx
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {NewTx} NewTx
+     */
+    NewTx.fromObject = function fromObject(object) {
+        if (object instanceof $root.NewTx)
+            return object;
+        var message = new $root.NewTx();
+        if (object.txs) {
+            if (!Array.isArray(object.txs))
+                throw TypeError(".NewTx.txs: array expected");
+            message.txs = [];
+            for (var i = 0; i < object.txs.length; ++i) {
+                if (typeof object.txs[i] !== "object")
+                    throw TypeError(".NewTx.txs: object expected");
+                message.txs[i] = $root.Tx.fromObject(object.txs[i]);
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a NewTx message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof NewTx
+     * @static
+     * @param {NewTx} message NewTx
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    NewTx.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.arrays || options.defaults)
+            object.txs = [];
+        if (message.txs && message.txs.length) {
+            object.txs = [];
+            for (var j = 0; j < message.txs.length; ++j)
+                object.txs[j] = $root.Tx.toObject(message.txs[j], options);
+        }
+        return object;
+    };
+
+    /**
+     * Converts this NewTx to JSON.
+     * @function toJSON
+     * @memberof NewTx
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    NewTx.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return NewTx;
+})();
+
+$root.NewBlock = (function() {
+
+    /**
+     * Properties of a NewBlock.
+     * @exports INewBlock
+     * @interface INewBlock
+     * @property {Array.<IBlock>|null} [blocks] NewBlock blocks
+     */
+
+    /**
+     * Constructs a new NewBlock.
+     * @exports NewBlock
+     * @classdesc Represents a NewBlock.
+     * @implements INewBlock
+     * @constructor
+     * @param {INewBlock=} [properties] Properties to set
+     */
+    function NewBlock(properties) {
+        this.blocks = [];
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * NewBlock blocks.
+     * @member {Array.<IBlock>} blocks
+     * @memberof NewBlock
+     * @instance
+     */
+    NewBlock.prototype.blocks = $util.emptyArray;
+
+    /**
+     * Creates a new NewBlock instance using the specified properties.
+     * @function create
+     * @memberof NewBlock
+     * @static
+     * @param {INewBlock=} [properties] Properties to set
+     * @returns {NewBlock} NewBlock instance
+     */
+    NewBlock.create = function create(properties) {
+        return new NewBlock(properties);
+    };
+
+    /**
+     * Encodes the specified NewBlock message. Does not implicitly {@link NewBlock.verify|verify} messages.
+     * @function encode
+     * @memberof NewBlock
+     * @static
+     * @param {INewBlock} message NewBlock message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    NewBlock.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.blocks != null && message.blocks.length)
+            for (var i = 0; i < message.blocks.length; ++i)
+                $root.Block.encode(message.blocks[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified NewBlock message, length delimited. Does not implicitly {@link NewBlock.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof NewBlock
+     * @static
+     * @param {INewBlock} message NewBlock message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    NewBlock.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a NewBlock message from the specified reader or buffer.
+     * @function decode
+     * @memberof NewBlock
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {NewBlock} NewBlock
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    NewBlock.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.NewBlock();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                if (!(message.blocks && message.blocks.length))
+                    message.blocks = [];
+                message.blocks.push($root.Block.decode(reader, reader.uint32()));
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a NewBlock message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof NewBlock
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {NewBlock} NewBlock
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    NewBlock.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a NewBlock message.
+     * @function verify
+     * @memberof NewBlock
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    NewBlock.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.blocks != null && message.hasOwnProperty("blocks")) {
+            if (!Array.isArray(message.blocks))
+                return "blocks: array expected";
+            for (var i = 0; i < message.blocks.length; ++i) {
+                var error = $root.Block.verify(message.blocks[i]);
+                if (error)
+                    return "blocks." + error;
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Creates a NewBlock message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof NewBlock
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {NewBlock} NewBlock
+     */
+    NewBlock.fromObject = function fromObject(object) {
+        if (object instanceof $root.NewBlock)
+            return object;
+        var message = new $root.NewBlock();
+        if (object.blocks) {
+            if (!Array.isArray(object.blocks))
+                throw TypeError(".NewBlock.blocks: array expected");
+            message.blocks = [];
+            for (var i = 0; i < object.blocks.length; ++i) {
+                if (typeof object.blocks[i] !== "object")
+                    throw TypeError(".NewBlock.blocks: object expected");
+                message.blocks[i] = $root.Block.fromObject(object.blocks[i]);
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a NewBlock message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof NewBlock
+     * @static
+     * @param {NewBlock} message NewBlock
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    NewBlock.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.arrays || options.defaults)
+            object.blocks = [];
+        if (message.blocks && message.blocks.length) {
+            object.blocks = [];
+            for (var j = 0; j < message.blocks.length; ++j)
+                object.blocks[j] = $root.Block.toObject(message.blocks[j], options);
+        }
+        return object;
+    };
+
+    /**
+     * Converts this NewBlock to JSON.
+     * @function toJSON
+     * @memberof NewBlock
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    NewBlock.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return NewBlock;
+})();
+
+$root.GetHeaders = (function() {
+
+    /**
+     * Properties of a GetHeaders.
+     * @exports IGetHeaders
+     * @interface IGetHeaders
+     * @property {number|Long|null} [headerReqNum] GetHeaders headerReqNum
+     * @property {number|Long|null} [height] GetHeaders height
+     * @property {Array.<Uint8Array>|null} [hashes] GetHeaders hashes
+     */
+
+    /**
+     * Constructs a new GetHeaders.
+     * @exports GetHeaders
+     * @classdesc Represents a GetHeaders.
+     * @implements IGetHeaders
+     * @constructor
+     * @param {IGetHeaders=} [properties] Properties to set
+     */
+    function GetHeaders(properties) {
+        this.hashes = [];
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * GetHeaders headerReqNum.
+     * @member {number|Long} headerReqNum
+     * @memberof GetHeaders
+     * @instance
+     */
+    GetHeaders.prototype.headerReqNum = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+    /**
+     * GetHeaders height.
+     * @member {number|Long} height
+     * @memberof GetHeaders
+     * @instance
+     */
+    GetHeaders.prototype.height = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+    /**
+     * GetHeaders hashes.
+     * @member {Array.<Uint8Array>} hashes
+     * @memberof GetHeaders
+     * @instance
+     */
+    GetHeaders.prototype.hashes = $util.emptyArray;
+
+    /**
+     * Creates a new GetHeaders instance using the specified properties.
+     * @function create
+     * @memberof GetHeaders
+     * @static
+     * @param {IGetHeaders=} [properties] Properties to set
+     * @returns {GetHeaders} GetHeaders instance
+     */
+    GetHeaders.create = function create(properties) {
+        return new GetHeaders(properties);
+    };
+
+    /**
+     * Encodes the specified GetHeaders message. Does not implicitly {@link GetHeaders.verify|verify} messages.
+     * @function encode
+     * @memberof GetHeaders
+     * @static
+     * @param {IGetHeaders} message GetHeaders message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetHeaders.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.headerReqNum != null && message.hasOwnProperty("headerReqNum"))
+            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.headerReqNum);
+        if (message.height != null && message.hasOwnProperty("height"))
+            writer.uint32(/* id 2, wireType 0 =*/16).int64(message.height);
+        if (message.hashes != null && message.hashes.length)
+            for (var i = 0; i < message.hashes.length; ++i)
+                writer.uint32(/* id 3, wireType 2 =*/26).bytes(message.hashes[i]);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified GetHeaders message, length delimited. Does not implicitly {@link GetHeaders.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof GetHeaders
+     * @static
+     * @param {IGetHeaders} message GetHeaders message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetHeaders.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a GetHeaders message from the specified reader or buffer.
+     * @function decode
+     * @memberof GetHeaders
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {GetHeaders} GetHeaders
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetHeaders.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetHeaders();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.headerReqNum = reader.int64();
+                break;
+            case 2:
+                message.height = reader.int64();
+                break;
+            case 3:
+                if (!(message.hashes && message.hashes.length))
+                    message.hashes = [];
+                message.hashes.push(reader.bytes());
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a GetHeaders message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof GetHeaders
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {GetHeaders} GetHeaders
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetHeaders.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a GetHeaders message.
+     * @function verify
+     * @memberof GetHeaders
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    GetHeaders.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.headerReqNum != null && message.hasOwnProperty("headerReqNum"))
+            if (!$util.isInteger(message.headerReqNum) && !(message.headerReqNum && $util.isInteger(message.headerReqNum.low) && $util.isInteger(message.headerReqNum.high)))
+                return "headerReqNum: integer|Long expected";
+        if (message.height != null && message.hasOwnProperty("height"))
+            if (!$util.isInteger(message.height) && !(message.height && $util.isInteger(message.height.low) && $util.isInteger(message.height.high)))
+                return "height: integer|Long expected";
+        if (message.hashes != null && message.hasOwnProperty("hashes")) {
+            if (!Array.isArray(message.hashes))
+                return "hashes: array expected";
+            for (var i = 0; i < message.hashes.length; ++i)
+                if (!(message.hashes[i] && typeof message.hashes[i].length === "number" || $util.isString(message.hashes[i])))
+                    return "hashes: buffer[] expected";
+        }
+        return null;
+    };
+
+    /**
+     * Creates a GetHeaders message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof GetHeaders
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {GetHeaders} GetHeaders
+     */
+    GetHeaders.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetHeaders)
+            return object;
+        var message = new $root.GetHeaders();
+        if (object.headerReqNum != null)
+            if ($util.Long)
+                (message.headerReqNum = $util.Long.fromValue(object.headerReqNum)).unsigned = false;
+            else if (typeof object.headerReqNum === "string")
+                message.headerReqNum = parseInt(object.headerReqNum, 10);
+            else if (typeof object.headerReqNum === "number")
+                message.headerReqNum = object.headerReqNum;
+            else if (typeof object.headerReqNum === "object")
+                message.headerReqNum = new $util.LongBits(object.headerReqNum.low >>> 0, object.headerReqNum.high >>> 0).toNumber();
+        if (object.height != null)
+            if ($util.Long)
+                (message.height = $util.Long.fromValue(object.height)).unsigned = false;
+            else if (typeof object.height === "string")
+                message.height = parseInt(object.height, 10);
+            else if (typeof object.height === "number")
+                message.height = object.height;
+            else if (typeof object.height === "object")
+                message.height = new $util.LongBits(object.height.low >>> 0, object.height.high >>> 0).toNumber();
+        if (object.hashes) {
+            if (!Array.isArray(object.hashes))
+                throw TypeError(".GetHeaders.hashes: array expected");
+            message.hashes = [];
+            for (var i = 0; i < object.hashes.length; ++i)
+                if (typeof object.hashes[i] === "string")
+                    $util.base64.decode(object.hashes[i], message.hashes[i] = $util.newBuffer($util.base64.length(object.hashes[i])), 0);
+                else if (object.hashes[i].length)
+                    message.hashes[i] = object.hashes[i];
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a GetHeaders message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof GetHeaders
+     * @static
+     * @param {GetHeaders} message GetHeaders
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    GetHeaders.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.arrays || options.defaults)
+            object.hashes = [];
+        if (options.defaults) {
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, false);
+                object.headerReqNum = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.headerReqNum = options.longs === String ? "0" : 0;
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, false);
+                object.height = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.height = options.longs === String ? "0" : 0;
+        }
+        if (message.headerReqNum != null && message.hasOwnProperty("headerReqNum"))
+            if (typeof message.headerReqNum === "number")
+                object.headerReqNum = options.longs === String ? String(message.headerReqNum) : message.headerReqNum;
+            else
+                object.headerReqNum = options.longs === String ? $util.Long.prototype.toString.call(message.headerReqNum) : options.longs === Number ? new $util.LongBits(message.headerReqNum.low >>> 0, message.headerReqNum.high >>> 0).toNumber() : message.headerReqNum;
+        if (message.height != null && message.hasOwnProperty("height"))
+            if (typeof message.height === "number")
+                object.height = options.longs === String ? String(message.height) : message.height;
+            else
+                object.height = options.longs === String ? $util.Long.prototype.toString.call(message.height) : options.longs === Number ? new $util.LongBits(message.height.low >>> 0, message.height.high >>> 0).toNumber() : message.height;
+        if (message.hashes && message.hashes.length) {
+            object.hashes = [];
+            for (var j = 0; j < message.hashes.length; ++j)
+                object.hashes[j] = options.bytes === String ? $util.base64.encode(message.hashes[j], 0, message.hashes[j].length) : options.bytes === Array ? Array.prototype.slice.call(message.hashes[j]) : message.hashes[j];
+        }
+        return object;
+    };
+
+    /**
+     * Converts this GetHeaders to JSON.
+     * @function toJSON
+     * @memberof GetHeaders
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    GetHeaders.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return GetHeaders;
+})();
+
+$root.GetHeadersReturn = (function() {
+
+    /**
+     * Properties of a GetHeadersReturn.
+     * @exports IGetHeadersReturn
+     * @interface IGetHeadersReturn
+     * @property {boolean|null} [success] GetHeadersReturn success
+     * @property {IBlockHeaders|null} [blocks] GetHeadersReturn blocks
+     */
+
+    /**
+     * Constructs a new GetHeadersReturn.
+     * @exports GetHeadersReturn
+     * @classdesc Represents a GetHeadersReturn.
+     * @implements IGetHeadersReturn
+     * @constructor
+     * @param {IGetHeadersReturn=} [properties] Properties to set
+     */
+    function GetHeadersReturn(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * GetHeadersReturn success.
+     * @member {boolean} success
+     * @memberof GetHeadersReturn
+     * @instance
+     */
+    GetHeadersReturn.prototype.success = false;
+
+    /**
+     * GetHeadersReturn blocks.
+     * @member {IBlockHeaders|null|undefined} blocks
+     * @memberof GetHeadersReturn
+     * @instance
+     */
+    GetHeadersReturn.prototype.blocks = null;
+
+    /**
+     * Creates a new GetHeadersReturn instance using the specified properties.
+     * @function create
+     * @memberof GetHeadersReturn
+     * @static
+     * @param {IGetHeadersReturn=} [properties] Properties to set
+     * @returns {GetHeadersReturn} GetHeadersReturn instance
+     */
+    GetHeadersReturn.create = function create(properties) {
+        return new GetHeadersReturn(properties);
+    };
+
+    /**
+     * Encodes the specified GetHeadersReturn message. Does not implicitly {@link GetHeadersReturn.verify|verify} messages.
+     * @function encode
+     * @memberof GetHeadersReturn
+     * @static
+     * @param {IGetHeadersReturn} message GetHeadersReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetHeadersReturn.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.success != null && message.hasOwnProperty("success"))
+            writer.uint32(/* id 1, wireType 0 =*/8).bool(message.success);
+        if (message.blocks != null && message.hasOwnProperty("blocks"))
+            $root.BlockHeaders.encode(message.blocks, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified GetHeadersReturn message, length delimited. Does not implicitly {@link GetHeadersReturn.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof GetHeadersReturn
+     * @static
+     * @param {IGetHeadersReturn} message GetHeadersReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetHeadersReturn.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a GetHeadersReturn message from the specified reader or buffer.
+     * @function decode
+     * @memberof GetHeadersReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {GetHeadersReturn} GetHeadersReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetHeadersReturn.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetHeadersReturn();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.success = reader.bool();
+                break;
+            case 2:
+                message.blocks = $root.BlockHeaders.decode(reader, reader.uint32());
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a GetHeadersReturn message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof GetHeadersReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {GetHeadersReturn} GetHeadersReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetHeadersReturn.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a GetHeadersReturn message.
+     * @function verify
+     * @memberof GetHeadersReturn
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    GetHeadersReturn.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.success != null && message.hasOwnProperty("success"))
+            if (typeof message.success !== "boolean")
+                return "success: boolean expected";
+        if (message.blocks != null && message.hasOwnProperty("blocks")) {
+            var error = $root.BlockHeaders.verify(message.blocks);
+            if (error)
+                return "blocks." + error;
+        }
+        return null;
+    };
+
+    /**
+     * Creates a GetHeadersReturn message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof GetHeadersReturn
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {GetHeadersReturn} GetHeadersReturn
+     */
+    GetHeadersReturn.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetHeadersReturn)
+            return object;
+        var message = new $root.GetHeadersReturn();
+        if (object.success != null)
+            message.success = Boolean(object.success);
+        if (object.blocks != null) {
+            if (typeof object.blocks !== "object")
+                throw TypeError(".GetHeadersReturn.blocks: object expected");
+            message.blocks = $root.BlockHeaders.fromObject(object.blocks);
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a GetHeadersReturn message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof GetHeadersReturn
+     * @static
+     * @param {GetHeadersReturn} message GetHeadersReturn
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    GetHeadersReturn.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults) {
+            object.success = false;
+            object.blocks = null;
+        }
+        if (message.success != null && message.hasOwnProperty("success"))
+            object.success = message.success;
+        if (message.blocks != null && message.hasOwnProperty("blocks"))
+            object.blocks = $root.BlockHeaders.toObject(message.blocks, options);
+        return object;
+    };
+
+    /**
+     * Converts this GetHeadersReturn to JSON.
+     * @function toJSON
+     * @memberof GetHeadersReturn
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    GetHeadersReturn.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return GetHeadersReturn;
+})();
+
+$root.GetBlocks = (function() {
+
+    /**
+     * Properties of a GetBlocks.
+     * @exports IGetBlocks
+     * @interface IGetBlocks
+     * @property {Array.<Uint8Array>|null} [hashes] GetBlocks hashes
+     */
+
+    /**
+     * Constructs a new GetBlocks.
+     * @exports GetBlocks
+     * @classdesc Represents a GetBlocks.
+     * @implements IGetBlocks
+     * @constructor
+     * @param {IGetBlocks=} [properties] Properties to set
+     */
+    function GetBlocks(properties) {
+        this.hashes = [];
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * GetBlocks hashes.
+     * @member {Array.<Uint8Array>} hashes
+     * @memberof GetBlocks
+     * @instance
+     */
+    GetBlocks.prototype.hashes = $util.emptyArray;
+
+    /**
+     * Creates a new GetBlocks instance using the specified properties.
+     * @function create
+     * @memberof GetBlocks
+     * @static
+     * @param {IGetBlocks=} [properties] Properties to set
+     * @returns {GetBlocks} GetBlocks instance
+     */
+    GetBlocks.create = function create(properties) {
+        return new GetBlocks(properties);
+    };
+
+    /**
+     * Encodes the specified GetBlocks message. Does not implicitly {@link GetBlocks.verify|verify} messages.
+     * @function encode
+     * @memberof GetBlocks
+     * @static
+     * @param {IGetBlocks} message GetBlocks message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetBlocks.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.hashes != null && message.hashes.length)
+            for (var i = 0; i < message.hashes.length; ++i)
+                writer.uint32(/* id 1, wireType 2 =*/10).bytes(message.hashes[i]);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified GetBlocks message, length delimited. Does not implicitly {@link GetBlocks.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof GetBlocks
+     * @static
+     * @param {IGetBlocks} message GetBlocks message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetBlocks.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a GetBlocks message from the specified reader or buffer.
+     * @function decode
+     * @memberof GetBlocks
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {GetBlocks} GetBlocks
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetBlocks.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetBlocks();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                if (!(message.hashes && message.hashes.length))
+                    message.hashes = [];
+                message.hashes.push(reader.bytes());
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a GetBlocks message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof GetBlocks
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {GetBlocks} GetBlocks
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetBlocks.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a GetBlocks message.
+     * @function verify
+     * @memberof GetBlocks
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    GetBlocks.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.hashes != null && message.hasOwnProperty("hashes")) {
+            if (!Array.isArray(message.hashes))
+                return "hashes: array expected";
+            for (var i = 0; i < message.hashes.length; ++i)
+                if (!(message.hashes[i] && typeof message.hashes[i].length === "number" || $util.isString(message.hashes[i])))
+                    return "hashes: buffer[] expected";
+        }
+        return null;
+    };
+
+    /**
+     * Creates a GetBlocks message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof GetBlocks
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {GetBlocks} GetBlocks
+     */
+    GetBlocks.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetBlocks)
+            return object;
+        var message = new $root.GetBlocks();
+        if (object.hashes) {
+            if (!Array.isArray(object.hashes))
+                throw TypeError(".GetBlocks.hashes: array expected");
+            message.hashes = [];
+            for (var i = 0; i < object.hashes.length; ++i)
+                if (typeof object.hashes[i] === "string")
+                    $util.base64.decode(object.hashes[i], message.hashes[i] = $util.newBuffer($util.base64.length(object.hashes[i])), 0);
+                else if (object.hashes[i].length)
+                    message.hashes[i] = object.hashes[i];
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a GetBlocks message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof GetBlocks
+     * @static
+     * @param {GetBlocks} message GetBlocks
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    GetBlocks.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.arrays || options.defaults)
+            object.hashes = [];
+        if (message.hashes && message.hashes.length) {
+            object.hashes = [];
+            for (var j = 0; j < message.hashes.length; ++j)
+                object.hashes[j] = options.bytes === String ? $util.base64.encode(message.hashes[j], 0, message.hashes[j].length) : options.bytes === Array ? Array.prototype.slice.call(message.hashes[j]) : message.hashes[j];
+        }
+        return object;
+    };
+
+    /**
+     * Converts this GetBlocks to JSON.
+     * @function toJSON
+     * @memberof GetBlocks
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    GetBlocks.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return GetBlocks;
+})();
+
+$root.GetBlocksReturn = (function() {
+
+    /**
+     * Properties of a GetBlocksReturn.
+     * @exports IGetBlocksReturn
+     * @interface IGetBlocksReturn
+     * @property {boolean|null} [success] GetBlocksReturn success
+     * @property {Array.<IBlock>|null} [blocks] GetBlocksReturn blocks
+     */
+
+    /**
+     * Constructs a new GetBlocksReturn.
+     * @exports GetBlocksReturn
+     * @classdesc Represents a GetBlocksReturn.
+     * @implements IGetBlocksReturn
+     * @constructor
+     * @param {IGetBlocksReturn=} [properties] Properties to set
+     */
+    function GetBlocksReturn(properties) {
+        this.blocks = [];
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * GetBlocksReturn success.
+     * @member {boolean} success
+     * @memberof GetBlocksReturn
+     * @instance
+     */
+    GetBlocksReturn.prototype.success = false;
+
+    /**
+     * GetBlocksReturn blocks.
+     * @member {Array.<IBlock>} blocks
+     * @memberof GetBlocksReturn
+     * @instance
+     */
+    GetBlocksReturn.prototype.blocks = $util.emptyArray;
+
+    /**
+     * Creates a new GetBlocksReturn instance using the specified properties.
+     * @function create
+     * @memberof GetBlocksReturn
+     * @static
+     * @param {IGetBlocksReturn=} [properties] Properties to set
+     * @returns {GetBlocksReturn} GetBlocksReturn instance
+     */
+    GetBlocksReturn.create = function create(properties) {
+        return new GetBlocksReturn(properties);
+    };
+
+    /**
+     * Encodes the specified GetBlocksReturn message. Does not implicitly {@link GetBlocksReturn.verify|verify} messages.
+     * @function encode
+     * @memberof GetBlocksReturn
+     * @static
+     * @param {IGetBlocksReturn} message GetBlocksReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetBlocksReturn.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.success != null && message.hasOwnProperty("success"))
+            writer.uint32(/* id 1, wireType 0 =*/8).bool(message.success);
+        if (message.blocks != null && message.blocks.length)
+            for (var i = 0; i < message.blocks.length; ++i)
+                $root.Block.encode(message.blocks[i], writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified GetBlocksReturn message, length delimited. Does not implicitly {@link GetBlocksReturn.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof GetBlocksReturn
+     * @static
+     * @param {IGetBlocksReturn} message GetBlocksReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetBlocksReturn.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a GetBlocksReturn message from the specified reader or buffer.
+     * @function decode
+     * @memberof GetBlocksReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {GetBlocksReturn} GetBlocksReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetBlocksReturn.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetBlocksReturn();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.success = reader.bool();
+                break;
+            case 2:
+                if (!(message.blocks && message.blocks.length))
+                    message.blocks = [];
+                message.blocks.push($root.Block.decode(reader, reader.uint32()));
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a GetBlocksReturn message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof GetBlocksReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {GetBlocksReturn} GetBlocksReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetBlocksReturn.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a GetBlocksReturn message.
+     * @function verify
+     * @memberof GetBlocksReturn
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    GetBlocksReturn.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.success != null && message.hasOwnProperty("success"))
+            if (typeof message.success !== "boolean")
+                return "success: boolean expected";
+        if (message.blocks != null && message.hasOwnProperty("blocks")) {
+            if (!Array.isArray(message.blocks))
+                return "blocks: array expected";
+            for (var i = 0; i < message.blocks.length; ++i) {
+                var error = $root.Block.verify(message.blocks[i]);
+                if (error)
+                    return "blocks." + error;
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Creates a GetBlocksReturn message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof GetBlocksReturn
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {GetBlocksReturn} GetBlocksReturn
+     */
+    GetBlocksReturn.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetBlocksReturn)
+            return object;
+        var message = new $root.GetBlocksReturn();
+        if (object.success != null)
+            message.success = Boolean(object.success);
+        if (object.blocks) {
+            if (!Array.isArray(object.blocks))
+                throw TypeError(".GetBlocksReturn.blocks: array expected");
+            message.blocks = [];
+            for (var i = 0; i < object.blocks.length; ++i) {
+                if (typeof object.blocks[i] !== "object")
+                    throw TypeError(".GetBlocksReturn.blocks: object expected");
+                message.blocks[i] = $root.Block.fromObject(object.blocks[i]);
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a GetBlocksReturn message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof GetBlocksReturn
+     * @static
+     * @param {GetBlocksReturn} message GetBlocksReturn
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    GetBlocksReturn.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.arrays || options.defaults)
+            object.blocks = [];
+        if (options.defaults)
+            object.success = false;
+        if (message.success != null && message.hasOwnProperty("success"))
+            object.success = message.success;
+        if (message.blocks && message.blocks.length) {
+            object.blocks = [];
+            for (var j = 0; j < message.blocks.length; ++j)
+                object.blocks[j] = $root.Block.toObject(message.blocks[j], options);
+        }
+        return object;
+    };
+
+    /**
+     * Converts this GetBlocksReturn to JSON.
+     * @function toJSON
+     * @memberof GetBlocksReturn
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    GetBlocksReturn.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return GetBlocksReturn;
+})();
+
+$root.GetTxs = (function() {
+
+    /**
+     * Properties of a GetTxs.
+     * @exports IGetTxs
+     * @interface IGetTxs
+     * @property {number|Long|null} [minFee] GetTxs minFee
+     */
+
+    /**
+     * Constructs a new GetTxs.
+     * @exports GetTxs
+     * @classdesc Represents a GetTxs.
+     * @implements IGetTxs
+     * @constructor
+     * @param {IGetTxs=} [properties] Properties to set
+     */
+    function GetTxs(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * GetTxs minFee.
+     * @member {number|Long} minFee
+     * @memberof GetTxs
+     * @instance
+     */
+    GetTxs.prototype.minFee = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+    /**
+     * Creates a new GetTxs instance using the specified properties.
+     * @function create
+     * @memberof GetTxs
+     * @static
+     * @param {IGetTxs=} [properties] Properties to set
+     * @returns {GetTxs} GetTxs instance
+     */
+    GetTxs.create = function create(properties) {
+        return new GetTxs(properties);
+    };
+
+    /**
+     * Encodes the specified GetTxs message. Does not implicitly {@link GetTxs.verify|verify} messages.
+     * @function encode
+     * @memberof GetTxs
+     * @static
+     * @param {IGetTxs} message GetTxs message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetTxs.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.minFee != null && message.hasOwnProperty("minFee"))
+            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.minFee);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified GetTxs message, length delimited. Does not implicitly {@link GetTxs.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof GetTxs
+     * @static
+     * @param {IGetTxs} message GetTxs message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetTxs.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a GetTxs message from the specified reader or buffer.
+     * @function decode
+     * @memberof GetTxs
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {GetTxs} GetTxs
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetTxs.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetTxs();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.minFee = reader.int64();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a GetTxs message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof GetTxs
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {GetTxs} GetTxs
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetTxs.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a GetTxs message.
+     * @function verify
+     * @memberof GetTxs
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    GetTxs.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.minFee != null && message.hasOwnProperty("minFee"))
+            if (!$util.isInteger(message.minFee) && !(message.minFee && $util.isInteger(message.minFee.low) && $util.isInteger(message.minFee.high)))
+                return "minFee: integer|Long expected";
+        return null;
+    };
+
+    /**
+     * Creates a GetTxs message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof GetTxs
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {GetTxs} GetTxs
+     */
+    GetTxs.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetTxs)
+            return object;
+        var message = new $root.GetTxs();
+        if (object.minFee != null)
+            if ($util.Long)
+                (message.minFee = $util.Long.fromValue(object.minFee)).unsigned = false;
+            else if (typeof object.minFee === "string")
+                message.minFee = parseInt(object.minFee, 10);
+            else if (typeof object.minFee === "number")
+                message.minFee = object.minFee;
+            else if (typeof object.minFee === "object")
+                message.minFee = new $util.LongBits(object.minFee.low >>> 0, object.minFee.high >>> 0).toNumber();
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a GetTxs message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof GetTxs
+     * @static
+     * @param {GetTxs} message GetTxs
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    GetTxs.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults)
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, false);
+                object.minFee = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.minFee = options.longs === String ? "0" : 0;
+        if (message.minFee != null && message.hasOwnProperty("minFee"))
+            if (typeof message.minFee === "number")
+                object.minFee = options.longs === String ? String(message.minFee) : message.minFee;
+            else
+                object.minFee = options.longs === String ? $util.Long.prototype.toString.call(message.minFee) : options.longs === Number ? new $util.LongBits(message.minFee.low >>> 0, message.minFee.high >>> 0).toNumber() : message.minFee;
+        return object;
+    };
+
+    /**
+     * Converts this GetTxs to JSON.
+     * @function toJSON
+     * @memberof GetTxs
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    GetTxs.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return GetTxs;
+})();
+
+$root.GetTxsReturn = (function() {
+
+    /**
+     * Properties of a GetTxsReturn.
+     * @exports IGetTxsReturn
+     * @interface IGetTxsReturn
+     * @property {boolean|null} [success] GetTxsReturn success
+     * @property {Array.<ITx>|null} [blocks] GetTxsReturn blocks
+     */
+
+    /**
+     * Constructs a new GetTxsReturn.
+     * @exports GetTxsReturn
+     * @classdesc Represents a GetTxsReturn.
+     * @implements IGetTxsReturn
+     * @constructor
+     * @param {IGetTxsReturn=} [properties] Properties to set
+     */
+    function GetTxsReturn(properties) {
+        this.blocks = [];
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * GetTxsReturn success.
+     * @member {boolean} success
+     * @memberof GetTxsReturn
+     * @instance
+     */
+    GetTxsReturn.prototype.success = false;
+
+    /**
+     * GetTxsReturn blocks.
+     * @member {Array.<ITx>} blocks
+     * @memberof GetTxsReturn
+     * @instance
+     */
+    GetTxsReturn.prototype.blocks = $util.emptyArray;
+
+    /**
+     * Creates a new GetTxsReturn instance using the specified properties.
+     * @function create
+     * @memberof GetTxsReturn
+     * @static
+     * @param {IGetTxsReturn=} [properties] Properties to set
+     * @returns {GetTxsReturn} GetTxsReturn instance
+     */
+    GetTxsReturn.create = function create(properties) {
+        return new GetTxsReturn(properties);
+    };
+
+    /**
+     * Encodes the specified GetTxsReturn message. Does not implicitly {@link GetTxsReturn.verify|verify} messages.
+     * @function encode
+     * @memberof GetTxsReturn
+     * @static
+     * @param {IGetTxsReturn} message GetTxsReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetTxsReturn.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.success != null && message.hasOwnProperty("success"))
+            writer.uint32(/* id 1, wireType 0 =*/8).bool(message.success);
+        if (message.blocks != null && message.blocks.length)
+            for (var i = 0; i < message.blocks.length; ++i)
+                $root.Tx.encode(message.blocks[i], writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified GetTxsReturn message, length delimited. Does not implicitly {@link GetTxsReturn.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof GetTxsReturn
+     * @static
+     * @param {IGetTxsReturn} message GetTxsReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetTxsReturn.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a GetTxsReturn message from the specified reader or buffer.
+     * @function decode
+     * @memberof GetTxsReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {GetTxsReturn} GetTxsReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetTxsReturn.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetTxsReturn();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.success = reader.bool();
+                break;
+            case 2:
+                if (!(message.blocks && message.blocks.length))
+                    message.blocks = [];
+                message.blocks.push($root.Tx.decode(reader, reader.uint32()));
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a GetTxsReturn message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof GetTxsReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {GetTxsReturn} GetTxsReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetTxsReturn.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a GetTxsReturn message.
+     * @function verify
+     * @memberof GetTxsReturn
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    GetTxsReturn.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.success != null && message.hasOwnProperty("success"))
+            if (typeof message.success !== "boolean")
+                return "success: boolean expected";
+        if (message.blocks != null && message.hasOwnProperty("blocks")) {
+            if (!Array.isArray(message.blocks))
+                return "blocks: array expected";
+            for (var i = 0; i < message.blocks.length; ++i) {
+                var error = $root.Tx.verify(message.blocks[i]);
+                if (error)
+                    return "blocks." + error;
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Creates a GetTxsReturn message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof GetTxsReturn
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {GetTxsReturn} GetTxsReturn
+     */
+    GetTxsReturn.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetTxsReturn)
+            return object;
+        var message = new $root.GetTxsReturn();
+        if (object.success != null)
+            message.success = Boolean(object.success);
+        if (object.blocks) {
+            if (!Array.isArray(object.blocks))
+                throw TypeError(".GetTxsReturn.blocks: array expected");
+            message.blocks = [];
+            for (var i = 0; i < object.blocks.length; ++i) {
+                if (typeof object.blocks[i] !== "object")
+                    throw TypeError(".GetTxsReturn.blocks: object expected");
+                message.blocks[i] = $root.Tx.fromObject(object.blocks[i]);
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a GetTxsReturn message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof GetTxsReturn
+     * @static
+     * @param {GetTxsReturn} message GetTxsReturn
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    GetTxsReturn.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.arrays || options.defaults)
+            object.blocks = [];
+        if (options.defaults)
+            object.success = false;
+        if (message.success != null && message.hasOwnProperty("success"))
+            object.success = message.success;
+        if (message.blocks && message.blocks.length) {
+            object.blocks = [];
+            for (var j = 0; j < message.blocks.length; ++j)
+                object.blocks[j] = $root.Tx.toObject(message.blocks[j], options);
+        }
+        return object;
+    };
+
+    /**
+     * Converts this GetTxsReturn to JSON.
+     * @function toJSON
+     * @memberof GetTxsReturn
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    GetTxsReturn.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return GetTxsReturn;
+})();
+
+$root.GetBlocksByRange = (function() {
+
+    /**
+     * Properties of a GetBlocksByRange.
+     * @exports IGetBlocksByRange
+     * @interface IGetBlocksByRange
+     * @property {number|Long|null} [fromHeight] GetBlocksByRange fromHeight
+     * @property {number|Long|null} [count] GetBlocksByRange count
+     */
+
+    /**
+     * Constructs a new GetBlocksByRange.
+     * @exports GetBlocksByRange
+     * @classdesc Represents a GetBlocksByRange.
+     * @implements IGetBlocksByRange
+     * @constructor
+     * @param {IGetBlocksByRange=} [properties] Properties to set
+     */
+    function GetBlocksByRange(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * GetBlocksByRange fromHeight.
+     * @member {number|Long} fromHeight
+     * @memberof GetBlocksByRange
+     * @instance
+     */
+    GetBlocksByRange.prototype.fromHeight = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+    /**
+     * GetBlocksByRange count.
+     * @member {number|Long} count
+     * @memberof GetBlocksByRange
+     * @instance
+     */
+    GetBlocksByRange.prototype.count = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+    /**
+     * Creates a new GetBlocksByRange instance using the specified properties.
+     * @function create
+     * @memberof GetBlocksByRange
+     * @static
+     * @param {IGetBlocksByRange=} [properties] Properties to set
+     * @returns {GetBlocksByRange} GetBlocksByRange instance
+     */
+    GetBlocksByRange.create = function create(properties) {
+        return new GetBlocksByRange(properties);
+    };
+
+    /**
+     * Encodes the specified GetBlocksByRange message. Does not implicitly {@link GetBlocksByRange.verify|verify} messages.
+     * @function encode
+     * @memberof GetBlocksByRange
+     * @static
+     * @param {IGetBlocksByRange} message GetBlocksByRange message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetBlocksByRange.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.fromHeight != null && message.hasOwnProperty("fromHeight"))
+            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.fromHeight);
+        if (message.count != null && message.hasOwnProperty("count"))
+            writer.uint32(/* id 2, wireType 0 =*/16).int64(message.count);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified GetBlocksByRange message, length delimited. Does not implicitly {@link GetBlocksByRange.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof GetBlocksByRange
+     * @static
+     * @param {IGetBlocksByRange} message GetBlocksByRange message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetBlocksByRange.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a GetBlocksByRange message from the specified reader or buffer.
+     * @function decode
+     * @memberof GetBlocksByRange
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {GetBlocksByRange} GetBlocksByRange
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetBlocksByRange.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetBlocksByRange();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.fromHeight = reader.int64();
+                break;
+            case 2:
+                message.count = reader.int64();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a GetBlocksByRange message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof GetBlocksByRange
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {GetBlocksByRange} GetBlocksByRange
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetBlocksByRange.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a GetBlocksByRange message.
+     * @function verify
+     * @memberof GetBlocksByRange
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    GetBlocksByRange.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.fromHeight != null && message.hasOwnProperty("fromHeight"))
+            if (!$util.isInteger(message.fromHeight) && !(message.fromHeight && $util.isInteger(message.fromHeight.low) && $util.isInteger(message.fromHeight.high)))
+                return "fromHeight: integer|Long expected";
+        if (message.count != null && message.hasOwnProperty("count"))
+            if (!$util.isInteger(message.count) && !(message.count && $util.isInteger(message.count.low) && $util.isInteger(message.count.high)))
+                return "count: integer|Long expected";
+        return null;
+    };
+
+    /**
+     * Creates a GetBlocksByRange message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof GetBlocksByRange
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {GetBlocksByRange} GetBlocksByRange
+     */
+    GetBlocksByRange.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetBlocksByRange)
+            return object;
+        var message = new $root.GetBlocksByRange();
+        if (object.fromHeight != null)
+            if ($util.Long)
+                (message.fromHeight = $util.Long.fromValue(object.fromHeight)).unsigned = false;
+            else if (typeof object.fromHeight === "string")
+                message.fromHeight = parseInt(object.fromHeight, 10);
+            else if (typeof object.fromHeight === "number")
+                message.fromHeight = object.fromHeight;
+            else if (typeof object.fromHeight === "object")
+                message.fromHeight = new $util.LongBits(object.fromHeight.low >>> 0, object.fromHeight.high >>> 0).toNumber();
+        if (object.count != null)
+            if ($util.Long)
+                (message.count = $util.Long.fromValue(object.count)).unsigned = false;
+            else if (typeof object.count === "string")
+                message.count = parseInt(object.count, 10);
+            else if (typeof object.count === "number")
+                message.count = object.count;
+            else if (typeof object.count === "object")
+                message.count = new $util.LongBits(object.count.low >>> 0, object.count.high >>> 0).toNumber();
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a GetBlocksByRange message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof GetBlocksByRange
+     * @static
+     * @param {GetBlocksByRange} message GetBlocksByRange
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    GetBlocksByRange.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults) {
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, false);
+                object.fromHeight = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.fromHeight = options.longs === String ? "0" : 0;
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, false);
+                object.count = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.count = options.longs === String ? "0" : 0;
+        }
+        if (message.fromHeight != null && message.hasOwnProperty("fromHeight"))
+            if (typeof message.fromHeight === "number")
+                object.fromHeight = options.longs === String ? String(message.fromHeight) : message.fromHeight;
+            else
+                object.fromHeight = options.longs === String ? $util.Long.prototype.toString.call(message.fromHeight) : options.longs === Number ? new $util.LongBits(message.fromHeight.low >>> 0, message.fromHeight.high >>> 0).toNumber() : message.fromHeight;
+        if (message.count != null && message.hasOwnProperty("count"))
+            if (typeof message.count === "number")
+                object.count = options.longs === String ? String(message.count) : message.count;
+            else
+                object.count = options.longs === String ? $util.Long.prototype.toString.call(message.count) : options.longs === Number ? new $util.LongBits(message.count.low >>> 0, message.count.high >>> 0).toNumber() : message.count;
+        return object;
+    };
+
+    /**
+     * Converts this GetBlocksByRange to JSON.
+     * @function toJSON
+     * @memberof GetBlocksByRange
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    GetBlocksByRange.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return GetBlocksByRange;
+})();
+
+$root.GetBlocksByRangeReturn = (function() {
+
+    /**
+     * Properties of a GetBlocksByRangeReturn.
+     * @exports IGetBlocksByRangeReturn
+     * @interface IGetBlocksByRangeReturn
+     * @property {boolean|null} [success] GetBlocksByRangeReturn success
+     * @property {Array.<IBlock>|null} [blocks] GetBlocksByRangeReturn blocks
+     */
+
+    /**
+     * Constructs a new GetBlocksByRangeReturn.
+     * @exports GetBlocksByRangeReturn
+     * @classdesc Represents a GetBlocksByRangeReturn.
+     * @implements IGetBlocksByRangeReturn
+     * @constructor
+     * @param {IGetBlocksByRangeReturn=} [properties] Properties to set
+     */
+    function GetBlocksByRangeReturn(properties) {
+        this.blocks = [];
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * GetBlocksByRangeReturn success.
+     * @member {boolean} success
+     * @memberof GetBlocksByRangeReturn
+     * @instance
+     */
+    GetBlocksByRangeReturn.prototype.success = false;
+
+    /**
+     * GetBlocksByRangeReturn blocks.
+     * @member {Array.<IBlock>} blocks
+     * @memberof GetBlocksByRangeReturn
+     * @instance
+     */
+    GetBlocksByRangeReturn.prototype.blocks = $util.emptyArray;
+
+    /**
+     * Creates a new GetBlocksByRangeReturn instance using the specified properties.
+     * @function create
+     * @memberof GetBlocksByRangeReturn
+     * @static
+     * @param {IGetBlocksByRangeReturn=} [properties] Properties to set
+     * @returns {GetBlocksByRangeReturn} GetBlocksByRangeReturn instance
+     */
+    GetBlocksByRangeReturn.create = function create(properties) {
+        return new GetBlocksByRangeReturn(properties);
+    };
+
+    /**
+     * Encodes the specified GetBlocksByRangeReturn message. Does not implicitly {@link GetBlocksByRangeReturn.verify|verify} messages.
+     * @function encode
+     * @memberof GetBlocksByRangeReturn
+     * @static
+     * @param {IGetBlocksByRangeReturn} message GetBlocksByRangeReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetBlocksByRangeReturn.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.success != null && message.hasOwnProperty("success"))
+            writer.uint32(/* id 1, wireType 0 =*/8).bool(message.success);
+        if (message.blocks != null && message.blocks.length)
+            for (var i = 0; i < message.blocks.length; ++i)
+                $root.Block.encode(message.blocks[i], writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified GetBlocksByRangeReturn message, length delimited. Does not implicitly {@link GetBlocksByRangeReturn.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof GetBlocksByRangeReturn
+     * @static
+     * @param {IGetBlocksByRangeReturn} message GetBlocksByRangeReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetBlocksByRangeReturn.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a GetBlocksByRangeReturn message from the specified reader or buffer.
+     * @function decode
+     * @memberof GetBlocksByRangeReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {GetBlocksByRangeReturn} GetBlocksByRangeReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetBlocksByRangeReturn.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetBlocksByRangeReturn();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.success = reader.bool();
+                break;
+            case 2:
+                if (!(message.blocks && message.blocks.length))
+                    message.blocks = [];
+                message.blocks.push($root.Block.decode(reader, reader.uint32()));
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a GetBlocksByRangeReturn message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof GetBlocksByRangeReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {GetBlocksByRangeReturn} GetBlocksByRangeReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetBlocksByRangeReturn.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a GetBlocksByRangeReturn message.
+     * @function verify
+     * @memberof GetBlocksByRangeReturn
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    GetBlocksByRangeReturn.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.success != null && message.hasOwnProperty("success"))
+            if (typeof message.success !== "boolean")
+                return "success: boolean expected";
+        if (message.blocks != null && message.hasOwnProperty("blocks")) {
+            if (!Array.isArray(message.blocks))
+                return "blocks: array expected";
+            for (var i = 0; i < message.blocks.length; ++i) {
+                var error = $root.Block.verify(message.blocks[i]);
+                if (error)
+                    return "blocks." + error;
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Creates a GetBlocksByRangeReturn message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof GetBlocksByRangeReturn
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {GetBlocksByRangeReturn} GetBlocksByRangeReturn
+     */
+    GetBlocksByRangeReturn.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetBlocksByRangeReturn)
+            return object;
+        var message = new $root.GetBlocksByRangeReturn();
+        if (object.success != null)
+            message.success = Boolean(object.success);
+        if (object.blocks) {
+            if (!Array.isArray(object.blocks))
+                throw TypeError(".GetBlocksByRangeReturn.blocks: array expected");
+            message.blocks = [];
+            for (var i = 0; i < object.blocks.length; ++i) {
+                if (typeof object.blocks[i] !== "object")
+                    throw TypeError(".GetBlocksByRangeReturn.blocks: object expected");
+                message.blocks[i] = $root.Block.fromObject(object.blocks[i]);
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a GetBlocksByRangeReturn message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof GetBlocksByRangeReturn
+     * @static
+     * @param {GetBlocksByRangeReturn} message GetBlocksByRangeReturn
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    GetBlocksByRangeReturn.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.arrays || options.defaults)
+            object.blocks = [];
+        if (options.defaults)
+            object.success = false;
+        if (message.success != null && message.hasOwnProperty("success"))
+            object.success = message.success;
+        if (message.blocks && message.blocks.length) {
+            object.blocks = [];
+            for (var j = 0; j < message.blocks.length; ++j)
+                object.blocks[j] = $root.Block.toObject(message.blocks[j], options);
+        }
+        return object;
+    };
+
+    /**
+     * Converts this GetBlocksByRangeReturn to JSON.
+     * @function toJSON
+     * @memberof GetBlocksByRangeReturn
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    GetBlocksByRangeReturn.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return GetBlocksByRangeReturn;
+})();
+
+$root.GetHeadersByRange = (function() {
+
+    /**
+     * Properties of a GetHeadersByRange.
+     * @exports IGetHeadersByRange
+     * @interface IGetHeadersByRange
+     * @property {number|Long|null} [fromHeight] GetHeadersByRange fromHeight
+     * @property {number|Long|null} [count] GetHeadersByRange count
+     */
+
+    /**
+     * Constructs a new GetHeadersByRange.
+     * @exports GetHeadersByRange
+     * @classdesc Represents a GetHeadersByRange.
+     * @implements IGetHeadersByRange
+     * @constructor
+     * @param {IGetHeadersByRange=} [properties] Properties to set
+     */
+    function GetHeadersByRange(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * GetHeadersByRange fromHeight.
+     * @member {number|Long} fromHeight
+     * @memberof GetHeadersByRange
+     * @instance
+     */
+    GetHeadersByRange.prototype.fromHeight = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+    /**
+     * GetHeadersByRange count.
+     * @member {number|Long} count
+     * @memberof GetHeadersByRange
+     * @instance
+     */
+    GetHeadersByRange.prototype.count = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+    /**
+     * Creates a new GetHeadersByRange instance using the specified properties.
+     * @function create
+     * @memberof GetHeadersByRange
+     * @static
+     * @param {IGetHeadersByRange=} [properties] Properties to set
+     * @returns {GetHeadersByRange} GetHeadersByRange instance
+     */
+    GetHeadersByRange.create = function create(properties) {
+        return new GetHeadersByRange(properties);
+    };
+
+    /**
+     * Encodes the specified GetHeadersByRange message. Does not implicitly {@link GetHeadersByRange.verify|verify} messages.
+     * @function encode
+     * @memberof GetHeadersByRange
+     * @static
+     * @param {IGetHeadersByRange} message GetHeadersByRange message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetHeadersByRange.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.fromHeight != null && message.hasOwnProperty("fromHeight"))
+            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.fromHeight);
+        if (message.count != null && message.hasOwnProperty("count"))
+            writer.uint32(/* id 2, wireType 0 =*/16).int64(message.count);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified GetHeadersByRange message, length delimited. Does not implicitly {@link GetHeadersByRange.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof GetHeadersByRange
+     * @static
+     * @param {IGetHeadersByRange} message GetHeadersByRange message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetHeadersByRange.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a GetHeadersByRange message from the specified reader or buffer.
+     * @function decode
+     * @memberof GetHeadersByRange
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {GetHeadersByRange} GetHeadersByRange
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetHeadersByRange.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetHeadersByRange();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.fromHeight = reader.int64();
+                break;
+            case 2:
+                message.count = reader.int64();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a GetHeadersByRange message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof GetHeadersByRange
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {GetHeadersByRange} GetHeadersByRange
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetHeadersByRange.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a GetHeadersByRange message.
+     * @function verify
+     * @memberof GetHeadersByRange
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    GetHeadersByRange.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.fromHeight != null && message.hasOwnProperty("fromHeight"))
+            if (!$util.isInteger(message.fromHeight) && !(message.fromHeight && $util.isInteger(message.fromHeight.low) && $util.isInteger(message.fromHeight.high)))
+                return "fromHeight: integer|Long expected";
+        if (message.count != null && message.hasOwnProperty("count"))
+            if (!$util.isInteger(message.count) && !(message.count && $util.isInteger(message.count.low) && $util.isInteger(message.count.high)))
+                return "count: integer|Long expected";
+        return null;
+    };
+
+    /**
+     * Creates a GetHeadersByRange message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof GetHeadersByRange
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {GetHeadersByRange} GetHeadersByRange
+     */
+    GetHeadersByRange.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetHeadersByRange)
+            return object;
+        var message = new $root.GetHeadersByRange();
+        if (object.fromHeight != null)
+            if ($util.Long)
+                (message.fromHeight = $util.Long.fromValue(object.fromHeight)).unsigned = false;
+            else if (typeof object.fromHeight === "string")
+                message.fromHeight = parseInt(object.fromHeight, 10);
+            else if (typeof object.fromHeight === "number")
+                message.fromHeight = object.fromHeight;
+            else if (typeof object.fromHeight === "object")
+                message.fromHeight = new $util.LongBits(object.fromHeight.low >>> 0, object.fromHeight.high >>> 0).toNumber();
+        if (object.count != null)
+            if ($util.Long)
+                (message.count = $util.Long.fromValue(object.count)).unsigned = false;
+            else if (typeof object.count === "string")
+                message.count = parseInt(object.count, 10);
+            else if (typeof object.count === "number")
+                message.count = object.count;
+            else if (typeof object.count === "object")
+                message.count = new $util.LongBits(object.count.low >>> 0, object.count.high >>> 0).toNumber();
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a GetHeadersByRange message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof GetHeadersByRange
+     * @static
+     * @param {GetHeadersByRange} message GetHeadersByRange
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    GetHeadersByRange.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults) {
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, false);
+                object.fromHeight = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.fromHeight = options.longs === String ? "0" : 0;
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, false);
+                object.count = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.count = options.longs === String ? "0" : 0;
+        }
+        if (message.fromHeight != null && message.hasOwnProperty("fromHeight"))
+            if (typeof message.fromHeight === "number")
+                object.fromHeight = options.longs === String ? String(message.fromHeight) : message.fromHeight;
+            else
+                object.fromHeight = options.longs === String ? $util.Long.prototype.toString.call(message.fromHeight) : options.longs === Number ? new $util.LongBits(message.fromHeight.low >>> 0, message.fromHeight.high >>> 0).toNumber() : message.fromHeight;
+        if (message.count != null && message.hasOwnProperty("count"))
+            if (typeof message.count === "number")
+                object.count = options.longs === String ? String(message.count) : message.count;
+            else
+                object.count = options.longs === String ? $util.Long.prototype.toString.call(message.count) : options.longs === Number ? new $util.LongBits(message.count.low >>> 0, message.count.high >>> 0).toNumber() : message.count;
+        return object;
+    };
+
+    /**
+     * Converts this GetHeadersByRange to JSON.
+     * @function toJSON
+     * @memberof GetHeadersByRange
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    GetHeadersByRange.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return GetHeadersByRange;
+})();
+
+$root.GetHeadersByRangeReturn = (function() {
+
+    /**
+     * Properties of a GetHeadersByRangeReturn.
+     * @exports IGetHeadersByRangeReturn
+     * @interface IGetHeadersByRangeReturn
+     * @property {boolean|null} [success] GetHeadersByRangeReturn success
+     * @property {IBlockHeaders|null} [blocks] GetHeadersByRangeReturn blocks
+     */
+
+    /**
+     * Constructs a new GetHeadersByRangeReturn.
+     * @exports GetHeadersByRangeReturn
+     * @classdesc Represents a GetHeadersByRangeReturn.
+     * @implements IGetHeadersByRangeReturn
+     * @constructor
+     * @param {IGetHeadersByRangeReturn=} [properties] Properties to set
+     */
+    function GetHeadersByRangeReturn(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * GetHeadersByRangeReturn success.
+     * @member {boolean} success
+     * @memberof GetHeadersByRangeReturn
+     * @instance
+     */
+    GetHeadersByRangeReturn.prototype.success = false;
+
+    /**
+     * GetHeadersByRangeReturn blocks.
+     * @member {IBlockHeaders|null|undefined} blocks
+     * @memberof GetHeadersByRangeReturn
+     * @instance
+     */
+    GetHeadersByRangeReturn.prototype.blocks = null;
+
+    /**
+     * Creates a new GetHeadersByRangeReturn instance using the specified properties.
+     * @function create
+     * @memberof GetHeadersByRangeReturn
+     * @static
+     * @param {IGetHeadersByRangeReturn=} [properties] Properties to set
+     * @returns {GetHeadersByRangeReturn} GetHeadersByRangeReturn instance
+     */
+    GetHeadersByRangeReturn.create = function create(properties) {
+        return new GetHeadersByRangeReturn(properties);
+    };
+
+    /**
+     * Encodes the specified GetHeadersByRangeReturn message. Does not implicitly {@link GetHeadersByRangeReturn.verify|verify} messages.
+     * @function encode
+     * @memberof GetHeadersByRangeReturn
+     * @static
+     * @param {IGetHeadersByRangeReturn} message GetHeadersByRangeReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetHeadersByRangeReturn.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.success != null && message.hasOwnProperty("success"))
+            writer.uint32(/* id 1, wireType 0 =*/8).bool(message.success);
+        if (message.blocks != null && message.hasOwnProperty("blocks"))
+            $root.BlockHeaders.encode(message.blocks, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified GetHeadersByRangeReturn message, length delimited. Does not implicitly {@link GetHeadersByRangeReturn.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof GetHeadersByRangeReturn
+     * @static
+     * @param {IGetHeadersByRangeReturn} message GetHeadersByRangeReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetHeadersByRangeReturn.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a GetHeadersByRangeReturn message from the specified reader or buffer.
+     * @function decode
+     * @memberof GetHeadersByRangeReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {GetHeadersByRangeReturn} GetHeadersByRangeReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetHeadersByRangeReturn.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetHeadersByRangeReturn();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.success = reader.bool();
+                break;
+            case 2:
+                message.blocks = $root.BlockHeaders.decode(reader, reader.uint32());
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a GetHeadersByRangeReturn message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof GetHeadersByRangeReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {GetHeadersByRangeReturn} GetHeadersByRangeReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetHeadersByRangeReturn.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a GetHeadersByRangeReturn message.
+     * @function verify
+     * @memberof GetHeadersByRangeReturn
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    GetHeadersByRangeReturn.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.success != null && message.hasOwnProperty("success"))
+            if (typeof message.success !== "boolean")
+                return "success: boolean expected";
+        if (message.blocks != null && message.hasOwnProperty("blocks")) {
+            var error = $root.BlockHeaders.verify(message.blocks);
+            if (error)
+                return "blocks." + error;
+        }
+        return null;
+    };
+
+    /**
+     * Creates a GetHeadersByRangeReturn message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof GetHeadersByRangeReturn
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {GetHeadersByRangeReturn} GetHeadersByRangeReturn
+     */
+    GetHeadersByRangeReturn.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetHeadersByRangeReturn)
+            return object;
+        var message = new $root.GetHeadersByRangeReturn();
+        if (object.success != null)
+            message.success = Boolean(object.success);
+        if (object.blocks != null) {
+            if (typeof object.blocks !== "object")
+                throw TypeError(".GetHeadersByRangeReturn.blocks: object expected");
+            message.blocks = $root.BlockHeaders.fromObject(object.blocks);
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a GetHeadersByRangeReturn message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof GetHeadersByRangeReturn
+     * @static
+     * @param {GetHeadersByRangeReturn} message GetHeadersByRangeReturn
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    GetHeadersByRangeReturn.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults) {
+            object.success = false;
+            object.blocks = null;
+        }
+        if (message.success != null && message.hasOwnProperty("success"))
+            object.success = message.success;
+        if (message.blocks != null && message.hasOwnProperty("blocks"))
+            object.blocks = $root.BlockHeaders.toObject(message.blocks, options);
+        return object;
+    };
+
+    /**
+     * Converts this GetHeadersByRangeReturn to JSON.
+     * @function toJSON
+     * @memberof GetHeadersByRangeReturn
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    GetHeadersByRangeReturn.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return GetHeadersByRangeReturn;
 })();
 
 $root.Block = (function() {
