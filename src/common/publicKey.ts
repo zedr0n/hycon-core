@@ -1,19 +1,18 @@
-import { Address } from "./address"
-import { GenesisSignedTx, SignedTx } from "./tx"
-// tslint:disable-next-line:no-var-requires
-const secp256k1 = require("secp256k1")
+import secp256k1 = require("secp256k1")
 import { Hash } from "../util/hash"
+import { Address } from "./address"
+import { GenesisSignedTx } from "./txGenesisSigned"
+import { SignedTx } from "./txSigned"
 
 export class PublicKey {
-    private pubKey: Buffer
-    constructor(publicKey: Buffer)
-    // tslint:disable-next-line:unified-signatures
-    constructor(tx: (SignedTx | GenesisSignedTx))
-    constructor(a: (SignedTx | GenesisSignedTx | Buffer)) {
-        if (a instanceof Buffer) {
-            this.pubKey = a
+    public readonly pubKey: Buffer
+
+    constructor(pubKeySource: (SignedTx | GenesisSignedTx | Buffer)) {
+        if (pubKeySource instanceof Buffer) {
+            this.pubKey = pubKeySource
         } else {
-            this.pubKey = secp256k1.recover(a.unsignedHash().toBuffer(), a.signature, a.recovery)
+            const hash = pubKeySource.unsignedHash().toBuffer()
+            this.pubKey = secp256k1.recover(hash, pubKeySource.signature, pubKeySource.recovery)
         }
     }
 

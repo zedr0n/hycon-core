@@ -1,28 +1,32 @@
+import blake2b = require("blake2b")
 import * as Long from "long"
 import * as proto from "../serialization/proto"
 import { Hash } from "../util/hash"
 
-// tslint:disable:member-access
-// tslint:disable-next-line:no-var-requires
-const blake2b = require("blake2b")
 export type GenesisBlockHeader = BaseBlockHeader
 export type AnyBlockHeader = (BlockHeader | GenesisBlockHeader)
 export class BaseBlockHeader implements proto.IBlockHeader {
-    public merkleRoot !: Hash
-    public timeStamp !: number
-    public difficulty !: number
-    public stateRoot !: Hash
+    public merkleRoot: Hash
+    public timeStamp: number
+    public difficulty: number
+    public stateRoot: Hash
 
     // tslint:disable-next-line:no-empty
     constructor() { }
 
     public set(header: proto.IBlockHeader): void {
-
-        if (header.merkleRoot === undefined) { throw new Error("Header missing merkle root") }
-        // tslint:disable:max-line-length
-        if (header.stateRoot === undefined || header.stateRoot.byteLength === 0) { throw new Error("Header missing state root") }
-        if (header.timeStamp === undefined || header.timeStamp.valueOf() < 151500330500) { throw new Error("Header missing timeStamp") }
-        if (header.difficulty === undefined || header.difficulty == null) { throw new Error("Header missing difficulty") }
+        if (header.merkleRoot === undefined) {
+            throw new Error("Header missing merkle root")
+        }
+        if (header.stateRoot === undefined || header.stateRoot.byteLength === 0) {
+            throw new Error("Header missing state root")
+        }
+        if (header.timeStamp === undefined || header.timeStamp.valueOf() < 151500330500) {
+            throw new Error("Header missing timeStamp")
+        }
+        if (header.difficulty === undefined || header.difficulty == null) {
+            throw new Error("Header missing difficulty")
+        }
 
         if (this.merkleRoot) {
             this.merkleRoot.set(header.merkleRoot)
@@ -70,7 +74,7 @@ export function setGenesisBlockHeader(header: proto.IBlockHeader): GenesisBlockH
 // tslint:disable-next-line:max-classes-per-file
 export class BlockHeader extends BaseBlockHeader {
     public previousHash: Hash[] = []
-    public nonce !: Long
+    public nonce: Long
 
     constructor(header: proto.IBlockHeader) {
         super()
@@ -81,7 +85,9 @@ export class BlockHeader extends BaseBlockHeader {
         super.set(header)
         if (header.previousHash === undefined) { throw new Error("Header missing previous hash") }
         if (header.nonce === undefined) { throw new Error("Header missing nonce") }
-        if (header.difficulty === undefined || header.difficulty == null || header.difficulty <= 0) { throw new Error("Header missing difficulty") }
+        if (header.difficulty === undefined || header.difficulty == null || header.difficulty <= 0) {
+            throw new Error("Header missing difficulty")
+        }
 
         for (const prev of header.previousHash) {
             this.previousHash.push(new Hash(prev))

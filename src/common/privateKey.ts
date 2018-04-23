@@ -1,16 +1,20 @@
 import { randomBytes } from "crypto"
+import secp256k1 = require("secp256k1")
 import { Hash } from "../util/hash"
 import { PublicKey } from "./publicKey"
-import { GenesisSignedTx, GenesisTx, SignedTx, Tx } from "./tx"
-// tslint:disable:member-access
-// tslint:disable-next-line:no-var-requires
-const secp256k1 = require("secp256k1")
+import { Tx } from "./tx"
+import { GenesisTx } from "./txGenesis"
+import { GenesisSignedTx } from "./txGenesisSigned"
+import { SignedTx } from "./txSigned"
 
 export class PrivateKey {
-    readonly privKey: Buffer
+    public readonly privKey: Buffer
     constructor(privateKey?: Buffer) {
         if (privateKey !== undefined) {
             this.privKey = privateKey
+            if (!secp256k1.privateKeyVerify(this.privKey)) {
+                throw new Error("Invalid private key")
+            }
         } else {
             do {
                 this.privKey = randomBytes(32)
