@@ -1,6 +1,4 @@
 // Utility File for Providing the Utility Functions.
-// tslint:disable:no-bitwise
-// tslint:disable-next-line:no-var-requires
 const assert = require("assert")
 export function compare(a: (Buffer | Uint8Array), b: (Buffer | Uint8Array)) {
     assert(a.length === b.length)
@@ -42,3 +40,14 @@ export function unforcedInt(intNum: number) {
     const decimal = 1.e-4 * (intNum & 0xFFFFFF)
     return int + decimal
 }
+
+export function hexToUint8Array(str: string): Uint8Array {
+    let arr: number[] = []
+    while (str.length >= 2) {
+        arr.push(parseInt(str.substring(0, 2), 16));
+        str = str.substring(2, str.length);
+    }
+    let result = new Uint8Array(arr)
+    return result
+}
+
