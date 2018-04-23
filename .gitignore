@@ -1,4 +1,3 @@
-node_modules
 *.ts-e
 logs
-package-lock.json
+node_modules
