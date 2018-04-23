@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "./node_modules/.bin/ts-node src/main.ts",
-    "protogen": "./node_modules/.bin/pbjs -t static-module -w commonjs -o src/serialization/proto.js proto/main.proto &&  ./node_modules/.bin/pbts -o src/serialization/proto.d.ts src/serialization/proto.js && ./src/serialization/trim_null.sh"
+    "protogen": "pbjs -t static-module -w commonjs -o src/serialization/proto.js proto/main.proto &&  pbts -o src/serialization/proto.d.ts src/serialization/proto.js && ./src/serialization/trim_null.sh",
+    "debugNetwork": "./node_modules/.bin/ts-node --inspect=9231 --inspect-brk src/network/main.ts",
+    "startNetwork": "./node_modules/.bin/ts-node src/network/main.ts"
   },
   "author": "",
   "license": "ISC",
@@ -14,15 +16,18 @@
     "@types/log4js": "^2.3.5",
     "@types/node": "^9.6.6",
     "protobufjs": "^6.8.6",
-    "ts-node": "^6.0.0",
+    "ts-node": "4.0.1",
     "typescript": "^2.8.1"
   },
   "dependencies": {
     "base-58": "0.0.1",
     "blake2b": "^2.1.2",
+    "delay": "^2.0.0",
     "fs-extra": "^5.0.0",
+    "secp256k1": "^3.5.0",
     "log4js": "^2.5.3",
     "merkle-lib": "^2.0.10",
-    "secp256k1": "^3.5.0"
+    "net": "^1.0.2",
+    "protobufjs": "^6.8.6"
   }
 }
