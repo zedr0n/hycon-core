@@ -29,6 +29,8 @@ export abstract class BasicPeer {
     public port: number
     public state: PeerState = PeerState.Connected
 
+    protected connectedCallback: () => void = undefined
+
     constructor(socket: Socket, mode: PeerMode) {
         this.peerMode = mode
         this.initializeSocket(socket)
@@ -57,7 +59,12 @@ export abstract class BasicPeer {
         this.state = PeerState.Connecting
     }
 
-    public abstract onConnected(): void
+    // on connect
+    public onConnected() {
+        if (this.connectedCallback) {
+            this.connectedCallback()
+        }
+    }
 
     public reconnect() {
         this.initializeSocket(new Socket())
@@ -98,6 +105,13 @@ export abstract class BasicPeer {
     public abstract close(): void
     public error(error: Error) {
         logger.error(`${error}`)
+    }
+
+    public sendBuffer(encodeReq: Uint8Array) {
+        const newPacket = new Packet()
+        newPacket.pushBuffer(new Buffer(encodeReq))
+        const encoded = newPacket.pack()
+        this.socket.write(encoded)
     }
 
 }

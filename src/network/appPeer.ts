@@ -2,123 +2,105 @@ import { getLogger } from "log4js"
 import * as net from "net"
 import { Socket } from "net"
 import { setTimeout } from "timers"
-import { Ping, PingReturn } from "../serialization/proto"
+import { Block, BlockHeader } from "../serialization/proto"
+import { IPingReturn, IPutTxReturn, Ping, PingReturn, PutTx, PutTxReturn, Tx } from "../serialization/proto"
+import { GetHeadersByHashReturn, IPutBlockReturn, PutBlock, PutBlockReturn } from "../serialization/proto"
 import * as proto from "../serialization/proto"
 import { AppNetwork } from "./appNetwork"
 import { BasicPeer, PeerMode, PeerState } from "./basicPeer"
+import { NetPeer } from "./netPeer"
 import { Packet } from "./packet"
 import { IPeer } from "./peer"
+
 const delay = require("delay")
 const logger = getLogger("AppPeer")
 logger.level = "debug"
 
-export class AppPeer extends BasicPeer implements IPeer {
-    public static MaxTryCount = 20
-    public static PollingStep = 100  // milli seconds
-
-    public pingReturn: PingReturn
-
+export class AppPeer extends NetPeer {
     constructor(server: AppNetwork, socket: Socket, mode: PeerMode) {
-        super(socket, mode)
-        this.server = server
+        super(server, socket, mode)
+
 
     }
 
-    public close() {
-        logger.info(`Replier Gracefullly Closed`)
+    public onReceiveMessage(res: proto.Node) {
 
-        switch (this.peerMode) {
-            case PeerMode.AcceptedSession:
-                this.server.removePeer(this as AppPeer)
-                break
-
-            case PeerMode.ConnectedSession:
-                setTimeout(() => {
-                    this.reconnect()
-                }, 2000)
-                this.state = PeerState.Disconnected
-                break
+        if (res.status) {
+            logger.debug(`Status=${JSON.stringify(res.status)}`)
         }
-
-    }
-
-    public onConnected() {
-        logger.debug(`OnConnected`)
-        setInterval(() => {
-            this.test()
-        }, 1000)
-    }
-
-    public async test() {
-        const result = await this.ping()
-        logger.debug(`Ping Result Nonce=${result.nonce}`)
-
-    }
-
-    public async ping(): Promise<PingReturn> {
-        this.sendPing()
-        let i = AppPeer.MaxTryCount
-        while (i-- > 0) {
-            await delay(AppPeer.PollingStep)
-            if (this.pingReturn) {
-                const ret = this.pingReturn
-                this.pingReturn = undefined
-                return ret
-            }
-        }
-        throw new Error(`Ping Error`)
-    }
-    public putTx(tx: any): Promise<boolean> {
-        throw new Error("Method not implemented.")
-    }
-    public getTxs(minFee?: number): Promise<any[]> {
-        throw new Error("Method not implemented.")
-    }
-    public putBlock(block: any): Promise<boolean> {
-        throw new Error("Method not implemented.")
-    }
-    public getBlocksByHash(hash: any): Promise<any> {
-        throw new Error("Method not implemented.")
-    }
-    public getHeaderByHash(hash: any): Promise<any> {
-        throw new Error("Method not implemented.")
-    }
-    public getBlocksRange(fromHeight: number, count: number): Promise<any[]> {
-        throw new Error("Method not implemented.")
-    }
-    public getHeadersRange(fromHeight: number, count: number): Promise<any[]> {
-        throw new Error("Method not implemented.")
-    }
-
-    public async parsePacket(packet: Packet): Promise<any> {
-        const data = packet.popBuffer()
-        const res = proto.Node.decode(data)
         if (res.ping) {
             const userNonce = Number(res.ping.nonce.toString()) + 3000
             logger.debug(`Ping Nonce=${res.ping.nonce}`)
-
-            this.sendPingResponse(userNonce)
+            this.sendPingReturn(userNonce)
         }
-        if (res.pingResponse) {
-            this.pingReturn = res.pingResponse
-            logger.debug(`Ping Response Nonce=${res.pingResponse.nonce}`)
+        if (res.pingReturn) {
+            this.pingReturn = res.pingReturn
+            logger.debug(`Ping Response Nonce=${res.pingReturn.nonce}`)
         }
-    }
 
-    public nonce: number = 100
-    public sendPing() {
-        const encodeReq = proto.Node.encode({ ping: { nonce: this.nonce++ } }).finish()
-        const newPacket = new Packet()
-        newPacket.pushBuffer(new Buffer(encodeReq))
-        const encoded = newPacket.pack()
-        this.socket.write(encoded)
-    }
+        if (res.putTx) {
+            logger.debug(`PutTx=${JSON.stringify(res.putTx.txs)}`)
+            this.sendPutTxReturn(true)
+        }
+        if (res.putTxReturn) {
+            this.putTxReturn = res.putTxReturn
+            logger.debug(`PutTx Response Success=${res.putTxReturn.success}`)
+        }
 
-    public sendPingResponse(userNonce: number) {
-        const encodeReq = proto.Node.encode({ pingResponse: { nonce: userNonce } }).finish()
-        const newPacket = new Packet()
-        newPacket.pushBuffer(new Buffer(encodeReq))
-        const encoded = newPacket.pack()
-        this.socket.write(encoded)
+        if (res.getTxs) {
+            this.sendGetTxsReturn(true, [])
+        }
+        if (res.getTxsReturn) {
+            this.getTxsReturn = res.getTxsReturn
+            logger.debug(`GetTxsReturn Response Success=${res.getTxsReturn.success}`)
+        }
+
+        if (res.putBlock) {
+            logger.debug(`PutBlock=${JSON.stringify(res.putBlock.blocks)}`)
+            const m = res.putBlock.blocks[0].miner
+            logger.debug(`miner=${Buffer.from(m).toString()}`)
+            this.sendPutBlockReturn(true)
+        }
+        if (res.putBlockReturn) {
+            this.putBlockReturn = res.putBlockReturn
+            logger.debug(`PutBlock Response Success=${res.putBlockReturn.success}`)
+        }
+
+        if (res.getBlocksByHash) {
+            logger.debug(`getBlocksByHash=${JSON.stringify(res.getBlocksByHash.hashes)}`)
+            this.sendGetBlocksByHashReturn(true, [])
+        }
+        if (res.getBlocksByHashReturn) {
+            this.getBlocksByHashReturn = res.getBlocksByHashReturn
+            logger.debug(`getBlocksByHashReturn Response Success=${res.getBlocksByHashReturn.success}`)
+        }
+
+        if (res.getHeadersByHash) {
+            logger.debug(`getHeadersByHash=${JSON.stringify(res.getHeadersByHash.hashes)}`)
+            this.sendGetHeadersByHashReturn(true, [])
+        }
+        if (res.getHeadersByHashReturn) {
+            this.getHeadersByHashReturn = res.getHeadersByHashReturn
+            logger.debug(`getHeadersByHashReturn Response Success=${res.getHeadersByHashReturn.success}`)
+        }
+
+        if (res.getBlocksByRange) {
+            logger.debug(`getBlocksByRange=${JSON.stringify(res.getBlocksByRange)}`)
+            this.sendGetBlocksByRangeReturn(true, [])
+        }
+        if (res.getBlocksByRangeReturn) {
+            this.getBlocksByRangeReturn = res.getBlocksByRangeReturn
+            logger.debug(`getBlocksByRangeReturn Response Success=${res.getBlocksByRangeReturn.success}`)
+        }
+
+        if (res.getHeadersByRange) {
+            logger.debug(`getHeadersByRange=${JSON.stringify(res.getHeadersByRange)}`)
+            this.sendGetHeadersByRangeReturn(true, [])
+        }
+        if (res.getHeadersByRangeReturn) {
+            this.getHeadersByRangeReturn = res.getHeadersByRangeReturn
+            logger.debug(`getHeadersByRangeReturn Response Success=${res.getHeadersByRangeReturn.success}`)
+        }
+
     }
 }

@@ -15,18 +15,23 @@ $root.Node = (function() {
      * Properties of a Node.
      * @exports INode
      * @interface INode
-     * @property {INewTx|null} [newTx] Node newTx
-     * @property {INewBlock|null} [newBlock] Node newBlock
-     * @property {IGetHeaders|null} [getHeaders] Node getHeaders
-     * @property {IGetHeadersReturn|null} [getHeadersReturn] Node getHeadersReturn
-     * @property {IGetBlocks|null} [getBlocks] Node getBlocks
-     * @property {IGetBlocksReturn|null} [getBlocksReturn] Node getBlocksReturn
+     * @property {IStatus|null} [status] Node status
+     * @property {IPing|null} [ping] Node ping
+     * @property {IPingReturn|null} [pingReturn] Node pingReturn
+     * @property {IPutTx|null} [putTx] Node putTx
+     * @property {IPutTxReturn|null} [putTxReturn] Node putTxReturn
+     * @property {IGetTxs|null} [getTxs] Node getTxs
+     * @property {IGetTxsReturn|null} [getTxsReturn] Node getTxsReturn
+     * @property {IPutBlock|null} [putBlock] Node putBlock
+     * @property {IPutBlockReturn|null} [putBlockReturn] Node putBlockReturn
+     * @property {IGetBlocksByHash|null} [getBlocksByHash] Node getBlocksByHash
+     * @property {IGetBlocksByHashReturn|null} [getBlocksByHashReturn] Node getBlocksByHashReturn
+     * @property {IGetHeadersByHash|null} [getHeadersByHash] Node getHeadersByHash
+     * @property {IGetHeadersByHashReturn|null} [getHeadersByHashReturn] Node getHeadersByHashReturn
      * @property {IGetBlocksByRange|null} [getBlocksByRange] Node getBlocksByRange
      * @property {IGetBlocksByRangeReturn|null} [getBlocksByRangeReturn] Node getBlocksByRangeReturn
      * @property {IGetHeadersByRange|null} [getHeadersByRange] Node getHeadersByRange
      * @property {IGetHeadersByRangeReturn|null} [getHeadersByRangeReturn] Node getHeadersByRangeReturn
-     * @property {IPing|null} [ping] Node ping
-     * @property {IPingReturn|null} [pingResponse] Node pingResponse
      */
 
     /**
@@ -45,52 +50,108 @@ $root.Node = (function() {
     }
 
     /**
-     * Node newTx.
-     * @member {INewTx|null|undefined} newTx
+     * Node status.
+     * @member {IStatus|null|undefined} status
      * @memberof Node
      * @instance
      */
-    Node.prototype.newTx = null;
+    Node.prototype.status = null;
 
     /**
-     * Node newBlock.
-     * @member {INewBlock|null|undefined} newBlock
+     * Node ping.
+     * @member {IPing|null|undefined} ping
      * @memberof Node
      * @instance
      */
-    Node.prototype.newBlock = null;
+    Node.prototype.ping = null;
 
     /**
-     * Node getHeaders.
-     * @member {IGetHeaders|null|undefined} getHeaders
+     * Node pingReturn.
+     * @member {IPingReturn|null|undefined} pingReturn
      * @memberof Node
      * @instance
      */
-    Node.prototype.getHeaders = null;
+    Node.prototype.pingReturn = null;
 
     /**
-     * Node getHeadersReturn.
-     * @member {IGetHeadersReturn|null|undefined} getHeadersReturn
+     * Node putTx.
+     * @member {IPutTx|null|undefined} putTx
      * @memberof Node
      * @instance
      */
-    Node.prototype.getHeadersReturn = null;
+    Node.prototype.putTx = null;
 
     /**
-     * Node getBlocks.
-     * @member {IGetBlocks|null|undefined} getBlocks
+     * Node putTxReturn.
+     * @member {IPutTxReturn|null|undefined} putTxReturn
      * @memberof Node
      * @instance
      */
-    Node.prototype.getBlocks = null;
+    Node.prototype.putTxReturn = null;
 
     /**
-     * Node getBlocksReturn.
-     * @member {IGetBlocksReturn|null|undefined} getBlocksReturn
+     * Node getTxs.
+     * @member {IGetTxs|null|undefined} getTxs
      * @memberof Node
      * @instance
      */
-    Node.prototype.getBlocksReturn = null;
+    Node.prototype.getTxs = null;
+
+    /**
+     * Node getTxsReturn.
+     * @member {IGetTxsReturn|null|undefined} getTxsReturn
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.getTxsReturn = null;
+
+    /**
+     * Node putBlock.
+     * @member {IPutBlock|null|undefined} putBlock
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.putBlock = null;
+
+    /**
+     * Node putBlockReturn.
+     * @member {IPutBlockReturn|null|undefined} putBlockReturn
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.putBlockReturn = null;
+
+    /**
+     * Node getBlocksByHash.
+     * @member {IGetBlocksByHash|null|undefined} getBlocksByHash
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.getBlocksByHash = null;
+
+    /**
+     * Node getBlocksByHashReturn.
+     * @member {IGetBlocksByHashReturn|null|undefined} getBlocksByHashReturn
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.getBlocksByHashReturn = null;
+
+    /**
+     * Node getHeadersByHash.
+     * @member {IGetHeadersByHash|null|undefined} getHeadersByHash
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.getHeadersByHash = null;
+
+    /**
+     * Node getHeadersByHashReturn.
+     * @member {IGetHeadersByHashReturn|null|undefined} getHeadersByHashReturn
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.getHeadersByHashReturn = null;
 
     /**
      * Node getBlocksByRange.
@@ -124,33 +185,17 @@ $root.Node = (function() {
      */
     Node.prototype.getHeadersByRangeReturn = null;
 
-    /**
-     * Node ping.
-     * @member {IPing|null|undefined} ping
-     * @memberof Node
-     * @instance
-     */
-    Node.prototype.ping = null;
-
-    /**
-     * Node pingResponse.
-     * @member {IPingReturn|null|undefined} pingResponse
-     * @memberof Node
-     * @instance
-     */
-    Node.prototype.pingResponse = null;
-
     // OneOf field names bound to virtual getters and setters
     var $oneOfFields;
 
     /**
      * Node request.
-     * @member {"newTx"|"newBlock"|"getHeaders"|"getHeadersReturn"|"getBlocks"|"getBlocksReturn"|"getBlocksByRange"|"getBlocksByRangeReturn"|"getHeadersByRange"|"getHeadersByRangeReturn"|"ping"|"pingResponse"|undefined} request
+     * @member {"status"|"ping"|"pingReturn"|"putTx"|"putTxReturn"|"getTxs"|"getTxsReturn"|"putBlock"|"putBlockReturn"|"getBlocksByHash"|"getBlocksByHashReturn"|"getHeadersByHash"|"getHeadersByHashReturn"|"getBlocksByRange"|"getBlocksByRangeReturn"|"getHeadersByRange"|"getHeadersByRangeReturn"|undefined} request
      * @memberof Node
      * @instance
      */
     Object.defineProperty(Node.prototype, "request", {
-        get: $util.oneOfGetter($oneOfFields = ["newTx", "newBlock", "getHeaders", "getHeadersReturn", "getBlocks", "getBlocksReturn", "getBlocksByRange", "getBlocksByRangeReturn", "getHeadersByRange", "getHeadersByRangeReturn", "ping", "pingResponse"]),
+        get: $util.oneOfGetter($oneOfFields = ["status", "ping", "pingReturn", "putTx", "putTxReturn", "getTxs", "getTxsReturn", "putBlock", "putBlockReturn", "getBlocksByHash", "getBlocksByHashReturn", "getHeadersByHash", "getHeadersByHashReturn", "getBlocksByRange", "getBlocksByRangeReturn", "getHeadersByRange", "getHeadersByRangeReturn"]),
         set: $util.oneOfSetter($oneOfFields)
     });
 
@@ -178,30 +223,40 @@ $root.Node = (function() {
     Node.encode = function encode(message, writer) {
         if (!writer)
             writer = $Writer.create();
-        if (message.newTx != null && message.hasOwnProperty("newTx"))
-            $root.NewTx.encode(message.newTx, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
-        if (message.newBlock != null && message.hasOwnProperty("newBlock"))
-            $root.NewBlock.encode(message.newBlock, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
-        if (message.getHeaders != null && message.hasOwnProperty("getHeaders"))
-            $root.GetHeaders.encode(message.getHeaders, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
-        if (message.getHeadersReturn != null && message.hasOwnProperty("getHeadersReturn"))
-            $root.GetHeadersReturn.encode(message.getHeadersReturn, writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
-        if (message.getBlocks != null && message.hasOwnProperty("getBlocks"))
-            $root.GetBlocks.encode(message.getBlocks, writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
-        if (message.getBlocksReturn != null && message.hasOwnProperty("getBlocksReturn"))
-            $root.GetBlocksReturn.encode(message.getBlocksReturn, writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
-        if (message.getBlocksByRange != null && message.hasOwnProperty("getBlocksByRange"))
-            $root.GetBlocksByRange.encode(message.getBlocksByRange, writer.uint32(/* id 7, wireType 2 =*/58).fork()).ldelim();
-        if (message.getBlocksByRangeReturn != null && message.hasOwnProperty("getBlocksByRangeReturn"))
-            $root.GetBlocksByRangeReturn.encode(message.getBlocksByRangeReturn, writer.uint32(/* id 8, wireType 2 =*/66).fork()).ldelim();
-        if (message.getHeadersByRange != null && message.hasOwnProperty("getHeadersByRange"))
-            $root.GetHeadersByRange.encode(message.getHeadersByRange, writer.uint32(/* id 9, wireType 2 =*/74).fork()).ldelim();
-        if (message.getHeadersByRangeReturn != null && message.hasOwnProperty("getHeadersByRangeReturn"))
-            $root.GetHeadersByRangeReturn.encode(message.getHeadersByRangeReturn, writer.uint32(/* id 10, wireType 2 =*/82).fork()).ldelim();
+        if (message.status != null && message.hasOwnProperty("status"))
+            $root.Status.encode(message.status, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
         if (message.ping != null && message.hasOwnProperty("ping"))
-            $root.Ping.encode(message.ping, writer.uint32(/* id 11, wireType 2 =*/90).fork()).ldelim();
-        if (message.pingResponse != null && message.hasOwnProperty("pingResponse"))
-            $root.PingReturn.encode(message.pingResponse, writer.uint32(/* id 12, wireType 2 =*/98).fork()).ldelim();
+            $root.Ping.encode(message.ping, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+        if (message.pingReturn != null && message.hasOwnProperty("pingReturn"))
+            $root.PingReturn.encode(message.pingReturn, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+        if (message.putTx != null && message.hasOwnProperty("putTx"))
+            $root.PutTx.encode(message.putTx, writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
+        if (message.putTxReturn != null && message.hasOwnProperty("putTxReturn"))
+            $root.PutTxReturn.encode(message.putTxReturn, writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
+        if (message.getTxs != null && message.hasOwnProperty("getTxs"))
+            $root.GetTxs.encode(message.getTxs, writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
+        if (message.getTxsReturn != null && message.hasOwnProperty("getTxsReturn"))
+            $root.GetTxsReturn.encode(message.getTxsReturn, writer.uint32(/* id 7, wireType 2 =*/58).fork()).ldelim();
+        if (message.putBlock != null && message.hasOwnProperty("putBlock"))
+            $root.PutBlock.encode(message.putBlock, writer.uint32(/* id 8, wireType 2 =*/66).fork()).ldelim();
+        if (message.putBlockReturn != null && message.hasOwnProperty("putBlockReturn"))
+            $root.PutBlockReturn.encode(message.putBlockReturn, writer.uint32(/* id 9, wireType 2 =*/74).fork()).ldelim();
+        if (message.getBlocksByHash != null && message.hasOwnProperty("getBlocksByHash"))
+            $root.GetBlocksByHash.encode(message.getBlocksByHash, writer.uint32(/* id 10, wireType 2 =*/82).fork()).ldelim();
+        if (message.getBlocksByHashReturn != null && message.hasOwnProperty("getBlocksByHashReturn"))
+            $root.GetBlocksByHashReturn.encode(message.getBlocksByHashReturn, writer.uint32(/* id 11, wireType 2 =*/90).fork()).ldelim();
+        if (message.getHeadersByHash != null && message.hasOwnProperty("getHeadersByHash"))
+            $root.GetHeadersByHash.encode(message.getHeadersByHash, writer.uint32(/* id 12, wireType 2 =*/98).fork()).ldelim();
+        if (message.getHeadersByHashReturn != null && message.hasOwnProperty("getHeadersByHashReturn"))
+            $root.GetHeadersByHashReturn.encode(message.getHeadersByHashReturn, writer.uint32(/* id 13, wireType 2 =*/106).fork()).ldelim();
+        if (message.getBlocksByRange != null && message.hasOwnProperty("getBlocksByRange"))
+            $root.GetBlocksByRange.encode(message.getBlocksByRange, writer.uint32(/* id 14, wireType 2 =*/114).fork()).ldelim();
+        if (message.getBlocksByRangeReturn != null && message.hasOwnProperty("getBlocksByRangeReturn"))
+            $root.GetBlocksByRangeReturn.encode(message.getBlocksByRangeReturn, writer.uint32(/* id 15, wireType 2 =*/122).fork()).ldelim();
+        if (message.getHeadersByRange != null && message.hasOwnProperty("getHeadersByRange"))
+            $root.GetHeadersByRange.encode(message.getHeadersByRange, writer.uint32(/* id 16, wireType 2 =*/130).fork()).ldelim();
+        if (message.getHeadersByRangeReturn != null && message.hasOwnProperty("getHeadersByRangeReturn"))
+            $root.GetHeadersByRangeReturn.encode(message.getHeadersByRangeReturn, writer.uint32(/* id 17, wireType 2 =*/138).fork()).ldelim();
         return writer;
     };
 
@@ -237,40 +292,55 @@ $root.Node = (function() {
             var tag = reader.uint32();
             switch (tag >>> 3) {
             case 1:
-                message.newTx = $root.NewTx.decode(reader, reader.uint32());
+                message.status = $root.Status.decode(reader, reader.uint32());
                 break;
             case 2:
-                message.newBlock = $root.NewBlock.decode(reader, reader.uint32());
-                break;
-            case 3:
-                message.getHeaders = $root.GetHeaders.decode(reader, reader.uint32());
-                break;
-            case 4:
-                message.getHeadersReturn = $root.GetHeadersReturn.decode(reader, reader.uint32());
-                break;
-            case 5:
-                message.getBlocks = $root.GetBlocks.decode(reader, reader.uint32());
-                break;
-            case 6:
-                message.getBlocksReturn = $root.GetBlocksReturn.decode(reader, reader.uint32());
-                break;
-            case 7:
-                message.getBlocksByRange = $root.GetBlocksByRange.decode(reader, reader.uint32());
-                break;
-            case 8:
-                message.getBlocksByRangeReturn = $root.GetBlocksByRangeReturn.decode(reader, reader.uint32());
-                break;
-            case 9:
-                message.getHeadersByRange = $root.GetHeadersByRange.decode(reader, reader.uint32());
-                break;
-            case 10:
-                message.getHeadersByRangeReturn = $root.GetHeadersByRangeReturn.decode(reader, reader.uint32());
-                break;
-            case 11:
                 message.ping = $root.Ping.decode(reader, reader.uint32());
                 break;
+            case 3:
+                message.pingReturn = $root.PingReturn.decode(reader, reader.uint32());
+                break;
+            case 4:
+                message.putTx = $root.PutTx.decode(reader, reader.uint32());
+                break;
+            case 5:
+                message.putTxReturn = $root.PutTxReturn.decode(reader, reader.uint32());
+                break;
+            case 6:
+                message.getTxs = $root.GetTxs.decode(reader, reader.uint32());
+                break;
+            case 7:
+                message.getTxsReturn = $root.GetTxsReturn.decode(reader, reader.uint32());
+                break;
+            case 8:
+                message.putBlock = $root.PutBlock.decode(reader, reader.uint32());
+                break;
+            case 9:
+                message.putBlockReturn = $root.PutBlockReturn.decode(reader, reader.uint32());
+                break;
+            case 10:
+                message.getBlocksByHash = $root.GetBlocksByHash.decode(reader, reader.uint32());
+                break;
+            case 11:
+                message.getBlocksByHashReturn = $root.GetBlocksByHashReturn.decode(reader, reader.uint32());
+                break;
             case 12:
-                message.pingResponse = $root.PingReturn.decode(reader, reader.uint32());
+                message.getHeadersByHash = $root.GetHeadersByHash.decode(reader, reader.uint32());
+                break;
+            case 13:
+                message.getHeadersByHashReturn = $root.GetHeadersByHashReturn.decode(reader, reader.uint32());
+                break;
+            case 14:
+                message.getBlocksByRange = $root.GetBlocksByRange.decode(reader, reader.uint32());
+                break;
+            case 15:
+                message.getBlocksByRangeReturn = $root.GetBlocksByRangeReturn.decode(reader, reader.uint32());
+                break;
+            case 16:
+                message.getHeadersByRange = $root.GetHeadersByRange.decode(reader, reader.uint32());
+                break;
+            case 17:
+                message.getHeadersByRangeReturn = $root.GetHeadersByRangeReturn.decode(reader, reader.uint32());
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -308,62 +378,132 @@ $root.Node = (function() {
         if (typeof message !== "object" || message === null)
             return "object expected";
         var properties = {};
-        if (message.newTx != null && message.hasOwnProperty("newTx")) {
+        if (message.status != null && message.hasOwnProperty("status")) {
             properties.request = 1;
             {
-                var error = $root.NewTx.verify(message.newTx);
+                var error = $root.Status.verify(message.status);
                 if (error)
-                    return "newTx." + error;
+                    return "status." + error;
             }
         }
-        if (message.newBlock != null && message.hasOwnProperty("newBlock")) {
+        if (message.ping != null && message.hasOwnProperty("ping")) {
             if (properties.request === 1)
                 return "request: multiple values";
             properties.request = 1;
             {
-                var error = $root.NewBlock.verify(message.newBlock);
+                var error = $root.Ping.verify(message.ping);
                 if (error)
-                    return "newBlock." + error;
+                    return "ping." + error;
             }
         }
-        if (message.getHeaders != null && message.hasOwnProperty("getHeaders")) {
+        if (message.pingReturn != null && message.hasOwnProperty("pingReturn")) {
             if (properties.request === 1)
                 return "request: multiple values";
             properties.request = 1;
             {
-                var error = $root.GetHeaders.verify(message.getHeaders);
+                var error = $root.PingReturn.verify(message.pingReturn);
                 if (error)
-                    return "getHeaders." + error;
+                    return "pingReturn." + error;
             }
         }
-        if (message.getHeadersReturn != null && message.hasOwnProperty("getHeadersReturn")) {
+        if (message.putTx != null && message.hasOwnProperty("putTx")) {
             if (properties.request === 1)
                 return "request: multiple values";
             properties.request = 1;
             {
-                var error = $root.GetHeadersReturn.verify(message.getHeadersReturn);
+                var error = $root.PutTx.verify(message.putTx);
                 if (error)
-                    return "getHeadersReturn." + error;
+                    return "putTx." + error;
             }
         }
-        if (message.getBlocks != null && message.hasOwnProperty("getBlocks")) {
+        if (message.putTxReturn != null && message.hasOwnProperty("putTxReturn")) {
             if (properties.request === 1)
                 return "request: multiple values";
             properties.request = 1;
             {
-                var error = $root.GetBlocks.verify(message.getBlocks);
+                var error = $root.PutTxReturn.verify(message.putTxReturn);
                 if (error)
-                    return "getBlocks." + error;
+                    return "putTxReturn." + error;
             }
         }
-        if (message.getBlocksReturn != null && message.hasOwnProperty("getBlocksReturn")) {
+        if (message.getTxs != null && message.hasOwnProperty("getTxs")) {
             if (properties.request === 1)
                 return "request: multiple values";
             properties.request = 1;
             {
-                var error = $root.GetBlocksReturn.verify(message.getBlocksReturn);
+                var error = $root.GetTxs.verify(message.getTxs);
                 if (error)
-                    return "getBlocksReturn." + error;
+                    return "getTxs." + error;
+            }
+        }
+        if (message.getTxsReturn != null && message.hasOwnProperty("getTxsReturn")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.GetTxsReturn.verify(message.getTxsReturn);
+                if (error)
+                    return "getTxsReturn." + error;
+            }
+        }
+        if (message.putBlock != null && message.hasOwnProperty("putBlock")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.PutBlock.verify(message.putBlock);
+                if (error)
+                    return "putBlock." + error;
+            }
+        }
+        if (message.putBlockReturn != null && message.hasOwnProperty("putBlockReturn")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.PutBlockReturn.verify(message.putBlockReturn);
+                if (error)
+                    return "putBlockReturn." + error;
+            }
+        }
+        if (message.getBlocksByHash != null && message.hasOwnProperty("getBlocksByHash")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.GetBlocksByHash.verify(message.getBlocksByHash);
+                if (error)
+                    return "getBlocksByHash." + error;
+            }
+        }
+        if (message.getBlocksByHashReturn != null && message.hasOwnProperty("getBlocksByHashReturn")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.GetBlocksByHashReturn.verify(message.getBlocksByHashReturn);
+                if (error)
+                    return "getBlocksByHashReturn." + error;
+            }
+        }
+        if (message.getHeadersByHash != null && message.hasOwnProperty("getHeadersByHash")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.GetHeadersByHash.verify(message.getHeadersByHash);
+                if (error)
+                    return "getHeadersByHash." + error;
+            }
+        }
+        if (message.getHeadersByHashReturn != null && message.hasOwnProperty("getHeadersByHashReturn")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.GetHeadersByHashReturn.verify(message.getHeadersByHashReturn);
+                if (error)
+                    return "getHeadersByHashReturn." + error;
             }
         }
         if (message.getBlocksByRange != null && message.hasOwnProperty("getBlocksByRange")) {
@@ -406,26 +546,6 @@ $root.Node = (function() {
                     return "getHeadersByRangeReturn." + error;
             }
         }
-        if (message.ping != null && message.hasOwnProperty("ping")) {
-            if (properties.request === 1)
-                return "request: multiple values";
-            properties.request = 1;
-            {
-                var error = $root.Ping.verify(message.ping);
-                if (error)
-                    return "ping." + error;
-            }
-        }
-        if (message.pingResponse != null && message.hasOwnProperty("pingResponse")) {
-            if (properties.request === 1)
-                return "request: multiple values";
-            properties.request = 1;
-            {
-                var error = $root.PingReturn.verify(message.pingResponse);
-                if (error)
-                    return "pingResponse." + error;
-            }
-        }
         return null;
     };
 
@@ -441,35 +561,70 @@ $root.Node = (function() {
         if (object instanceof $root.Node)
             return object;
         var message = new $root.Node();
-        if (object.newTx != null) {
-            if (typeof object.newTx !== "object")
-                throw TypeError(".Node.newTx: object expected");
-            message.newTx = $root.NewTx.fromObject(object.newTx);
+        if (object.status != null) {
+            if (typeof object.status !== "object")
+                throw TypeError(".Node.status: object expected");
+            message.status = $root.Status.fromObject(object.status);
         }
-        if (object.newBlock != null) {
-            if (typeof object.newBlock !== "object")
-                throw TypeError(".Node.newBlock: object expected");
-            message.newBlock = $root.NewBlock.fromObject(object.newBlock);
+        if (object.ping != null) {
+            if (typeof object.ping !== "object")
+                throw TypeError(".Node.ping: object expected");
+            message.ping = $root.Ping.fromObject(object.ping);
         }
-        if (object.getHeaders != null) {
-            if (typeof object.getHeaders !== "object")
-                throw TypeError(".Node.getHeaders: object expected");
-            message.getHeaders = $root.GetHeaders.fromObject(object.getHeaders);
+        if (object.pingReturn != null) {
+            if (typeof object.pingReturn !== "object")
+                throw TypeError(".Node.pingReturn: object expected");
+            message.pingReturn = $root.PingReturn.fromObject(object.pingReturn);
         }
-        if (object.getHeadersReturn != null) {
-            if (typeof object.getHeadersReturn !== "object")
-                throw TypeError(".Node.getHeadersReturn: object expected");
-            message.getHeadersReturn = $root.GetHeadersReturn.fromObject(object.getHeadersReturn);
+        if (object.putTx != null) {
+            if (typeof object.putTx !== "object")
+                throw TypeError(".Node.putTx: object expected");
+            message.putTx = $root.PutTx.fromObject(object.putTx);
         }
-        if (object.getBlocks != null) {
-            if (typeof object.getBlocks !== "object")
-                throw TypeError(".Node.getBlocks: object expected");
-            message.getBlocks = $root.GetBlocks.fromObject(object.getBlocks);
+        if (object.putTxReturn != null) {
+            if (typeof object.putTxReturn !== "object")
+                throw TypeError(".Node.putTxReturn: object expected");
+            message.putTxReturn = $root.PutTxReturn.fromObject(object.putTxReturn);
         }
-        if (object.getBlocksReturn != null) {
-            if (typeof object.getBlocksReturn !== "object")
-                throw TypeError(".Node.getBlocksReturn: object expected");
-            message.getBlocksReturn = $root.GetBlocksReturn.fromObject(object.getBlocksReturn);
+        if (object.getTxs != null) {
+            if (typeof object.getTxs !== "object")
+                throw TypeError(".Node.getTxs: object expected");
+            message.getTxs = $root.GetTxs.fromObject(object.getTxs);
+        }
+        if (object.getTxsReturn != null) {
+            if (typeof object.getTxsReturn !== "object")
+                throw TypeError(".Node.getTxsReturn: object expected");
+            message.getTxsReturn = $root.GetTxsReturn.fromObject(object.getTxsReturn);
+        }
+        if (object.putBlock != null) {
+            if (typeof object.putBlock !== "object")
+                throw TypeError(".Node.putBlock: object expected");
+            message.putBlock = $root.PutBlock.fromObject(object.putBlock);
+        }
+        if (object.putBlockReturn != null) {
+            if (typeof object.putBlockReturn !== "object")
+                throw TypeError(".Node.putBlockReturn: object expected");
+            message.putBlockReturn = $root.PutBlockReturn.fromObject(object.putBlockReturn);
+        }
+        if (object.getBlocksByHash != null) {
+            if (typeof object.getBlocksByHash !== "object")
+                throw TypeError(".Node.getBlocksByHash: object expected");
+            message.getBlocksByHash = $root.GetBlocksByHash.fromObject(object.getBlocksByHash);
+        }
+        if (object.getBlocksByHashReturn != null) {
+            if (typeof object.getBlocksByHashReturn !== "object")
+                throw TypeError(".Node.getBlocksByHashReturn: object expected");
+            message.getBlocksByHashReturn = $root.GetBlocksByHashReturn.fromObject(object.getBlocksByHashReturn);
+        }
+        if (object.getHeadersByHash != null) {
+            if (typeof object.getHeadersByHash !== "object")
+                throw TypeError(".Node.getHeadersByHash: object expected");
+            message.getHeadersByHash = $root.GetHeadersByHash.fromObject(object.getHeadersByHash);
+        }
+        if (object.getHeadersByHashReturn != null) {
+            if (typeof object.getHeadersByHashReturn !== "object")
+                throw TypeError(".Node.getHeadersByHashReturn: object expected");
+            message.getHeadersByHashReturn = $root.GetHeadersByHashReturn.fromObject(object.getHeadersByHashReturn);
         }
         if (object.getBlocksByRange != null) {
             if (typeof object.getBlocksByRange !== "object")
@@ -491,16 +646,6 @@ $root.Node = (function() {
                 throw TypeError(".Node.getHeadersByRangeReturn: object expected");
             message.getHeadersByRangeReturn = $root.GetHeadersByRangeReturn.fromObject(object.getHeadersByRangeReturn);
         }
-        if (object.ping != null) {
-            if (typeof object.ping !== "object")
-                throw TypeError(".Node.ping: object expected");
-            message.ping = $root.Ping.fromObject(object.ping);
-        }
-        if (object.pingResponse != null) {
-            if (typeof object.pingResponse !== "object")
-                throw TypeError(".Node.pingResponse: object expected");
-            message.pingResponse = $root.PingReturn.fromObject(object.pingResponse);
-        }
         return message;
     };
 
@@ -517,35 +662,70 @@ $root.Node = (function() {
         if (!options)
             options = {};
         var object = {};
-        if (message.newTx != null && message.hasOwnProperty("newTx")) {
-            object.newTx = $root.NewTx.toObject(message.newTx, options);
+        if (message.status != null && message.hasOwnProperty("status")) {
+            object.status = $root.Status.toObject(message.status, options);
             if (options.oneofs)
-                object.request = "newTx";
+                object.request = "status";
         }
-        if (message.newBlock != null && message.hasOwnProperty("newBlock")) {
-            object.newBlock = $root.NewBlock.toObject(message.newBlock, options);
+        if (message.ping != null && message.hasOwnProperty("ping")) {
+            object.ping = $root.Ping.toObject(message.ping, options);
             if (options.oneofs)
-                object.request = "newBlock";
+                object.request = "ping";
         }
-        if (message.getHeaders != null && message.hasOwnProperty("getHeaders")) {
-            object.getHeaders = $root.GetHeaders.toObject(message.getHeaders, options);
+        if (message.pingReturn != null && message.hasOwnProperty("pingReturn")) {
+            object.pingReturn = $root.PingReturn.toObject(message.pingReturn, options);
             if (options.oneofs)
-                object.request = "getHeaders";
+                object.request = "pingReturn";
         }
-        if (message.getHeadersReturn != null && message.hasOwnProperty("getHeadersReturn")) {
-            object.getHeadersReturn = $root.GetHeadersReturn.toObject(message.getHeadersReturn, options);
+        if (message.putTx != null && message.hasOwnProperty("putTx")) {
+            object.putTx = $root.PutTx.toObject(message.putTx, options);
             if (options.oneofs)
-                object.request = "getHeadersReturn";
+                object.request = "putTx";
         }
-        if (message.getBlocks != null && message.hasOwnProperty("getBlocks")) {
-            object.getBlocks = $root.GetBlocks.toObject(message.getBlocks, options);
+        if (message.putTxReturn != null && message.hasOwnProperty("putTxReturn")) {
+            object.putTxReturn = $root.PutTxReturn.toObject(message.putTxReturn, options);
             if (options.oneofs)
-                object.request = "getBlocks";
+                object.request = "putTxReturn";
         }
-        if (message.getBlocksReturn != null && message.hasOwnProperty("getBlocksReturn")) {
-            object.getBlocksReturn = $root.GetBlocksReturn.toObject(message.getBlocksReturn, options);
+        if (message.getTxs != null && message.hasOwnProperty("getTxs")) {
+            object.getTxs = $root.GetTxs.toObject(message.getTxs, options);
             if (options.oneofs)
-                object.request = "getBlocksReturn";
+                object.request = "getTxs";
+        }
+        if (message.getTxsReturn != null && message.hasOwnProperty("getTxsReturn")) {
+            object.getTxsReturn = $root.GetTxsReturn.toObject(message.getTxsReturn, options);
+            if (options.oneofs)
+                object.request = "getTxsReturn";
+        }
+        if (message.putBlock != null && message.hasOwnProperty("putBlock")) {
+            object.putBlock = $root.PutBlock.toObject(message.putBlock, options);
+            if (options.oneofs)
+                object.request = "putBlock";
+        }
+        if (message.putBlockReturn != null && message.hasOwnProperty("putBlockReturn")) {
+            object.putBlockReturn = $root.PutBlockReturn.toObject(message.putBlockReturn, options);
+            if (options.oneofs)
+                object.request = "putBlockReturn";
+        }
+        if (message.getBlocksByHash != null && message.hasOwnProperty("getBlocksByHash")) {
+            object.getBlocksByHash = $root.GetBlocksByHash.toObject(message.getBlocksByHash, options);
+            if (options.oneofs)
+                object.request = "getBlocksByHash";
+        }
+        if (message.getBlocksByHashReturn != null && message.hasOwnProperty("getBlocksByHashReturn")) {
+            object.getBlocksByHashReturn = $root.GetBlocksByHashReturn.toObject(message.getBlocksByHashReturn, options);
+            if (options.oneofs)
+                object.request = "getBlocksByHashReturn";
+        }
+        if (message.getHeadersByHash != null && message.hasOwnProperty("getHeadersByHash")) {
+            object.getHeadersByHash = $root.GetHeadersByHash.toObject(message.getHeadersByHash, options);
+            if (options.oneofs)
+                object.request = "getHeadersByHash";
+        }
+        if (message.getHeadersByHashReturn != null && message.hasOwnProperty("getHeadersByHashReturn")) {
+            object.getHeadersByHashReturn = $root.GetHeadersByHashReturn.toObject(message.getHeadersByHashReturn, options);
+            if (options.oneofs)
+                object.request = "getHeadersByHashReturn";
         }
         if (message.getBlocksByRange != null && message.hasOwnProperty("getBlocksByRange")) {
             object.getBlocksByRange = $root.GetBlocksByRange.toObject(message.getBlocksByRange, options);
@@ -567,16 +747,6 @@ $root.Node = (function() {
             if (options.oneofs)
                 object.request = "getHeadersByRangeReturn";
         }
-        if (message.ping != null && message.hasOwnProperty("ping")) {
-            object.ping = $root.Ping.toObject(message.ping, options);
-            if (options.oneofs)
-                object.request = "ping";
-        }
-        if (message.pingResponse != null && message.hasOwnProperty("pingResponse")) {
-            object.pingResponse = $root.PingReturn.toObject(message.pingResponse, options);
-            if (options.oneofs)
-                object.request = "pingResponse";
-        }
         return object;
     };
 
@@ -592,6 +762,255 @@ $root.Node = (function() {
     };
 
     return Node;
+})();
+
+$root.Status = (function() {
+
+    /**
+     * Properties of a Status.
+     * @exports IStatus
+     * @interface IStatus
+     * @property {number|Long|null} [version] Status version
+     * @property {string|null} [networkid] Status networkid
+     * @property {Uint8Array|null} [hash] Status hash
+     */
+
+    /**
+     * Constructs a new Status.
+     * @exports Status
+     * @classdesc Represents a Status.
+     * @implements IStatus
+     * @constructor
+     * @param {IStatus=} [properties] Properties to set
+     */
+    function Status(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * Status version.
+     * @member {number|Long} version
+     * @memberof Status
+     * @instance
+     */
+    Status.prototype.version = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+    /**
+     * Status networkid.
+     * @member {string} networkid
+     * @memberof Status
+     * @instance
+     */
+    Status.prototype.networkid = "";
+
+    /**
+     * Status hash.
+     * @member {Uint8Array} hash
+     * @memberof Status
+     * @instance
+     */
+    Status.prototype.hash = $util.newBuffer([]);
+
+    /**
+     * Creates a new Status instance using the specified properties.
+     * @function create
+     * @memberof Status
+     * @static
+     * @param {IStatus=} [properties] Properties to set
+     * @returns {Status} Status instance
+     */
+    Status.create = function create(properties) {
+        return new Status(properties);
+    };
+
+    /**
+     * Encodes the specified Status message. Does not implicitly {@link Status.verify|verify} messages.
+     * @function encode
+     * @memberof Status
+     * @static
+     * @param {IStatus} message Status message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Status.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.version != null && message.hasOwnProperty("version"))
+            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.version);
+        if (message.networkid != null && message.hasOwnProperty("networkid"))
+            writer.uint32(/* id 2, wireType 2 =*/18).string(message.networkid);
+        if (message.hash != null && message.hasOwnProperty("hash"))
+            writer.uint32(/* id 3, wireType 2 =*/26).bytes(message.hash);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified Status message, length delimited. Does not implicitly {@link Status.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof Status
+     * @static
+     * @param {IStatus} message Status message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Status.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a Status message from the specified reader or buffer.
+     * @function decode
+     * @memberof Status
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {Status} Status
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Status.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.Status();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.version = reader.int64();
+                break;
+            case 2:
+                message.networkid = reader.string();
+                break;
+            case 3:
+                message.hash = reader.bytes();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a Status message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof Status
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {Status} Status
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Status.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a Status message.
+     * @function verify
+     * @memberof Status
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    Status.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.version != null && message.hasOwnProperty("version"))
+            if (!$util.isInteger(message.version) && !(message.version && $util.isInteger(message.version.low) && $util.isInteger(message.version.high)))
+                return "version: integer|Long expected";
+        if (message.networkid != null && message.hasOwnProperty("networkid"))
+            if (!$util.isString(message.networkid))
+                return "networkid: string expected";
+        if (message.hash != null && message.hasOwnProperty("hash"))
+            if (!(message.hash && typeof message.hash.length === "number" || $util.isString(message.hash)))
+                return "hash: buffer expected";
+        return null;
+    };
+
+    /**
+     * Creates a Status message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof Status
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {Status} Status
+     */
+    Status.fromObject = function fromObject(object) {
+        if (object instanceof $root.Status)
+            return object;
+        var message = new $root.Status();
+        if (object.version != null)
+            if ($util.Long)
+                (message.version = $util.Long.fromValue(object.version)).unsigned = false;
+            else if (typeof object.version === "string")
+                message.version = parseInt(object.version, 10);
+            else if (typeof object.version === "number")
+                message.version = object.version;
+            else if (typeof object.version === "object")
+                message.version = new $util.LongBits(object.version.low >>> 0, object.version.high >>> 0).toNumber();
+        if (object.networkid != null)
+            message.networkid = String(object.networkid);
+        if (object.hash != null)
+            if (typeof object.hash === "string")
+                $util.base64.decode(object.hash, message.hash = $util.newBuffer($util.base64.length(object.hash)), 0);
+            else if (object.hash.length)
+                message.hash = object.hash;
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a Status message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof Status
+     * @static
+     * @param {Status} message Status
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    Status.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults) {
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, false);
+                object.version = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.version = options.longs === String ? "0" : 0;
+            object.networkid = "";
+            object.hash = options.bytes === String ? "" : [];
+        }
+        if (message.version != null && message.hasOwnProperty("version"))
+            if (typeof message.version === "number")
+                object.version = options.longs === String ? String(message.version) : message.version;
+            else
+                object.version = options.longs === String ? $util.Long.prototype.toString.call(message.version) : options.longs === Number ? new $util.LongBits(message.version.low >>> 0, message.version.high >>> 0).toNumber() : message.version;
+        if (message.networkid != null && message.hasOwnProperty("networkid"))
+            object.networkid = message.networkid;
+        if (message.hash != null && message.hasOwnProperty("hash"))
+            object.hash = options.bytes === String ? $util.base64.encode(message.hash, 0, message.hash.length) : options.bytes === Array ? Array.prototype.slice.call(message.hash) : message.hash;
+        return object;
+    };
+
+    /**
+     * Converts this Status to JSON.
+     * @function toJSON
+     * @memberof Status
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    Status.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return Status;
 })();
 
 $root.Ping = (function() {
@@ -994,6 +1413,1228 @@ $root.PingReturn = (function() {
     };
 
     return PingReturn;
+})();
+
+$root.PutTx = (function() {
+
+    /**
+     * Properties of a PutTx.
+     * @exports IPutTx
+     * @interface IPutTx
+     * @property {Array.<ITx>|null} [txs] PutTx txs
+     */
+
+    /**
+     * Constructs a new PutTx.
+     * @exports PutTx
+     * @classdesc Represents a PutTx.
+     * @implements IPutTx
+     * @constructor
+     * @param {IPutTx=} [properties] Properties to set
+     */
+    function PutTx(properties) {
+        this.txs = [];
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * PutTx txs.
+     * @member {Array.<ITx>} txs
+     * @memberof PutTx
+     * @instance
+     */
+    PutTx.prototype.txs = $util.emptyArray;
+
+    /**
+     * Creates a new PutTx instance using the specified properties.
+     * @function create
+     * @memberof PutTx
+     * @static
+     * @param {IPutTx=} [properties] Properties to set
+     * @returns {PutTx} PutTx instance
+     */
+    PutTx.create = function create(properties) {
+        return new PutTx(properties);
+    };
+
+    /**
+     * Encodes the specified PutTx message. Does not implicitly {@link PutTx.verify|verify} messages.
+     * @function encode
+     * @memberof PutTx
+     * @static
+     * @param {IPutTx} message PutTx message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    PutTx.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.txs != null && message.txs.length)
+            for (var i = 0; i < message.txs.length; ++i)
+                $root.Tx.encode(message.txs[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified PutTx message, length delimited. Does not implicitly {@link PutTx.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof PutTx
+     * @static
+     * @param {IPutTx} message PutTx message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    PutTx.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a PutTx message from the specified reader or buffer.
+     * @function decode
+     * @memberof PutTx
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {PutTx} PutTx
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    PutTx.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.PutTx();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                if (!(message.txs && message.txs.length))
+                    message.txs = [];
+                message.txs.push($root.Tx.decode(reader, reader.uint32()));
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a PutTx message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof PutTx
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {PutTx} PutTx
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    PutTx.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a PutTx message.
+     * @function verify
+     * @memberof PutTx
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    PutTx.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.txs != null && message.hasOwnProperty("txs")) {
+            if (!Array.isArray(message.txs))
+                return "txs: array expected";
+            for (var i = 0; i < message.txs.length; ++i) {
+                var error = $root.Tx.verify(message.txs[i]);
+                if (error)
+                    return "txs." + error;
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Creates a PutTx message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof PutTx
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {PutTx} PutTx
+     */
+    PutTx.fromObject = function fromObject(object) {
+        if (object instanceof $root.PutTx)
+            return object;
+        var message = new $root.PutTx();
+        if (object.txs) {
+            if (!Array.isArray(object.txs))
+                throw TypeError(".PutTx.txs: array expected");
+            message.txs = [];
+            for (var i = 0; i < object.txs.length; ++i) {
+                if (typeof object.txs[i] !== "object")
+                    throw TypeError(".PutTx.txs: object expected");
+                message.txs[i] = $root.Tx.fromObject(object.txs[i]);
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a PutTx message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof PutTx
+     * @static
+     * @param {PutTx} message PutTx
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    PutTx.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.arrays || options.defaults)
+            object.txs = [];
+        if (message.txs && message.txs.length) {
+            object.txs = [];
+            for (var j = 0; j < message.txs.length; ++j)
+                object.txs[j] = $root.Tx.toObject(message.txs[j], options);
+        }
+        return object;
+    };
+
+    /**
+     * Converts this PutTx to JSON.
+     * @function toJSON
+     * @memberof PutTx
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    PutTx.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return PutTx;
+})();
+
+$root.PutTxReturn = (function() {
+
+    /**
+     * Properties of a PutTxReturn.
+     * @exports IPutTxReturn
+     * @interface IPutTxReturn
+     * @property {boolean|null} [success] PutTxReturn success
+     */
+
+    /**
+     * Constructs a new PutTxReturn.
+     * @exports PutTxReturn
+     * @classdesc Represents a PutTxReturn.
+     * @implements IPutTxReturn
+     * @constructor
+     * @param {IPutTxReturn=} [properties] Properties to set
+     */
+    function PutTxReturn(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * PutTxReturn success.
+     * @member {boolean} success
+     * @memberof PutTxReturn
+     * @instance
+     */
+    PutTxReturn.prototype.success = false;
+
+    /**
+     * Creates a new PutTxReturn instance using the specified properties.
+     * @function create
+     * @memberof PutTxReturn
+     * @static
+     * @param {IPutTxReturn=} [properties] Properties to set
+     * @returns {PutTxReturn} PutTxReturn instance
+     */
+    PutTxReturn.create = function create(properties) {
+        return new PutTxReturn(properties);
+    };
+
+    /**
+     * Encodes the specified PutTxReturn message. Does not implicitly {@link PutTxReturn.verify|verify} messages.
+     * @function encode
+     * @memberof PutTxReturn
+     * @static
+     * @param {IPutTxReturn} message PutTxReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    PutTxReturn.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.success != null && message.hasOwnProperty("success"))
+            writer.uint32(/* id 1, wireType 0 =*/8).bool(message.success);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified PutTxReturn message, length delimited. Does not implicitly {@link PutTxReturn.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof PutTxReturn
+     * @static
+     * @param {IPutTxReturn} message PutTxReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    PutTxReturn.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a PutTxReturn message from the specified reader or buffer.
+     * @function decode
+     * @memberof PutTxReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {PutTxReturn} PutTxReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    PutTxReturn.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.PutTxReturn();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.success = reader.bool();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a PutTxReturn message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof PutTxReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {PutTxReturn} PutTxReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    PutTxReturn.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a PutTxReturn message.
+     * @function verify
+     * @memberof PutTxReturn
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    PutTxReturn.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.success != null && message.hasOwnProperty("success"))
+            if (typeof message.success !== "boolean")
+                return "success: boolean expected";
+        return null;
+    };
+
+    /**
+     * Creates a PutTxReturn message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof PutTxReturn
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {PutTxReturn} PutTxReturn
+     */
+    PutTxReturn.fromObject = function fromObject(object) {
+        if (object instanceof $root.PutTxReturn)
+            return object;
+        var message = new $root.PutTxReturn();
+        if (object.success != null)
+            message.success = Boolean(object.success);
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a PutTxReturn message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof PutTxReturn
+     * @static
+     * @param {PutTxReturn} message PutTxReturn
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    PutTxReturn.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults)
+            object.success = false;
+        if (message.success != null && message.hasOwnProperty("success"))
+            object.success = message.success;
+        return object;
+    };
+
+    /**
+     * Converts this PutTxReturn to JSON.
+     * @function toJSON
+     * @memberof PutTxReturn
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    PutTxReturn.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return PutTxReturn;
+})();
+
+$root.GetTxs = (function() {
+
+    /**
+     * Properties of a GetTxs.
+     * @exports IGetTxs
+     * @interface IGetTxs
+     * @property {number|Long|null} [minFee] GetTxs minFee
+     */
+
+    /**
+     * Constructs a new GetTxs.
+     * @exports GetTxs
+     * @classdesc Represents a GetTxs.
+     * @implements IGetTxs
+     * @constructor
+     * @param {IGetTxs=} [properties] Properties to set
+     */
+    function GetTxs(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * GetTxs minFee.
+     * @member {number|Long} minFee
+     * @memberof GetTxs
+     * @instance
+     */
+    GetTxs.prototype.minFee = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+    /**
+     * Creates a new GetTxs instance using the specified properties.
+     * @function create
+     * @memberof GetTxs
+     * @static
+     * @param {IGetTxs=} [properties] Properties to set
+     * @returns {GetTxs} GetTxs instance
+     */
+    GetTxs.create = function create(properties) {
+        return new GetTxs(properties);
+    };
+
+    /**
+     * Encodes the specified GetTxs message. Does not implicitly {@link GetTxs.verify|verify} messages.
+     * @function encode
+     * @memberof GetTxs
+     * @static
+     * @param {IGetTxs} message GetTxs message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetTxs.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.minFee != null && message.hasOwnProperty("minFee"))
+            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.minFee);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified GetTxs message, length delimited. Does not implicitly {@link GetTxs.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof GetTxs
+     * @static
+     * @param {IGetTxs} message GetTxs message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetTxs.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a GetTxs message from the specified reader or buffer.
+     * @function decode
+     * @memberof GetTxs
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {GetTxs} GetTxs
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetTxs.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetTxs();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.minFee = reader.int64();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a GetTxs message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof GetTxs
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {GetTxs} GetTxs
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetTxs.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a GetTxs message.
+     * @function verify
+     * @memberof GetTxs
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    GetTxs.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.minFee != null && message.hasOwnProperty("minFee"))
+            if (!$util.isInteger(message.minFee) && !(message.minFee && $util.isInteger(message.minFee.low) && $util.isInteger(message.minFee.high)))
+                return "minFee: integer|Long expected";
+        return null;
+    };
+
+    /**
+     * Creates a GetTxs message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof GetTxs
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {GetTxs} GetTxs
+     */
+    GetTxs.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetTxs)
+            return object;
+        var message = new $root.GetTxs();
+        if (object.minFee != null)
+            if ($util.Long)
+                (message.minFee = $util.Long.fromValue(object.minFee)).unsigned = false;
+            else if (typeof object.minFee === "string")
+                message.minFee = parseInt(object.minFee, 10);
+            else if (typeof object.minFee === "number")
+                message.minFee = object.minFee;
+            else if (typeof object.minFee === "object")
+                message.minFee = new $util.LongBits(object.minFee.low >>> 0, object.minFee.high >>> 0).toNumber();
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a GetTxs message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof GetTxs
+     * @static
+     * @param {GetTxs} message GetTxs
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    GetTxs.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults)
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, false);
+                object.minFee = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.minFee = options.longs === String ? "0" : 0;
+        if (message.minFee != null && message.hasOwnProperty("minFee"))
+            if (typeof message.minFee === "number")
+                object.minFee = options.longs === String ? String(message.minFee) : message.minFee;
+            else
+                object.minFee = options.longs === String ? $util.Long.prototype.toString.call(message.minFee) : options.longs === Number ? new $util.LongBits(message.minFee.low >>> 0, message.minFee.high >>> 0).toNumber() : message.minFee;
+        return object;
+    };
+
+    /**
+     * Converts this GetTxs to JSON.
+     * @function toJSON
+     * @memberof GetTxs
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    GetTxs.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return GetTxs;
+})();
+
+$root.GetTxsReturn = (function() {
+
+    /**
+     * Properties of a GetTxsReturn.
+     * @exports IGetTxsReturn
+     * @interface IGetTxsReturn
+     * @property {boolean|null} [success] GetTxsReturn success
+     * @property {Array.<ITx>|null} [txs] GetTxsReturn txs
+     */
+
+    /**
+     * Constructs a new GetTxsReturn.
+     * @exports GetTxsReturn
+     * @classdesc Represents a GetTxsReturn.
+     * @implements IGetTxsReturn
+     * @constructor
+     * @param {IGetTxsReturn=} [properties] Properties to set
+     */
+    function GetTxsReturn(properties) {
+        this.txs = [];
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * GetTxsReturn success.
+     * @member {boolean} success
+     * @memberof GetTxsReturn
+     * @instance
+     */
+    GetTxsReturn.prototype.success = false;
+
+    /**
+     * GetTxsReturn txs.
+     * @member {Array.<ITx>} txs
+     * @memberof GetTxsReturn
+     * @instance
+     */
+    GetTxsReturn.prototype.txs = $util.emptyArray;
+
+    /**
+     * Creates a new GetTxsReturn instance using the specified properties.
+     * @function create
+     * @memberof GetTxsReturn
+     * @static
+     * @param {IGetTxsReturn=} [properties] Properties to set
+     * @returns {GetTxsReturn} GetTxsReturn instance
+     */
+    GetTxsReturn.create = function create(properties) {
+        return new GetTxsReturn(properties);
+    };
+
+    /**
+     * Encodes the specified GetTxsReturn message. Does not implicitly {@link GetTxsReturn.verify|verify} messages.
+     * @function encode
+     * @memberof GetTxsReturn
+     * @static
+     * @param {IGetTxsReturn} message GetTxsReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetTxsReturn.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.success != null && message.hasOwnProperty("success"))
+            writer.uint32(/* id 1, wireType 0 =*/8).bool(message.success);
+        if (message.txs != null && message.txs.length)
+            for (var i = 0; i < message.txs.length; ++i)
+                $root.Tx.encode(message.txs[i], writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified GetTxsReturn message, length delimited. Does not implicitly {@link GetTxsReturn.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof GetTxsReturn
+     * @static
+     * @param {IGetTxsReturn} message GetTxsReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetTxsReturn.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a GetTxsReturn message from the specified reader or buffer.
+     * @function decode
+     * @memberof GetTxsReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {GetTxsReturn} GetTxsReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetTxsReturn.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetTxsReturn();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.success = reader.bool();
+                break;
+            case 2:
+                if (!(message.txs && message.txs.length))
+                    message.txs = [];
+                message.txs.push($root.Tx.decode(reader, reader.uint32()));
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a GetTxsReturn message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof GetTxsReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {GetTxsReturn} GetTxsReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetTxsReturn.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a GetTxsReturn message.
+     * @function verify
+     * @memberof GetTxsReturn
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    GetTxsReturn.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.success != null && message.hasOwnProperty("success"))
+            if (typeof message.success !== "boolean")
+                return "success: boolean expected";
+        if (message.txs != null && message.hasOwnProperty("txs")) {
+            if (!Array.isArray(message.txs))
+                return "txs: array expected";
+            for (var i = 0; i < message.txs.length; ++i) {
+                var error = $root.Tx.verify(message.txs[i]);
+                if (error)
+                    return "txs." + error;
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Creates a GetTxsReturn message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof GetTxsReturn
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {GetTxsReturn} GetTxsReturn
+     */
+    GetTxsReturn.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetTxsReturn)
+            return object;
+        var message = new $root.GetTxsReturn();
+        if (object.success != null)
+            message.success = Boolean(object.success);
+        if (object.txs) {
+            if (!Array.isArray(object.txs))
+                throw TypeError(".GetTxsReturn.txs: array expected");
+            message.txs = [];
+            for (var i = 0; i < object.txs.length; ++i) {
+                if (typeof object.txs[i] !== "object")
+                    throw TypeError(".GetTxsReturn.txs: object expected");
+                message.txs[i] = $root.Tx.fromObject(object.txs[i]);
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a GetTxsReturn message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof GetTxsReturn
+     * @static
+     * @param {GetTxsReturn} message GetTxsReturn
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    GetTxsReturn.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.arrays || options.defaults)
+            object.txs = [];
+        if (options.defaults)
+            object.success = false;
+        if (message.success != null && message.hasOwnProperty("success"))
+            object.success = message.success;
+        if (message.txs && message.txs.length) {
+            object.txs = [];
+            for (var j = 0; j < message.txs.length; ++j)
+                object.txs[j] = $root.Tx.toObject(message.txs[j], options);
+        }
+        return object;
+    };
+
+    /**
+     * Converts this GetTxsReturn to JSON.
+     * @function toJSON
+     * @memberof GetTxsReturn
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    GetTxsReturn.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return GetTxsReturn;
+})();
+
+$root.PutBlock = (function() {
+
+    /**
+     * Properties of a PutBlock.
+     * @exports IPutBlock
+     * @interface IPutBlock
+     * @property {Array.<IBlock>|null} [blocks] PutBlock blocks
+     */
+
+    /**
+     * Constructs a new PutBlock.
+     * @exports PutBlock
+     * @classdesc Represents a PutBlock.
+     * @implements IPutBlock
+     * @constructor
+     * @param {IPutBlock=} [properties] Properties to set
+     */
+    function PutBlock(properties) {
+        this.blocks = [];
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * PutBlock blocks.
+     * @member {Array.<IBlock>} blocks
+     * @memberof PutBlock
+     * @instance
+     */
+    PutBlock.prototype.blocks = $util.emptyArray;
+
+    /**
+     * Creates a new PutBlock instance using the specified properties.
+     * @function create
+     * @memberof PutBlock
+     * @static
+     * @param {IPutBlock=} [properties] Properties to set
+     * @returns {PutBlock} PutBlock instance
+     */
+    PutBlock.create = function create(properties) {
+        return new PutBlock(properties);
+    };
+
+    /**
+     * Encodes the specified PutBlock message. Does not implicitly {@link PutBlock.verify|verify} messages.
+     * @function encode
+     * @memberof PutBlock
+     * @static
+     * @param {IPutBlock} message PutBlock message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    PutBlock.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.blocks != null && message.blocks.length)
+            for (var i = 0; i < message.blocks.length; ++i)
+                $root.Block.encode(message.blocks[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified PutBlock message, length delimited. Does not implicitly {@link PutBlock.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof PutBlock
+     * @static
+     * @param {IPutBlock} message PutBlock message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    PutBlock.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a PutBlock message from the specified reader or buffer.
+     * @function decode
+     * @memberof PutBlock
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {PutBlock} PutBlock
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    PutBlock.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.PutBlock();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                if (!(message.blocks && message.blocks.length))
+                    message.blocks = [];
+                message.blocks.push($root.Block.decode(reader, reader.uint32()));
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a PutBlock message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof PutBlock
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {PutBlock} PutBlock
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    PutBlock.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a PutBlock message.
+     * @function verify
+     * @memberof PutBlock
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    PutBlock.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.blocks != null && message.hasOwnProperty("blocks")) {
+            if (!Array.isArray(message.blocks))
+                return "blocks: array expected";
+            for (var i = 0; i < message.blocks.length; ++i) {
+                var error = $root.Block.verify(message.blocks[i]);
+                if (error)
+                    return "blocks." + error;
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Creates a PutBlock message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof PutBlock
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {PutBlock} PutBlock
+     */
+    PutBlock.fromObject = function fromObject(object) {
+        if (object instanceof $root.PutBlock)
+            return object;
+        var message = new $root.PutBlock();
+        if (object.blocks) {
+            if (!Array.isArray(object.blocks))
+                throw TypeError(".PutBlock.blocks: array expected");
+            message.blocks = [];
+            for (var i = 0; i < object.blocks.length; ++i) {
+                if (typeof object.blocks[i] !== "object")
+                    throw TypeError(".PutBlock.blocks: object expected");
+                message.blocks[i] = $root.Block.fromObject(object.blocks[i]);
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a PutBlock message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof PutBlock
+     * @static
+     * @param {PutBlock} message PutBlock
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    PutBlock.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.arrays || options.defaults)
+            object.blocks = [];
+        if (message.blocks && message.blocks.length) {
+            object.blocks = [];
+            for (var j = 0; j < message.blocks.length; ++j)
+                object.blocks[j] = $root.Block.toObject(message.blocks[j], options);
+        }
+        return object;
+    };
+
+    /**
+     * Converts this PutBlock to JSON.
+     * @function toJSON
+     * @memberof PutBlock
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    PutBlock.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return PutBlock;
+})();
+
+$root.PutBlockReturn = (function() {
+
+    /**
+     * Properties of a PutBlockReturn.
+     * @exports IPutBlockReturn
+     * @interface IPutBlockReturn
+     * @property {boolean|null} [success] PutBlockReturn success
+     */
+
+    /**
+     * Constructs a new PutBlockReturn.
+     * @exports PutBlockReturn
+     * @classdesc Represents a PutBlockReturn.
+     * @implements IPutBlockReturn
+     * @constructor
+     * @param {IPutBlockReturn=} [properties] Properties to set
+     */
+    function PutBlockReturn(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * PutBlockReturn success.
+     * @member {boolean} success
+     * @memberof PutBlockReturn
+     * @instance
+     */
+    PutBlockReturn.prototype.success = false;
+
+    /**
+     * Creates a new PutBlockReturn instance using the specified properties.
+     * @function create
+     * @memberof PutBlockReturn
+     * @static
+     * @param {IPutBlockReturn=} [properties] Properties to set
+     * @returns {PutBlockReturn} PutBlockReturn instance
+     */
+    PutBlockReturn.create = function create(properties) {
+        return new PutBlockReturn(properties);
+    };
+
+    /**
+     * Encodes the specified PutBlockReturn message. Does not implicitly {@link PutBlockReturn.verify|verify} messages.
+     * @function encode
+     * @memberof PutBlockReturn
+     * @static
+     * @param {IPutBlockReturn} message PutBlockReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    PutBlockReturn.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.success != null && message.hasOwnProperty("success"))
+            writer.uint32(/* id 1, wireType 0 =*/8).bool(message.success);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified PutBlockReturn message, length delimited. Does not implicitly {@link PutBlockReturn.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof PutBlockReturn
+     * @static
+     * @param {IPutBlockReturn} message PutBlockReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    PutBlockReturn.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a PutBlockReturn message from the specified reader or buffer.
+     * @function decode
+     * @memberof PutBlockReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {PutBlockReturn} PutBlockReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    PutBlockReturn.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.PutBlockReturn();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.success = reader.bool();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a PutBlockReturn message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof PutBlockReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {PutBlockReturn} PutBlockReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    PutBlockReturn.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a PutBlockReturn message.
+     * @function verify
+     * @memberof PutBlockReturn
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    PutBlockReturn.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.success != null && message.hasOwnProperty("success"))
+            if (typeof message.success !== "boolean")
+                return "success: boolean expected";
+        return null;
+    };
+
+    /**
+     * Creates a PutBlockReturn message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof PutBlockReturn
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {PutBlockReturn} PutBlockReturn
+     */
+    PutBlockReturn.fromObject = function fromObject(object) {
+        if (object instanceof $root.PutBlockReturn)
+            return object;
+        var message = new $root.PutBlockReturn();
+        if (object.success != null)
+            message.success = Boolean(object.success);
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a PutBlockReturn message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof PutBlockReturn
+     * @static
+     * @param {PutBlockReturn} message PutBlockReturn
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    PutBlockReturn.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults)
+            object.success = false;
+        if (message.success != null && message.hasOwnProperty("success"))
+            object.success = message.success;
+        return object;
+    };
+
+    /**
+     * Converts this PutBlockReturn to JSON.
+     * @function toJSON
+     * @memberof PutBlockReturn
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    PutBlockReturn.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return PutBlockReturn;
 })();
 
 $root.NewTx = (function() {
@@ -1412,26 +3053,24 @@ $root.NewBlock = (function() {
     return NewBlock;
 })();
 
-$root.GetHeaders = (function() {
+$root.GetBlocksByHash = (function() {
 
     /**
-     * Properties of a GetHeaders.
-     * @exports IGetHeaders
-     * @interface IGetHeaders
-     * @property {number|Long|null} [headerReqNum] GetHeaders headerReqNum
-     * @property {number|Long|null} [height] GetHeaders height
-     * @property {Array.<Uint8Array>|null} [hashes] GetHeaders hashes
+     * Properties of a GetBlocksByHash.
+     * @exports IGetBlocksByHash
+     * @interface IGetBlocksByHash
+     * @property {Array.<Uint8Array>|null} [hashes] GetBlocksByHash hashes
      */
 
     /**
-     * Constructs a new GetHeaders.
-     * @exports GetHeaders
-     * @classdesc Represents a GetHeaders.
-     * @implements IGetHeaders
+     * Constructs a new GetBlocksByHash.
+     * @exports GetBlocksByHash
+     * @classdesc Represents a GetBlocksByHash.
+     * @implements IGetBlocksByHash
      * @constructor
-     * @param {IGetHeaders=} [properties] Properties to set
+     * @param {IGetBlocksByHash=} [properties] Properties to set
      */
-    function GetHeaders(properties) {
+    function GetBlocksByHash(properties) {
         this.hashes = [];
         if (properties)
             for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
@@ -1440,528 +3079,35 @@ $root.GetHeaders = (function() {
     }
 
     /**
-     * GetHeaders headerReqNum.
-     * @member {number|Long} headerReqNum
-     * @memberof GetHeaders
-     * @instance
-     */
-    GetHeaders.prototype.headerReqNum = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
-
-    /**
-     * GetHeaders height.
-     * @member {number|Long} height
-     * @memberof GetHeaders
-     * @instance
-     */
-    GetHeaders.prototype.height = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
-
-    /**
-     * GetHeaders hashes.
+     * GetBlocksByHash hashes.
      * @member {Array.<Uint8Array>} hashes
-     * @memberof GetHeaders
+     * @memberof GetBlocksByHash
      * @instance
      */
-    GetHeaders.prototype.hashes = $util.emptyArray;
+    GetBlocksByHash.prototype.hashes = $util.emptyArray;
 
     /**
-     * Creates a new GetHeaders instance using the specified properties.
+     * Creates a new GetBlocksByHash instance using the specified properties.
      * @function create
-     * @memberof GetHeaders
+     * @memberof GetBlocksByHash
      * @static
-     * @param {IGetHeaders=} [properties] Properties to set
-     * @returns {GetHeaders} GetHeaders instance
+     * @param {IGetBlocksByHash=} [properties] Properties to set
+     * @returns {GetBlocksByHash} GetBlocksByHash instance
      */
-    GetHeaders.create = function create(properties) {
-        return new GetHeaders(properties);
+    GetBlocksByHash.create = function create(properties) {
+        return new GetBlocksByHash(properties);
     };
 
     /**
-     * Encodes the specified GetHeaders message. Does not implicitly {@link GetHeaders.verify|verify} messages.
+     * Encodes the specified GetBlocksByHash message. Does not implicitly {@link GetBlocksByHash.verify|verify} messages.
      * @function encode
-     * @memberof GetHeaders
+     * @memberof GetBlocksByHash
      * @static
-     * @param {IGetHeaders} message GetHeaders message or plain object to encode
+     * @param {IGetBlocksByHash} message GetBlocksByHash message or plain object to encode
      * @param {$protobuf.Writer} [writer] Writer to encode to
      * @returns {$protobuf.Writer} Writer
      */
-    GetHeaders.encode = function encode(message, writer) {
-        if (!writer)
-            writer = $Writer.create();
-        if (message.headerReqNum != null && message.hasOwnProperty("headerReqNum"))
-            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.headerReqNum);
-        if (message.height != null && message.hasOwnProperty("height"))
-            writer.uint32(/* id 2, wireType 0 =*/16).int64(message.height);
-        if (message.hashes != null && message.hashes.length)
-            for (var i = 0; i < message.hashes.length; ++i)
-                writer.uint32(/* id 3, wireType 2 =*/26).bytes(message.hashes[i]);
-        return writer;
-    };
-
-    /**
-     * Encodes the specified GetHeaders message, length delimited. Does not implicitly {@link GetHeaders.verify|verify} messages.
-     * @function encodeDelimited
-     * @memberof GetHeaders
-     * @static
-     * @param {IGetHeaders} message GetHeaders message or plain object to encode
-     * @param {$protobuf.Writer} [writer] Writer to encode to
-     * @returns {$protobuf.Writer} Writer
-     */
-    GetHeaders.encodeDelimited = function encodeDelimited(message, writer) {
-        return this.encode(message, writer).ldelim();
-    };
-
-    /**
-     * Decodes a GetHeaders message from the specified reader or buffer.
-     * @function decode
-     * @memberof GetHeaders
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @param {number} [length] Message length if known beforehand
-     * @returns {GetHeaders} GetHeaders
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    GetHeaders.decode = function decode(reader, length) {
-        if (!(reader instanceof $Reader))
-            reader = $Reader.create(reader);
-        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetHeaders();
-        while (reader.pos < end) {
-            var tag = reader.uint32();
-            switch (tag >>> 3) {
-            case 1:
-                message.headerReqNum = reader.int64();
-                break;
-            case 2:
-                message.height = reader.int64();
-                break;
-            case 3:
-                if (!(message.hashes && message.hashes.length))
-                    message.hashes = [];
-                message.hashes.push(reader.bytes());
-                break;
-            default:
-                reader.skipType(tag & 7);
-                break;
-            }
-        }
-        return message;
-    };
-
-    /**
-     * Decodes a GetHeaders message from the specified reader or buffer, length delimited.
-     * @function decodeDelimited
-     * @memberof GetHeaders
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @returns {GetHeaders} GetHeaders
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    GetHeaders.decodeDelimited = function decodeDelimited(reader) {
-        if (!(reader instanceof $Reader))
-            reader = new $Reader(reader);
-        return this.decode(reader, reader.uint32());
-    };
-
-    /**
-     * Verifies a GetHeaders message.
-     * @function verify
-     * @memberof GetHeaders
-     * @static
-     * @param {Object.<string,*>} message Plain object to verify
-     * @returns {string|null} `null` if valid, otherwise the reason why it is not
-     */
-    GetHeaders.verify = function verify(message) {
-        if (typeof message !== "object" || message === null)
-            return "object expected";
-        if (message.headerReqNum != null && message.hasOwnProperty("headerReqNum"))
-            if (!$util.isInteger(message.headerReqNum) && !(message.headerReqNum && $util.isInteger(message.headerReqNum.low) && $util.isInteger(message.headerReqNum.high)))
-                return "headerReqNum: integer|Long expected";
-        if (message.height != null && message.hasOwnProperty("height"))
-            if (!$util.isInteger(message.height) && !(message.height && $util.isInteger(message.height.low) && $util.isInteger(message.height.high)))
-                return "height: integer|Long expected";
-        if (message.hashes != null && message.hasOwnProperty("hashes")) {
-            if (!Array.isArray(message.hashes))
-                return "hashes: array expected";
-            for (var i = 0; i < message.hashes.length; ++i)
-                if (!(message.hashes[i] && typeof message.hashes[i].length === "number" || $util.isString(message.hashes[i])))
-                    return "hashes: buffer[] expected";
-        }
-        return null;
-    };
-
-    /**
-     * Creates a GetHeaders message from a plain object. Also converts values to their respective internal types.
-     * @function fromObject
-     * @memberof GetHeaders
-     * @static
-     * @param {Object.<string,*>} object Plain object
-     * @returns {GetHeaders} GetHeaders
-     */
-    GetHeaders.fromObject = function fromObject(object) {
-        if (object instanceof $root.GetHeaders)
-            return object;
-        var message = new $root.GetHeaders();
-        if (object.headerReqNum != null)
-            if ($util.Long)
-                (message.headerReqNum = $util.Long.fromValue(object.headerReqNum)).unsigned = false;
-            else if (typeof object.headerReqNum === "string")
-                message.headerReqNum = parseInt(object.headerReqNum, 10);
-            else if (typeof object.headerReqNum === "number")
-                message.headerReqNum = object.headerReqNum;
-            else if (typeof object.headerReqNum === "object")
-                message.headerReqNum = new $util.LongBits(object.headerReqNum.low >>> 0, object.headerReqNum.high >>> 0).toNumber();
-        if (object.height != null)
-            if ($util.Long)
-                (message.height = $util.Long.fromValue(object.height)).unsigned = false;
-            else if (typeof object.height === "string")
-                message.height = parseInt(object.height, 10);
-            else if (typeof object.height === "number")
-                message.height = object.height;
-            else if (typeof object.height === "object")
-                message.height = new $util.LongBits(object.height.low >>> 0, object.height.high >>> 0).toNumber();
-        if (object.hashes) {
-            if (!Array.isArray(object.hashes))
-                throw TypeError(".GetHeaders.hashes: array expected");
-            message.hashes = [];
-            for (var i = 0; i < object.hashes.length; ++i)
-                if (typeof object.hashes[i] === "string")
-                    $util.base64.decode(object.hashes[i], message.hashes[i] = $util.newBuffer($util.base64.length(object.hashes[i])), 0);
-                else if (object.hashes[i].length)
-                    message.hashes[i] = object.hashes[i];
-        }
-        return message;
-    };
-
-    /**
-     * Creates a plain object from a GetHeaders message. Also converts values to other types if specified.
-     * @function toObject
-     * @memberof GetHeaders
-     * @static
-     * @param {GetHeaders} message GetHeaders
-     * @param {$protobuf.IConversionOptions} [options] Conversion options
-     * @returns {Object.<string,*>} Plain object
-     */
-    GetHeaders.toObject = function toObject(message, options) {
-        if (!options)
-            options = {};
-        var object = {};
-        if (options.arrays || options.defaults)
-            object.hashes = [];
-        if (options.defaults) {
-            if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
-                object.headerReqNum = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
-            } else
-                object.headerReqNum = options.longs === String ? "0" : 0;
-            if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
-                object.height = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
-            } else
-                object.height = options.longs === String ? "0" : 0;
-        }
-        if (message.headerReqNum != null && message.hasOwnProperty("headerReqNum"))
-            if (typeof message.headerReqNum === "number")
-                object.headerReqNum = options.longs === String ? String(message.headerReqNum) : message.headerReqNum;
-            else
-                object.headerReqNum = options.longs === String ? $util.Long.prototype.toString.call(message.headerReqNum) : options.longs === Number ? new $util.LongBits(message.headerReqNum.low >>> 0, message.headerReqNum.high >>> 0).toNumber() : message.headerReqNum;
-        if (message.height != null && message.hasOwnProperty("height"))
-            if (typeof message.height === "number")
-                object.height = options.longs === String ? String(message.height) : message.height;
-            else
-                object.height = options.longs === String ? $util.Long.prototype.toString.call(message.height) : options.longs === Number ? new $util.LongBits(message.height.low >>> 0, message.height.high >>> 0).toNumber() : message.height;
-        if (message.hashes && message.hashes.length) {
-            object.hashes = [];
-            for (var j = 0; j < message.hashes.length; ++j)
-                object.hashes[j] = options.bytes === String ? $util.base64.encode(message.hashes[j], 0, message.hashes[j].length) : options.bytes === Array ? Array.prototype.slice.call(message.hashes[j]) : message.hashes[j];
-        }
-        return object;
-    };
-
-    /**
-     * Converts this GetHeaders to JSON.
-     * @function toJSON
-     * @memberof GetHeaders
-     * @instance
-     * @returns {Object.<string,*>} JSON object
-     */
-    GetHeaders.prototype.toJSON = function toJSON() {
-        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-    };
-
-    return GetHeaders;
-})();
-
-$root.GetHeadersReturn = (function() {
-
-    /**
-     * Properties of a GetHeadersReturn.
-     * @exports IGetHeadersReturn
-     * @interface IGetHeadersReturn
-     * @property {boolean|null} [success] GetHeadersReturn success
-     * @property {IBlockHeaders|null} [blocks] GetHeadersReturn blocks
-     */
-
-    /**
-     * Constructs a new GetHeadersReturn.
-     * @exports GetHeadersReturn
-     * @classdesc Represents a GetHeadersReturn.
-     * @implements IGetHeadersReturn
-     * @constructor
-     * @param {IGetHeadersReturn=} [properties] Properties to set
-     */
-    function GetHeadersReturn(properties) {
-        if (properties)
-            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                if (properties[keys[i]] != null)
-                    this[keys[i]] = properties[keys[i]];
-    }
-
-    /**
-     * GetHeadersReturn success.
-     * @member {boolean} success
-     * @memberof GetHeadersReturn
-     * @instance
-     */
-    GetHeadersReturn.prototype.success = false;
-
-    /**
-     * GetHeadersReturn blocks.
-     * @member {IBlockHeaders|null|undefined} blocks
-     * @memberof GetHeadersReturn
-     * @instance
-     */
-    GetHeadersReturn.prototype.blocks = null;
-
-    /**
-     * Creates a new GetHeadersReturn instance using the specified properties.
-     * @function create
-     * @memberof GetHeadersReturn
-     * @static
-     * @param {IGetHeadersReturn=} [properties] Properties to set
-     * @returns {GetHeadersReturn} GetHeadersReturn instance
-     */
-    GetHeadersReturn.create = function create(properties) {
-        return new GetHeadersReturn(properties);
-    };
-
-    /**
-     * Encodes the specified GetHeadersReturn message. Does not implicitly {@link GetHeadersReturn.verify|verify} messages.
-     * @function encode
-     * @memberof GetHeadersReturn
-     * @static
-     * @param {IGetHeadersReturn} message GetHeadersReturn message or plain object to encode
-     * @param {$protobuf.Writer} [writer] Writer to encode to
-     * @returns {$protobuf.Writer} Writer
-     */
-    GetHeadersReturn.encode = function encode(message, writer) {
-        if (!writer)
-            writer = $Writer.create();
-        if (message.success != null && message.hasOwnProperty("success"))
-            writer.uint32(/* id 1, wireType 0 =*/8).bool(message.success);
-        if (message.blocks != null && message.hasOwnProperty("blocks"))
-            $root.BlockHeaders.encode(message.blocks, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
-        return writer;
-    };
-
-    /**
-     * Encodes the specified GetHeadersReturn message, length delimited. Does not implicitly {@link GetHeadersReturn.verify|verify} messages.
-     * @function encodeDelimited
-     * @memberof GetHeadersReturn
-     * @static
-     * @param {IGetHeadersReturn} message GetHeadersReturn message or plain object to encode
-     * @param {$protobuf.Writer} [writer] Writer to encode to
-     * @returns {$protobuf.Writer} Writer
-     */
-    GetHeadersReturn.encodeDelimited = function encodeDelimited(message, writer) {
-        return this.encode(message, writer).ldelim();
-    };
-
-    /**
-     * Decodes a GetHeadersReturn message from the specified reader or buffer.
-     * @function decode
-     * @memberof GetHeadersReturn
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @param {number} [length] Message length if known beforehand
-     * @returns {GetHeadersReturn} GetHeadersReturn
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    GetHeadersReturn.decode = function decode(reader, length) {
-        if (!(reader instanceof $Reader))
-            reader = $Reader.create(reader);
-        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetHeadersReturn();
-        while (reader.pos < end) {
-            var tag = reader.uint32();
-            switch (tag >>> 3) {
-            case 1:
-                message.success = reader.bool();
-                break;
-            case 2:
-                message.blocks = $root.BlockHeaders.decode(reader, reader.uint32());
-                break;
-            default:
-                reader.skipType(tag & 7);
-                break;
-            }
-        }
-        return message;
-    };
-
-    /**
-     * Decodes a GetHeadersReturn message from the specified reader or buffer, length delimited.
-     * @function decodeDelimited
-     * @memberof GetHeadersReturn
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @returns {GetHeadersReturn} GetHeadersReturn
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    GetHeadersReturn.decodeDelimited = function decodeDelimited(reader) {
-        if (!(reader instanceof $Reader))
-            reader = new $Reader(reader);
-        return this.decode(reader, reader.uint32());
-    };
-
-    /**
-     * Verifies a GetHeadersReturn message.
-     * @function verify
-     * @memberof GetHeadersReturn
-     * @static
-     * @param {Object.<string,*>} message Plain object to verify
-     * @returns {string|null} `null` if valid, otherwise the reason why it is not
-     */
-    GetHeadersReturn.verify = function verify(message) {
-        if (typeof message !== "object" || message === null)
-            return "object expected";
-        if (message.success != null && message.hasOwnProperty("success"))
-            if (typeof message.success !== "boolean")
-                return "success: boolean expected";
-        if (message.blocks != null && message.hasOwnProperty("blocks")) {
-            var error = $root.BlockHeaders.verify(message.blocks);
-            if (error)
-                return "blocks." + error;
-        }
-        return null;
-    };
-
-    /**
-     * Creates a GetHeadersReturn message from a plain object. Also converts values to their respective internal types.
-     * @function fromObject
-     * @memberof GetHeadersReturn
-     * @static
-     * @param {Object.<string,*>} object Plain object
-     * @returns {GetHeadersReturn} GetHeadersReturn
-     */
-    GetHeadersReturn.fromObject = function fromObject(object) {
-        if (object instanceof $root.GetHeadersReturn)
-            return object;
-        var message = new $root.GetHeadersReturn();
-        if (object.success != null)
-            message.success = Boolean(object.success);
-        if (object.blocks != null) {
-            if (typeof object.blocks !== "object")
-                throw TypeError(".GetHeadersReturn.blocks: object expected");
-            message.blocks = $root.BlockHeaders.fromObject(object.blocks);
-        }
-        return message;
-    };
-
-    /**
-     * Creates a plain object from a GetHeadersReturn message. Also converts values to other types if specified.
-     * @function toObject
-     * @memberof GetHeadersReturn
-     * @static
-     * @param {GetHeadersReturn} message GetHeadersReturn
-     * @param {$protobuf.IConversionOptions} [options] Conversion options
-     * @returns {Object.<string,*>} Plain object
-     */
-    GetHeadersReturn.toObject = function toObject(message, options) {
-        if (!options)
-            options = {};
-        var object = {};
-        if (options.defaults) {
-            object.success = false;
-            object.blocks = null;
-        }
-        if (message.success != null && message.hasOwnProperty("success"))
-            object.success = message.success;
-        if (message.blocks != null && message.hasOwnProperty("blocks"))
-            object.blocks = $root.BlockHeaders.toObject(message.blocks, options);
-        return object;
-    };
-
-    /**
-     * Converts this GetHeadersReturn to JSON.
-     * @function toJSON
-     * @memberof GetHeadersReturn
-     * @instance
-     * @returns {Object.<string,*>} JSON object
-     */
-    GetHeadersReturn.prototype.toJSON = function toJSON() {
-        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-    };
-
-    return GetHeadersReturn;
-})();
-
-$root.GetBlocks = (function() {
-
-    /**
-     * Properties of a GetBlocks.
-     * @exports IGetBlocks
-     * @interface IGetBlocks
-     * @property {Array.<Uint8Array>|null} [hashes] GetBlocks hashes
-     */
-
-    /**
-     * Constructs a new GetBlocks.
-     * @exports GetBlocks
-     * @classdesc Represents a GetBlocks.
-     * @implements IGetBlocks
-     * @constructor
-     * @param {IGetBlocks=} [properties] Properties to set
-     */
-    function GetBlocks(properties) {
-        this.hashes = [];
-        if (properties)
-            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                if (properties[keys[i]] != null)
-                    this[keys[i]] = properties[keys[i]];
-    }
-
-    /**
-     * GetBlocks hashes.
-     * @member {Array.<Uint8Array>} hashes
-     * @memberof GetBlocks
-     * @instance
-     */
-    GetBlocks.prototype.hashes = $util.emptyArray;
-
-    /**
-     * Creates a new GetBlocks instance using the specified properties.
-     * @function create
-     * @memberof GetBlocks
-     * @static
-     * @param {IGetBlocks=} [properties] Properties to set
-     * @returns {GetBlocks} GetBlocks instance
-     */
-    GetBlocks.create = function create(properties) {
-        return new GetBlocks(properties);
-    };
-
-    /**
-     * Encodes the specified GetBlocks message. Does not implicitly {@link GetBlocks.verify|verify} messages.
-     * @function encode
-     * @memberof GetBlocks
-     * @static
-     * @param {IGetBlocks} message GetBlocks message or plain object to encode
-     * @param {$protobuf.Writer} [writer] Writer to encode to
-     * @returns {$protobuf.Writer} Writer
-     */
-    GetBlocks.encode = function encode(message, writer) {
+    GetBlocksByHash.encode = function encode(message, writer) {
         if (!writer)
             writer = $Writer.create();
         if (message.hashes != null && message.hashes.length)
@@ -1971,33 +3117,33 @@ $root.GetBlocks = (function() {
     };
 
     /**
-     * Encodes the specified GetBlocks message, length delimited. Does not implicitly {@link GetBlocks.verify|verify} messages.
+     * Encodes the specified GetBlocksByHash message, length delimited. Does not implicitly {@link GetBlocksByHash.verify|verify} messages.
      * @function encodeDelimited
-     * @memberof GetBlocks
+     * @memberof GetBlocksByHash
      * @static
-     * @param {IGetBlocks} message GetBlocks message or plain object to encode
+     * @param {IGetBlocksByHash} message GetBlocksByHash message or plain object to encode
      * @param {$protobuf.Writer} [writer] Writer to encode to
      * @returns {$protobuf.Writer} Writer
      */
-    GetBlocks.encodeDelimited = function encodeDelimited(message, writer) {
+    GetBlocksByHash.encodeDelimited = function encodeDelimited(message, writer) {
         return this.encode(message, writer).ldelim();
     };
 
     /**
-     * Decodes a GetBlocks message from the specified reader or buffer.
+     * Decodes a GetBlocksByHash message from the specified reader or buffer.
      * @function decode
-     * @memberof GetBlocks
+     * @memberof GetBlocksByHash
      * @static
      * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
      * @param {number} [length] Message length if known beforehand
-     * @returns {GetBlocks} GetBlocks
+     * @returns {GetBlocksByHash} GetBlocksByHash
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    GetBlocks.decode = function decode(reader, length) {
+    GetBlocksByHash.decode = function decode(reader, length) {
         if (!(reader instanceof $Reader))
             reader = $Reader.create(reader);
-        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetBlocks();
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetBlocksByHash();
         while (reader.pos < end) {
             var tag = reader.uint32();
             switch (tag >>> 3) {
@@ -2015,30 +3161,30 @@ $root.GetBlocks = (function() {
     };
 
     /**
-     * Decodes a GetBlocks message from the specified reader or buffer, length delimited.
+     * Decodes a GetBlocksByHash message from the specified reader or buffer, length delimited.
      * @function decodeDelimited
-     * @memberof GetBlocks
+     * @memberof GetBlocksByHash
      * @static
      * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @returns {GetBlocks} GetBlocks
+     * @returns {GetBlocksByHash} GetBlocksByHash
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    GetBlocks.decodeDelimited = function decodeDelimited(reader) {
+    GetBlocksByHash.decodeDelimited = function decodeDelimited(reader) {
         if (!(reader instanceof $Reader))
             reader = new $Reader(reader);
         return this.decode(reader, reader.uint32());
     };
 
     /**
-     * Verifies a GetBlocks message.
+     * Verifies a GetBlocksByHash message.
      * @function verify
-     * @memberof GetBlocks
+     * @memberof GetBlocksByHash
      * @static
      * @param {Object.<string,*>} message Plain object to verify
      * @returns {string|null} `null` if valid, otherwise the reason why it is not
      */
-    GetBlocks.verify = function verify(message) {
+    GetBlocksByHash.verify = function verify(message) {
         if (typeof message !== "object" || message === null)
             return "object expected";
         if (message.hashes != null && message.hasOwnProperty("hashes")) {
@@ -2052,20 +3198,20 @@ $root.GetBlocks = (function() {
     };
 
     /**
-     * Creates a GetBlocks message from a plain object. Also converts values to their respective internal types.
+     * Creates a GetBlocksByHash message from a plain object. Also converts values to their respective internal types.
      * @function fromObject
-     * @memberof GetBlocks
+     * @memberof GetBlocksByHash
      * @static
      * @param {Object.<string,*>} object Plain object
-     * @returns {GetBlocks} GetBlocks
+     * @returns {GetBlocksByHash} GetBlocksByHash
      */
-    GetBlocks.fromObject = function fromObject(object) {
-        if (object instanceof $root.GetBlocks)
+    GetBlocksByHash.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetBlocksByHash)
             return object;
-        var message = new $root.GetBlocks();
+        var message = new $root.GetBlocksByHash();
         if (object.hashes) {
             if (!Array.isArray(object.hashes))
-                throw TypeError(".GetBlocks.hashes: array expected");
+                throw TypeError(".GetBlocksByHash.hashes: array expected");
             message.hashes = [];
             for (var i = 0; i < object.hashes.length; ++i)
                 if (typeof object.hashes[i] === "string")
@@ -2077,15 +3223,15 @@ $root.GetBlocks = (function() {
     };
 
     /**
-     * Creates a plain object from a GetBlocks message. Also converts values to other types if specified.
+     * Creates a plain object from a GetBlocksByHash message. Also converts values to other types if specified.
      * @function toObject
-     * @memberof GetBlocks
+     * @memberof GetBlocksByHash
      * @static
-     * @param {GetBlocks} message GetBlocks
+     * @param {GetBlocksByHash} message GetBlocksByHash
      * @param {$protobuf.IConversionOptions} [options] Conversion options
      * @returns {Object.<string,*>} Plain object
      */
-    GetBlocks.toObject = function toObject(message, options) {
+    GetBlocksByHash.toObject = function toObject(message, options) {
         if (!options)
             options = {};
         var object = {};
@@ -2100,38 +3246,38 @@ $root.GetBlocks = (function() {
     };
 
     /**
-     * Converts this GetBlocks to JSON.
+     * Converts this GetBlocksByHash to JSON.
      * @function toJSON
-     * @memberof GetBlocks
+     * @memberof GetBlocksByHash
      * @instance
      * @returns {Object.<string,*>} JSON object
      */
-    GetBlocks.prototype.toJSON = function toJSON() {
+    GetBlocksByHash.prototype.toJSON = function toJSON() {
         return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
     };
 
-    return GetBlocks;
+    return GetBlocksByHash;
 })();
 
-$root.GetBlocksReturn = (function() {
+$root.GetBlocksByHashReturn = (function() {
 
     /**
-     * Properties of a GetBlocksReturn.
-     * @exports IGetBlocksReturn
-     * @interface IGetBlocksReturn
-     * @property {boolean|null} [success] GetBlocksReturn success
-     * @property {Array.<IBlock>|null} [blocks] GetBlocksReturn blocks
+     * Properties of a GetBlocksByHashReturn.
+     * @exports IGetBlocksByHashReturn
+     * @interface IGetBlocksByHashReturn
+     * @property {boolean|null} [success] GetBlocksByHashReturn success
+     * @property {Array.<IBlock>|null} [blocks] GetBlocksByHashReturn blocks
      */
 
     /**
-     * Constructs a new GetBlocksReturn.
-     * @exports GetBlocksReturn
-     * @classdesc Represents a GetBlocksReturn.
-     * @implements IGetBlocksReturn
+     * Constructs a new GetBlocksByHashReturn.
+     * @exports GetBlocksByHashReturn
+     * @classdesc Represents a GetBlocksByHashReturn.
+     * @implements IGetBlocksByHashReturn
      * @constructor
-     * @param {IGetBlocksReturn=} [properties] Properties to set
+     * @param {IGetBlocksByHashReturn=} [properties] Properties to set
      */
-    function GetBlocksReturn(properties) {
+    function GetBlocksByHashReturn(properties) {
         this.blocks = [];
         if (properties)
             for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
@@ -2140,43 +3286,43 @@ $root.GetBlocksReturn = (function() {
     }
 
     /**
-     * GetBlocksReturn success.
+     * GetBlocksByHashReturn success.
      * @member {boolean} success
-     * @memberof GetBlocksReturn
+     * @memberof GetBlocksByHashReturn
      * @instance
      */
-    GetBlocksReturn.prototype.success = false;
+    GetBlocksByHashReturn.prototype.success = false;
 
     /**
-     * GetBlocksReturn blocks.
+     * GetBlocksByHashReturn blocks.
      * @member {Array.<IBlock>} blocks
-     * @memberof GetBlocksReturn
+     * @memberof GetBlocksByHashReturn
      * @instance
      */
-    GetBlocksReturn.prototype.blocks = $util.emptyArray;
+    GetBlocksByHashReturn.prototype.blocks = $util.emptyArray;
 
     /**
-     * Creates a new GetBlocksReturn instance using the specified properties.
+     * Creates a new GetBlocksByHashReturn instance using the specified properties.
      * @function create
-     * @memberof GetBlocksReturn
+     * @memberof GetBlocksByHashReturn
      * @static
-     * @param {IGetBlocksReturn=} [properties] Properties to set
-     * @returns {GetBlocksReturn} GetBlocksReturn instance
+     * @param {IGetBlocksByHashReturn=} [properties] Properties to set
+     * @returns {GetBlocksByHashReturn} GetBlocksByHashReturn instance
      */
-    GetBlocksReturn.create = function create(properties) {
-        return new GetBlocksReturn(properties);
+    GetBlocksByHashReturn.create = function create(properties) {
+        return new GetBlocksByHashReturn(properties);
     };
 
     /**
-     * Encodes the specified GetBlocksReturn message. Does not implicitly {@link GetBlocksReturn.verify|verify} messages.
+     * Encodes the specified GetBlocksByHashReturn message. Does not implicitly {@link GetBlocksByHashReturn.verify|verify} messages.
      * @function encode
-     * @memberof GetBlocksReturn
+     * @memberof GetBlocksByHashReturn
      * @static
-     * @param {IGetBlocksReturn} message GetBlocksReturn message or plain object to encode
+     * @param {IGetBlocksByHashReturn} message GetBlocksByHashReturn message or plain object to encode
      * @param {$protobuf.Writer} [writer] Writer to encode to
      * @returns {$protobuf.Writer} Writer
      */
-    GetBlocksReturn.encode = function encode(message, writer) {
+    GetBlocksByHashReturn.encode = function encode(message, writer) {
         if (!writer)
             writer = $Writer.create();
         if (message.success != null && message.hasOwnProperty("success"))
@@ -2188,33 +3334,33 @@ $root.GetBlocksReturn = (function() {
     };
 
     /**
-     * Encodes the specified GetBlocksReturn message, length delimited. Does not implicitly {@link GetBlocksReturn.verify|verify} messages.
+     * Encodes the specified GetBlocksByHashReturn message, length delimited. Does not implicitly {@link GetBlocksByHashReturn.verify|verify} messages.
      * @function encodeDelimited
-     * @memberof GetBlocksReturn
+     * @memberof GetBlocksByHashReturn
      * @static
-     * @param {IGetBlocksReturn} message GetBlocksReturn message or plain object to encode
+     * @param {IGetBlocksByHashReturn} message GetBlocksByHashReturn message or plain object to encode
      * @param {$protobuf.Writer} [writer] Writer to encode to
      * @returns {$protobuf.Writer} Writer
      */
-    GetBlocksReturn.encodeDelimited = function encodeDelimited(message, writer) {
+    GetBlocksByHashReturn.encodeDelimited = function encodeDelimited(message, writer) {
         return this.encode(message, writer).ldelim();
     };
 
     /**
-     * Decodes a GetBlocksReturn message from the specified reader or buffer.
+     * Decodes a GetBlocksByHashReturn message from the specified reader or buffer.
      * @function decode
-     * @memberof GetBlocksReturn
+     * @memberof GetBlocksByHashReturn
      * @static
      * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
      * @param {number} [length] Message length if known beforehand
-     * @returns {GetBlocksReturn} GetBlocksReturn
+     * @returns {GetBlocksByHashReturn} GetBlocksByHashReturn
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    GetBlocksReturn.decode = function decode(reader, length) {
+    GetBlocksByHashReturn.decode = function decode(reader, length) {
         if (!(reader instanceof $Reader))
             reader = $Reader.create(reader);
-        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetBlocksReturn();
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetBlocksByHashReturn();
         while (reader.pos < end) {
             var tag = reader.uint32();
             switch (tag >>> 3) {
@@ -2235,30 +3381,30 @@ $root.GetBlocksReturn = (function() {
     };
 
     /**
-     * Decodes a GetBlocksReturn message from the specified reader or buffer, length delimited.
+     * Decodes a GetBlocksByHashReturn message from the specified reader or buffer, length delimited.
      * @function decodeDelimited
-     * @memberof GetBlocksReturn
+     * @memberof GetBlocksByHashReturn
      * @static
      * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @returns {GetBlocksReturn} GetBlocksReturn
+     * @returns {GetBlocksByHashReturn} GetBlocksByHashReturn
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    GetBlocksReturn.decodeDelimited = function decodeDelimited(reader) {
+    GetBlocksByHashReturn.decodeDelimited = function decodeDelimited(reader) {
         if (!(reader instanceof $Reader))
             reader = new $Reader(reader);
         return this.decode(reader, reader.uint32());
     };
 
     /**
-     * Verifies a GetBlocksReturn message.
+     * Verifies a GetBlocksByHashReturn message.
      * @function verify
-     * @memberof GetBlocksReturn
+     * @memberof GetBlocksByHashReturn
      * @static
      * @param {Object.<string,*>} message Plain object to verify
      * @returns {string|null} `null` if valid, otherwise the reason why it is not
      */
-    GetBlocksReturn.verify = function verify(message) {
+    GetBlocksByHashReturn.verify = function verify(message) {
         if (typeof message !== "object" || message === null)
             return "object expected";
         if (message.success != null && message.hasOwnProperty("success"))
@@ -2277,26 +3423,26 @@ $root.GetBlocksReturn = (function() {
     };
 
     /**
-     * Creates a GetBlocksReturn message from a plain object. Also converts values to their respective internal types.
+     * Creates a GetBlocksByHashReturn message from a plain object. Also converts values to their respective internal types.
      * @function fromObject
-     * @memberof GetBlocksReturn
+     * @memberof GetBlocksByHashReturn
      * @static
      * @param {Object.<string,*>} object Plain object
-     * @returns {GetBlocksReturn} GetBlocksReturn
+     * @returns {GetBlocksByHashReturn} GetBlocksByHashReturn
      */
-    GetBlocksReturn.fromObject = function fromObject(object) {
-        if (object instanceof $root.GetBlocksReturn)
+    GetBlocksByHashReturn.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetBlocksByHashReturn)
             return object;
-        var message = new $root.GetBlocksReturn();
+        var message = new $root.GetBlocksByHashReturn();
         if (object.success != null)
             message.success = Boolean(object.success);
         if (object.blocks) {
             if (!Array.isArray(object.blocks))
-                throw TypeError(".GetBlocksReturn.blocks: array expected");
+                throw TypeError(".GetBlocksByHashReturn.blocks: array expected");
             message.blocks = [];
             for (var i = 0; i < object.blocks.length; ++i) {
                 if (typeof object.blocks[i] !== "object")
-                    throw TypeError(".GetBlocksReturn.blocks: object expected");
+                    throw TypeError(".GetBlocksByHashReturn.blocks: object expected");
                 message.blocks[i] = $root.Block.fromObject(object.blocks[i]);
             }
         }
@@ -2304,15 +3450,15 @@ $root.GetBlocksReturn = (function() {
     };
 
     /**
-     * Creates a plain object from a GetBlocksReturn message. Also converts values to other types if specified.
+     * Creates a plain object from a GetBlocksByHashReturn message. Also converts values to other types if specified.
      * @function toObject
-     * @memberof GetBlocksReturn
+     * @memberof GetBlocksByHashReturn
      * @static
-     * @param {GetBlocksReturn} message GetBlocksReturn
+     * @param {GetBlocksByHashReturn} message GetBlocksByHashReturn
      * @param {$protobuf.IConversionOptions} [options] Conversion options
      * @returns {Object.<string,*>} Plain object
      */
-    GetBlocksReturn.toObject = function toObject(message, options) {
+    GetBlocksByHashReturn.toObject = function toObject(message, options) {
         if (!options)
             options = {};
         var object = {};
@@ -2331,37 +3477,38 @@ $root.GetBlocksReturn = (function() {
     };
 
     /**
-     * Converts this GetBlocksReturn to JSON.
+     * Converts this GetBlocksByHashReturn to JSON.
      * @function toJSON
-     * @memberof GetBlocksReturn
+     * @memberof GetBlocksByHashReturn
      * @instance
      * @returns {Object.<string,*>} JSON object
      */
-    GetBlocksReturn.prototype.toJSON = function toJSON() {
+    GetBlocksByHashReturn.prototype.toJSON = function toJSON() {
         return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
     };
 
-    return GetBlocksReturn;
+    return GetBlocksByHashReturn;
 })();
 
-$root.GetTxs = (function() {
+$root.GetHeadersByHash = (function() {
 
     /**
-     * Properties of a GetTxs.
-     * @exports IGetTxs
-     * @interface IGetTxs
-     * @property {number|Long|null} [minFee] GetTxs minFee
+     * Properties of a GetHeadersByHash.
+     * @exports IGetHeadersByHash
+     * @interface IGetHeadersByHash
+     * @property {Array.<Uint8Array>|null} [hashes] GetHeadersByHash hashes
      */
 
     /**
-     * Constructs a new GetTxs.
-     * @exports GetTxs
-     * @classdesc Represents a GetTxs.
-     * @implements IGetTxs
+     * Constructs a new GetHeadersByHash.
+     * @exports GetHeadersByHash
+     * @classdesc Represents a GetHeadersByHash.
+     * @implements IGetHeadersByHash
      * @constructor
-     * @param {IGetTxs=} [properties] Properties to set
+     * @param {IGetHeadersByHash=} [properties] Properties to set
      */
-    function GetTxs(properties) {
+    function GetHeadersByHash(properties) {
+        this.hashes = [];
         if (properties)
             for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                 if (properties[keys[i]] != null)
@@ -2369,75 +3516,78 @@ $root.GetTxs = (function() {
     }
 
     /**
-     * GetTxs minFee.
-     * @member {number|Long} minFee
-     * @memberof GetTxs
+     * GetHeadersByHash hashes.
+     * @member {Array.<Uint8Array>} hashes
+     * @memberof GetHeadersByHash
      * @instance
      */
-    GetTxs.prototype.minFee = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    GetHeadersByHash.prototype.hashes = $util.emptyArray;
 
     /**
-     * Creates a new GetTxs instance using the specified properties.
+     * Creates a new GetHeadersByHash instance using the specified properties.
      * @function create
-     * @memberof GetTxs
+     * @memberof GetHeadersByHash
      * @static
-     * @param {IGetTxs=} [properties] Properties to set
-     * @returns {GetTxs} GetTxs instance
+     * @param {IGetHeadersByHash=} [properties] Properties to set
+     * @returns {GetHeadersByHash} GetHeadersByHash instance
      */
-    GetTxs.create = function create(properties) {
-        return new GetTxs(properties);
+    GetHeadersByHash.create = function create(properties) {
+        return new GetHeadersByHash(properties);
     };
 
     /**
-     * Encodes the specified GetTxs message. Does not implicitly {@link GetTxs.verify|verify} messages.
+     * Encodes the specified GetHeadersByHash message. Does not implicitly {@link GetHeadersByHash.verify|verify} messages.
      * @function encode
-     * @memberof GetTxs
+     * @memberof GetHeadersByHash
      * @static
-     * @param {IGetTxs} message GetTxs message or plain object to encode
+     * @param {IGetHeadersByHash} message GetHeadersByHash message or plain object to encode
      * @param {$protobuf.Writer} [writer] Writer to encode to
      * @returns {$protobuf.Writer} Writer
      */
-    GetTxs.encode = function encode(message, writer) {
+    GetHeadersByHash.encode = function encode(message, writer) {
         if (!writer)
             writer = $Writer.create();
-        if (message.minFee != null && message.hasOwnProperty("minFee"))
-            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.minFee);
+        if (message.hashes != null && message.hashes.length)
+            for (var i = 0; i < message.hashes.length; ++i)
+                writer.uint32(/* id 1, wireType 2 =*/10).bytes(message.hashes[i]);
         return writer;
     };
 
     /**
-     * Encodes the specified GetTxs message, length delimited. Does not implicitly {@link GetTxs.verify|verify} messages.
+     * Encodes the specified GetHeadersByHash message, length delimited. Does not implicitly {@link GetHeadersByHash.verify|verify} messages.
      * @function encodeDelimited
-     * @memberof GetTxs
+     * @memberof GetHeadersByHash
      * @static
-     * @param {IGetTxs} message GetTxs message or plain object to encode
+     * @param {IGetHeadersByHash} message GetHeadersByHash message or plain object to encode
      * @param {$protobuf.Writer} [writer] Writer to encode to
      * @returns {$protobuf.Writer} Writer
      */
-    GetTxs.encodeDelimited = function encodeDelimited(message, writer) {
+    GetHeadersByHash.encodeDelimited = function encodeDelimited(message, writer) {
         return this.encode(message, writer).ldelim();
     };
 
     /**
-     * Decodes a GetTxs message from the specified reader or buffer.
+     * Decodes a GetHeadersByHash message from the specified reader or buffer.
      * @function decode
-     * @memberof GetTxs
+     * @memberof GetHeadersByHash
      * @static
      * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
      * @param {number} [length] Message length if known beforehand
-     * @returns {GetTxs} GetTxs
+     * @returns {GetHeadersByHash} GetHeadersByHash
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    GetTxs.decode = function decode(reader, length) {
+    GetHeadersByHash.decode = function decode(reader, length) {
         if (!(reader instanceof $Reader))
             reader = $Reader.create(reader);
-        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetTxs();
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetHeadersByHash();
         while (reader.pos < end) {
             var tag = reader.uint32();
             switch (tag >>> 3) {
             case 1:
-                message.minFee = reader.int64();
+                if (!(message.hashes && message.hashes.length))
+                    message.hashes = [];
+                message.hashes.push(reader.bytes());
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -2448,123 +3598,124 @@ $root.GetTxs = (function() {
     };
 
     /**
-     * Decodes a GetTxs message from the specified reader or buffer, length delimited.
+     * Decodes a GetHeadersByHash message from the specified reader or buffer, length delimited.
      * @function decodeDelimited
-     * @memberof GetTxs
+     * @memberof GetHeadersByHash
      * @static
      * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @returns {GetTxs} GetTxs
+     * @returns {GetHeadersByHash} GetHeadersByHash
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    GetTxs.decodeDelimited = function decodeDelimited(reader) {
+    GetHeadersByHash.decodeDelimited = function decodeDelimited(reader) {
         if (!(reader instanceof $Reader))
             reader = new $Reader(reader);
         return this.decode(reader, reader.uint32());
     };
 
     /**
-     * Verifies a GetTxs message.
+     * Verifies a GetHeadersByHash message.
      * @function verify
-     * @memberof GetTxs
+     * @memberof GetHeadersByHash
      * @static
      * @param {Object.<string,*>} message Plain object to verify
      * @returns {string|null} `null` if valid, otherwise the reason why it is not
      */
-    GetTxs.verify = function verify(message) {
+    GetHeadersByHash.verify = function verify(message) {
         if (typeof message !== "object" || message === null)
             return "object expected";
-        if (message.minFee != null && message.hasOwnProperty("minFee"))
-            if (!$util.isInteger(message.minFee) && !(message.minFee && $util.isInteger(message.minFee.low) && $util.isInteger(message.minFee.high)))
-                return "minFee: integer|Long expected";
+        if (message.hashes != null && message.hasOwnProperty("hashes")) {
+            if (!Array.isArray(message.hashes))
+                return "hashes: array expected";
+            for (var i = 0; i < message.hashes.length; ++i)
+                if (!(message.hashes[i] && typeof message.hashes[i].length === "number" || $util.isString(message.hashes[i])))
+                    return "hashes: buffer[] expected";
+        }
         return null;
     };
 
     /**
-     * Creates a GetTxs message from a plain object. Also converts values to their respective internal types.
+     * Creates a GetHeadersByHash message from a plain object. Also converts values to their respective internal types.
      * @function fromObject
-     * @memberof GetTxs
+     * @memberof GetHeadersByHash
      * @static
      * @param {Object.<string,*>} object Plain object
-     * @returns {GetTxs} GetTxs
+     * @returns {GetHeadersByHash} GetHeadersByHash
      */
-    GetTxs.fromObject = function fromObject(object) {
-        if (object instanceof $root.GetTxs)
+    GetHeadersByHash.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetHeadersByHash)
             return object;
-        var message = new $root.GetTxs();
-        if (object.minFee != null)
-            if ($util.Long)
-                (message.minFee = $util.Long.fromValue(object.minFee)).unsigned = false;
-            else if (typeof object.minFee === "string")
-                message.minFee = parseInt(object.minFee, 10);
-            else if (typeof object.minFee === "number")
-                message.minFee = object.minFee;
-            else if (typeof object.minFee === "object")
-                message.minFee = new $util.LongBits(object.minFee.low >>> 0, object.minFee.high >>> 0).toNumber();
+        var message = new $root.GetHeadersByHash();
+        if (object.hashes) {
+            if (!Array.isArray(object.hashes))
+                throw TypeError(".GetHeadersByHash.hashes: array expected");
+            message.hashes = [];
+            for (var i = 0; i < object.hashes.length; ++i)
+                if (typeof object.hashes[i] === "string")
+                    $util.base64.decode(object.hashes[i], message.hashes[i] = $util.newBuffer($util.base64.length(object.hashes[i])), 0);
+                else if (object.hashes[i].length)
+                    message.hashes[i] = object.hashes[i];
+        }
         return message;
     };
 
     /**
-     * Creates a plain object from a GetTxs message. Also converts values to other types if specified.
+     * Creates a plain object from a GetHeadersByHash message. Also converts values to other types if specified.
      * @function toObject
-     * @memberof GetTxs
+     * @memberof GetHeadersByHash
      * @static
-     * @param {GetTxs} message GetTxs
+     * @param {GetHeadersByHash} message GetHeadersByHash
      * @param {$protobuf.IConversionOptions} [options] Conversion options
      * @returns {Object.<string,*>} Plain object
      */
-    GetTxs.toObject = function toObject(message, options) {
+    GetHeadersByHash.toObject = function toObject(message, options) {
         if (!options)
             options = {};
         var object = {};
-        if (options.defaults)
-            if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
-                object.minFee = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
-            } else
-                object.minFee = options.longs === String ? "0" : 0;
-        if (message.minFee != null && message.hasOwnProperty("minFee"))
-            if (typeof message.minFee === "number")
-                object.minFee = options.longs === String ? String(message.minFee) : message.minFee;
-            else
-                object.minFee = options.longs === String ? $util.Long.prototype.toString.call(message.minFee) : options.longs === Number ? new $util.LongBits(message.minFee.low >>> 0, message.minFee.high >>> 0).toNumber() : message.minFee;
+        if (options.arrays || options.defaults)
+            object.hashes = [];
+        if (message.hashes && message.hashes.length) {
+            object.hashes = [];
+            for (var j = 0; j < message.hashes.length; ++j)
+                object.hashes[j] = options.bytes === String ? $util.base64.encode(message.hashes[j], 0, message.hashes[j].length) : options.bytes === Array ? Array.prototype.slice.call(message.hashes[j]) : message.hashes[j];
+        }
         return object;
     };
 
     /**
-     * Converts this GetTxs to JSON.
+     * Converts this GetHeadersByHash to JSON.
      * @function toJSON
-     * @memberof GetTxs
+     * @memberof GetHeadersByHash
      * @instance
      * @returns {Object.<string,*>} JSON object
      */
-    GetTxs.prototype.toJSON = function toJSON() {
+    GetHeadersByHash.prototype.toJSON = function toJSON() {
         return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
     };
 
-    return GetTxs;
+    return GetHeadersByHash;
 })();
 
-$root.GetTxsReturn = (function() {
+$root.GetHeadersByHashReturn = (function() {
 
     /**
-     * Properties of a GetTxsReturn.
-     * @exports IGetTxsReturn
-     * @interface IGetTxsReturn
-     * @property {boolean|null} [success] GetTxsReturn success
-     * @property {Array.<ITx>|null} [blocks] GetTxsReturn blocks
+     * Properties of a GetHeadersByHashReturn.
+     * @exports IGetHeadersByHashReturn
+     * @interface IGetHeadersByHashReturn
+     * @property {boolean|null} [success] GetHeadersByHashReturn success
+     * @property {Array.<IBlockHeader>|null} [headers] GetHeadersByHashReturn headers
      */
 
     /**
-     * Constructs a new GetTxsReturn.
-     * @exports GetTxsReturn
-     * @classdesc Represents a GetTxsReturn.
-     * @implements IGetTxsReturn
+     * Constructs a new GetHeadersByHashReturn.
+     * @exports GetHeadersByHashReturn
+     * @classdesc Represents a GetHeadersByHashReturn.
+     * @implements IGetHeadersByHashReturn
      * @constructor
-     * @param {IGetTxsReturn=} [properties] Properties to set
+     * @param {IGetHeadersByHashReturn=} [properties] Properties to set
      */
-    function GetTxsReturn(properties) {
-        this.blocks = [];
+    function GetHeadersByHashReturn(properties) {
+        this.headers = [];
         if (properties)
             for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                 if (properties[keys[i]] != null)
@@ -2572,81 +3723,81 @@ $root.GetTxsReturn = (function() {
     }
 
     /**
-     * GetTxsReturn success.
+     * GetHeadersByHashReturn success.
      * @member {boolean} success
-     * @memberof GetTxsReturn
+     * @memberof GetHeadersByHashReturn
      * @instance
      */
-    GetTxsReturn.prototype.success = false;
+    GetHeadersByHashReturn.prototype.success = false;
 
     /**
-     * GetTxsReturn blocks.
-     * @member {Array.<ITx>} blocks
-     * @memberof GetTxsReturn
+     * GetHeadersByHashReturn headers.
+     * @member {Array.<IBlockHeader>} headers
+     * @memberof GetHeadersByHashReturn
      * @instance
      */
-    GetTxsReturn.prototype.blocks = $util.emptyArray;
+    GetHeadersByHashReturn.prototype.headers = $util.emptyArray;
 
     /**
-     * Creates a new GetTxsReturn instance using the specified properties.
+     * Creates a new GetHeadersByHashReturn instance using the specified properties.
      * @function create
-     * @memberof GetTxsReturn
+     * @memberof GetHeadersByHashReturn
      * @static
-     * @param {IGetTxsReturn=} [properties] Properties to set
-     * @returns {GetTxsReturn} GetTxsReturn instance
+     * @param {IGetHeadersByHashReturn=} [properties] Properties to set
+     * @returns {GetHeadersByHashReturn} GetHeadersByHashReturn instance
      */
-    GetTxsReturn.create = function create(properties) {
-        return new GetTxsReturn(properties);
+    GetHeadersByHashReturn.create = function create(properties) {
+        return new GetHeadersByHashReturn(properties);
     };
 
     /**
-     * Encodes the specified GetTxsReturn message. Does not implicitly {@link GetTxsReturn.verify|verify} messages.
+     * Encodes the specified GetHeadersByHashReturn message. Does not implicitly {@link GetHeadersByHashReturn.verify|verify} messages.
      * @function encode
-     * @memberof GetTxsReturn
+     * @memberof GetHeadersByHashReturn
      * @static
-     * @param {IGetTxsReturn} message GetTxsReturn message or plain object to encode
+     * @param {IGetHeadersByHashReturn} message GetHeadersByHashReturn message or plain object to encode
      * @param {$protobuf.Writer} [writer] Writer to encode to
      * @returns {$protobuf.Writer} Writer
      */
-    GetTxsReturn.encode = function encode(message, writer) {
+    GetHeadersByHashReturn.encode = function encode(message, writer) {
         if (!writer)
             writer = $Writer.create();
         if (message.success != null && message.hasOwnProperty("success"))
             writer.uint32(/* id 1, wireType 0 =*/8).bool(message.success);
-        if (message.blocks != null && message.blocks.length)
-            for (var i = 0; i < message.blocks.length; ++i)
-                $root.Tx.encode(message.blocks[i], writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+        if (message.headers != null && message.headers.length)
+            for (var i = 0; i < message.headers.length; ++i)
+                $root.BlockHeader.encode(message.headers[i], writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
         return writer;
     };
 
     /**
-     * Encodes the specified GetTxsReturn message, length delimited. Does not implicitly {@link GetTxsReturn.verify|verify} messages.
+     * Encodes the specified GetHeadersByHashReturn message, length delimited. Does not implicitly {@link GetHeadersByHashReturn.verify|verify} messages.
      * @function encodeDelimited
-     * @memberof GetTxsReturn
+     * @memberof GetHeadersByHashReturn
      * @static
-     * @param {IGetTxsReturn} message GetTxsReturn message or plain object to encode
+     * @param {IGetHeadersByHashReturn} message GetHeadersByHashReturn message or plain object to encode
      * @param {$protobuf.Writer} [writer] Writer to encode to
      * @returns {$protobuf.Writer} Writer
      */
-    GetTxsReturn.encodeDelimited = function encodeDelimited(message, writer) {
+    GetHeadersByHashReturn.encodeDelimited = function encodeDelimited(message, writer) {
         return this.encode(message, writer).ldelim();
     };
 
     /**
-     * Decodes a GetTxsReturn message from the specified reader or buffer.
+     * Decodes a GetHeadersByHashReturn message from the specified reader or buffer.
      * @function decode
-     * @memberof GetTxsReturn
+     * @memberof GetHeadersByHashReturn
      * @static
      * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
      * @param {number} [length] Message length if known beforehand
-     * @returns {GetTxsReturn} GetTxsReturn
+     * @returns {GetHeadersByHashReturn} GetHeadersByHashReturn
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    GetTxsReturn.decode = function decode(reader, length) {
+    GetHeadersByHashReturn.decode = function decode(reader, length) {
         if (!(reader instanceof $Reader))
             reader = $Reader.create(reader);
-        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetTxsReturn();
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetHeadersByHashReturn();
         while (reader.pos < end) {
             var tag = reader.uint32();
             switch (tag >>> 3) {
@@ -2654,9 +3805,9 @@ $root.GetTxsReturn = (function() {
                 message.success = reader.bool();
                 break;
             case 2:
-                if (!(message.blocks && message.blocks.length))
-                    message.blocks = [];
-                message.blocks.push($root.Tx.decode(reader, reader.uint32()));
+                if (!(message.headers && message.headers.length))
+                    message.headers = [];
+                message.headers.push($root.BlockHeader.decode(reader, reader.uint32()));
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -2667,113 +3818,113 @@ $root.GetTxsReturn = (function() {
     };
 
     /**
-     * Decodes a GetTxsReturn message from the specified reader or buffer, length delimited.
+     * Decodes a GetHeadersByHashReturn message from the specified reader or buffer, length delimited.
      * @function decodeDelimited
-     * @memberof GetTxsReturn
+     * @memberof GetHeadersByHashReturn
      * @static
      * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @returns {GetTxsReturn} GetTxsReturn
+     * @returns {GetHeadersByHashReturn} GetHeadersByHashReturn
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    GetTxsReturn.decodeDelimited = function decodeDelimited(reader) {
+    GetHeadersByHashReturn.decodeDelimited = function decodeDelimited(reader) {
         if (!(reader instanceof $Reader))
             reader = new $Reader(reader);
         return this.decode(reader, reader.uint32());
     };
 
     /**
-     * Verifies a GetTxsReturn message.
+     * Verifies a GetHeadersByHashReturn message.
      * @function verify
-     * @memberof GetTxsReturn
+     * @memberof GetHeadersByHashReturn
      * @static
      * @param {Object.<string,*>} message Plain object to verify
      * @returns {string|null} `null` if valid, otherwise the reason why it is not
      */
-    GetTxsReturn.verify = function verify(message) {
+    GetHeadersByHashReturn.verify = function verify(message) {
         if (typeof message !== "object" || message === null)
             return "object expected";
         if (message.success != null && message.hasOwnProperty("success"))
             if (typeof message.success !== "boolean")
                 return "success: boolean expected";
-        if (message.blocks != null && message.hasOwnProperty("blocks")) {
-            if (!Array.isArray(message.blocks))
-                return "blocks: array expected";
-            for (var i = 0; i < message.blocks.length; ++i) {
-                var error = $root.Tx.verify(message.blocks[i]);
+        if (message.headers != null && message.hasOwnProperty("headers")) {
+            if (!Array.isArray(message.headers))
+                return "headers: array expected";
+            for (var i = 0; i < message.headers.length; ++i) {
+                var error = $root.BlockHeader.verify(message.headers[i]);
                 if (error)
-                    return "blocks." + error;
+                    return "headers." + error;
             }
         }
         return null;
     };
 
     /**
-     * Creates a GetTxsReturn message from a plain object. Also converts values to their respective internal types.
+     * Creates a GetHeadersByHashReturn message from a plain object. Also converts values to their respective internal types.
      * @function fromObject
-     * @memberof GetTxsReturn
+     * @memberof GetHeadersByHashReturn
      * @static
      * @param {Object.<string,*>} object Plain object
-     * @returns {GetTxsReturn} GetTxsReturn
+     * @returns {GetHeadersByHashReturn} GetHeadersByHashReturn
      */
-    GetTxsReturn.fromObject = function fromObject(object) {
-        if (object instanceof $root.GetTxsReturn)
+    GetHeadersByHashReturn.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetHeadersByHashReturn)
             return object;
-        var message = new $root.GetTxsReturn();
+        var message = new $root.GetHeadersByHashReturn();
         if (object.success != null)
             message.success = Boolean(object.success);
-        if (object.blocks) {
-            if (!Array.isArray(object.blocks))
-                throw TypeError(".GetTxsReturn.blocks: array expected");
-            message.blocks = [];
-            for (var i = 0; i < object.blocks.length; ++i) {
-                if (typeof object.blocks[i] !== "object")
-                    throw TypeError(".GetTxsReturn.blocks: object expected");
-                message.blocks[i] = $root.Tx.fromObject(object.blocks[i]);
+        if (object.headers) {
+            if (!Array.isArray(object.headers))
+                throw TypeError(".GetHeadersByHashReturn.headers: array expected");
+            message.headers = [];
+            for (var i = 0; i < object.headers.length; ++i) {
+                if (typeof object.headers[i] !== "object")
+                    throw TypeError(".GetHeadersByHashReturn.headers: object expected");
+                message.headers[i] = $root.BlockHeader.fromObject(object.headers[i]);
             }
         }
         return message;
     };
 
     /**
-     * Creates a plain object from a GetTxsReturn message. Also converts values to other types if specified.
+     * Creates a plain object from a GetHeadersByHashReturn message. Also converts values to other types if specified.
      * @function toObject
-     * @memberof GetTxsReturn
+     * @memberof GetHeadersByHashReturn
      * @static
-     * @param {GetTxsReturn} message GetTxsReturn
+     * @param {GetHeadersByHashReturn} message GetHeadersByHashReturn
      * @param {$protobuf.IConversionOptions} [options] Conversion options
      * @returns {Object.<string,*>} Plain object
      */
-    GetTxsReturn.toObject = function toObject(message, options) {
+    GetHeadersByHashReturn.toObject = function toObject(message, options) {
         if (!options)
             options = {};
         var object = {};
         if (options.arrays || options.defaults)
-            object.blocks = [];
+            object.headers = [];
         if (options.defaults)
             object.success = false;
         if (message.success != null && message.hasOwnProperty("success"))
             object.success = message.success;
-        if (message.blocks && message.blocks.length) {
-            object.blocks = [];
-            for (var j = 0; j < message.blocks.length; ++j)
-                object.blocks[j] = $root.Tx.toObject(message.blocks[j], options);
+        if (message.headers && message.headers.length) {
+            object.headers = [];
+            for (var j = 0; j < message.headers.length; ++j)
+                object.headers[j] = $root.BlockHeader.toObject(message.headers[j], options);
         }
         return object;
     };
 
     /**
-     * Converts this GetTxsReturn to JSON.
+     * Converts this GetHeadersByHashReturn to JSON.
      * @function toJSON
-     * @memberof GetTxsReturn
+     * @memberof GetHeadersByHashReturn
      * @instance
      * @returns {Object.<string,*>} JSON object
      */
-    GetTxsReturn.prototype.toJSON = function toJSON() {
+    GetHeadersByHashReturn.prototype.toJSON = function toJSON() {
         return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
     };
 
-    return GetTxsReturn;
+    return GetHeadersByHashReturn;
 })();
 
 $root.GetBlocksByRange = (function() {
@@ -3490,7 +4641,7 @@ $root.GetHeadersByRangeReturn = (function() {
      * @exports IGetHeadersByRangeReturn
      * @interface IGetHeadersByRangeReturn
      * @property {boolean|null} [success] GetHeadersByRangeReturn success
-     * @property {IBlockHeaders|null} [blocks] GetHeadersByRangeReturn blocks
+     * @property {Array.<IBlockHeader>|null} [headers] GetHeadersByRangeReturn headers
      */
 
     /**
@@ -3502,6 +4653,7 @@ $root.GetHeadersByRangeReturn = (function() {
      * @param {IGetHeadersByRangeReturn=} [properties] Properties to set
      */
     function GetHeadersByRangeReturn(properties) {
+        this.headers = [];
         if (properties)
             for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                 if (properties[keys[i]] != null)
@@ -3517,12 +4669,12 @@ $root.GetHeadersByRangeReturn = (function() {
     GetHeadersByRangeReturn.prototype.success = false;
 
     /**
-     * GetHeadersByRangeReturn blocks.
-     * @member {IBlockHeaders|null|undefined} blocks
+     * GetHeadersByRangeReturn headers.
+     * @member {Array.<IBlockHeader>} headers
      * @memberof GetHeadersByRangeReturn
      * @instance
      */
-    GetHeadersByRangeReturn.prototype.blocks = null;
+    GetHeadersByRangeReturn.prototype.headers = $util.emptyArray;
 
     /**
      * Creates a new GetHeadersByRangeReturn instance using the specified properties.
@@ -3550,8 +4702,9 @@ $root.GetHeadersByRangeReturn = (function() {
             writer = $Writer.create();
         if (message.success != null && message.hasOwnProperty("success"))
             writer.uint32(/* id 1, wireType 0 =*/8).bool(message.success);
-        if (message.blocks != null && message.hasOwnProperty("blocks"))
-            $root.BlockHeaders.encode(message.blocks, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+        if (message.headers != null && message.headers.length)
+            for (var i = 0; i < message.headers.length; ++i)
+                $root.BlockHeader.encode(message.headers[i], writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
         return writer;
     };
 
@@ -3590,7 +4743,9 @@ $root.GetHeadersByRangeReturn = (function() {
                 message.success = reader.bool();
                 break;
             case 2:
-                message.blocks = $root.BlockHeaders.decode(reader, reader.uint32());
+                if (!(message.headers && message.headers.length))
+                    message.headers = [];
+                message.headers.push($root.BlockHeader.decode(reader, reader.uint32()));
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -3630,10 +4785,14 @@ $root.GetHeadersByRangeReturn = (function() {
         if (message.success != null && message.hasOwnProperty("success"))
             if (typeof message.success !== "boolean")
                 return "success: boolean expected";
-        if (message.blocks != null && message.hasOwnProperty("blocks")) {
-            var error = $root.BlockHeaders.verify(message.blocks);
-            if (error)
-                return "blocks." + error;
+        if (message.headers != null && message.hasOwnProperty("headers")) {
+            if (!Array.isArray(message.headers))
+                return "headers: array expected";
+            for (var i = 0; i < message.headers.length; ++i) {
+                var error = $root.BlockHeader.verify(message.headers[i]);
+                if (error)
+                    return "headers." + error;
+            }
         }
         return null;
     };
@@ -3652,10 +4811,15 @@ $root.GetHeadersByRangeReturn = (function() {
         var message = new $root.GetHeadersByRangeReturn();
         if (object.success != null)
             message.success = Boolean(object.success);
-        if (object.blocks != null) {
-            if (typeof object.blocks !== "object")
-                throw TypeError(".GetHeadersByRangeReturn.blocks: object expected");
-            message.blocks = $root.BlockHeaders.fromObject(object.blocks);
+        if (object.headers) {
+            if (!Array.isArray(object.headers))
+                throw TypeError(".GetHeadersByRangeReturn.headers: array expected");
+            message.headers = [];
+            for (var i = 0; i < object.headers.length; ++i) {
+                if (typeof object.headers[i] !== "object")
+                    throw TypeError(".GetHeadersByRangeReturn.headers: object expected");
+                message.headers[i] = $root.BlockHeader.fromObject(object.headers[i]);
+            }
         }
         return message;
     };
@@ -3673,14 +4837,17 @@ $root.GetHeadersByRangeReturn = (function() {
         if (!options)
             options = {};
         var object = {};
-        if (options.defaults) {
+        if (options.arrays || options.defaults)
+            object.headers = [];
+        if (options.defaults)
             object.success = false;
-            object.blocks = null;
-        }
         if (message.success != null && message.hasOwnProperty("success"))
             object.success = message.success;
-        if (message.blocks != null && message.hasOwnProperty("blocks"))
-            object.blocks = $root.BlockHeaders.toObject(message.blocks, options);
+        if (message.headers && message.headers.length) {
+            object.headers = [];
+            for (var j = 0; j < message.headers.length; ++j)
+                object.headers[j] = $root.BlockHeader.toObject(message.headers[j], options);
+        }
         return object;
     };
 

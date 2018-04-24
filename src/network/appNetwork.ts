@@ -1,8 +1,10 @@
 import { getLogger } from "log4js"
 import * as net from "net"
+import * as proto from "../serialization/proto"
 import { AppPeer } from "./appPeer"
 import { INetwork } from "./network"
 import { IPeer } from "./peer"
+
 const logger = getLogger("Network")
 import { Socket } from "net"
 import { PeerMode } from "./basicPeer"
@@ -11,6 +13,7 @@ export class AppNetwork implements INetwork {
     public server: net.Server
     public port: number = -1
     public peers: AppPeer[] = []
+
     constructor(port: number = 8148) {
         this.port = port
         logger.debug(`TcpNetwork Port=${port}`)
@@ -38,6 +41,7 @@ export class AppNetwork implements INetwork {
 
     public addPeer(socket: Socket) {
         const newone = new AppPeer(this, socket, PeerMode.AcceptedSession)
+        newone.onConnected()
         this.peers.push(newone)
     }
 
@@ -65,4 +69,5 @@ export class AppNetwork implements INetwork {
     public getRandomPeers(count: number): IPeer {
         throw new Error("Method not implemented.")
     }
+
 }

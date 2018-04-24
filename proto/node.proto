@@ -5,21 +5,41 @@ import "tx.proto";
 
 message Node { 
     oneof request {
-        NewTx newTx=1;
-        NewBlock newBlock=2;
-        GetHeaders getHeaders=3;
-        GetHeadersReturn getHeadersReturn=4;
-        GetBlocks getBlocks=5;
-        GetBlocksReturn getBlocksReturn=6;
-        GetBlocksByRange getBlocksByRange=7;
-        GetBlocksByRangeReturn getBlocksByRangeReturn=8;
-        GetHeadersByRange getHeadersByRange=9;
-        GetHeadersByRangeReturn getHeadersByRangeReturn=10;
-        Ping ping=11;
-        PingReturn pingResponse=12;
+        Status status=1;
+
+        Ping ping=2;
+        PingReturn pingReturn=3;
+
+        PutTx putTx=4;
+        PutTxReturn putTxReturn=5;
+
+        GetTxs getTxs=6;
+        GetTxsReturn getTxsReturn=7;
+
+        PutBlock putBlock=8;
+        PutBlockReturn putBlockReturn=9;
+
+        GetBlocksByHash getBlocksByHash=10;
+        GetBlocksByHashReturn getBlocksByHashReturn=11;
+
+        GetHeadersByHash getHeadersByHash=12;
+        GetHeadersByHashReturn getHeadersByHashReturn=13;
+
+        GetBlocksByRange getBlocksByRange=14;
+        GetBlocksByRangeReturn getBlocksByRangeReturn=15;
+        
+        GetHeadersByRange getHeadersByRange=16;
+        GetHeadersByRangeReturn getHeadersByRangeReturn=17;
+       
+     
     }
 }
 
+message Status {
+    int64 version = 1;
+    string networkid = 2;
+    bytes hash=3;
+}
 
 message Ping {
     int64 nonce =1;
@@ -27,6 +47,36 @@ message Ping {
 message PingReturn {
     int64 nonce =1;
 }
+
+message PutTx {
+    repeated Tx txs=1;
+}
+
+message PutTxReturn {
+    bool success=1;
+}
+
+
+message GetTxs {
+    int64 minFee=1;
+}
+
+message GetTxsReturn {
+    bool success=1;
+    repeated Tx txs=2;
+}
+
+
+
+message PutBlock {
+    repeated Block blocks=1;
+}
+
+message PutBlockReturn {
+    bool success=1;
+}
+
+
 
 message NewTx {
     repeated Tx txs=1;
@@ -37,38 +87,27 @@ message NewBlock {
     repeated Block blocks=1;
 }
 
-
-message GetHeaders {    
-    int64 headerReqNum = 1;
-    int64 height = 2;
-    repeated bytes hashes = 3;
-}
-
-message GetHeadersReturn {
-    bool success =1;
-    BlockHeaders blocks = 2;
-}
-
-
-message GetBlocks {
+message GetBlocksByHash {      
     repeated bytes hashes = 1;
 }
 
-message GetBlocksReturn {
+message GetBlocksByHashReturn {
     bool success =1;
     repeated Block blocks= 2;
 }
 
-message GetTxs {
-    int64 minFee=1;
+
+
+message GetHeadersByHash {    
+    repeated bytes hashes = 1;
 }
 
-message GetTxsReturn {
+message GetHeadersByHashReturn {
     bool success =1;
-    repeated Tx blocks = 2;
+    repeated BlockHeader headers = 2;
 }
 
-
+        
 message GetBlocksByRange {
     int64 fromHeight= 1;
     int64 count=2;
@@ -87,5 +126,5 @@ message GetHeadersByRange {
 
 message GetHeadersByRangeReturn {
     bool success =1;
-    BlockHeaders blocks = 2;
+    repeated BlockHeader headers = 2;
 }
