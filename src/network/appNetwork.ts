@@ -40,10 +40,11 @@ export class AppNetwork implements INetwork {
         this.peers.push(newone)
     }
 
-    public addClient(ip: string, port: number) {
+    public addClient(ip: string, port: number): IPeer {
         const newone = new AppPeer(this, null, PeerMode.ConnectedSession)
         newone.intializeClient(ip, port)
         this.peers.push(newone)
+        return newone
     }
 
     public removePeer(one: AppPeer) {

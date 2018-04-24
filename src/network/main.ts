@@ -1,15 +1,14 @@
 import { getLogger } from "log4js"
 import { AppNetwork } from "./appNetwork"
+import { INetwork } from "./network"
 const logger = getLogger("Network")
 logger.level = "debug"
 
 function testNetwork() {
     logger.debug(`Network`)
-    const tcp = new AppNetwork()
+    const tcp: INetwork = new AppNetwork()
     tcp.start()
-
-    tcp.addClient("localhost", 8148)
-
+    let newone: IPeer = tcp.addClient("localhost", 8148)
 }
 
 testNetwork()
