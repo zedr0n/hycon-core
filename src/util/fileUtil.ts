@@ -1,8 +1,8 @@
-import * as fs from 'fs-extra'
-import conf = require('../settings')
+import * as fs from "fs-extra"
+import conf = require("../settings")
 
-import { getLogger } from 'log4js'
-const logger = getLogger('FileUtil')
+import { getLogger } from "log4js"
+const logger = getLogger("FileUtil")
 
 export class FileUtil {
     public static init() {
@@ -17,10 +17,10 @@ export class FileUtil {
         }
 
         try {
-            fs.ensureDir('./wallet/rootKey')
+            fs.ensureDir("./wallet/rootKey")
         } catch (e) {
             try {
-                fs.mkdir('./wallet')
+                fs.mkdir("./wallet")
             } catch (error) {
                 logger.error(`Making ./wallet directory failed: ${error}`)
             }
