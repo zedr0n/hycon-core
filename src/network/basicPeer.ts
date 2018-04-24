@@ -1,12 +1,10 @@
 import { getLogger } from "log4js"
 import * as net from "net"
 import { Socket } from "net"
-import { Ping } from "../serialization/proto"
-import * as proto from "../serialization/proto"
+import { AppNetwork } from "./appNetwork"
 import { Packet } from "./packet"
 import { IPeer } from "./peer"
 import { SocketBuffer } from "./socketBuffer"
-import { TcpNetwork } from "./tcpNetwork"
 
 const logger = getLogger("Network")
 
@@ -22,7 +20,7 @@ export enum PeerState {
 }
 
 export abstract class BasicPeer {
-    public server: TcpNetwork
+    public server: AppNetwork
     public socket: Socket
     public socketBuffer = new SocketBuffer
     public peerMode: PeerMode = PeerMode.AcceptedSession
@@ -31,8 +29,6 @@ export abstract class BasicPeer {
     public port: number
     public state: PeerState = PeerState.Connected
 
-    public pingReturn: proto.IPingReturn
-
     constructor(socket: Socket, mode: PeerMode) {
         this.peerMode = mode
         this.initializeSocket(socket)
@@ -40,6 +36,8 @@ export abstract class BasicPeer {
             this.parsePacket(packet)
         }
     }
+
+    public abstract async parsePacket(packet: Packet): Promise<any>
 
     public intializeClient(ip: string, port: number) {
         this.ip = ip
@@ -101,35 +99,5 @@ export abstract class BasicPeer {
     public error(error: Error) {
         logger.error(`${error}`)
     }
-    public async parsePacket(packet: Packet): Promise<any> {
-        const data = packet.popBuffer()
-        const res = proto.Node.decode(data)
-        if (res.ping) {
-            const userNonce = Number(res.ping.nonce.toString()) + 3000
-            logger.debug(`Ping Nonce=${res.ping.nonce}`)
 
-            this.sendPingResponse(userNonce)
-        }
-        if (res.pingResponse) {
-            this.pingReturn = res.pingResponse
-            logger.debug(`Ping Response Nonce=${res.pingResponse.nonce}`)
-        }
-    }
-
-    public nonce: number = 100
-    public sendPing() {
-        const encodeReq = proto.Node.encode({ ping: { nonce: this.nonce++ } }).finish()
-        const newPacket = new Packet()
-        newPacket.pushBuffer(new Buffer(encodeReq))
-        const encoded = newPacket.pack()
-        this.socket.write(encoded)
-    }
-
-    public sendPingResponse(userNonce: number) {
-        const encodeReq = proto.Node.encode({ pingResponse: { nonce: userNonce } }).finish()
-        const newPacket = new Packet()
-        newPacket.pushBuffer(new Buffer(encodeReq))
-        const encoded = newPacket.pack()
-        this.socket.write(encoded)
-    }
 }

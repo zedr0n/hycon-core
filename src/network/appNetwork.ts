@@ -6,6 +6,7 @@ import { IPeer } from "./peer"
 const logger = getLogger("Network")
 import { Socket } from "net"
 import { PeerMode } from "./basicPeer"
+
 export class AppNetwork implements INetwork {
     public server: net.Server
     public port: number = -1
