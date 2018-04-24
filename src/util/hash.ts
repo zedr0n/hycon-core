@@ -1,15 +1,16 @@
-
-import * as proto from "../serialization/proto"
-
 import { Block } from "../common/block"
 import { AnyBlockHeader, BaseBlockHeader, BlockHeader, GenesisBlockHeader } from "../common/blockHeader"
-import { GenesisSignedTx, GenesisTx, SignedTx, Tx } from "../common/tx"
+import { Tx } from "../common/tx"
+import { GenesisTx } from "../common/txGenesis"
+import { GenesisSignedTx } from "../common/txGenesisSigned"
+import { SignedTx } from "../common/txSigned"
 import { Account } from "../consensus/account"
 import { StateNode } from "../consensus/stateNode"
+import * as proto from "../serialization/proto"
 
-// tslint:disable:no-var-requires
-const Base58 = require("base-58")
-const blake2b = require("blake2b")
+import Base58 = require("base-58")
+import blake2b = require("blake2b")
+// tslint:disable-next-line:no-var-requires
 const cryptonight = require("node-cryptonight").asyncHash
 
 // tslint:disable-next-line:max-line-length
@@ -37,6 +38,7 @@ export class Hash extends Uint8Array {
     }
 
     public static hash(ob: Uint8Array | string): Uint8Array {
+        typeof ob === "string" ? ob = Buffer.from(ob) : ob = ob
         return blake2b(32).update(ob).digest()
     }
 
@@ -63,7 +65,7 @@ export class Hash extends Uint8Array {
         super(toUint8Array(ob))
     }
 
-    public toString() {
+    public toString(): string {
         return Base58.encode(this)
     }
 
