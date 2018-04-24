@@ -14,7 +14,9 @@ function checkSum(arr: Uint8Array): string {
 
 function toUint8Array(address: (string | Uint8Array)): Uint8Array {
     if (typeof address === "string") {
-        // TODO: Check 'H' prefix
+        if (address.charAt(0) !== "H") {
+            throw new Error(`Address is invalid. Expected address to start with 'H'`)
+        }
         const check = address.slice(-4)
         address = address.slice(1, -4)
         const out: Uint8Array = Base58.decode(address)
