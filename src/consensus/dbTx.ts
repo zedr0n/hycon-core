@@ -1,19 +1,18 @@
 import { Block } from "../common/block"
 import { BlockHeader } from "../common/blockHeader"
-import { SignedTx, Tx } from "../common/tx"
+import { Tx } from "../common/tx"
 import * as proto from "../serialization/proto"
 import { Hash } from "../util/hash"
 
-// tslint:disable:member-access
 export class DBTx implements proto.ITxDB {
     public static decode(data: Uint8Array): DBTx {
         const tx = proto.TxDB.decode(data)
         return new DBTx(tx)
     }
-    public hash !: Hash
-    public blockHash !: Hash
-    public blockHeight !: number
-    public txNumber !: number
+    public hash: Hash
+    public blockHash: Hash
+    public blockHeight: number
+    public txNumber: number
 
     constructor(dbTx?: proto.ITxDB) {
         if (dbTx) {

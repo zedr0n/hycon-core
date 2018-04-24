@@ -8,7 +8,9 @@
         "semicolon": [
             true,
             "never"
-        ]
+        ],
+        "no-empty": false,
+        "max-line-length": false
     },
     "rulesDirectory": []
 }

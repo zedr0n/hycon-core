@@ -3,8 +3,9 @@ import * as fs from "fs"
 import { getLogger } from "log4js"
 import * as proto from "../serialization/proto"
 import conf = require("../settings")
-import { AnyBlockHeader, BlockHeader, GenesisBlockHeader, setGenesisBlockHeader } from "./blockHeader"
-import { GenesisSignedTx, SignedTx } from "./tx"
+import { AnyBlockHeader, BlockHeader } from "./blockHeader"
+import { GenesisBlockHeader, setGenesisBlockHeader } from "./genesisHeader"
+import { GenesisSignedTx } from "./txGenesisSigned"
 
 const logger = getLogger("GenesisBlock")
 

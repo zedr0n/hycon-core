@@ -6,7 +6,8 @@ import * as utils from "../util/miningUtil"
 import { Address } from "./address"
 import { GenesisBlock } from "./blockGenesis"
 import { AnyBlockHeader, BlockHeader } from "./blockHeader"
-import { GenesisSignedTx, SignedTx } from "./tx"
+import { GenesisSignedTx } from "./txGenesisSigned"
+import { SignedTx } from "./txSigned"
 
 const logger = getLogger("Block")
 

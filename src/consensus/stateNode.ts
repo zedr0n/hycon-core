@@ -1,16 +1,14 @@
-import * as proto from "../serialization/proto"
-
 import { Address } from "../common/address"
+import * as proto from "../serialization/proto"
 import { Hash } from "../util/hash"
 import { NodeRef } from "./nodeRef"
 
-// tslint:disable:member-access
 export class StateNode implements proto.IStateNode {
     public static decode(data: Uint8Array): StateNode {
         const stateNode = proto.StateNode.decode(data)
         return new StateNode(stateNode)
     }
-    public nodeRefs !: NodeRef []
+    public nodeRefs: NodeRef[]
     constructor(stateNode?: proto.IStateNode) {
         if (stateNode !== undefined) {
             this.set(stateNode)

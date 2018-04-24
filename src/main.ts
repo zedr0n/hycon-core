@@ -5,7 +5,6 @@ configure({
     appenders: {
         console: { type: "stdout" },
         fileLogs: {
-            // tslint:disable-next-line:max-line-length
             filename: `./logs/${new Date().getFullYear()}-${(new Date().getMonth()) + 1}-${new Date().getDate()}/logFile.log`,
             keepFileExt: true,
             maxLogSize: 16777216,

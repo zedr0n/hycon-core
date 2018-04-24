@@ -1,7 +1,8 @@
 import Base58 = require("base-58")
 import blake2b = require("blake2b")
 import { Block } from "../common/block"
-import { AnyBlockHeader, BaseBlockHeader, BlockHeader, GenesisBlockHeader } from "../common/blockHeader"
+import { AnyBlockHeader, BlockHeader } from "../common/blockHeader"
+import { BaseBlockHeader, GenesisBlockHeader } from "../common/genesisHeader"
 import { Tx } from "../common/tx"
 import { GenesisTx } from "../common/txGenesis"
 import { GenesisSignedTx } from "../common/txGenesisSigned"
@@ -12,7 +13,6 @@ import * as proto from "../serialization/proto"
 // tslint:disable-next-line:no-var-requires
 const cryptonight = require("node-cryptonight").asyncHash
 
-// tslint:disable-next-line:max-line-length
 function toUint8Array(ob?: Tx | Block | GenesisBlockHeader | BlockHeader | string | Uint8Array | SignedTx | GenesisTx | GenesisSignedTx | StateNode | Account) {
     if (ob !== undefined) {
         if (typeof ob === "string") {
@@ -22,7 +22,6 @@ function toUint8Array(ob?: Tx | Block | GenesisBlockHeader | BlockHeader | strin
                 throw new Error(`Hash length ${ob.length} but should be 32`)
             }
             return ob
-            // tslint:disable-next-line:max-line-length
         } else if (ob instanceof Tx || ob instanceof BlockHeader || ob instanceof BaseBlockHeader || ob instanceof Block || ob instanceof SignedTx || ob instanceof StateNode || ob instanceof Account || ob instanceof GenesisBlockHeader || ob instanceof GenesisTx || ob instanceof GenesisSignedTx) {
             return Hash.hash(ob.encode())
         }
@@ -59,7 +58,6 @@ export class Hash extends Uint8Array {
         return new Hash(Base58.decode(str))
     }
 
-    // tslint:disable-next-line:max-line-length
     constructor(ob?: Tx | Block | GenesisBlockHeader | BlockHeader | string | Uint8Array | SignedTx | GenesisTx | GenesisSignedTx | StateNode | Account) {
         super(toUint8Array(ob))
     }

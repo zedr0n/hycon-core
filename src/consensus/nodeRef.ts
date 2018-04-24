@@ -1,15 +1,13 @@
 import * as proto from "../serialization/proto"
-
 import { Hash } from "../util/hash"
 
-// tslint:disable:member-access
 export class NodeRef implements proto.INodeRef {
     public static decode(data: Uint8Array): NodeRef {
         const nodeRef = proto.NodeRef.decode(data)
         return new NodeRef(nodeRef)
     }
-    public address !: Uint8Array
-    public child !: Hash
+    public address: Uint8Array
+    public child: Hash
 
     constructor(nodeRef?: proto.INodeRef) {
         if (nodeRef !== undefined) {

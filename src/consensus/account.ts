@@ -1,15 +1,13 @@
 import * as Long from "long"
 import * as proto from "../serialization/proto"
-
-// tslint:disable:member-access
 import { Hash } from "../util/hash"
 export class Account implements proto.IAccount {
     public static decode(data: Uint8Array): Account {
         const account = proto.Account.decode(data)
         return new Account(account)
     }
-    public balance !: number
-    public nonce !: number
+    public balance: number
+    public nonce: number
 
     constructor(account?: proto.IAccount) {
         if (account !== undefined) {

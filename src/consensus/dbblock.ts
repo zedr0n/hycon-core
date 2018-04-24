@@ -1,14 +1,15 @@
 import { Block } from "../common/block"
-import { AnyBlockHeader, BlockHeader, setGenesisBlockHeader } from "../common/blockHeader"
+import { AnyBlockHeader, BlockHeader } from "../common/blockHeader"
+import { setGenesisBlockHeader } from "../common/genesisHeader"
 import * as proto from "../serialization/proto"
-// tslint:disable:member-access
+
 export class DBBlock implements proto.IBlockDB {
     public static decode(data: Uint8Array): DBBlock {
         const blockDB = proto.BlockDB.decode(data)
         return new DBBlock(blockDB)
     }
-    public height !: number
-    public header !: AnyBlockHeader
+    public height: number
+    public header: AnyBlockHeader
     public fileNumber?: number
     public offset?: number
     public length?: number

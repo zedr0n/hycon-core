@@ -1,12 +1,8 @@
 import * as proto from "../serialization/proto"
-
-import { SignedTx, Tx } from "../common/tx"
 import { Hash } from "../util/hash"
 import { Account } from "./account"
 import { StateNode } from "./stateNode"
 
-// tslint:disable:member-access
-// tslint:disable:unified-signatures
 export class DBState implements proto.IDBState {
     public static decode(data: Uint8Array): DBState {
         const state = proto.DBState.decode(data)
@@ -14,11 +10,10 @@ export class DBState implements proto.IDBState {
     }
     public account?: Account
     public node?: StateNode
-    public refCount !: number
-    constructor()
+    public refCount: number
 
-    constructor(dbState: proto.IDBState)
-    constructor(dbState: Account | StateNode, refCount?: number)
+    constructor(dbState?: proto.IDBState)
+    constructor(dbState?: Account | StateNode, refCount?: number)
     constructor(dbState?: (proto.IDBState | Account | StateNode), refCount: number = 0) {
         if (dbState instanceof Account) {
             this.account = dbState

@@ -40,8 +40,8 @@ export class Address extends Uint8Array {
     }
 
     constructor(address: string | Uint8Array | number) {
-        // tslint:disable-next-line:max-line-length
-        typeof address === "number" ? super(address) : super(toUint8Array(address)) // Need to allow for super constructor for number due to extension of Uint8Array
+        typeof address === "number" ? super(address) : super(toUint8Array(address))
+        // Need to allow for super constructor for number due to extension of Uint8Array
     }
 
     public toString(): string {
