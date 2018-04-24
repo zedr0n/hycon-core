@@ -45,3 +45,25 @@ export class Tx implements proto.ITx {
         return proto.Tx.encode(this).finish()
     }
 }
+
+export class SignedTx implements proto.ITx {
+    public from: Address
+    public to: Address
+    public amount: number
+    public fee: number
+    public nonce: number
+    public signature: Uint8Array
+    public recovery: number
+}
+
+export class GenesisTx implements proto.ITx {
+    public to: Address
+    public amount: number
+}
+
+export class GenesisSignedTx implements proto.ITx {
+    public to: Address
+    public amount: number
+    public signature: Uint8Array
+    public recovery: number
+}
