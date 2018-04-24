@@ -1,3 +1,5 @@
+import Base58 = require("base-58")
+import blake2b = require("blake2b")
 import { Block } from "../common/block"
 import { AnyBlockHeader, BaseBlockHeader, BlockHeader, GenesisBlockHeader } from "../common/blockHeader"
 import { Tx } from "../common/tx"
@@ -7,9 +9,6 @@ import { SignedTx } from "../common/txSigned"
 import { Account } from "../consensus/account"
 import { StateNode } from "../consensus/stateNode"
 import * as proto from "../serialization/proto"
-
-import Base58 = require("base-58")
-import blake2b = require("blake2b")
 // tslint:disable-next-line:no-var-requires
 const cryptonight = require("node-cryptonight").asyncHash
 
