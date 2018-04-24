@@ -1,9 +1,9 @@
-import * as proto from "../serialization/proto"
-import { Hash } from "../util/hash"
+import * as proto from "../../serialization/proto"
+import { Hash } from "../../util/hash"
 import { Account } from "./account"
 import { StateNode } from "./stateNode"
-
 export class DBState implements proto.IDBState {
+
     public static decode(data: Uint8Array): DBState {
         const state = proto.DBState.decode(data)
         return new DBState(state)
@@ -12,8 +12,8 @@ export class DBState implements proto.IDBState {
     public node?: StateNode
     public refCount: number
 
-    constructor(dbState?: proto.IDBState)
-    constructor(dbState?: Account | StateNode, refCount?: number)
+    constructor(dbState: proto.IDBState)
+    constructor(dbState: Account | StateNode, refCount?: number)
     constructor(dbState?: (proto.IDBState | Account | StateNode), refCount: number = 0) {
         if (dbState instanceof Account) {
             this.account = dbState
@@ -42,8 +42,6 @@ export class DBState implements proto.IDBState {
                 this.node = new StateNode(state.node)
             }
         }
-
-        this.refCount = state.refCount
     }
 
     public hash(): Hash {
@@ -52,6 +50,7 @@ export class DBState implements proto.IDBState {
         }
         return new Hash(this.node)
     }
+
     public encode(): Uint8Array {
         return proto.DBState.encode(this).finish()
     }

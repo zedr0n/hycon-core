@@ -1,12 +1,11 @@
 import { getLogger } from "log4js"
 import merkle = require("merkle-lib")
 import * as proto from "../serialization/proto"
+import * as utils from "../util/difficulty"
 import { Hash } from "../util/hash"
-import * as utils from "../util/miningUtil"
 import { Address } from "./address"
 import { GenesisBlock } from "./blockGenesis"
 import { AnyBlockHeader, BlockHeader } from "./blockHeader"
-import { GenesisSignedTx } from "./txGenesisSigned"
 import { SignedTx } from "./txSigned"
 
 const logger = getLogger("Block")
@@ -14,8 +13,15 @@ const logger = getLogger("Block")
 export type AnyBlock = (Block | GenesisBlock)
 
 export class Block implements proto.IBlock {
-    public static decode(data: Uint8Array): Block {
+    public static decode(data: Uint8Array): AnyBlock {
         const block = proto.Block.decode(data)
+        let genesis
+        if (block && block.header) {
+            if (block.header.difficulty === 0 && block.header.previousHash === undefined) {
+                genesis = new GenesisBlock(block)
+                return genesis
+            }
+        }
         return new Block(block)
     }
 
@@ -46,30 +52,6 @@ export class Block implements proto.IBlock {
         this.miner = new Address(block.miner)
     }
 
-    public verify(): boolean {
-        // TODO: Use cryptonight, prehash and nonce
-        const hexHeader = new Hash(this.header).toHex()
-        const diff = utils.unforcedInt(this.header.difficulty)
-        const hexDifficulty = utils.difficulty(diff)
-
-        // TODO: Fix Not enough precision?
-        if (Number(hexHeader) >= Number(hexDifficulty)) {
-            return false
-        }
-
-        const txVerify = this.txs.every((tx) => tx.verify())
-        if (!txVerify) {
-            return false
-        }
-
-        const merkleRootVerify = this.calculateMerkleRoot().equals(this.header.merkleRoot)
-        if (!merkleRootVerify) {
-            return false
-        }
-
-        return true
-    }
-
     public updateMerkleRoot(): void {
         this.header.merkleRoot = this.calculateMerkleRoot()
     }
@@ -78,7 +60,7 @@ export class Block implements proto.IBlock {
         return proto.Block.encode(this).finish()
     }
 
-    private calculateMerkleRoot(): Hash {
+    public calculateMerkleRoot(): Hash {
         const values: Uint8Array[] = []
         this.txs.forEach((tx) => {
             const hash = Hash.hash(proto.Tx.encode(tx).finish())

@@ -56,11 +56,6 @@ export class SignedTx implements proto.ITx {
         this.recovery = stx.recovery
     }
 
-    public verify(): boolean {
-        const pubkey = new PublicKey(this)
-        return pubkey.verify(this)
-    }
-
     public equals(tx: SignedTx): boolean {
         if (this.amount !== tx.amount) {
             return false

@@ -259,7 +259,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
             const blockPromise: Array<Promise<AnyBlock>> = []
             for (const iHash of request.hashes) {
                 const hash = new Hash(iHash)
-                blockPromise.push(this.concensus.getBlocksByHash(hash))
+                blockPromise.push(this.concensus.getBlockByHash(hash))
             }
             const blocks = await Promise.all(blockPromise)
             message = { getBlocksByHashReturn: { success: true, blocks } }

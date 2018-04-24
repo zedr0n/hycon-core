@@ -49,5 +49,20 @@
             "port": 9231,
             "protocol": "inspector"
         },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "debugReorg",
+            "runtimeExecutable": "npm",
+            "windows": {
+                "runtimeExecutable": "npm.cmd"
+            },
+            "runtimeArgs": [
+                "run",
+                "debugReorg"
+            ],
+            "port": 9233,
+            "protocol": "inspector"
+        },
     ]
 }

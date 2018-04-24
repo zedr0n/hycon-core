@@ -1,6 +1,7 @@
 import blake2b = require("blake2b")
 import * as Long from "long"
 import * as proto from "../serialization/proto"
+import * as utils from "../util/difficulty"
 import { Hash } from "../util/hash"
 import { BaseBlockHeader, GenesisBlockHeader } from "./genesisHeader"
 

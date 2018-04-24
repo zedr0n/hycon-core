@@ -10,8 +10,8 @@ message Block {
 
 message BlockDB {
     int32 height = 1;
-    int32 fileNumber = 2;
-    int32 offset = 3;
-    BlockHeader header = 4;
+    BlockHeader header = 2;
+    int32 fileNumber = 3;
+    int32 offset = 4;
     int32 length = 5;
 }

@@ -1,8 +1,8 @@
 *.ts-e
+*.sw?
 build
 logs
 node_modules
+package-lock.json
 test.ts
-.DS_Store
-
-
+deleteme*/

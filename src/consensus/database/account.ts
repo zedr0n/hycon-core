@@ -1,6 +1,5 @@
-import * as Long from "long"
-import * as proto from "../serialization/proto"
-import { Hash } from "../util/hash"
+import Long = require("long")
+import * as proto from "../../serialization/proto"
 export class Account implements proto.IAccount {
     public static decode(data: Uint8Array): Account {
         const account = proto.Account.decode(data)
@@ -21,6 +20,7 @@ export class Account implements proto.IAccount {
         this.balance = account.balance instanceof Long ? account.balance.toInt() : account.balance
         this.nonce = account.nonce
     }
+
     public encode(): Uint8Array {
         return proto.Account.encode(this).finish()
     }

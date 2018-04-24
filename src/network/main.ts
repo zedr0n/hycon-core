@@ -1,2 +1,2 @@
 import { NatUpnp } from "./nat"
-let natUpnp = new NatUpnp(8150)
+const natUpnp = new NatUpnp(8150)

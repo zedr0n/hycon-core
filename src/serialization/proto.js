@@ -5664,9 +5664,9 @@ $root.BlockDB = (function() {
      * @exports IBlockDB
      * @interface IBlockDB
      * @property {number|null} [height] BlockDB height
+     * @property {IBlockHeader|null} [header] BlockDB header
      * @property {number|null} [fileNumber] BlockDB fileNumber
      * @property {number|null} [offset] BlockDB offset
-     * @property {IBlockHeader|null} [header] BlockDB header
      * @property {number|null} [length] BlockDB length
      */
 
@@ -5694,6 +5694,14 @@ $root.BlockDB = (function() {
     BlockDB.prototype.height = 0;
 
     /**
+     * BlockDB header.
+     * @member {IBlockHeader|null|undefined} header
+     * @memberof BlockDB
+     * @instance
+     */
+    BlockDB.prototype.header = null;
+
+    /**
      * BlockDB fileNumber.
      * @member {number} fileNumber
      * @memberof BlockDB
@@ -5708,14 +5716,6 @@ $root.BlockDB = (function() {
      * @instance
      */
     BlockDB.prototype.offset = 0;
-
-    /**
-     * BlockDB header.
-     * @member {IBlockHeader|null|undefined} header
-     * @memberof BlockDB
-     * @instance
-     */
-    BlockDB.prototype.header = null;
 
     /**
      * BlockDB length.
@@ -5751,12 +5751,12 @@ $root.BlockDB = (function() {
             writer = $Writer.create();
         if (message.height != null && message.hasOwnProperty("height"))
             writer.uint32(/* id 1, wireType 0 =*/8).int32(message.height);
-        if (message.fileNumber != null && message.hasOwnProperty("fileNumber"))
-            writer.uint32(/* id 2, wireType 0 =*/16).int32(message.fileNumber);
-        if (message.offset != null && message.hasOwnProperty("offset"))
-            writer.uint32(/* id 3, wireType 0 =*/24).int32(message.offset);
         if (message.header != null && message.hasOwnProperty("header"))
-            $root.BlockHeader.encode(message.header, writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
+            $root.BlockHeader.encode(message.header, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+        if (message.fileNumber != null && message.hasOwnProperty("fileNumber"))
+            writer.uint32(/* id 3, wireType 0 =*/24).int32(message.fileNumber);
+        if (message.offset != null && message.hasOwnProperty("offset"))
+            writer.uint32(/* id 4, wireType 0 =*/32).int32(message.offset);
         if (message.length != null && message.hasOwnProperty("length"))
             writer.uint32(/* id 5, wireType 0 =*/40).int32(message.length);
         return writer;
@@ -5797,13 +5797,13 @@ $root.BlockDB = (function() {
                 message.height = reader.int32();
                 break;
             case 2:
-                message.fileNumber = reader.int32();
+                message.header = $root.BlockHeader.decode(reader, reader.uint32());
                 break;
             case 3:
-                message.offset = reader.int32();
+                message.fileNumber = reader.int32();
                 break;
             case 4:
-                message.header = $root.BlockHeader.decode(reader, reader.uint32());
+                message.offset = reader.int32();
                 break;
             case 5:
                 message.length = reader.int32();
@@ -5846,17 +5846,17 @@ $root.BlockDB = (function() {
         if (message.height != null && message.hasOwnProperty("height"))
             if (!$util.isInteger(message.height))
                 return "height: integer expected";
+        if (message.header != null && message.hasOwnProperty("header")) {
+            var error = $root.BlockHeader.verify(message.header);
+            if (error)
+                return "header." + error;
+        }
         if (message.fileNumber != null && message.hasOwnProperty("fileNumber"))
             if (!$util.isInteger(message.fileNumber))
                 return "fileNumber: integer expected";
         if (message.offset != null && message.hasOwnProperty("offset"))
             if (!$util.isInteger(message.offset))
                 return "offset: integer expected";
-        if (message.header != null && message.hasOwnProperty("header")) {
-            var error = $root.BlockHeader.verify(message.header);
-            if (error)
-                return "header." + error;
-        }
         if (message.length != null && message.hasOwnProperty("length"))
             if (!$util.isInteger(message.length))
                 return "length: integer expected";
@@ -5877,15 +5877,15 @@ $root.BlockDB = (function() {
         var message = new $root.BlockDB();
         if (object.height != null)
             message.height = object.height | 0;
-        if (object.fileNumber != null)
-            message.fileNumber = object.fileNumber | 0;
-        if (object.offset != null)
-            message.offset = object.offset | 0;
         if (object.header != null) {
             if (typeof object.header !== "object")
                 throw TypeError(".BlockDB.header: object expected");
             message.header = $root.BlockHeader.fromObject(object.header);
         }
+        if (object.fileNumber != null)
+            message.fileNumber = object.fileNumber | 0;
+        if (object.offset != null)
+            message.offset = object.offset | 0;
         if (object.length != null)
             message.length = object.length | 0;
         return message;
@@ -5906,19 +5906,19 @@ $root.BlockDB = (function() {
         var object = {};
         if (options.defaults) {
             object.height = 0;
+            object.header = null;
             object.fileNumber = 0;
             object.offset = 0;
-            object.header = null;
             object.length = 0;
         }
         if (message.height != null && message.hasOwnProperty("height"))
             object.height = message.height;
+        if (message.header != null && message.hasOwnProperty("header"))
+            object.header = $root.BlockHeader.toObject(message.header, options);
         if (message.fileNumber != null && message.hasOwnProperty("fileNumber"))
             object.fileNumber = message.fileNumber;
         if (message.offset != null && message.hasOwnProperty("offset"))
             object.offset = message.offset;
-        if (message.header != null && message.hasOwnProperty("header"))
-            object.header = $root.BlockHeader.toObject(message.header, options);
         if (message.length != null && message.hasOwnProperty("length"))
             object.length = message.length;
         return object;

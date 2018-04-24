@@ -5,6 +5,8 @@ const dTime: number[] = []
 let ema: number = 30000
 const weight: number = 0.3
 const target: number = 30000
+
+// tslint:disable:no-bitwise
 function updateDifficulty(newDifficulty: number): void {
     lastDifficulty = newDifficulty
 }
@@ -50,4 +52,43 @@ export function getTargetDifficulty(): number {
     } else {
         return lastDifficulty - ((ema - target) * weight)
     }
+}
+
+export function difficulty(diff: number): string {
+    let str = ""
+    for (let i = 0; i < Math.floor(diff); i++) {
+        str += "0"
+    }
+    str += subHex(10000 * (diff - Math.floor(diff)))
+    while (str.length !== 64) {
+        str += "0"
+    }
+    return str
+}
+
+function subHex(num: number): string {
+    return Math.round((0xFFFF - (num * 1e-4) * (0xFFFF - 0x1000))).toString(16)
+}
+
+export function forcedInt(float: number) {
+    const int = Math.floor(float)
+    const decimal = Number(String((float - int).toPrecision(4)).replace(/0\./, ""))
+
+    return decimal | ((int & 0xFF) << 24)
+}
+
+export function unforcedInt(intNum: number) {
+    const int = intNum >> 24
+    const decimal = 1.e-4 * (intNum & 0xFFFFFF)
+    return int + decimal
+}
+
+export function hexToUint8Array(str: string): Uint8Array {
+    const arr: number[] = []
+    while (str.length >= 2) {
+        arr.push(parseInt(str.substring(0, 2), 16))
+        str = str.substring(2, str.length)
+    }
+    const result = new Uint8Array(arr)
+    return result
 }

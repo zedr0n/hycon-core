@@ -1,11 +1,10 @@
 import * as ip from "ip"
 import { getLogger } from "log4js"
 import { INetwork } from "./inetwork"
-//import { TurtleNetwork } from "./turtle/turtleNetwork"
 
 const logger = getLogger("Upnp")
 logger.level = "debug"
-type TurtleNetwork = any;
+type TurtleNetwork = any
 
 export class UpnpServer {
 
@@ -41,12 +40,12 @@ export class UpnpServer {
 // tslint:disable-next-line:max-classes-per-file
 export class UpnpClient {
 
-    public localPeer: Map<string, string>
     public static threshold: number = 30 * 1000
-    public appNetwork: TurtleNetwork
+    public localPeer: Map<string, string>
+    public appNetwork: INetwork
     public count: number = 0
 
-    constructor(appNetwork: TurtleNetwork) {
+    constructor(appNetwork: INetwork) {
         this.appNetwork = appNetwork
         this.localPeer = new Map()
         setTimeout(() => {

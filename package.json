@@ -14,7 +14,8 @@
     "startRabbit": "./node_modules/.bin/ts-node src/network/rabbit/main.ts --port=8148",
     "testNetwork1": "./node_modules/.bin/ts-node src/main.ts --port=8151",
     "testNetwork2": "./node_modules/.bin/ts-node src/main.ts --port=8152",
-    "testNetwork3": "./node_modules/.bin/ts-node src/main.ts --port=8153"
+    "testNetwork3": "./node_modules/.bin/ts-node src/main.ts --port=8153",
+    "reorg": "rm -rf deleteme* && ./node_modules/.bin/ts-node src/consensus/reorg_test.ts"
   },
   "author": "",
   "license": "ISC",
@@ -24,6 +25,7 @@
     "@types/delay": "^2.0.1",
     "@types/fs-extra": "^5.0.2",
     "@types/ip": "0.0.30",
+    "@types/levelup": "git://github.com/OwenDelahoy/levelup-types.git",
     "@types/log4js": "^2.3.5",
     "@types/node": "^9.6.6",
     "protobufjs": "^6.8.6",

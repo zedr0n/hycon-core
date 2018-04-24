@@ -1,6 +1,4 @@
 syntax = "proto3";
-import "address.proto";
-import "hash.proto";
 message Txs {
   repeated Tx txs =1;
 }

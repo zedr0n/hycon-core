@@ -1,12 +1,13 @@
 import { getLogger } from "log4js"
 import { Server } from "../server"
-import { ITxPool } from "./txPool"
+import { Hash } from "../util/hash"
+import { ITxPool } from "./itxPool"
 import { SignedTx } from "./txSigned"
 
 const logger = getLogger("AppTxPool")
 export class AppTxPool implements ITxPool {
-    private server: Server
     private txPool: SignedTx[] = []
+    private server: Server
     private topNumber: number = 10
     private topList: SignedTx[] = []
     private txListCallbacks: Array<(txs: SignedTx[]) => void> = []
@@ -86,11 +87,15 @@ export class AppTxPool implements ITxPool {
     }
 
     private getTxs(n: number): SignedTx[] {
-        const txs = []
-        for (let i = 0; i < n; i++) {
-            txs.push(this.txPool[i])
+        if (n >= this.txPool.length) {
+            return this.txPool.slice()
+        } else {
+            const txs = []
+            for (let i = 0; i < n; i++) {
+                txs.push(this.txPool[i])
+            }
+            return txs
         }
-        return txs
     }
 
     private topTxCallback(): void {

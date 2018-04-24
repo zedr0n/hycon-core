@@ -47,7 +47,7 @@ export class MinerServer implements IMiner {
         }
     }
 
-    public newCandidateBlock(candidateBlock: Block, stateTransition: StateTransition): void {
+    public newCandidateBlock(candidateBlock: Block): void {
         logger.info(`Send candidate block to miner : ${candidateBlock.header.preHash().toString()}`)
 
         // check same block
@@ -58,7 +58,6 @@ export class MinerServer implements IMiner {
         }
         this.block = candidateBlock
         this.prehash = hash
-        this.stateTransition = stateTransition
 
         // set Target
         const target = candidateBlock.header.difficulty

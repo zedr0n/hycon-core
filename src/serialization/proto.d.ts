@@ -2271,14 +2271,14 @@ export interface IBlockDB {
     /** BlockDB height */
     height?: number;
 
+    /** BlockDB header */
+    header?: IBlockHeader;
+
     /** BlockDB fileNumber */
     fileNumber?: number;
 
     /** BlockDB offset */
     offset?: number;
-
-    /** BlockDB header */
-    header?: IBlockHeader;
 
     /** BlockDB length */
     length?: number;
@@ -2296,14 +2296,14 @@ export class BlockDB implements IBlockDB {
     /** BlockDB height. */
     public height: number;
 
+    /** BlockDB header. */
+    public header?: IBlockHeader;
+
     /** BlockDB fileNumber. */
     public fileNumber: number;
 
     /** BlockDB offset. */
     public offset: number;
-
-    /** BlockDB header. */
-    public header?: IBlockHeader;
 
     /** BlockDB length. */
     public length: number;

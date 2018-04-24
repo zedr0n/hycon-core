@@ -1,15 +1,19 @@
 import commandLineArgs = require("command-line-args")
+import { randomBytes } from "crypto"
 import { getLogger } from "log4js"
 import { AppTxPool } from "./common/appTxPool"
-import { ITxPool } from "./common/txPool"
-import { AppConsensus } from "./consensus/appConsensus"
+import { Block } from "./common/block"
+import { ITxPool } from "./common/itxPool"
+import { SignedTx } from "./common/txSigned"
 import { IConsensus } from "./consensus/iconsensus"
+import { SingleChain } from "./consensus/singleChain"
 import { AppMiner } from "./miner/appMiner"
 import { IMiner } from "./miner/miner"
 import { INetwork } from "./network/inetwork"
 import { RabbitNetwork } from "./network/rabbit/network" // for speed
 import { RestManager } from "./rest/restManager"
 import { TestServer } from "./testServer"
+import { Hash } from "./util/hash"
 import { WalletManager } from "./wallet/walletManager"
 
 const optionDefinitions = [
@@ -44,16 +48,16 @@ export class Server {
         logger.info(`Verbose=${this.options.verbose}`)
         logger.info(`Port=${this.options.port}`)
 
-        this.consensus = new AppConsensus(this)
+        this.consensus = new SingleChain(this, "./deleteme.db", "./deleteme.ws", "./deleteme.file")
         this.network = new RabbitNetwork(this, this.options.port)
 
         this.wallet = new WalletManager(this)
         this.miner = new AppMiner(this)
         this.txPool = new AppTxPool(this)
         this.rest = new RestManager(this)
-
     }
-    public run() {
+    public async run() {
+        await this.consensus.init()
         logger.info("Starting server...")
         this.network.start()
         this.readOptions()
@@ -68,5 +72,37 @@ export class Server {
             this.test = new TestServer(this)
         }
 
+    }
+
+    // TODO : Block, hash, SignedTx, randomBytes import, and testMakeBlock(db, consensus) remove
+    // tslint:disable-next-line:member-ordering
+    public async testReorg() {
+        const stxArray: SignedTx[] = []
+        for (let i = 0; i < 10; i++) {
+            stxArray.push(new SignedTx({
+                amount: 10000,
+                fee: 1,
+                from: randomBytes(20),
+                nonce: 1,
+                recovery: 1,
+                signature: randomBytes(32),
+                to: randomBytes(20),
+            }))
+        }
+        setTimeout(async () => {
+            await this.consensus.testMakeBlock(stxArray.slice(0, 3)).then(async (value: Block) => {
+                await this.consensus.testMakeBlock(stxArray.slice(3, 7)).then(async (value2: Block) => {
+                    await this.consensus.putBlock(value2)
+                })
+                await this.consensus.putBlock(value).then(async () => {
+                    setTimeout(() => {
+                        logger.debug(`Start 3`)
+                        this.consensus.testMakeBlock(stxArray.slice(0, 2)).then(async (value3: Block) => {
+                            await this.consensus.putBlock(value3)
+                        })
+                    }, 100)
+                })
+            })
+        }, 1000)
     }
 }

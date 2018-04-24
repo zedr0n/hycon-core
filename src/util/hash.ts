@@ -7,8 +7,8 @@ import { Tx } from "../common/tx"
 import { GenesisTx } from "../common/txGenesis"
 import { GenesisSignedTx } from "../common/txGenesisSigned"
 import { SignedTx } from "../common/txSigned"
-import { Account } from "../consensus/account"
-import { StateNode } from "../consensus/stateNode"
+import { Account } from "../consensus/database/account"
+import { StateNode } from "../consensus/database/stateNode"
 import * as proto from "../serialization/proto"
 // tslint:disable-next-line:no-var-requires
 const cryptonight = require("node-cryptonight").asyncHash
