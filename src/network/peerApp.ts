@@ -7,19 +7,18 @@ import { IPingReturn, IPutTxReturn, Ping, PingReturn, PutTx, PutTxReturn, Tx } f
 import { GetHeadersByHashReturn, IPutBlockReturn, PutBlock, PutBlockReturn } from "../serialization/proto"
 import * as proto from "../serialization/proto"
 import { AppNetwork } from "./appNetwork"
-import { BasicPeer, PeerMode, PeerState } from "./basicPeer"
-import { NetPeer } from "./netPeer"
 import { Packet } from "./packet"
 import { IPeer } from "./peer"
+import { peerBasic, PeerMode, PeerState } from "./peerBasic"
+import { peerNet } from "./peerNet"
 
 const delay = require("delay")
 const logger = getLogger("AppPeer")
 logger.level = "debug"
 
-export class AppPeer extends NetPeer {
+export class peerApp extends peerNet {
     constructor(server: AppNetwork, socket: Socket, mode: PeerMode) {
         super(server, socket, mode)
-
 
     }
 

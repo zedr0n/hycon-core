@@ -2,9 +2,9 @@ import { getLogger } from "log4js"
 import { Block } from "../serialization/proto"
 import { Ping } from "../serialization/proto"
 import { AppNetwork } from "./appNetwork"
-import { AppPeer } from "./appPeer"
 import { INetwork } from "./network"
 import { IPeer } from "./peer"
+import { peerApp } from "./peerApp"
 
 const logger = getLogger("Network")
 logger.level = "debug"

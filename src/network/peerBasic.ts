@@ -19,7 +19,7 @@ export enum PeerState {
     Connected,
 }
 
-export abstract class BasicPeer {
+export abstract class peerBasic {
     public server: AppNetwork
     public socket: Socket
     public socketBuffer = new SocketBuffer
