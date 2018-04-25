@@ -20,7 +20,7 @@ export class Block implements proto.IBlock {
 
     public header: BlockHeader
     public txs: SignedTx[]
-    public miner: Address
+    public miner: Address// TODO: move miner to header
 
     constructor(block: proto.IBlock) {
         this.set(block)
@@ -46,6 +46,7 @@ export class Block implements proto.IBlock {
     }
 
     public verify(): boolean {
+        // TODO: Use cryptonight, prehash and nonce
         const hexHeader = new Hash(this.header).toHex()
         const diff = utils.unforcedInt(this.header.difficulty)
         const hexDifficulty = utils.difficulty(diff)
