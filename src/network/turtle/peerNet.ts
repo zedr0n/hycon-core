@@ -1,6 +1,6 @@
 import { getLogger } from "log4js"
-import * as net from "net"
 import { Socket } from "net"
+import * as net from "net"
 import { setTimeout } from "timers"
 import { IGetBlocksByHashReturn, IGetHeadersByHashReturn } from "../serialization/proto"
 import { IGetBlocksByRangeReturn, IGetHeadersByRangeReturn } from "../serialization/proto"
@@ -11,12 +11,12 @@ import * as proto from "../serialization/proto"
 import { AppNetwork } from "./appNetwork"
 import { Packet } from "./packet"
 import { IPeer } from "./peer"
-import { peerBasic, PeerMode, PeerState } from "./peerBasic"
+import { PeerBasic, PeerMode, PeerState } from "./peerBasic"
 const delay = require("delay")
 const logger = getLogger("NetPeer")
 logger.level = "debug"
 
-export abstract class peerNet extends peerBasic implements IPeer {
+export abstract class PeerNet extends PeerBasic implements IPeer {
     private static MaxTryCount = 20
     private static PollingStep = 100  // milli seconds
 
@@ -75,9 +75,9 @@ export abstract class peerNet extends peerBasic implements IPeer {
     // ping
     public async ping(): Promise<PingReturn> {
         this.sendPing()
-        let i = peerNet.MaxTryCount
+        let i = PeerNet.MaxTryCount
         while (i-- > 0) {
-            await delay(peerNet.PollingStep)
+            await delay(PeerNet.PollingStep)
             if (this.pingReturn) {
                 const ret = this.pingReturn
                 this.pingReturn = undefined
@@ -100,9 +100,9 @@ export abstract class peerNet extends peerBasic implements IPeer {
     // putTx
     public async putTx(tx: Tx): Promise<boolean> {
         this.sendPutTx(tx)
-        let i = peerNet.MaxTryCount
+        let i = PeerNet.MaxTryCount
         while (i-- > 0) {
-            await delay(peerNet.PollingStep)
+            await delay(PeerNet.PollingStep)
             if (this.putTxReturn) {
                 const ret = this.putTxReturn.success
                 this.putTxReturn = undefined
@@ -124,9 +124,9 @@ export abstract class peerNet extends peerBasic implements IPeer {
     // get txs
     public async getTxs(minFee: number): Promise<proto.ITx[]> {
         this.sendGetTxs(minFee)
-        let i = peerNet.MaxTryCount
+        let i = PeerNet.MaxTryCount
         while (i-- > 0) {
-            await delay(peerNet.PollingStep)
+            await delay(PeerNet.PollingStep)
             if (this.getTxsReturn) {
                 const ret = this.getTxsReturn.txs
                 this.getTxsReturn = undefined
@@ -149,9 +149,9 @@ export abstract class peerNet extends peerBasic implements IPeer {
     // putBlock
     public async putBlock(tx: Block): Promise<boolean> {
         this.sendPutBlock(tx)
-        let i = peerNet.MaxTryCount
+        let i = PeerNet.MaxTryCount
         while (i-- > 0) {
-            await delay(peerNet.PollingStep)
+            await delay(PeerNet.PollingStep)
             if (this.putBlockReturn) {
                 const ret = this.putBlockReturn.success
                 this.putBlockReturn = undefined
@@ -173,9 +173,9 @@ export abstract class peerNet extends peerBasic implements IPeer {
     // get blocks by hash
     public async getBlocksByHash(hash: any[]): Promise<boolean> {
         this.sendGetBlocksByHash([])
-        let i = peerNet.MaxTryCount
+        let i = PeerNet.MaxTryCount
         while (i-- > 0) {
-            await delay(peerNet.PollingStep)
+            await delay(PeerNet.PollingStep)
             if (this.getBlocksByHashReturn) {
                 const ret = this.getBlocksByHashReturn.success
                 this.putBlockReturn = undefined
@@ -198,9 +198,9 @@ export abstract class peerNet extends peerBasic implements IPeer {
     // get headers by hash
     public async getHeadersByHash(hash: any[]): Promise<BlockHeader[]> {
         this.sendGetHeadersByHash(hash)
-        let i = peerNet.MaxTryCount
+        let i = PeerNet.MaxTryCount
         while (i-- > 0) {
-            await delay(peerNet.PollingStep)
+            await delay(PeerNet.PollingStep)
             if (this.getHeadersByHashReturn) {
                 const ret: BlockHeader[] = []
                 for (const v of this.getHeadersByHashReturn.headers) {
@@ -226,9 +226,9 @@ export abstract class peerNet extends peerBasic implements IPeer {
     // get blocks  by range
     public async getBlocksByRange(fromHeight: number, count: number): Promise<IBlock[]> {
         this.sendGetBlocksByRange(fromHeight, count)
-        let i = peerNet.MaxTryCount
+        let i = PeerNet.MaxTryCount
         while (i-- > 0) {
-            await delay(peerNet.PollingStep)
+            await delay(PeerNet.PollingStep)
             if (this.getBlocksByRangeReturn) {
                 const ret = this.getBlocksByRangeReturn.blocks
                 this.getBlocksByRangeReturn = undefined
@@ -251,9 +251,9 @@ export abstract class peerNet extends peerBasic implements IPeer {
     // get headers  by range
     public async getHeadersByRange(fromHeight: number, count: number): Promise<proto.IBlockHeader[]> {
         this.sendGetHeadersByRange(fromHeight, count)
-        let i = peerNet.MaxTryCount
+        let i = PeerNet.MaxTryCount
         while (i-- > 0) {
-            await delay(peerNet.PollingStep)
+            await delay(PeerNet.PollingStep)
             if (this.getHeadersByRangeReturn) {
                 const ret = this.getHeadersByRangeReturn.headers
                 this.getHeadersByRangeReturn = undefined
@@ -269,6 +269,16 @@ export abstract class peerNet extends peerBasic implements IPeer {
 
     public sendGetHeadersByRangeReturn(success: boolean, headers: BlockHeader[]) {
         const encodeReq = proto.Node.encode({ getHeadersByRangeReturn: { success, headers } }).finish()
+        this.sendBuffer(encodeReq)
+    }
+
+    public sendGetPeers(count: number) {
+        const encodeReq = proto.Node.encode({ getPeers: { count } }).finish()
+        this.sendBuffer(encodeReq)
+    }
+
+    public sendGetPeersReturn(success: boolean, peers: proto.Peer[]) {
+        const encodeReq = proto.Node.encode({ getPeersReturn: { success, peers } }).finish()
         this.sendBuffer(encodeReq)
     }
 

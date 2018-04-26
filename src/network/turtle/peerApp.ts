@@ -9,14 +9,14 @@ import * as proto from "../serialization/proto"
 import { AppNetwork } from "./appNetwork"
 import { Packet } from "./packet"
 import { IPeer } from "./peer"
-import { peerBasic, PeerMode, PeerState } from "./peerBasic"
-import { peerNet } from "./peerNet"
+import { PeerBasic, PeerMode, PeerState } from "./peerBasic"
+import { PeerNet } from "./peerNet"
 
 const delay = require("delay")
 const logger = getLogger("AppPeer")
 logger.level = "debug"
 
-export class peerApp extends peerNet {
+export class PeerApp extends PeerNet {
     constructor(server: AppNetwork, socket: Socket, mode: PeerMode) {
         super(server, socket, mode)
 

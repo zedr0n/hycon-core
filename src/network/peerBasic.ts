@@ -19,7 +19,7 @@ export enum PeerState {
     Connected,
 }
 
-export abstract class peerBasic {
+export abstract class PeerBasic {
     public server: AppNetwork
     public socket: Socket
     public socketBuffer = new SocketBuffer
@@ -28,6 +28,7 @@ export abstract class peerBasic {
     public ip: string
     public port: number
     public state: PeerState = PeerState.Connected
+
 
     protected connectedCallback: () => void = undefined
 
