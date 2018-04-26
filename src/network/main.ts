@@ -24,7 +24,7 @@ async function pollingNewone() {
 }
 function testNetwork() {
     logger.debug(`Network`)
-    const tcp: INetwork = new AppNetwork()
+    const tcp: INetwork = new AppNetwork(undefined, undefined)
     tcp.start()
     newone = tcp.addClient("localhost", 8148)
     newone.setConnectedCallback(() => {

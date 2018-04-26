@@ -9,14 +9,20 @@ import { Socket } from "net"
 import { Server } from "../server"
 import { PeerMode } from "./peerBasic"
 export class AppNetwork implements INetwork {
-
+    public static defaultPort = 8148
     public server: Server
     public tcp: net.Server
     public port: number = -1
     public peers: peerApp[] = []
 
-    constructor(port: number = 8148, server: Server) {
-        this.port = port
+    constructor(port: number, server: Server) {
+        if (port) {
+            this.port = port
+        }
+        else {
+            this.port = 8148
+        }
+
         this.server = server
         logger.debug(`TcpNetwork Port=${port}`)
     }
