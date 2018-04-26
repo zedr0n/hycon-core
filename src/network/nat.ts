@@ -1,31 +1,34 @@
 import { getLogger } from 'log4js'
 import * as delay from 'delay'
 const natUpnp = require('nat-upnp')
-const client = natUpnp.createClient()
 
+const client = natUpnp.createClient()
 const logger = getLogger('Nat')
 logger.level = "debug"
 
 export class NatUpnp {
-    public static privatePort: number
-    public static publicPort: number
+    private privatePort: number
+    private publicPort: number
     public publicIp = ""
     public static ttl = 10
-    public portList: any[] = []
-    public maxTryCount = 3
-    constructor(port:number) {
+    public maxTryCount = 10
+
+    constructor(Port:number) {
+        this.privatePort = Port
+        this.publicPort = Port
         setTimeout(() => {
             this.run()
         }, 100)
     }
+
     public async openPort() {
         for (let i = 0; i < this.maxTryCount; i++) {
-            logger.debug(`Trying Portmapping ${i + 1}/${this.maxTryCount} Port=${NatUpnp.publicPort}`)
+            logger.debug(`Trying Portmapping ${i + 1}/${this.maxTryCount} Port=${this.publicPort}`)
             try {
-                await new Promise(function (resolve, reject) {
+                await new Promise( (resolve, reject) => {
                     client.portMapping({
-                        public: NatUpnp.publicPort,
-                        private: NatUpnp.privatePort,
+                        public: this.publicPort,
+                        private: this.privatePort,
                         ttl: NatUpnp.ttl
                     }, function (err: any) {
                         if (err) reject("port-mapping fail")
@@ -33,72 +36,66 @@ export class NatUpnp {
                     });
                 })
                 // port-mapping suucess                
-                logger.debug(`Portmapping Success Public=${NatUpnp.publicPort} Private=${NatUpnp.privatePort}`)
+                logger.debug(`Portmapping Success Public=${this.publicPort} Private=${this.privatePort}`)
                 return // complete
             }
             catch (e) {
-                // error
-                NatUpnp.publicPort++
+                this.publicPort++
                 await delay(100)
             }
         }
-
-        // all tries failed
-        throw "open port fail"
+        throw "Make upnp nat mapping failed"
     }
+
     public async run() {
         try {
-            var result: any
             await this.openPort()
-            /*
-            client.portUnmapping({
-                public: 12345
-            });
-            */
-            result = await new Promise(function (resolve, reject) {
-                client.externalIp(function (err: any, results: any) {
-                    if (err) reject("get external ip fail ${err}")
-                    resolve({ extIp: results })
+
+            let result: any = await new Promise( (resolve, reject) => {
+                client.externalIp( (err: any, ip: any) => {
+                    if (err) reject(`Get external IP failed`)
+                    resolve({ extIp: ip })
                 })
             })
             this.publicIp = result.extIp
+
             logger.info(`External Ip=${this.publicIp}`)
 
             // if (this.server && this.server.upnpServer) {
             //     this.server.sendMyInfo(this.server.upnpServer.serverId, this.publicIp, NatUpnp.publicPort)
             // }
 
-            result = await new Promise(function (resolve, reject) {
-                client.getMappings(function (err: any, results: any) {
-                    if (err) reject("get mappings fail")
+            // result = await new Promise(function (resolve, reject) {
+            //     client.getMappings(function (err: any, results: any) {
+            //         if (err) reject("get mappings fail")
 
-                    var newresult = { items: results };
-                    resolve(newresult)
-                });
-            })
+            //         var newresult = { items: results };
+            //         resolve(newresult)
+            //     });
+            // })
 
-            this.portList = []
-            for (let item of result.items) {
-                let publicPort = item.public.port
-                let privateIp = item.private.host
-                let privatePort = item.private.port
-                let newone = {
-                    publicIp: this.publicIp, publicPort: publicPort,
-                    privateIp: privateIp, privatePort: privatePort
-                }
-                //logger.info(`${JSON.stringify(newone)}`)
-                logger.info(`${this.publicIp}:${publicPort} -> ${privateIp}:${privatePort}`)
-                this.portList.push(newone)
-            }
+            // this.portList = []
+            // for (let item of result.items) {
+            //     let publicPort = item.public.port
+            //     let privateIp = item.private.host
+            //     let privatePort = item.private.port
+            //     let newone = {
+            //         publicIp: this.publicIp, publicPort: publicPort,
+            //         privateIp: privateIp, privatePort: privatePort
+            //     }
+            //     //logger.info(`${JSON.stringify(newone)}`)
+            //     logger.info(`${this.publicIp}:${publicPort} -> ${privateIp}:${privatePort}`)
+            //     this.portList.push(newone)
+            // }
 
-            /*
-                    client.getMappings({ local: true }, function (err: any, results: any) {
-                        logger.debug(`Local GetMappings Upnp err=${err}  results=${JSON.stringify(results)}`)
-                    });*/
+            // /*
+            //         client.getMappings({ local: true }, function (err: any, results: any) {
+            //             logger.debug(`Local GetMappings Upnp err=${err}  results=${JSON.stringify(results)}`)
+            //         });*/
         }
         // await rejection goes here!
         catch (e) {
-            console.log(`Upnp Error=${e}`)
+            logger.error(`Upnp Error: ${e}, please confirm your router support upnp nat function and the function is enabled.`)
             // test code
             /*if (this.server && this.server.upnpServer) {
                 // this.server.sendMyInfo(this.publicIp, NatUpnp.publicPort)
@@ -106,7 +103,5 @@ export class NatUpnp {
                 this.server.sendMyInfo(name, "1.2.3.4", 8085)
             }*/
         }
-
     }
 }
-

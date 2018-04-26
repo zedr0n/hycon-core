@@ -7,7 +7,9 @@
     "start": "./node_modules/.bin/ts-node src/main.ts --port=8150",
     "protogen": "pbjs -t static-module -w commonjs -o src/serialization/proto.js proto/main.proto &&  pbts -o src/serialization/proto.d.ts src/serialization/proto.js && ./src/serialization/trim_null.sh",
     "debugNetwork": "./node_modules/.bin/ts-node --inspect=9231 --inspect-brk src/main.ts",
-    "startNetwork": "./node_modules/.bin/ts-node src/main.ts"
+    "testNetwork1": "./node_modules/.bin/ts-node src/main.ts --port=8151",
+    "testNetwork2": "./node_modules/.bin/ts-node src/main.ts --port=8152",
+    "testNetwork3": "./node_modules/.bin/ts-node src/main.ts --port=8153"
   },
   "author": "",
   "license": "ISC",
@@ -31,12 +33,15 @@
     "delay": "^2.0.0",
     "fs-extra": "^5.0.0",
     "ip": "^1.1.5",
+    "levelup": "^2.0.2",
     "log4js": "^2.5.3",
     "merkle-lib": "^2.0.10",
+    "nat-upnp": "^1.1.1",
     "net": "^1.0.2",
     "node-cryptonight": "^1.0.1",
     "node-ssdp": "^3.3.0",
     "protobufjs": "^6.8.6",
+    "rocksdb": "^2.0.0",
     "secp256k1": "^3.5.0",
     "sha256": "^0.2.0",
     "wallet.ts": "^0.2.5"

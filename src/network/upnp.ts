@@ -88,12 +88,12 @@ export class UpnpClient{
                 let date = headers.DATE
 
                 if (!isLocal && isSameProduct) {
-                    logger.debug(`debug = ${JSON.stringify(headers)}`)
-                    logger.debug("IP ADDRESS:", ipaddress)
-                    logger.debug("LOCAL ADDRESS:", localIP)
-                    logger.debug("IS LOCAL:", isLocal)
-                    logger.debug("DATE:", date)
-                    logger.debug(`DETECT IP Local=${isLocal} Product=${product} IP=${localIP} Port=${localPort}`)
+                    // logger.debug(`debug = ${JSON.stringify(headers)}`)
+                    // logger.debug("IP ADDRESS:", ipaddress)
+                    // logger.debug("LOCAL ADDRESS:", localIP)
+                    // logger.debug("IS LOCAL:", isLocal)
+                    // logger.debug("DATE:", date)
+                    // logger.debug(`DETECT IP Local=${isLocal} Product=${product} IP=${localIP} Port=${localPort}`)
                     if(!this.localPeer.has(`${localIP}:${localPort}`)){
                         this.appNetwork.addClient(localIP,parseInt(localPort,10))
                         this.count++
