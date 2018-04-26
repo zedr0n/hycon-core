@@ -1,6 +1,6 @@
 import { getLogger } from "log4js"
-import * as net from "net"
 import { Socket } from "net"
+import * as net from "net"
 import { setTimeout } from "timers"
 import { IGetBlocksByHashReturn, IGetHeadersByHashReturn } from "../serialization/proto"
 import { IGetBlocksByRangeReturn, IGetHeadersByRangeReturn } from "../serialization/proto"
@@ -269,6 +269,16 @@ export abstract class peerNet extends peerBasic implements IPeer {
 
     public sendGetHeadersByRangeReturn(success: boolean, headers: BlockHeader[]) {
         const encodeReq = proto.Node.encode({ getHeadersByRangeReturn: { success, headers } }).finish()
+        this.sendBuffer(encodeReq)
+    }
+
+    public sendGetPeers(count: number) {
+        const encodeReq = proto.Node.encode({ getPeers: { count } }).finish()
+        this.sendBuffer(encodeReq)
+    }
+
+    public sendGetPeersReturn(success: boolean, peers: proto.Peer[]) {
+        const encodeReq = proto.Node.encode({ getPeersReturn: { success, peers } }).finish()
         this.sendBuffer(encodeReq)
     }
 

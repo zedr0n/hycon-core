@@ -32,6 +32,8 @@ $root.Node = (function() {
      * @property {IGetBlocksByRangeReturn|null} [getBlocksByRangeReturn] Node getBlocksByRangeReturn
      * @property {IGetHeadersByRange|null} [getHeadersByRange] Node getHeadersByRange
      * @property {IGetHeadersByRangeReturn|null} [getHeadersByRangeReturn] Node getHeadersByRangeReturn
+     * @property {IGetPeers|null} [getPeers] Node getPeers
+     * @property {IGetPeersReturn|null} [getPeersReturn] Node getPeersReturn
      */
 
     /**
@@ -185,17 +187,33 @@ $root.Node = (function() {
      */
     Node.prototype.getHeadersByRangeReturn = null;
 
+    /**
+     * Node getPeers.
+     * @member {IGetPeers|null|undefined} getPeers
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.getPeers = null;
+
+    /**
+     * Node getPeersReturn.
+     * @member {IGetPeersReturn|null|undefined} getPeersReturn
+     * @memberof Node
+     * @instance
+     */
+    Node.prototype.getPeersReturn = null;
+
     // OneOf field names bound to virtual getters and setters
     var $oneOfFields;
 
     /**
      * Node request.
-     * @member {"status"|"ping"|"pingReturn"|"putTx"|"putTxReturn"|"getTxs"|"getTxsReturn"|"putBlock"|"putBlockReturn"|"getBlocksByHash"|"getBlocksByHashReturn"|"getHeadersByHash"|"getHeadersByHashReturn"|"getBlocksByRange"|"getBlocksByRangeReturn"|"getHeadersByRange"|"getHeadersByRangeReturn"|undefined} request
+     * @member {"status"|"ping"|"pingReturn"|"putTx"|"putTxReturn"|"getTxs"|"getTxsReturn"|"putBlock"|"putBlockReturn"|"getBlocksByHash"|"getBlocksByHashReturn"|"getHeadersByHash"|"getHeadersByHashReturn"|"getBlocksByRange"|"getBlocksByRangeReturn"|"getHeadersByRange"|"getHeadersByRangeReturn"|"getPeers"|"getPeersReturn"|undefined} request
      * @memberof Node
      * @instance
      */
     Object.defineProperty(Node.prototype, "request", {
-        get: $util.oneOfGetter($oneOfFields = ["status", "ping", "pingReturn", "putTx", "putTxReturn", "getTxs", "getTxsReturn", "putBlock", "putBlockReturn", "getBlocksByHash", "getBlocksByHashReturn", "getHeadersByHash", "getHeadersByHashReturn", "getBlocksByRange", "getBlocksByRangeReturn", "getHeadersByRange", "getHeadersByRangeReturn"]),
+        get: $util.oneOfGetter($oneOfFields = ["status", "ping", "pingReturn", "putTx", "putTxReturn", "getTxs", "getTxsReturn", "putBlock", "putBlockReturn", "getBlocksByHash", "getBlocksByHashReturn", "getHeadersByHash", "getHeadersByHashReturn", "getBlocksByRange", "getBlocksByRangeReturn", "getHeadersByRange", "getHeadersByRangeReturn", "getPeers", "getPeersReturn"]),
         set: $util.oneOfSetter($oneOfFields)
     });
 
@@ -257,6 +275,10 @@ $root.Node = (function() {
             $root.GetHeadersByRange.encode(message.getHeadersByRange, writer.uint32(/* id 16, wireType 2 =*/130).fork()).ldelim();
         if (message.getHeadersByRangeReturn != null && message.hasOwnProperty("getHeadersByRangeReturn"))
             $root.GetHeadersByRangeReturn.encode(message.getHeadersByRangeReturn, writer.uint32(/* id 17, wireType 2 =*/138).fork()).ldelim();
+        if (message.getPeers != null && message.hasOwnProperty("getPeers"))
+            $root.GetPeers.encode(message.getPeers, writer.uint32(/* id 18, wireType 2 =*/146).fork()).ldelim();
+        if (message.getPeersReturn != null && message.hasOwnProperty("getPeersReturn"))
+            $root.GetPeersReturn.encode(message.getPeersReturn, writer.uint32(/* id 19, wireType 2 =*/154).fork()).ldelim();
         return writer;
     };
 
@@ -341,6 +363,12 @@ $root.Node = (function() {
                 break;
             case 17:
                 message.getHeadersByRangeReturn = $root.GetHeadersByRangeReturn.decode(reader, reader.uint32());
+                break;
+            case 18:
+                message.getPeers = $root.GetPeers.decode(reader, reader.uint32());
+                break;
+            case 19:
+                message.getPeersReturn = $root.GetPeersReturn.decode(reader, reader.uint32());
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -546,6 +574,26 @@ $root.Node = (function() {
                     return "getHeadersByRangeReturn." + error;
             }
         }
+        if (message.getPeers != null && message.hasOwnProperty("getPeers")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.GetPeers.verify(message.getPeers);
+                if (error)
+                    return "getPeers." + error;
+            }
+        }
+        if (message.getPeersReturn != null && message.hasOwnProperty("getPeersReturn")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.GetPeersReturn.verify(message.getPeersReturn);
+                if (error)
+                    return "getPeersReturn." + error;
+            }
+        }
         return null;
     };
 
@@ -645,6 +693,16 @@ $root.Node = (function() {
             if (typeof object.getHeadersByRangeReturn !== "object")
                 throw TypeError(".Node.getHeadersByRangeReturn: object expected");
             message.getHeadersByRangeReturn = $root.GetHeadersByRangeReturn.fromObject(object.getHeadersByRangeReturn);
+        }
+        if (object.getPeers != null) {
+            if (typeof object.getPeers !== "object")
+                throw TypeError(".Node.getPeers: object expected");
+            message.getPeers = $root.GetPeers.fromObject(object.getPeers);
+        }
+        if (object.getPeersReturn != null) {
+            if (typeof object.getPeersReturn !== "object")
+                throw TypeError(".Node.getPeersReturn: object expected");
+            message.getPeersReturn = $root.GetPeersReturn.fromObject(object.getPeersReturn);
         }
         return message;
     };
@@ -746,6 +804,16 @@ $root.Node = (function() {
             object.getHeadersByRangeReturn = $root.GetHeadersByRangeReturn.toObject(message.getHeadersByRangeReturn, options);
             if (options.oneofs)
                 object.request = "getHeadersByRangeReturn";
+        }
+        if (message.getPeers != null && message.hasOwnProperty("getPeers")) {
+            object.getPeers = $root.GetPeers.toObject(message.getPeers, options);
+            if (options.oneofs)
+                object.request = "getPeers";
+        }
+        if (message.getPeersReturn != null && message.hasOwnProperty("getPeersReturn")) {
+            object.getPeersReturn = $root.GetPeersReturn.toObject(message.getPeersReturn, options);
+            if (options.oneofs)
+                object.request = "getPeersReturn";
         }
         return object;
     };
@@ -4865,6 +4933,424 @@ $root.GetHeadersByRangeReturn = (function() {
     return GetHeadersByRangeReturn;
 })();
 
+$root.GetPeers = (function() {
+
+    /**
+     * Properties of a GetPeers.
+     * @exports IGetPeers
+     * @interface IGetPeers
+     * @property {number|null} [count] GetPeers count
+     */
+
+    /**
+     * Constructs a new GetPeers.
+     * @exports GetPeers
+     * @classdesc Represents a GetPeers.
+     * @implements IGetPeers
+     * @constructor
+     * @param {IGetPeers=} [properties] Properties to set
+     */
+    function GetPeers(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * GetPeers count.
+     * @member {number} count
+     * @memberof GetPeers
+     * @instance
+     */
+    GetPeers.prototype.count = 0;
+
+    /**
+     * Creates a new GetPeers instance using the specified properties.
+     * @function create
+     * @memberof GetPeers
+     * @static
+     * @param {IGetPeers=} [properties] Properties to set
+     * @returns {GetPeers} GetPeers instance
+     */
+    GetPeers.create = function create(properties) {
+        return new GetPeers(properties);
+    };
+
+    /**
+     * Encodes the specified GetPeers message. Does not implicitly {@link GetPeers.verify|verify} messages.
+     * @function encode
+     * @memberof GetPeers
+     * @static
+     * @param {IGetPeers} message GetPeers message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetPeers.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.count != null && message.hasOwnProperty("count"))
+            writer.uint32(/* id 2, wireType 0 =*/16).int32(message.count);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified GetPeers message, length delimited. Does not implicitly {@link GetPeers.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof GetPeers
+     * @static
+     * @param {IGetPeers} message GetPeers message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetPeers.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a GetPeers message from the specified reader or buffer.
+     * @function decode
+     * @memberof GetPeers
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {GetPeers} GetPeers
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetPeers.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetPeers();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 2:
+                message.count = reader.int32();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a GetPeers message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof GetPeers
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {GetPeers} GetPeers
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetPeers.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a GetPeers message.
+     * @function verify
+     * @memberof GetPeers
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    GetPeers.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.count != null && message.hasOwnProperty("count"))
+            if (!$util.isInteger(message.count))
+                return "count: integer expected";
+        return null;
+    };
+
+    /**
+     * Creates a GetPeers message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof GetPeers
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {GetPeers} GetPeers
+     */
+    GetPeers.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetPeers)
+            return object;
+        var message = new $root.GetPeers();
+        if (object.count != null)
+            message.count = object.count | 0;
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a GetPeers message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof GetPeers
+     * @static
+     * @param {GetPeers} message GetPeers
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    GetPeers.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults)
+            object.count = 0;
+        if (message.count != null && message.hasOwnProperty("count"))
+            object.count = message.count;
+        return object;
+    };
+
+    /**
+     * Converts this GetPeers to JSON.
+     * @function toJSON
+     * @memberof GetPeers
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    GetPeers.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return GetPeers;
+})();
+
+$root.GetPeersReturn = (function() {
+
+    /**
+     * Properties of a GetPeersReturn.
+     * @exports IGetPeersReturn
+     * @interface IGetPeersReturn
+     * @property {boolean|null} [success] GetPeersReturn success
+     * @property {Array.<IPeer>|null} [peers] GetPeersReturn peers
+     */
+
+    /**
+     * Constructs a new GetPeersReturn.
+     * @exports GetPeersReturn
+     * @classdesc Represents a GetPeersReturn.
+     * @implements IGetPeersReturn
+     * @constructor
+     * @param {IGetPeersReturn=} [properties] Properties to set
+     */
+    function GetPeersReturn(properties) {
+        this.peers = [];
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * GetPeersReturn success.
+     * @member {boolean} success
+     * @memberof GetPeersReturn
+     * @instance
+     */
+    GetPeersReturn.prototype.success = false;
+
+    /**
+     * GetPeersReturn peers.
+     * @member {Array.<IPeer>} peers
+     * @memberof GetPeersReturn
+     * @instance
+     */
+    GetPeersReturn.prototype.peers = $util.emptyArray;
+
+    /**
+     * Creates a new GetPeersReturn instance using the specified properties.
+     * @function create
+     * @memberof GetPeersReturn
+     * @static
+     * @param {IGetPeersReturn=} [properties] Properties to set
+     * @returns {GetPeersReturn} GetPeersReturn instance
+     */
+    GetPeersReturn.create = function create(properties) {
+        return new GetPeersReturn(properties);
+    };
+
+    /**
+     * Encodes the specified GetPeersReturn message. Does not implicitly {@link GetPeersReturn.verify|verify} messages.
+     * @function encode
+     * @memberof GetPeersReturn
+     * @static
+     * @param {IGetPeersReturn} message GetPeersReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetPeersReturn.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.success != null && message.hasOwnProperty("success"))
+            writer.uint32(/* id 1, wireType 0 =*/8).bool(message.success);
+        if (message.peers != null && message.peers.length)
+            for (var i = 0; i < message.peers.length; ++i)
+                $root.Peer.encode(message.peers[i], writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified GetPeersReturn message, length delimited. Does not implicitly {@link GetPeersReturn.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof GetPeersReturn
+     * @static
+     * @param {IGetPeersReturn} message GetPeersReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetPeersReturn.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a GetPeersReturn message from the specified reader or buffer.
+     * @function decode
+     * @memberof GetPeersReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {GetPeersReturn} GetPeersReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetPeersReturn.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetPeersReturn();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.success = reader.bool();
+                break;
+            case 2:
+                if (!(message.peers && message.peers.length))
+                    message.peers = [];
+                message.peers.push($root.Peer.decode(reader, reader.uint32()));
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a GetPeersReturn message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof GetPeersReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {GetPeersReturn} GetPeersReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetPeersReturn.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a GetPeersReturn message.
+     * @function verify
+     * @memberof GetPeersReturn
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    GetPeersReturn.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.success != null && message.hasOwnProperty("success"))
+            if (typeof message.success !== "boolean")
+                return "success: boolean expected";
+        if (message.peers != null && message.hasOwnProperty("peers")) {
+            if (!Array.isArray(message.peers))
+                return "peers: array expected";
+            for (var i = 0; i < message.peers.length; ++i) {
+                var error = $root.Peer.verify(message.peers[i]);
+                if (error)
+                    return "peers." + error;
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Creates a GetPeersReturn message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof GetPeersReturn
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {GetPeersReturn} GetPeersReturn
+     */
+    GetPeersReturn.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetPeersReturn)
+            return object;
+        var message = new $root.GetPeersReturn();
+        if (object.success != null)
+            message.success = Boolean(object.success);
+        if (object.peers) {
+            if (!Array.isArray(object.peers))
+                throw TypeError(".GetPeersReturn.peers: array expected");
+            message.peers = [];
+            for (var i = 0; i < object.peers.length; ++i) {
+                if (typeof object.peers[i] !== "object")
+                    throw TypeError(".GetPeersReturn.peers: object expected");
+                message.peers[i] = $root.Peer.fromObject(object.peers[i]);
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a GetPeersReturn message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof GetPeersReturn
+     * @static
+     * @param {GetPeersReturn} message GetPeersReturn
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    GetPeersReturn.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.arrays || options.defaults)
+            object.peers = [];
+        if (options.defaults)
+            object.success = false;
+        if (message.success != null && message.hasOwnProperty("success"))
+            object.success = message.success;
+        if (message.peers && message.peers.length) {
+            object.peers = [];
+            for (var j = 0; j < message.peers.length; ++j)
+                object.peers[j] = $root.Peer.toObject(message.peers[j], options);
+        }
+        return object;
+    };
+
+    /**
+     * Converts this GetPeersReturn to JSON.
+     * @function toJSON
+     * @memberof GetPeersReturn
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    GetPeersReturn.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return GetPeersReturn;
+})();
+
 $root.Block = (function() {
 
     /**
@@ -6814,6 +7300,419 @@ $root.BlockHeaders = (function() {
     };
 
     return BlockHeaders;
+})();
+
+$root.Peer = (function() {
+
+    /**
+     * Properties of a Peer.
+     * @exports IPeer
+     * @interface IPeer
+     * @property {string|null} [host] Peer host
+     * @property {number|null} [port] Peer port
+     * @property {string|null} [name] Peer name
+     * @property {string|null} [location] Peer location
+     * @property {boolean|null} [isMiner] Peer isMiner
+     * @property {string|null} [ip] Peer ip
+     * @property {number|null} [nodes] Peer nodes
+     * @property {IBlock|null} [lastBlock] Peer lastBlock
+     * @property {number|null} [pendingTransaction] Peer pendingTransaction
+     * @property {number|null} [nodeLatency] Peer nodeLatency
+     * @property {number|null} [peersNumber] Peer peersNumber
+     */
+
+    /**
+     * Constructs a new Peer.
+     * @exports Peer
+     * @classdesc Represents a Peer.
+     * @implements IPeer
+     * @constructor
+     * @param {IPeer=} [properties] Properties to set
+     */
+    function Peer(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * Peer host.
+     * @member {string} host
+     * @memberof Peer
+     * @instance
+     */
+    Peer.prototype.host = "";
+
+    /**
+     * Peer port.
+     * @member {number} port
+     * @memberof Peer
+     * @instance
+     */
+    Peer.prototype.port = 0;
+
+    /**
+     * Peer name.
+     * @member {string} name
+     * @memberof Peer
+     * @instance
+     */
+    Peer.prototype.name = "";
+
+    /**
+     * Peer location.
+     * @member {string} location
+     * @memberof Peer
+     * @instance
+     */
+    Peer.prototype.location = "";
+
+    /**
+     * Peer isMiner.
+     * @member {boolean} isMiner
+     * @memberof Peer
+     * @instance
+     */
+    Peer.prototype.isMiner = false;
+
+    /**
+     * Peer ip.
+     * @member {string} ip
+     * @memberof Peer
+     * @instance
+     */
+    Peer.prototype.ip = "";
+
+    /**
+     * Peer nodes.
+     * @member {number} nodes
+     * @memberof Peer
+     * @instance
+     */
+    Peer.prototype.nodes = 0;
+
+    /**
+     * Peer lastBlock.
+     * @member {IBlock|null|undefined} lastBlock
+     * @memberof Peer
+     * @instance
+     */
+    Peer.prototype.lastBlock = null;
+
+    /**
+     * Peer pendingTransaction.
+     * @member {number} pendingTransaction
+     * @memberof Peer
+     * @instance
+     */
+    Peer.prototype.pendingTransaction = 0;
+
+    /**
+     * Peer nodeLatency.
+     * @member {number} nodeLatency
+     * @memberof Peer
+     * @instance
+     */
+    Peer.prototype.nodeLatency = 0;
+
+    /**
+     * Peer peersNumber.
+     * @member {number} peersNumber
+     * @memberof Peer
+     * @instance
+     */
+    Peer.prototype.peersNumber = 0;
+
+    /**
+     * Creates a new Peer instance using the specified properties.
+     * @function create
+     * @memberof Peer
+     * @static
+     * @param {IPeer=} [properties] Properties to set
+     * @returns {Peer} Peer instance
+     */
+    Peer.create = function create(properties) {
+        return new Peer(properties);
+    };
+
+    /**
+     * Encodes the specified Peer message. Does not implicitly {@link Peer.verify|verify} messages.
+     * @function encode
+     * @memberof Peer
+     * @static
+     * @param {IPeer} message Peer message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Peer.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.host != null && message.hasOwnProperty("host"))
+            writer.uint32(/* id 1, wireType 2 =*/10).string(message.host);
+        if (message.port != null && message.hasOwnProperty("port"))
+            writer.uint32(/* id 2, wireType 0 =*/16).int32(message.port);
+        if (message.name != null && message.hasOwnProperty("name"))
+            writer.uint32(/* id 3, wireType 2 =*/26).string(message.name);
+        if (message.location != null && message.hasOwnProperty("location"))
+            writer.uint32(/* id 4, wireType 2 =*/34).string(message.location);
+        if (message.isMiner != null && message.hasOwnProperty("isMiner"))
+            writer.uint32(/* id 5, wireType 0 =*/40).bool(message.isMiner);
+        if (message.ip != null && message.hasOwnProperty("ip"))
+            writer.uint32(/* id 6, wireType 2 =*/50).string(message.ip);
+        if (message.nodes != null && message.hasOwnProperty("nodes"))
+            writer.uint32(/* id 7, wireType 0 =*/56).int32(message.nodes);
+        if (message.lastBlock != null && message.hasOwnProperty("lastBlock"))
+            $root.Block.encode(message.lastBlock, writer.uint32(/* id 8, wireType 2 =*/66).fork()).ldelim();
+        if (message.pendingTransaction != null && message.hasOwnProperty("pendingTransaction"))
+            writer.uint32(/* id 9, wireType 0 =*/72).int32(message.pendingTransaction);
+        if (message.nodeLatency != null && message.hasOwnProperty("nodeLatency"))
+            writer.uint32(/* id 10, wireType 0 =*/80).int32(message.nodeLatency);
+        if (message.peersNumber != null && message.hasOwnProperty("peersNumber"))
+            writer.uint32(/* id 11, wireType 0 =*/88).int32(message.peersNumber);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified Peer message, length delimited. Does not implicitly {@link Peer.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof Peer
+     * @static
+     * @param {IPeer} message Peer message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    Peer.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a Peer message from the specified reader or buffer.
+     * @function decode
+     * @memberof Peer
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {Peer} Peer
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Peer.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.Peer();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.host = reader.string();
+                break;
+            case 2:
+                message.port = reader.int32();
+                break;
+            case 3:
+                message.name = reader.string();
+                break;
+            case 4:
+                message.location = reader.string();
+                break;
+            case 5:
+                message.isMiner = reader.bool();
+                break;
+            case 6:
+                message.ip = reader.string();
+                break;
+            case 7:
+                message.nodes = reader.int32();
+                break;
+            case 8:
+                message.lastBlock = $root.Block.decode(reader, reader.uint32());
+                break;
+            case 9:
+                message.pendingTransaction = reader.int32();
+                break;
+            case 10:
+                message.nodeLatency = reader.int32();
+                break;
+            case 11:
+                message.peersNumber = reader.int32();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a Peer message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof Peer
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {Peer} Peer
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    Peer.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a Peer message.
+     * @function verify
+     * @memberof Peer
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    Peer.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.host != null && message.hasOwnProperty("host"))
+            if (!$util.isString(message.host))
+                return "host: string expected";
+        if (message.port != null && message.hasOwnProperty("port"))
+            if (!$util.isInteger(message.port))
+                return "port: integer expected";
+        if (message.name != null && message.hasOwnProperty("name"))
+            if (!$util.isString(message.name))
+                return "name: string expected";
+        if (message.location != null && message.hasOwnProperty("location"))
+            if (!$util.isString(message.location))
+                return "location: string expected";
+        if (message.isMiner != null && message.hasOwnProperty("isMiner"))
+            if (typeof message.isMiner !== "boolean")
+                return "isMiner: boolean expected";
+        if (message.ip != null && message.hasOwnProperty("ip"))
+            if (!$util.isString(message.ip))
+                return "ip: string expected";
+        if (message.nodes != null && message.hasOwnProperty("nodes"))
+            if (!$util.isInteger(message.nodes))
+                return "nodes: integer expected";
+        if (message.lastBlock != null && message.hasOwnProperty("lastBlock")) {
+            var error = $root.Block.verify(message.lastBlock);
+            if (error)
+                return "lastBlock." + error;
+        }
+        if (message.pendingTransaction != null && message.hasOwnProperty("pendingTransaction"))
+            if (!$util.isInteger(message.pendingTransaction))
+                return "pendingTransaction: integer expected";
+        if (message.nodeLatency != null && message.hasOwnProperty("nodeLatency"))
+            if (!$util.isInteger(message.nodeLatency))
+                return "nodeLatency: integer expected";
+        if (message.peersNumber != null && message.hasOwnProperty("peersNumber"))
+            if (!$util.isInteger(message.peersNumber))
+                return "peersNumber: integer expected";
+        return null;
+    };
+
+    /**
+     * Creates a Peer message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof Peer
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {Peer} Peer
+     */
+    Peer.fromObject = function fromObject(object) {
+        if (object instanceof $root.Peer)
+            return object;
+        var message = new $root.Peer();
+        if (object.host != null)
+            message.host = String(object.host);
+        if (object.port != null)
+            message.port = object.port | 0;
+        if (object.name != null)
+            message.name = String(object.name);
+        if (object.location != null)
+            message.location = String(object.location);
+        if (object.isMiner != null)
+            message.isMiner = Boolean(object.isMiner);
+        if (object.ip != null)
+            message.ip = String(object.ip);
+        if (object.nodes != null)
+            message.nodes = object.nodes | 0;
+        if (object.lastBlock != null) {
+            if (typeof object.lastBlock !== "object")
+                throw TypeError(".Peer.lastBlock: object expected");
+            message.lastBlock = $root.Block.fromObject(object.lastBlock);
+        }
+        if (object.pendingTransaction != null)
+            message.pendingTransaction = object.pendingTransaction | 0;
+        if (object.nodeLatency != null)
+            message.nodeLatency = object.nodeLatency | 0;
+        if (object.peersNumber != null)
+            message.peersNumber = object.peersNumber | 0;
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a Peer message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof Peer
+     * @static
+     * @param {Peer} message Peer
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    Peer.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults) {
+            object.host = "";
+            object.port = 0;
+            object.name = "";
+            object.location = "";
+            object.isMiner = false;
+            object.ip = "";
+            object.nodes = 0;
+            object.lastBlock = null;
+            object.pendingTransaction = 0;
+            object.nodeLatency = 0;
+            object.peersNumber = 0;
+        }
+        if (message.host != null && message.hasOwnProperty("host"))
+            object.host = message.host;
+        if (message.port != null && message.hasOwnProperty("port"))
+            object.port = message.port;
+        if (message.name != null && message.hasOwnProperty("name"))
+            object.name = message.name;
+        if (message.location != null && message.hasOwnProperty("location"))
+            object.location = message.location;
+        if (message.isMiner != null && message.hasOwnProperty("isMiner"))
+            object.isMiner = message.isMiner;
+        if (message.ip != null && message.hasOwnProperty("ip"))
+            object.ip = message.ip;
+        if (message.nodes != null && message.hasOwnProperty("nodes"))
+            object.nodes = message.nodes;
+        if (message.lastBlock != null && message.hasOwnProperty("lastBlock"))
+            object.lastBlock = $root.Block.toObject(message.lastBlock, options);
+        if (message.pendingTransaction != null && message.hasOwnProperty("pendingTransaction"))
+            object.pendingTransaction = message.pendingTransaction;
+        if (message.nodeLatency != null && message.hasOwnProperty("nodeLatency"))
+            object.nodeLatency = message.nodeLatency;
+        if (message.peersNumber != null && message.hasOwnProperty("peersNumber"))
+            object.peersNumber = message.peersNumber;
+        return object;
+    };
+
+    /**
+     * Converts this Peer to JSON.
+     * @function toJSON
+     * @memberof Peer
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    Peer.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return Peer;
 })();
 
 $root.DBState = (function() {

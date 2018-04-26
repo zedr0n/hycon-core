@@ -53,6 +53,12 @@ export interface INode {
 
     /** Node getHeadersByRangeReturn */
     getHeadersByRangeReturn?: IGetHeadersByRangeReturn;
+
+    /** Node getPeers */
+    getPeers?: IGetPeers;
+
+    /** Node getPeersReturn */
+    getPeersReturn?: IGetPeersReturn;
 }
 
 /** Represents a Node. */
@@ -115,8 +121,14 @@ export class Node implements INode {
     /** Node getHeadersByRangeReturn. */
     public getHeadersByRangeReturn?: IGetHeadersByRangeReturn;
 
+    /** Node getPeers. */
+    public getPeers?: IGetPeers;
+
+    /** Node getPeersReturn. */
+    public getPeersReturn?: IGetPeersReturn;
+
     /** Node request. */
-    public request?: ("status"|"ping"|"pingReturn"|"putTx"|"putTxReturn"|"getTxs"|"getTxsReturn"|"putBlock"|"putBlockReturn"|"getBlocksByHash"|"getBlocksByHashReturn"|"getHeadersByHash"|"getHeadersByHashReturn"|"getBlocksByRange"|"getBlocksByRangeReturn"|"getHeadersByRange"|"getHeadersByRangeReturn");
+    public request?: ("status"|"ping"|"pingReturn"|"putTx"|"putTxReturn"|"getTxs"|"getTxsReturn"|"putBlock"|"putBlockReturn"|"getBlocksByHash"|"getBlocksByHashReturn"|"getHeadersByHash"|"getHeadersByHashReturn"|"getBlocksByRange"|"getBlocksByRangeReturn"|"getHeadersByRange"|"getHeadersByRangeReturn"|"getPeers"|"getPeersReturn");
 
     /**
      * Creates a new Node instance using the specified properties.
@@ -1953,6 +1965,192 @@ export class GetHeadersByRangeReturn implements IGetHeadersByRangeReturn {
     public toJSON(): { [k: string]: any };
 }
 
+/** Properties of a GetPeers. */
+export interface IGetPeers {
+
+    /** GetPeers count */
+    count?: number;
+}
+
+/** Represents a GetPeers. */
+export class GetPeers implements IGetPeers {
+
+    /**
+     * Constructs a new GetPeers.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IGetPeers);
+
+    /** GetPeers count. */
+    public count: number;
+
+    /**
+     * Creates a new GetPeers instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns GetPeers instance
+     */
+    public static create(properties?: IGetPeers): GetPeers;
+
+    /**
+     * Encodes the specified GetPeers message. Does not implicitly {@link GetPeers.verify|verify} messages.
+     * @param message GetPeers message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: IGetPeers, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified GetPeers message, length delimited. Does not implicitly {@link GetPeers.verify|verify} messages.
+     * @param message GetPeers message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: IGetPeers, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a GetPeers message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns GetPeers
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): GetPeers;
+
+    /**
+     * Decodes a GetPeers message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns GetPeers
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): GetPeers;
+
+    /**
+     * Verifies a GetPeers message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a GetPeers message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns GetPeers
+     */
+    public static fromObject(object: { [k: string]: any }): GetPeers;
+
+    /**
+     * Creates a plain object from a GetPeers message. Also converts values to other types if specified.
+     * @param message GetPeers
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: GetPeers, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this GetPeers to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a GetPeersReturn. */
+export interface IGetPeersReturn {
+
+    /** GetPeersReturn success */
+    success?: boolean;
+
+    /** GetPeersReturn peers */
+    peers?: IPeer[];
+}
+
+/** Represents a GetPeersReturn. */
+export class GetPeersReturn implements IGetPeersReturn {
+
+    /**
+     * Constructs a new GetPeersReturn.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IGetPeersReturn);
+
+    /** GetPeersReturn success. */
+    public success: boolean;
+
+    /** GetPeersReturn peers. */
+    public peers: IPeer[];
+
+    /**
+     * Creates a new GetPeersReturn instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns GetPeersReturn instance
+     */
+    public static create(properties?: IGetPeersReturn): GetPeersReturn;
+
+    /**
+     * Encodes the specified GetPeersReturn message. Does not implicitly {@link GetPeersReturn.verify|verify} messages.
+     * @param message GetPeersReturn message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: IGetPeersReturn, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified GetPeersReturn message, length delimited. Does not implicitly {@link GetPeersReturn.verify|verify} messages.
+     * @param message GetPeersReturn message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: IGetPeersReturn, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a GetPeersReturn message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns GetPeersReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): GetPeersReturn;
+
+    /**
+     * Decodes a GetPeersReturn message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns GetPeersReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): GetPeersReturn;
+
+    /**
+     * Verifies a GetPeersReturn message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a GetPeersReturn message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns GetPeersReturn
+     */
+    public static fromObject(object: { [k: string]: any }): GetPeersReturn;
+
+    /**
+     * Creates a plain object from a GetPeersReturn message. Also converts values to other types if specified.
+     * @param message GetPeersReturn
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: GetPeersReturn, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this GetPeersReturn to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
 /** Properties of a Block. */
 export interface IBlock {
 
@@ -2704,6 +2902,156 @@ export class BlockHeaders implements IBlockHeaders {
 
     /**
      * Converts this BlockHeaders to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a Peer. */
+export interface IPeer {
+
+    /** Peer host */
+    host?: string;
+
+    /** Peer port */
+    port?: number;
+
+    /** Peer name */
+    name?: string;
+
+    /** Peer location */
+    location?: string;
+
+    /** Peer isMiner */
+    isMiner?: boolean;
+
+    /** Peer ip */
+    ip?: string;
+
+    /** Peer nodes */
+    nodes?: number;
+
+    /** Peer lastBlock */
+    lastBlock?: IBlock;
+
+    /** Peer pendingTransaction */
+    pendingTransaction?: number;
+
+    /** Peer nodeLatency */
+    nodeLatency?: number;
+
+    /** Peer peersNumber */
+    peersNumber?: number;
+}
+
+/** Represents a Peer. */
+export class Peer implements IPeer {
+
+    /**
+     * Constructs a new Peer.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IPeer);
+
+    /** Peer host. */
+    public host: string;
+
+    /** Peer port. */
+    public port: number;
+
+    /** Peer name. */
+    public name: string;
+
+    /** Peer location. */
+    public location: string;
+
+    /** Peer isMiner. */
+    public isMiner: boolean;
+
+    /** Peer ip. */
+    public ip: string;
+
+    /** Peer nodes. */
+    public nodes: number;
+
+    /** Peer lastBlock. */
+    public lastBlock?: IBlock;
+
+    /** Peer pendingTransaction. */
+    public pendingTransaction: number;
+
+    /** Peer nodeLatency. */
+    public nodeLatency: number;
+
+    /** Peer peersNumber. */
+    public peersNumber: number;
+
+    /**
+     * Creates a new Peer instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns Peer instance
+     */
+    public static create(properties?: IPeer): Peer;
+
+    /**
+     * Encodes the specified Peer message. Does not implicitly {@link Peer.verify|verify} messages.
+     * @param message Peer message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: IPeer, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified Peer message, length delimited. Does not implicitly {@link Peer.verify|verify} messages.
+     * @param message Peer message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: IPeer, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a Peer message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns Peer
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): Peer;
+
+    /**
+     * Decodes a Peer message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns Peer
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): Peer;
+
+    /**
+     * Verifies a Peer message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a Peer message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns Peer
+     */
+    public static fromObject(object: { [k: string]: any }): Peer;
+
+    /**
+     * Creates a plain object from a Peer message. Also converts values to other types if specified.
+     * @param message Peer
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: Peer, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this Peer to JSON.
      * @returns JSON object
      */
     public toJSON(): { [k: string]: any };

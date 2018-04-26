@@ -2,6 +2,7 @@ syntax = "proto3";
 import "block.proto";
 import "blockHeader.proto";
 import "tx.proto";
+import "peer.proto";
 
 message Node { 
     oneof request {
@@ -31,6 +32,9 @@ message Node {
         GetHeadersByRange getHeadersByRange=16;
         GetHeadersByRangeReturn getHeadersByRangeReturn=17;
        
+        GetPeers getPeers=18;
+        GetPeersReturn getPeersReturn=19;
+      
      
     }
 }
@@ -127,4 +131,14 @@ message GetHeadersByRange {
 message GetHeadersByRangeReturn {
     bool success =1;
     repeated BlockHeader headers = 2;
+}
+
+
+message GetPeers {        
+    int32 count=2;
+}
+
+message GetPeersReturn {  
+    bool success =1;  
+    repeated Peer peers = 2;
 }
