@@ -36,7 +36,7 @@ function testNetwork() {
     })
 }
 
-testNetwork()
-// run the main loop
-setInterval(
-    () => { }, 1000)
+// testNetwork()
+// // run the main loop
+// setInterval(
+//     () => { }, 1000)

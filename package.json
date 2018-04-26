@@ -6,8 +6,8 @@
   "scripts": {
     "start": "./node_modules/.bin/ts-node src/main.ts --port=8150",
     "protogen": "pbjs -t static-module -w commonjs -o src/serialization/proto.js proto/main.proto &&  pbts -o src/serialization/proto.d.ts src/serialization/proto.js && ./src/serialization/trim_null.sh",
-    "debugNetwork": "./node_modules/.bin/ts-node --inspect=9231 --inspect-brk src/network/main.ts",
-    "startNetwork": "./node_modules/.bin/ts-node src/network/main.ts"
+    "debugNetwork": "./node_modules/.bin/ts-node --inspect=9231 --inspect-brk src/main.ts",
+    "startNetwork": "./node_modules/.bin/ts-node src/main.ts"
   },
   "author": "",
   "license": "ISC",
@@ -22,16 +22,20 @@
     "typescript": "^2.8.1"
   },
   "dependencies": {
+    "@types/delay": "^2.0.1",
+    "@types/ip": "0.0.30",
     "base-58": "0.0.1",
     "bip39": "^2.5.0",
     "blake2b": "^2.1.2",
     "command-line-args": "^5.0.2",
     "delay": "^2.0.0",
     "fs-extra": "^5.0.0",
+    "ip": "^1.1.5",
     "log4js": "^2.5.3",
     "merkle-lib": "^2.0.10",
     "net": "^1.0.2",
     "node-cryptonight": "^1.0.1",
+    "node-ssdp": "^3.3.0",
     "protobufjs": "^6.8.6",
     "secp256k1": "^3.5.0",
     "sha256": "^0.2.0",

@@ -2,4 +2,6 @@
 logs
 node_modules
 test.ts
+.DS_Store
+
 

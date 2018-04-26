@@ -8,6 +8,7 @@ const logger = getLogger("Network")
 import { Socket } from "net"
 import { Server } from "../server"
 import { PeerMode } from "./peerBasic"
+import { UpnpServer, UpnpClient } from "./upnp"
 export class AppNetwork implements INetwork {
     public static defaultPort = 8148
     public server: Server
@@ -15,6 +16,8 @@ export class AppNetwork implements INetwork {
     public port: number = -1
     public peers: PeerApp[] = []
     public clientTable: any = {}
+    public upnpServer: UpnpServer
+    public upnpClient: UpnpClient
 
     constructor(port: number, server: Server) {
         if (port) {
@@ -22,7 +25,6 @@ export class AppNetwork implements INetwork {
         } else {
             this.port = 8148
         }
-
         this.server = server
         logger.debug(`TcpNetwork Port=${port}`)
     }
@@ -36,6 +38,10 @@ export class AppNetwork implements INetwork {
         this.tcp.on("connection", (socket) => {
             this.addPeer(socket)
         })
+
+        //upnp
+        this.upnpServer = new UpnpServer(this.port)
+        this.upnpClient = new UpnpClient(this)
 
         setInterval(() => {
             this.polling()
