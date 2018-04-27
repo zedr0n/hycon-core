@@ -1,7 +1,7 @@
 
-import { Block, BlockHeader, Tx } from "../serialization/proto"
+import { Block, BlockHeader, Tx } from "../../serialization/proto"
 
-import { Ping, PingReturn } from "../serialization/proto"
+import { Ping, PingReturn } from "../../serialization/proto"
 
 export interface IPeer {
     ping(): Promise<PingReturn>

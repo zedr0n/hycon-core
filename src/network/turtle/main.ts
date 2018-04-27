@@ -1,6 +1,6 @@
 import { getLogger } from "log4js"
-import { Block } from "../serialization/proto"
-import { Ping } from "../serialization/proto"
+import { Block } from "../../serialization/proto"
+import { Ping } from "../../serialization/proto"
 import { AppNetwork } from "./appNetwork"
 import { INetwork } from "./network"
 import { IPeer } from "./peer"

@@ -7,6 +7,7 @@
     "start": "./node_modules/.bin/ts-node src/main.ts --port=8150",
     "protogen": "pbjs -t static-module -w commonjs -o src/serialization/proto.js proto/main.proto &&  pbts -o src/serialization/proto.d.ts src/serialization/proto.js && ./src/serialization/trim_null.sh",
     "debugNetwork": "./node_modules/.bin/ts-node --inspect=9231 --inspect-brk src/main.ts",
+    "startNetwork": "./node_modules/.bin/ts-node src/network/turtle/main.ts --port=8148",
     "testNetwork1": "./node_modules/.bin/ts-node src/main.ts --port=8151",
     "testNetwork2": "./node_modules/.bin/ts-node src/main.ts --port=8152",
     "testNetwork3": "./node_modules/.bin/ts-node src/main.ts --port=8153"

@@ -1,12 +1,13 @@
 import { getLogger } from "log4js"
 import * as net from "net"
-import * as proto from "../serialization/proto"
+import * as proto from "../../serialization/proto"
 import { INetwork } from "./network"
 import { IPeer } from "./peer"
 import { PeerApp } from "./peerApp"
 const logger = getLogger("Network")
 import { Socket } from "net"
-import { Server } from "../server"
+import { Server } from "../../server"
+import { UpnpClient, UpnpServer } from "../upnp"
 import { PeerMode } from "./peerBasic"
 export class AppNetwork implements INetwork {
     public static defaultPort = 8148
@@ -15,6 +16,8 @@ export class AppNetwork implements INetwork {
     public port: number = -1
     public peers: PeerApp[] = []
     public clientTable: any = {}
+    public upnpServer: UpnpServer
+    public upnpClient: UpnpClient
 
     constructor(port: number, server: Server) {
         if (port) {
@@ -22,7 +25,6 @@ export class AppNetwork implements INetwork {
         } else {
             this.port = 8148
         }
-
         this.server = server
         logger.debug(`TcpNetwork Port=${port}`)
     }
@@ -37,6 +39,10 @@ export class AppNetwork implements INetwork {
             this.addPeer(socket)
         })
 
+        // upnp
+        this.upnpServer = new UpnpServer(this.port)
+        this.upnpClient = new UpnpClient(this)
+
         setInterval(() => {
             this.polling()
         }, 2000)
@@ -48,7 +54,7 @@ export class AppNetwork implements INetwork {
 
         let index = 1
         for (const a of this.peers) {
-            logger.debug(`${index} Peer=${a.ip}:${a.port}`)
+            logger.debug(`${index} Local=${a.socket.localAddress}:${a.socket.localPort}  Remote=${a.socket.remoteAddress}:${a.socket.remotePort} `)
             index++
         }
     }
