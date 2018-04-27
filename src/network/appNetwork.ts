@@ -8,7 +8,7 @@ const logger = getLogger("Network")
 import { Socket } from "net"
 import { Server } from "../server"
 import { PeerMode } from "./peerBasic"
-import { UpnpServer, UpnpClient } from "./upnp"
+import { UpnpClient, UpnpServer } from "./upnp"
 export class AppNetwork implements INetwork {
     public static defaultPort = 8148
     public server: Server
@@ -39,7 +39,7 @@ export class AppNetwork implements INetwork {
             this.addPeer(socket)
         })
 
-        //upnp
+        // upnp
         this.upnpServer = new UpnpServer(this.port)
         this.upnpClient = new UpnpClient(this)
 
@@ -54,7 +54,7 @@ export class AppNetwork implements INetwork {
 
         let index = 1
         for (const a of this.peers) {
-            logger.debug(`${index} Peer=${a.ip}:${a.port}`)
+            logger.debug(`${index} Local=${a.socket.localAddress}:${a.socket.localPort}  Remote=${a.socket.remoteAddress}:${a.socket.remotePort} `)
             index++
         }
     }
