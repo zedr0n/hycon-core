@@ -4,8 +4,8 @@ import { IConsensus } from "../../consensus/consensus"
 import * as proto from "../../serialization/proto"
 import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"
-import { NetPeer } from "./netPeer"
-import { SocketBuffer } from "./socketBuffer"
+import { RabbitPeer } from "./netPeer"
+import { SocketParser } from "./socketBuffer"
 
 const logger = getLogger("Network")
 
@@ -70,9 +70,9 @@ export class RabbitNetwork implements INetwork {
         throw new Error("Method not implemented.")
     }
 
-    private newConnection(socket: Socket): NetPeer {
+    private newConnection(socket: Socket): RabbitPeer {
         logger.info(`Making peer`)
-        const peer = new NetPeer(socket, this.concensus)
+        const peer = new RabbitPeer(socket, this.concensus)
         socket.on("close", (error) => { this.removePeer(peer) })
         this.peers.push(peer)
         return peer

@@ -212,6 +212,12 @@ export interface IStatus {
 
     /** Status hash */
     hash?: Uint8Array;
+
+    /** Status ip */
+    ip?: string;
+
+    /** Status port */
+    port?: number;
 }
 
 /** Represents a Status. */
@@ -231,6 +237,12 @@ export class Status implements IStatus {
 
     /** Status hash. */
     public hash: Uint8Array;
+
+    /** Status ip. */
+    public ip: string;
+
+    /** Status port. */
+    public port: number;
 
     /**
      * Creates a new Status instance using the specified properties.

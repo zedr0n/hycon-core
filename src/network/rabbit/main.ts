@@ -15,14 +15,14 @@ logger.debug("OK")
 async function pollingNewone(sampleClient: any) {
 
     let result
-    result = await sampleClient.putBlocks(
-        [new Block({ miner: Buffer.from("apple") })])
+    //  result = await sampleClient.putBlocks(
+    //    [new Block({ miner: Buffer.from("apple") })])
     result = await sampleClient.ping()
-    result = await sampleClient.getTxs(100)
-    result = await sampleClient.getHeadersByHash([])
-    result = await sampleClient.getBlocksByHash([])
-    result = await sampleClient.getBlocksByRange(0, 0)
-    result = await sampleClient.getHeadersByRange(0, 0)
+    /* result = await sampleClient.getTxs(100)
+     result = await sampleClient.getHeadersByHash([])
+     result = await sampleClient.getBlocksByHash([])
+     result = await sampleClient.getBlocksByRange(0, 0)
+     result = await sampleClient.getHeadersByRange(0, 0)*/
     logger.debug(`*************** Result=${JSON.stringify(result)}`)
 }
 async function testNetwork() {
@@ -30,7 +30,6 @@ async function testNetwork() {
     const tcp: RabbitNetwork = new RabbitNetwork(undefined, 8148)
     tcp.start()
     const sampleClient = await tcp.addClient("localhost", 8148)
-    sampleClient.test()
     setTimeout(() => {
         pollingNewone(sampleClient)
     }, 2000)

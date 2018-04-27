@@ -7,7 +7,8 @@ import { IConsensus } from "./consensus/consensus"
 import { AppMiner } from "./miner/appMiner"
 import { IMiner } from "./miner/miner"
 import { INetwork } from "./network/network"
-import { AppNetwork } from "./network/turtle/appNetwork"
+import { RabbitNetwork } from "./network/rabbit/network" // for speed
+import { AppNetwork } from "./network/turtle/appNetwork" // for development only
 import { RestManager } from "./rest/restManager"
 import { WalletManager } from "./wallet/walletManager"
 
@@ -39,6 +40,7 @@ export class Server {
         this.readOptions()
         this.consensus = new AppConsensus(this)
         this.network = new AppNetwork(this.options.port, this)
+        // this.network = new RabbitNetwork(this, this.options.port)
         this.wallet = new WalletManager(this)
         this.miner = new AppMiner(this)
         this.txPool = new AppTxPool(this)

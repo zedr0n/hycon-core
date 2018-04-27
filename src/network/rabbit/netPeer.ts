@@ -133,8 +133,8 @@ export class RabbitPeer extends BasePeer implements IPeer {
         return headers
     }
 
-    protected async respond(id: number, request: proto.Request | proto.IRequest): Promise<void> {
-        if (!(request instanceof proto.Request)) {
+    protected async respond(id: number, request: proto.Node | proto.INode): Promise<void> {
+        if (!(request instanceof proto.Node)) {
             logger.debug(`Could not respond to request as it lacked request type '${request}'`)
             return
         }

@@ -2,21 +2,21 @@ import { getLogger } from "log4js"
 import { Socket } from "net"
 import { resolve } from "url"
 import * as proto from "../../serialization/proto"
-import { SocketBuffer } from "./socketBuffer"
+import { SocketParser } from "./socketBuffer"
 
 const logger = getLogger("Network")
 
 type replyResolve = (reply: proto.IReply) => void
 type replyReject = (reason?: any) => void
 export abstract class BasePeer {
-    public socketBuffer: SocketBuffer
+    public socketBuffer: SocketParser
     private replyId: number
     private replyMap: Map<number, { resolved: replyResolve, reject: replyReject }>
 
     constructor(socket: Socket) {
         this.replyId = 1
         this.replyMap = new Map()
-        this.socketBuffer = new SocketBuffer(socket, (route, buffer) => this.onPacket(route, buffer))
+        this.socketBuffer = new SocketParser(socket, (route, buffer) => this.onPacket(route, buffer))
         socket.on("close", () => this.close())
     }
 
@@ -26,12 +26,28 @@ export abstract class BasePeer {
             const res = proto.Node.decode(buffer)
             // tslint:disable-next-line:no-console
             console.log(res)
-            switch (res.message) {
-                case "request":
-                    this.respond(route, res.request)
+            switch (res.request) {
+                case "status":
+                case "ping":
+                case "getTxs":
+                case "putBlock":
+                case "getBlocksByHash":
+                case "getHeadersByHash":
+                case "getBlocksByRange":
+                case "getHeadersByRange":
+                case "getPeers":
+                    this.respond(route, res)
                     break
-                case "reply":
-                    this.route(route, res.reply)
+                case "pingReturn":
+                case "putTxReturn":
+                case "getTxsReturn":
+                case "putBlockReturn":
+                case "getBlocksByHashReturn":
+                case "getHeadersByHashReturn":
+                case "getBlocksByRangeReturn":
+                case "getHeadersByRangeReturn":
+                case "getPeersReturn":
+                    this.route(route, res)
                     break
             }
         } catch (e) {
@@ -39,24 +55,24 @@ export abstract class BasePeer {
         }
     }
 
-    protected abstract async respond(route: number, request: proto.Request | proto.IRequest): Promise<void>
+    protected abstract async respond(route: number, request: proto.Node | proto.INode): Promise<void>
 
-    protected async route(route: number, reply: proto.Reply | proto.IReply): Promise<void> {
+    protected async route(route: number, reply: proto.Node | proto.INode): Promise<void> {
         const { resolved } = this.replyMap.get(route)
         resolved(reply)
     }
 
-    protected async sendRequest(request: proto.IRequest): Promise<proto.IReply> {
+    protected async sendRequest(request: proto.INode): Promise<proto.INode> {
         const id = this.newReplyID()
-        const reply = await new Promise<proto.IReply>((resolved, reject) => {
+        const reply = await new Promise<proto.INode>((resolved, reject) => {
             this.replyMap.set(id, { resolved, reject })
-            this.send(id, { request })
+            this.send(id, request)
         })
         this.replyMap.delete(id)
         return reply
     }
-    protected sendReply(id: number, reply: proto.IReply): void {
-        this.send(id, { reply })
+    protected sendReply(id: number, reply: proto.INode): void {
+        this.send(id, reply)
     }
 
     protected send(route: number, data: proto.INode): void {
