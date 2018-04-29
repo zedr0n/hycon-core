@@ -8,7 +8,7 @@ export interface IPeer {
     putTx(tx: Tx): Promise<boolean>
     getTxs(minFee?: number): Promise<Tx[]>
     putBlock(block: Block): Promise<boolean>
-    getBlocksByHash(hash: any[]): Promise<Block>
+    getBlocksByHash(hash: any[]): Promise<Block[]>
     getHeadersByHash(hash: any[]): Promise<BlockHeader[]>
     getBlocksByRange(fromHeight: number, count: number): Promise<Block[]>
     getHeadersByRange(fromHeight: number, count: number): Promise<BlockHeader[]>

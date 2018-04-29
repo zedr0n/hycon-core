@@ -21,14 +21,6 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
     private static PollingStep = 100  // milli seconds
 
     protected status: IStatus
-    protected pingReturn: IPingReturn
-    protected putTxReturn: IPutTxReturn
-    protected getTxsReturn: IGetTxsReturn
-    protected putBlockReturn: IPutBlockReturn
-    protected getBlocksByHashReturn: IGetBlocksByHashReturn
-    protected getHeadersByHashReturn: IGetHeadersByHashReturn
-    protected getBlocksByRangeReturn: IGetBlocksByRangeReturn
-    protected getHeadersByRangeReturn: IGetHeadersByRangeReturn
     // callbacks
 
     protected nonce: number = 100
@@ -64,7 +56,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         this.onReceiveMessage(res)
     }
 
-    abstract public onReceiveMessage(res: proto.Node): void
+    //abstract public onReceiveMessage(res: proto.Node): void
 
     // send status
     public sendStatus(block: proto.Status) {
@@ -74,17 +66,10 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
 
     // ping
     public async ping(): Promise<PingReturn> {
-        this.sendPing()
-        let i = PeerNet.MaxTryCount
-        while (i-- > 0) {
-            await delay(PeerNet.PollingStep)
-            if (this.pingReturn) {
-                const ret = this.pingReturn
-                this.pingReturn = undefined
-                return ret
-            }
-        }
-        throw new Error(`Ping Error`)
+        return new Promise<PingReturn>((resolve, reject) => {
+            this.sendPing()
+            this.pingQueue.push({ resolve, reject })
+        })
     }
 
     public sendPing() {
@@ -99,17 +84,11 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
 
     // putTx
     public async putTx(tx: Tx): Promise<boolean> {
-        this.sendPutTx(tx)
-        let i = PeerNet.MaxTryCount
-        while (i-- > 0) {
-            await delay(PeerNet.PollingStep)
-            if (this.putTxReturn) {
-                const ret = this.putTxReturn.success
-                this.putTxReturn = undefined
-                return ret
-            }
-        }
-        throw new Error(`PutTx Error`)
+        return new Promise<boolean>((resolve, reject) => {
+            this.sendPutTx(tx)
+            this.putTxQueue.push({ resolve, reject })
+        })
+
     }
     public sendPutTx(tx: Tx) {
         const encodeReq = proto.Node.encode({ putTx: { txs: [tx] } }).finish()
@@ -123,17 +102,10 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
 
     // get txs
     public async getTxs(minFee: number): Promise<proto.ITx[]> {
-        this.sendGetTxs(minFee)
-        let i = PeerNet.MaxTryCount
-        while (i-- > 0) {
-            await delay(PeerNet.PollingStep)
-            if (this.getTxsReturn) {
-                const ret = this.getTxsReturn.txs
-                this.getTxsReturn = undefined
-                return ret
-            }
-        }
-        throw new Error(`getTxs Error`)
+        return new Promise<proto.ITx[]>((resolve, reject) => {
+            this.sendGetTxs(minFee)
+            this.getTxsQueue.push({ resolve, reject })
+        })
     }
 
     public sendGetTxs(minFee: number) {
@@ -148,17 +120,10 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
 
     // putBlock
     public async putBlock(tx: Block): Promise<boolean> {
-        this.sendPutBlock(tx)
-        let i = PeerNet.MaxTryCount
-        while (i-- > 0) {
-            await delay(PeerNet.PollingStep)
-            if (this.putBlockReturn) {
-                const ret = this.putBlockReturn.success
-                this.putBlockReturn = undefined
-                return ret
-            }
-        }
-        throw new Error(`PutTx Error`)
+        return new Promise<boolean>((resolve, reject) => {
+            this.sendPutBlock(tx)
+            this.putBlockQueue.push({ resolve, reject })
+        })
     }
     public sendPutBlock(block: Block) {
         const encodeReq = proto.Node.encode({ putBlock: { blocks: [block] } }).finish()
@@ -171,18 +136,11 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
     }
 
     // get blocks by hash
-    public async getBlocksByHash(hash: any[]): Promise<boolean> {
-        this.sendGetBlocksByHash([])
-        let i = PeerNet.MaxTryCount
-        while (i-- > 0) {
-            await delay(PeerNet.PollingStep)
-            if (this.getBlocksByHashReturn) {
-                const ret = this.getBlocksByHashReturn.success
-                this.putBlockReturn = undefined
-                return ret
-            }
-        }
-        throw new Error(`PutTx Error`)
+    public async getBlocksByHash(hash: any[]): Promise<Block[]> {
+        return new Promise<Block[]>((resolve, reject) => {
+            this.sendGetBlocksByHash([])
+            this.getBlocksByHashQueue.push({ resolve, reject })
+        })
     }
 
     public sendGetBlocksByHash(hashes: Uint8Array[]) {
@@ -197,20 +155,12 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
 
     // get headers by hash
     public async getHeadersByHash(hash: any[]): Promise<BlockHeader[]> {
-        this.sendGetHeadersByHash(hash)
-        let i = PeerNet.MaxTryCount
-        while (i-- > 0) {
-            await delay(PeerNet.PollingStep)
-            if (this.getHeadersByHashReturn) {
-                const ret: BlockHeader[] = []
-                for (const v of this.getHeadersByHashReturn.headers) {
-                    ret.push(new BlockHeader(v))
-                }
-                this.putBlockReturn = undefined
-                return ret
-            }
-        }
-        throw new Error(`PutTx Error`)
+
+        return new Promise<BlockHeader[]>((resolve, reject) => {
+            this.sendGetHeadersByHash(hash)
+            this.getHeadersByHashQueue.push({ resolve, reject })
+        })
+
     }
 
     public sendGetHeadersByHash(hashes: Uint8Array[]) {
@@ -224,18 +174,13 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
     }
 
     // get blocks  by range
-    public async getBlocksByRange(fromHeight: number, count: number): Promise<IBlock[]> {
-        this.sendGetBlocksByRange(fromHeight, count)
-        let i = PeerNet.MaxTryCount
-        while (i-- > 0) {
-            await delay(PeerNet.PollingStep)
-            if (this.getBlocksByRangeReturn) {
-                const ret = this.getBlocksByRangeReturn.blocks
-                this.getBlocksByRangeReturn = undefined
-                return ret
-            }
-        }
-        throw new Error(`getBlocksByRange Error`)
+    public async getBlocksByRange(fromHeight: number, count: number): Promise<Block[]> {
+
+        return new Promise<Block[]>((resolve, reject) => {
+            this.sendGetBlocksByRange(fromHeight, count)
+            this.getBlocksByRangeQueue.push({ resolve, reject })
+        })
+
     }
 
     public sendGetBlocksByRange(fromHeight: number, count: number) {
@@ -249,18 +194,11 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
     }
 
     // get headers  by range
-    public async getHeadersByRange(fromHeight: number, count: number): Promise<proto.IBlockHeader[]> {
-        this.sendGetHeadersByRange(fromHeight, count)
-        let i = PeerNet.MaxTryCount
-        while (i-- > 0) {
-            await delay(PeerNet.PollingStep)
-            if (this.getHeadersByRangeReturn) {
-                const ret = this.getHeadersByRangeReturn.headers
-                this.getHeadersByRangeReturn = undefined
-                return ret
-            }
-        }
-        throw new Error(`getHeadersByRange Error`)
+    public async getHeadersByRange(fromHeight: number, count: number): Promise<proto.BlockHeader[]> {
+        return new Promise<proto.BlockHeader[]>((resolve, reject) => {
+            this.sendGetHeadersByRange(fromHeight, count)
+            this.getHeadersByRangeQueue.push({ resolve, reject })
+        })
     }
     public sendGetHeadersByRange(fromHeight: number, count: number) {
         const encodeReq = proto.Node.encode({ getHeadersByRange: { fromHeight, count } }).finish()
@@ -284,6 +222,114 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
 
     public setConnectedCallback(callback: () => void) {
         this.connectedCallback = callback
+    }
+
+    public onReceiveMessage(res: proto.Node) {
+
+        if (res.status) {
+            logger.debug(`Status=${JSON.stringify(res.status)}`)
+        }
+        if (res.ping) {
+            const userNonce = Number(res.ping.nonce.toString()) + 3000
+            logger.debug(`Ping Nonce=${res.ping.nonce}`)
+            this.sendPingReturn(userNonce)
+        }
+        if (res.pingReturn) {
+            if (this.pingQueue.length > 0) {
+                var cb = this.pingQueue.pop()
+                cb.resolve(res.pingReturn)
+            }
+            logger.debug(`Ping Response Nonce=${res.pingReturn.nonce}`)
+        }
+
+        if (res.putTx) {
+            logger.debug(`PutTx=${JSON.stringify(res.putTx.txs)}`)
+            this.sendPutTxReturn(true)
+        }
+        if (res.putTxReturn) {
+            if (this.putTxQueue.length > 0) {
+                var cb = this.putTxQueue.pop()
+                cb.resolve(res.putTxReturn.success)
+            }
+            logger.debug(`PutTx Response Success=${res.putTxReturn.success}`)
+        }
+
+        if (res.getTxs) {
+            this.sendGetTxsReturn(true, [])
+        }
+        if (res.getTxsReturn) {
+            if (this.getTxsQueue.length > 0) {
+                var cb = this.getTxsQueue.pop()
+                cb.resolve(res.getTxsReturn.txs)
+            }
+            logger.debug(`GetTxsReturn Response Success=${res.getTxsReturn.success}`)
+        }
+
+        if (res.putBlock) {
+            logger.debug(`PutBlock=${JSON.stringify(res.putBlock.blocks)}`)
+            const m = res.putBlock.blocks[0].miner
+            logger.debug(`miner=${Buffer.from(m).toString()}`)
+            this.sendPutBlockReturn(true)
+        }
+        if (res.putBlockReturn) {
+            if (this.putBlockQueue.length > 0) {
+                var cb = this.putBlockQueue.pop()
+                cb.resolve(res.putBlockReturn.success)
+            }
+
+            logger.debug(`PutBlock Response Success=${res.putBlockReturn.success}`)
+        }
+
+        if (res.getBlocksByHash) {
+            logger.debug(`getBlocksByHash=${JSON.stringify(res.getBlocksByHash.hashes)}`)
+            this.sendGetBlocksByHashReturn(true, [])
+        }
+        if (res.getBlocksByHashReturn) {
+            if (this.getBlocksByHashQueue.length > 0) {
+                var cb = this.getBlocksByHashQueue.pop()
+                cb.resolve(res.getBlocksByHashReturn.blocks)
+            }
+
+            logger.debug(`getBlocksByHashReturn Response Success=${res.getBlocksByHashReturn.success}`)
+        }
+
+        if (res.getHeadersByHash) {
+            logger.debug(`getHeadersByHash=${JSON.stringify(res.getHeadersByHash.hashes)}`)
+            this.sendGetHeadersByHashReturn(true, [])
+        }
+        if (res.getHeadersByHashReturn) {
+            if (this.getHeadersByHashQueue.length > 0) {
+                var cb = this.getHeadersByHashQueue.pop()
+                cb.resolve(res.getHeadersByHashReturn.headers)
+            }
+            logger.debug(`getHeadersByHashReturn Response Success=${res.getHeadersByHashReturn.success}`)
+        }
+
+        if (res.getBlocksByRange) {
+            logger.debug(`getBlocksByRange=${JSON.stringify(res.getBlocksByRange)}`)
+            this.sendGetBlocksByRangeReturn(true, [])
+        }
+        if (res.getBlocksByRangeReturn) {
+            if (this.getBlocksByRangeQueue.length > 0) {
+                var cb = this.getBlocksByRangeQueue.pop()
+                cb.resolve(res.getBlocksByRangeReturn.blocks)
+            }
+
+            logger.debug(`getBlocksByRangeReturn Response Success=${res.getBlocksByRangeReturn.success}`)
+        }
+
+        if (res.getHeadersByRange) {
+            logger.debug(`getHeadersByRange=${JSON.stringify(res.getHeadersByRange)}`)
+            this.sendGetHeadersByRangeReturn(true, [])
+        }
+        if (res.getHeadersByRangeReturn) {
+            if (this.getHeadersByRangeQueue.length > 0) {
+                var cb = this.getHeadersByRangeQueue.pop()
+                cb.resolve(res.getHeadersByRangeReturn.headers)
+            }
+            logger.debug(`getHeadersByRangeReturn Response Success=${res.getHeadersByRangeReturn.success}`)
+        }
+
     }
 
 }

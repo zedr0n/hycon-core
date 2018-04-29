@@ -29,6 +29,15 @@ export abstract class PeerBasic {
     public port: number
     public state: PeerState = PeerState.Connected
 
+    protected pingQueue: any[] = []
+    protected putTxQueue: any[] = []
+    protected getTxsQueue: any[] = []
+    protected putBlockQueue: any[] = []
+    protected getBlocksByHashQueue: any[] = []
+    protected getHeadersByHashQueue: any[] = []
+    protected getBlocksByRangeQueue: any[] = []
+    protected getHeadersByRangeQueue: any[] = []
+
 
     protected connectedCallback: () => void = undefined
 
