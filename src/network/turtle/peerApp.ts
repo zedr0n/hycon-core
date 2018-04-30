@@ -50,6 +50,7 @@ export class PeerApp extends PeerNet {
     }
     public async onReceivePutBlock(packet: Packet, res: proto.Node) {
         try {
+            logger.debug(`onReceivePutBlock  TxCount=${res.putBlock.blocks[0].txs.length}`)
             for (const block of res.putBlock.blocks) {
                 await this.consensus.putBlock(block)
             }

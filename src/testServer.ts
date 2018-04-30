@@ -37,5 +37,11 @@ export class TestServer {
         // logger.debug(`Make Block`)
         const newBlock = new Block({ txs: this.txs })
         this.txs = []
+
+        const encodeReq = proto.Node.encode({ putBlock: { blocks: [newBlock] } }).finish()
+        const newPacket = new Packet()
+        newPacket.pushBuffer(new Buffer(encodeReq))
+
+        this.server.network.broadcast(newPacket)
     }
 }

@@ -249,7 +249,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
                 const cb = this.putTxQueue.pop()
                 cb.resolve(res.putTxReturn.success)
             }
-            logger.debug(`PutTx Response Success=${res.putTxReturn.success}`)
+            // logger.debug(`PutTx Response Success=${res.putTxReturn.success}`)
         }
 
         if (res.getTxs) {
