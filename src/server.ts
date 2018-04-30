@@ -28,9 +28,10 @@ const optionDefinitions = [
 const logger = getLogger("Server")
 
 export class Server {
-    public readonly consensus: IConsensus = undefined // the core
-    public readonly network: INetwork = undefined // hycon network
-    public readonly miner: IMiner = undefined // miner
+    public network: any = undefined // hycon network
+    public useRabbit = false
+    public consensus: IConsensus = undefined // the core
+    public miner: IMiner = undefined // miner
 
     public readonly wallet: WalletManager = undefined
 
@@ -46,7 +47,14 @@ export class Server {
         logger.info(`Port=${this.options.port}`)
 
         this.consensus = new AppConsensus(this)
-        this.network = new RabbitNetwork(this.consensus, this.options.port)
+        if (this.useRabbit) {
+            // rabbit
+            this.network = new RabbitNetwork(this.consensus, this.options.port)
+        } else {
+            // turtle
+            this.network = new AppNetwork(this.options.port, this)
+        }
+
         this.wallet = new WalletManager(this)
         this.miner = new AppMiner(this)
         this.txPool = new AppTxPool(this)

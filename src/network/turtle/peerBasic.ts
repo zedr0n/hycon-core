@@ -127,13 +127,12 @@ export abstract class PeerBasic {
     }
 
     // except the source
-    public broadcast(newPacket: Packet) {
+    public broadcast(newPacket: Uint8Array) {
         this.network.peers.forEach((e) => {
             if (e as PeerBasic !== this) {
-                e.sendPacket(newPacket)
+                e.sendBuffer(newPacket)
             }
         })
-
     }
 
 }

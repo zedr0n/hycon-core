@@ -56,8 +56,8 @@ export class AppNetwork implements INetwork {
         this.upnpClient = new UpnpClient(this)
 
         // add peer
-        const peers = this.server.options.peer
-        if (peers) {
+        if (this.server) {
+            const peers = this.server.options.peer
             for (const peer of peers) {
                 const args = peer.split(":")
                 const ip = args[0]
@@ -126,9 +126,9 @@ export class AppNetwork implements INetwork {
         return []
     }
 
-    public broadcast(newPacket: Packet): void {
+    public broadcast(newPacket: Uint8Array): void {
         for (const p of this.peers) {
-            p.sendPacket(newPacket)
+            p.sendBuffer(newPacket)
         }
     }
 }

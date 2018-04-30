@@ -24,6 +24,11 @@ export class RabbitNetwork implements INetwork {
         logger.debug(`TcpNetwork Port=${port}`)
     }
 
+    public broadcast(newPacket: Uint8Array): void {
+        for (const p of this.peers) {
+            p.sendBuffer(newPacket)
+        }
+    }
     public async start(): Promise<boolean> {
         return new Promise<boolean>((resolved, rejected) => {
             logger.debug(`Tcp Network Started`)

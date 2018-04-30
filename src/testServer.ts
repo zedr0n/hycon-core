@@ -26,11 +26,8 @@ export class TestServer {
         const newTx = new Tx({ amount: this.index++, fee: Math.random() * 10 })
         this.txs.push(newTx)
 
-        const encodeReq = proto.Node.encode({ putTx: { txs: [newTx] } }).finish()
-        const newPacket = new Packet()
-        newPacket.pushBuffer(new Buffer(encodeReq))
-
-        this.server.network.broadcast(newPacket)
+        const encoded: Uint8Array = proto.Node.encode({ putTx: { txs: [newTx] } }).finish()
+        this.server.network.broadcast(encoded)
     }
 
     private async makeBlock() {
@@ -38,10 +35,7 @@ export class TestServer {
         const newBlock = new Block({ txs: this.txs })
         this.txs = []
 
-        const encodeReq = proto.Node.encode({ putBlock: { blocks: [newBlock] } }).finish()
-        const newPacket = new Packet()
-        newPacket.pushBuffer(new Buffer(encodeReq))
-
-        this.server.network.broadcast(newPacket)
+        const encoded: Uint8Array = proto.Node.encode({ putBlock: { blocks: [newBlock] } }).finish()
+        this.server.network.broadcast(encoded)
     }
 }
