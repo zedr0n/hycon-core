@@ -4,16 +4,11 @@ import * as proto from "../serialization/proto"
 import { Hash } from "../util/hash"
 import { BaseBlockHeader, GenesisBlockHeader } from "./genesisHeader"
 
-import * as bigInteger from 'big-integer'
-type BigInteger = bigInteger.BigInteger
-// tslint:disable:member-access
-// tslint:disable-next-line:no-var-requires
-export type GenesisBlockHeader = BaseBlockHeader
 export type AnyBlockHeader = (BlockHeader | GenesisBlockHeader)
 
 export class BlockHeader extends BaseBlockHeader {
     public previousHash: Hash[] = []
-    public nonce: BigInteger
+    public nonce: Long
 
     constructor(header: proto.IBlockHeader) {
         super()
@@ -32,7 +27,7 @@ export class BlockHeader extends BaseBlockHeader {
             this.previousHash.push(new Hash(prev))
         }
 
-        this.nonce = bigInteger(header.nonce.toString())
+        this.nonce = header.nonce instanceof Long ? header.nonce : Long.fromNumber(header.nonce)
     }
 
     public preHash(): Uint8Array {
