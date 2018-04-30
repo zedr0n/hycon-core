@@ -9,6 +9,7 @@ import { Socket } from "net"
 import { IConsensus } from "../../consensus/consensus"
 import { Server } from "../../server"
 import { UpnpClient, UpnpServer } from "../upnp"
+import { Peer } from "./peer"
 import { PeerMode } from "./peerBasic"
 export class AppNetwork implements INetwork {
     public static defaultPort = 8148
@@ -102,8 +103,12 @@ export class AppNetwork implements INetwork {
     public getRandomPeer(): IPeer {
         throw new Error("Method not implemented.")
     }
-    public getRandomPeers(count: number): IPeer {
-        throw new Error("Method not implemented.")
+    public getRandomPeers(count: number): IPeer[] {
+        return []
+    }
+
+    public getPeers(count: number): proto.Peer[] {
+        return []
     }
 
 }
