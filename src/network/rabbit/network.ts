@@ -1,6 +1,6 @@
 import { getLogger } from "log4js"
 import { createConnection, createServer, Server, Socket } from "net"
-import { IConsensus } from "../../consensus/consensus"
+import { IConsensus } from "../../consensus/iconsensus"
 import * as proto from "../../serialization/proto"
 import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"

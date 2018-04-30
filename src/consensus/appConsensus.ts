@@ -1,5 +1,5 @@
 import { Server } from "../server"
-import { IConsensus } from "./consensus"
+import { IConsensus } from "./iconsensus"
 export class AppConsensus implements IConsensus {
     public server: Server = undefined
     constructor(server: Server) {

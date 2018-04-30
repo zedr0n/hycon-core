@@ -1,4 +1,4 @@
-import { IConsensus } from "./consensus"
+import { IConsensus } from "./iconsensus"
 
 export class Database implements IConsensus {
     public putBlock(block: any): Promise<boolean> {

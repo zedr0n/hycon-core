@@ -2,7 +2,7 @@ import commandLineArgs = require("command-line-args")
 import { getLogger } from "log4js"
 import { AppTxPool } from "./common/appTxPool"
 import { AppConsensus } from "./consensus/appConsensus"
-import { IConsensus } from "./consensus/consensus"
+import { IConsensus } from "./consensus/iconsensus"
 import { AppMiner } from "./miner/appMiner"
 import { IMiner } from "./miner/miner"
 import { INetwork } from "./network/inetwork"
