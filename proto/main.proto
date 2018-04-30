@@ -1,5 +1,5 @@
 syntax = "proto3";
-import "node.proto";
+import "network.proto";
 import "block.proto";
 import "blockHeader.proto";
 import "tx.proto";
