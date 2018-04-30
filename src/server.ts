@@ -28,13 +28,11 @@ const optionDefinitions = [
 const logger = getLogger("Server")
 
 export class Server {
-    public network: any = undefined // hycon network
     public useRabbit = true
-    public consensus: IConsensus = undefined // the core
-    public miner: IMiner = undefined // miner
-
+    public readonly consensus: IConsensus = undefined // the core
+    public readonly network: INetwork = undefined // hycon network
+    public readonly miner: IMiner = undefined // miner
     public readonly wallet: WalletManager = undefined
-
     public readonly txPool: AppTxPool = undefined // tx pool
     public readonly rest: RestManager = undefined // api server for hycon
     public options: any // json options
