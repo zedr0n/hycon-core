@@ -23,12 +23,12 @@ export class RabbitPeer extends BasePeer implements IPeer {
 
     public async status(): Promise<proto.IStatus> {
         const reply = await this.sendRequest({ status: { version: 0, networkid: "hycon" } })
-        if (reply.statusReturn === undefined) {
+        if (reply.status === undefined) {
             this.protocolError()
             throw new Error("Invalid response")
         }
 
-        return reply.statusReturn
+        return reply.status
     }
 
     public async ping(): Promise<void> {
@@ -133,11 +133,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
         return headers
     }
 
-    protected async respond(id: number, request: proto.Node | proto.INode): Promise<void> {
-        if (!(request instanceof proto.Node)) {
-            logger.debug(`Could not respond to request as it lacked request type '${request}'`)
-            return
-        }
+    protected async respond(id: number, request: proto.Network): Promise<void> {
         logger.info(`Must respond to ${request.request}`)
         switch (request.request) {
             case "status":
@@ -171,7 +167,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     private respondStatus(id: number, status: proto.IStatus) {
-        this.sendReply(id, { statusReturn: { version: 0, networkid: "hycon" } })
+        this.sendReply(id, { status: { version: 0, networkid: "hycon" } })
     }
 
     private respondPing(id: number, request: proto.IPing) {
@@ -202,7 +198,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
             const blockPromise: Array<Promise<Block>> = []
             for (const iHash of request.hashes) {
                 const hash = new Hash(iHash)
-                blockPromise.push(this.concensus.getBlockByHash(hash))
+                blockPromise.push(this.concensus.getBlocksByHash(hash))
             }
             const blocks = await Promise.all(blockPromise)
             this.sendReply(id, { getBlocksByHashReturn: { success: true, blocks } })

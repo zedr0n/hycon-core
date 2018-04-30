@@ -1,12 +1,11 @@
+import commandLineArgs = require("command-line-args")
 import { getLogger } from "log4js"
-const logger = getLogger("Server")
-const commandLineArgs = require("command-line-args")
 import { AppTxPool } from "./common/appTxPool"
 import { AppConsensus } from "./consensus/appConsensus"
 import { IConsensus } from "./consensus/consensus"
 import { AppMiner } from "./miner/appMiner"
 import { IMiner } from "./miner/miner"
-import { INetwork } from "./network/network"
+import { INetwork } from "./network/inetwork"
 import { RabbitNetwork } from "./network/rabbit/network" // for speed
 import { AppNetwork } from "./network/turtle/appNetwork" // for development only
 import { RestManager } from "./rest/restManager"
@@ -25,40 +24,35 @@ const optionDefinitions = [
     { name: "visDAG", alias: "d", type: Boolean },
 ]
 
+const logger = getLogger("Server")
+
 export class Server {
-    public network: INetwork = undefined // hycon network
-    public consensus: IConsensus = undefined // the core
-    public miner: IMiner = undefined // miner
+    public readonly consensus: IConsensus = undefined // the core
+    public readonly network: INetwork = undefined // hycon network
+    public readonly miner: IMiner = undefined // miner
 
-    public wallet: WalletManager = undefined
+    public readonly wallet: WalletManager = undefined
 
-    public txPool: AppTxPool = undefined // tx pool
-    public rest: RestManager = undefined // api server for hycon
+    public readonly txPool: AppTxPool = undefined // tx pool
+    public readonly rest: RestManager = undefined // api server for hycon
     public options: any // json options
 
     constructor() {
-        this.readOptions()
+        this.options = commandLineArgs(optionDefinitions)
+        logger.info(`Options=${JSON.stringify(this.options)}`)
+        logger.info(`Verbose=${this.options.verbose}`)
+        logger.info(`Port=${this.options.port}`)
+
         this.consensus = new AppConsensus(this)
-        this.network = new AppNetwork(this.options.port, this)
-        // this.network = new RabbitNetwork(this, this.options.port)
+        this.network = new RabbitNetwork(this.consensus, this.options.port)
         this.wallet = new WalletManager(this)
         this.miner = new AppMiner(this)
         this.txPool = new AppTxPool(this)
         this.rest = new RestManager(this)
-        this.network.start()
 
     }
     public run() {
         logger.info("Starting server...")
-        setInterval(() => {
-            // just polling
-        }, 1000)
-    }
-    private readOptions() {
-        const options = commandLineArgs(optionDefinitions)
-        this.options = options
-        logger.info(`Options=${JSON.stringify(options)}`)
-        logger.info(`Verbose=${options.verbose}`)
-        logger.info(`Port=${options.port}`)
+        this.network.start()
     }
 }

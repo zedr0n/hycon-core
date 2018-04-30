@@ -9,42 +9,42 @@ var $Reader = $protobuf.Reader, $Writer = $protobuf.Writer, $util = $protobuf.ut
 // Exported root namespace
 var $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
 
-$root.Node = (function() {
+$root.Network = (function() {
 
     /**
-     * Properties of a Node.
-     * @exports INode
-     * @interface INode
-     * @property {IStatus|null} [status] Node status
-     * @property {IPing|null} [ping] Node ping
-     * @property {IPingReturn|null} [pingReturn] Node pingReturn
-     * @property {IPutTx|null} [putTx] Node putTx
-     * @property {IPutTxReturn|null} [putTxReturn] Node putTxReturn
-     * @property {IGetTxs|null} [getTxs] Node getTxs
-     * @property {IGetTxsReturn|null} [getTxsReturn] Node getTxsReturn
-     * @property {IPutBlock|null} [putBlock] Node putBlock
-     * @property {IPutBlockReturn|null} [putBlockReturn] Node putBlockReturn
-     * @property {IGetBlocksByHash|null} [getBlocksByHash] Node getBlocksByHash
-     * @property {IGetBlocksByHashReturn|null} [getBlocksByHashReturn] Node getBlocksByHashReturn
-     * @property {IGetHeadersByHash|null} [getHeadersByHash] Node getHeadersByHash
-     * @property {IGetHeadersByHashReturn|null} [getHeadersByHashReturn] Node getHeadersByHashReturn
-     * @property {IGetBlocksByRange|null} [getBlocksByRange] Node getBlocksByRange
-     * @property {IGetBlocksByRangeReturn|null} [getBlocksByRangeReturn] Node getBlocksByRangeReturn
-     * @property {IGetHeadersByRange|null} [getHeadersByRange] Node getHeadersByRange
-     * @property {IGetHeadersByRangeReturn|null} [getHeadersByRangeReturn] Node getHeadersByRangeReturn
-     * @property {IGetPeers|null} [getPeers] Node getPeers
-     * @property {IGetPeersReturn|null} [getPeersReturn] Node getPeersReturn
+     * Properties of a Network.
+     * @exports INetwork
+     * @interface INetwork
+     * @property {IStatus|null} [status] Network status
+     * @property {IPing|null} [ping] Network ping
+     * @property {IPingReturn|null} [pingReturn] Network pingReturn
+     * @property {IPutTx|null} [putTx] Network putTx
+     * @property {IPutTxReturn|null} [putTxReturn] Network putTxReturn
+     * @property {IGetTxs|null} [getTxs] Network getTxs
+     * @property {IGetTxsReturn|null} [getTxsReturn] Network getTxsReturn
+     * @property {IPutBlock|null} [putBlock] Network putBlock
+     * @property {IPutBlockReturn|null} [putBlockReturn] Network putBlockReturn
+     * @property {IGetBlocksByHash|null} [getBlocksByHash] Network getBlocksByHash
+     * @property {IGetBlocksByHashReturn|null} [getBlocksByHashReturn] Network getBlocksByHashReturn
+     * @property {IGetHeadersByHash|null} [getHeadersByHash] Network getHeadersByHash
+     * @property {IGetHeadersByHashReturn|null} [getHeadersByHashReturn] Network getHeadersByHashReturn
+     * @property {IGetBlocksByRange|null} [getBlocksByRange] Network getBlocksByRange
+     * @property {IGetBlocksByRangeReturn|null} [getBlocksByRangeReturn] Network getBlocksByRangeReturn
+     * @property {IGetHeadersByRange|null} [getHeadersByRange] Network getHeadersByRange
+     * @property {IGetHeadersByRangeReturn|null} [getHeadersByRangeReturn] Network getHeadersByRangeReturn
+     * @property {IGetPeers|null} [getPeers] Network getPeers
+     * @property {IGetPeersReturn|null} [getPeersReturn] Network getPeersReturn
      */
 
     /**
-     * Constructs a new Node.
-     * @exports Node
-     * @classdesc Represents a Node.
-     * @implements INode
+     * Constructs a new Network.
+     * @exports Network
+     * @classdesc Represents a Network.
+     * @implements INetwork
      * @constructor
-     * @param {INode=} [properties] Properties to set
+     * @param {INetwork=} [properties] Properties to set
      */
-    function Node(properties) {
+    function Network(properties) {
         if (properties)
             for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                 if (properties[keys[i]] != null)
@@ -52,193 +52,193 @@ $root.Node = (function() {
     }
 
     /**
-     * Node status.
+     * Network status.
      * @member {IStatus|null|undefined} status
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Node.prototype.status = null;
+    Network.prototype.status = null;
 
     /**
-     * Node ping.
+     * Network ping.
      * @member {IPing|null|undefined} ping
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Node.prototype.ping = null;
+    Network.prototype.ping = null;
 
     /**
-     * Node pingReturn.
+     * Network pingReturn.
      * @member {IPingReturn|null|undefined} pingReturn
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Node.prototype.pingReturn = null;
+    Network.prototype.pingReturn = null;
 
     /**
-     * Node putTx.
+     * Network putTx.
      * @member {IPutTx|null|undefined} putTx
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Node.prototype.putTx = null;
+    Network.prototype.putTx = null;
 
     /**
-     * Node putTxReturn.
+     * Network putTxReturn.
      * @member {IPutTxReturn|null|undefined} putTxReturn
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Node.prototype.putTxReturn = null;
+    Network.prototype.putTxReturn = null;
 
     /**
-     * Node getTxs.
+     * Network getTxs.
      * @member {IGetTxs|null|undefined} getTxs
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Node.prototype.getTxs = null;
+    Network.prototype.getTxs = null;
 
     /**
-     * Node getTxsReturn.
+     * Network getTxsReturn.
      * @member {IGetTxsReturn|null|undefined} getTxsReturn
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Node.prototype.getTxsReturn = null;
+    Network.prototype.getTxsReturn = null;
 
     /**
-     * Node putBlock.
+     * Network putBlock.
      * @member {IPutBlock|null|undefined} putBlock
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Node.prototype.putBlock = null;
+    Network.prototype.putBlock = null;
 
     /**
-     * Node putBlockReturn.
+     * Network putBlockReturn.
      * @member {IPutBlockReturn|null|undefined} putBlockReturn
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Node.prototype.putBlockReturn = null;
+    Network.prototype.putBlockReturn = null;
 
     /**
-     * Node getBlocksByHash.
+     * Network getBlocksByHash.
      * @member {IGetBlocksByHash|null|undefined} getBlocksByHash
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Node.prototype.getBlocksByHash = null;
+    Network.prototype.getBlocksByHash = null;
 
     /**
-     * Node getBlocksByHashReturn.
+     * Network getBlocksByHashReturn.
      * @member {IGetBlocksByHashReturn|null|undefined} getBlocksByHashReturn
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Node.prototype.getBlocksByHashReturn = null;
+    Network.prototype.getBlocksByHashReturn = null;
 
     /**
-     * Node getHeadersByHash.
+     * Network getHeadersByHash.
      * @member {IGetHeadersByHash|null|undefined} getHeadersByHash
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Node.prototype.getHeadersByHash = null;
+    Network.prototype.getHeadersByHash = null;
 
     /**
-     * Node getHeadersByHashReturn.
+     * Network getHeadersByHashReturn.
      * @member {IGetHeadersByHashReturn|null|undefined} getHeadersByHashReturn
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Node.prototype.getHeadersByHashReturn = null;
+    Network.prototype.getHeadersByHashReturn = null;
 
     /**
-     * Node getBlocksByRange.
+     * Network getBlocksByRange.
      * @member {IGetBlocksByRange|null|undefined} getBlocksByRange
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Node.prototype.getBlocksByRange = null;
+    Network.prototype.getBlocksByRange = null;
 
     /**
-     * Node getBlocksByRangeReturn.
+     * Network getBlocksByRangeReturn.
      * @member {IGetBlocksByRangeReturn|null|undefined} getBlocksByRangeReturn
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Node.prototype.getBlocksByRangeReturn = null;
+    Network.prototype.getBlocksByRangeReturn = null;
 
     /**
-     * Node getHeadersByRange.
+     * Network getHeadersByRange.
      * @member {IGetHeadersByRange|null|undefined} getHeadersByRange
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Node.prototype.getHeadersByRange = null;
+    Network.prototype.getHeadersByRange = null;
 
     /**
-     * Node getHeadersByRangeReturn.
+     * Network getHeadersByRangeReturn.
      * @member {IGetHeadersByRangeReturn|null|undefined} getHeadersByRangeReturn
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Node.prototype.getHeadersByRangeReturn = null;
+    Network.prototype.getHeadersByRangeReturn = null;
 
     /**
-     * Node getPeers.
+     * Network getPeers.
      * @member {IGetPeers|null|undefined} getPeers
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Node.prototype.getPeers = null;
+    Network.prototype.getPeers = null;
 
     /**
-     * Node getPeersReturn.
+     * Network getPeersReturn.
      * @member {IGetPeersReturn|null|undefined} getPeersReturn
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Node.prototype.getPeersReturn = null;
+    Network.prototype.getPeersReturn = null;
 
     // OneOf field names bound to virtual getters and setters
     var $oneOfFields;
 
     /**
-     * Node request.
+     * Network request.
      * @member {"status"|"ping"|"pingReturn"|"putTx"|"putTxReturn"|"getTxs"|"getTxsReturn"|"putBlock"|"putBlockReturn"|"getBlocksByHash"|"getBlocksByHashReturn"|"getHeadersByHash"|"getHeadersByHashReturn"|"getBlocksByRange"|"getBlocksByRangeReturn"|"getHeadersByRange"|"getHeadersByRangeReturn"|"getPeers"|"getPeersReturn"|undefined} request
-     * @memberof Node
+     * @memberof Network
      * @instance
      */
-    Object.defineProperty(Node.prototype, "request", {
+    Object.defineProperty(Network.prototype, "request", {
         get: $util.oneOfGetter($oneOfFields = ["status", "ping", "pingReturn", "putTx", "putTxReturn", "getTxs", "getTxsReturn", "putBlock", "putBlockReturn", "getBlocksByHash", "getBlocksByHashReturn", "getHeadersByHash", "getHeadersByHashReturn", "getBlocksByRange", "getBlocksByRangeReturn", "getHeadersByRange", "getHeadersByRangeReturn", "getPeers", "getPeersReturn"]),
         set: $util.oneOfSetter($oneOfFields)
     });
 
     /**
-     * Creates a new Node instance using the specified properties.
+     * Creates a new Network instance using the specified properties.
      * @function create
-     * @memberof Node
+     * @memberof Network
      * @static
-     * @param {INode=} [properties] Properties to set
-     * @returns {Node} Node instance
+     * @param {INetwork=} [properties] Properties to set
+     * @returns {Network} Network instance
      */
-    Node.create = function create(properties) {
-        return new Node(properties);
+    Network.create = function create(properties) {
+        return new Network(properties);
     };
 
     /**
-     * Encodes the specified Node message. Does not implicitly {@link Node.verify|verify} messages.
+     * Encodes the specified Network message. Does not implicitly {@link Network.verify|verify} messages.
      * @function encode
-     * @memberof Node
+     * @memberof Network
      * @static
-     * @param {INode} message Node message or plain object to encode
+     * @param {INetwork} message Network message or plain object to encode
      * @param {$protobuf.Writer} [writer] Writer to encode to
      * @returns {$protobuf.Writer} Writer
      */
-    Node.encode = function encode(message, writer) {
+    Network.encode = function encode(message, writer) {
         if (!writer)
             writer = $Writer.create();
         if (message.status != null && message.hasOwnProperty("status"))
@@ -283,33 +283,33 @@ $root.Node = (function() {
     };
 
     /**
-     * Encodes the specified Node message, length delimited. Does not implicitly {@link Node.verify|verify} messages.
+     * Encodes the specified Network message, length delimited. Does not implicitly {@link Network.verify|verify} messages.
      * @function encodeDelimited
-     * @memberof Node
+     * @memberof Network
      * @static
-     * @param {INode} message Node message or plain object to encode
+     * @param {INetwork} message Network message or plain object to encode
      * @param {$protobuf.Writer} [writer] Writer to encode to
      * @returns {$protobuf.Writer} Writer
      */
-    Node.encodeDelimited = function encodeDelimited(message, writer) {
+    Network.encodeDelimited = function encodeDelimited(message, writer) {
         return this.encode(message, writer).ldelim();
     };
 
     /**
-     * Decodes a Node message from the specified reader or buffer.
+     * Decodes a Network message from the specified reader or buffer.
      * @function decode
-     * @memberof Node
+     * @memberof Network
      * @static
      * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
      * @param {number} [length] Message length if known beforehand
-     * @returns {Node} Node
+     * @returns {Network} Network
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    Node.decode = function decode(reader, length) {
+    Network.decode = function decode(reader, length) {
         if (!(reader instanceof $Reader))
             reader = $Reader.create(reader);
-        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.Node();
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.Network();
         while (reader.pos < end) {
             var tag = reader.uint32();
             switch (tag >>> 3) {
@@ -379,30 +379,30 @@ $root.Node = (function() {
     };
 
     /**
-     * Decodes a Node message from the specified reader or buffer, length delimited.
+     * Decodes a Network message from the specified reader or buffer, length delimited.
      * @function decodeDelimited
-     * @memberof Node
+     * @memberof Network
      * @static
      * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @returns {Node} Node
+     * @returns {Network} Network
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    Node.decodeDelimited = function decodeDelimited(reader) {
+    Network.decodeDelimited = function decodeDelimited(reader) {
         if (!(reader instanceof $Reader))
             reader = new $Reader(reader);
         return this.decode(reader, reader.uint32());
     };
 
     /**
-     * Verifies a Node message.
+     * Verifies a Network message.
      * @function verify
-     * @memberof Node
+     * @memberof Network
      * @static
      * @param {Object.<string,*>} message Plain object to verify
      * @returns {string|null} `null` if valid, otherwise the reason why it is not
      */
-    Node.verify = function verify(message) {
+    Network.verify = function verify(message) {
         if (typeof message !== "object" || message === null)
             return "object expected";
         var properties = {};
@@ -598,125 +598,125 @@ $root.Node = (function() {
     };
 
     /**
-     * Creates a Node message from a plain object. Also converts values to their respective internal types.
+     * Creates a Network message from a plain object. Also converts values to their respective internal types.
      * @function fromObject
-     * @memberof Node
+     * @memberof Network
      * @static
      * @param {Object.<string,*>} object Plain object
-     * @returns {Node} Node
+     * @returns {Network} Network
      */
-    Node.fromObject = function fromObject(object) {
-        if (object instanceof $root.Node)
+    Network.fromObject = function fromObject(object) {
+        if (object instanceof $root.Network)
             return object;
-        var message = new $root.Node();
+        var message = new $root.Network();
         if (object.status != null) {
             if (typeof object.status !== "object")
-                throw TypeError(".Node.status: object expected");
+                throw TypeError(".Network.status: object expected");
             message.status = $root.Status.fromObject(object.status);
         }
         if (object.ping != null) {
             if (typeof object.ping !== "object")
-                throw TypeError(".Node.ping: object expected");
+                throw TypeError(".Network.ping: object expected");
             message.ping = $root.Ping.fromObject(object.ping);
         }
         if (object.pingReturn != null) {
             if (typeof object.pingReturn !== "object")
-                throw TypeError(".Node.pingReturn: object expected");
+                throw TypeError(".Network.pingReturn: object expected");
             message.pingReturn = $root.PingReturn.fromObject(object.pingReturn);
         }
         if (object.putTx != null) {
             if (typeof object.putTx !== "object")
-                throw TypeError(".Node.putTx: object expected");
+                throw TypeError(".Network.putTx: object expected");
             message.putTx = $root.PutTx.fromObject(object.putTx);
         }
         if (object.putTxReturn != null) {
             if (typeof object.putTxReturn !== "object")
-                throw TypeError(".Node.putTxReturn: object expected");
+                throw TypeError(".Network.putTxReturn: object expected");
             message.putTxReturn = $root.PutTxReturn.fromObject(object.putTxReturn);
         }
         if (object.getTxs != null) {
             if (typeof object.getTxs !== "object")
-                throw TypeError(".Node.getTxs: object expected");
+                throw TypeError(".Network.getTxs: object expected");
             message.getTxs = $root.GetTxs.fromObject(object.getTxs);
         }
         if (object.getTxsReturn != null) {
             if (typeof object.getTxsReturn !== "object")
-                throw TypeError(".Node.getTxsReturn: object expected");
+                throw TypeError(".Network.getTxsReturn: object expected");
             message.getTxsReturn = $root.GetTxsReturn.fromObject(object.getTxsReturn);
         }
         if (object.putBlock != null) {
             if (typeof object.putBlock !== "object")
-                throw TypeError(".Node.putBlock: object expected");
+                throw TypeError(".Network.putBlock: object expected");
             message.putBlock = $root.PutBlock.fromObject(object.putBlock);
         }
         if (object.putBlockReturn != null) {
             if (typeof object.putBlockReturn !== "object")
-                throw TypeError(".Node.putBlockReturn: object expected");
+                throw TypeError(".Network.putBlockReturn: object expected");
             message.putBlockReturn = $root.PutBlockReturn.fromObject(object.putBlockReturn);
         }
         if (object.getBlocksByHash != null) {
             if (typeof object.getBlocksByHash !== "object")
-                throw TypeError(".Node.getBlocksByHash: object expected");
+                throw TypeError(".Network.getBlocksByHash: object expected");
             message.getBlocksByHash = $root.GetBlocksByHash.fromObject(object.getBlocksByHash);
         }
         if (object.getBlocksByHashReturn != null) {
             if (typeof object.getBlocksByHashReturn !== "object")
-                throw TypeError(".Node.getBlocksByHashReturn: object expected");
+                throw TypeError(".Network.getBlocksByHashReturn: object expected");
             message.getBlocksByHashReturn = $root.GetBlocksByHashReturn.fromObject(object.getBlocksByHashReturn);
         }
         if (object.getHeadersByHash != null) {
             if (typeof object.getHeadersByHash !== "object")
-                throw TypeError(".Node.getHeadersByHash: object expected");
+                throw TypeError(".Network.getHeadersByHash: object expected");
             message.getHeadersByHash = $root.GetHeadersByHash.fromObject(object.getHeadersByHash);
         }
         if (object.getHeadersByHashReturn != null) {
             if (typeof object.getHeadersByHashReturn !== "object")
-                throw TypeError(".Node.getHeadersByHashReturn: object expected");
+                throw TypeError(".Network.getHeadersByHashReturn: object expected");
             message.getHeadersByHashReturn = $root.GetHeadersByHashReturn.fromObject(object.getHeadersByHashReturn);
         }
         if (object.getBlocksByRange != null) {
             if (typeof object.getBlocksByRange !== "object")
-                throw TypeError(".Node.getBlocksByRange: object expected");
+                throw TypeError(".Network.getBlocksByRange: object expected");
             message.getBlocksByRange = $root.GetBlocksByRange.fromObject(object.getBlocksByRange);
         }
         if (object.getBlocksByRangeReturn != null) {
             if (typeof object.getBlocksByRangeReturn !== "object")
-                throw TypeError(".Node.getBlocksByRangeReturn: object expected");
+                throw TypeError(".Network.getBlocksByRangeReturn: object expected");
             message.getBlocksByRangeReturn = $root.GetBlocksByRangeReturn.fromObject(object.getBlocksByRangeReturn);
         }
         if (object.getHeadersByRange != null) {
             if (typeof object.getHeadersByRange !== "object")
-                throw TypeError(".Node.getHeadersByRange: object expected");
+                throw TypeError(".Network.getHeadersByRange: object expected");
             message.getHeadersByRange = $root.GetHeadersByRange.fromObject(object.getHeadersByRange);
         }
         if (object.getHeadersByRangeReturn != null) {
             if (typeof object.getHeadersByRangeReturn !== "object")
-                throw TypeError(".Node.getHeadersByRangeReturn: object expected");
+                throw TypeError(".Network.getHeadersByRangeReturn: object expected");
             message.getHeadersByRangeReturn = $root.GetHeadersByRangeReturn.fromObject(object.getHeadersByRangeReturn);
         }
         if (object.getPeers != null) {
             if (typeof object.getPeers !== "object")
-                throw TypeError(".Node.getPeers: object expected");
+                throw TypeError(".Network.getPeers: object expected");
             message.getPeers = $root.GetPeers.fromObject(object.getPeers);
         }
         if (object.getPeersReturn != null) {
             if (typeof object.getPeersReturn !== "object")
-                throw TypeError(".Node.getPeersReturn: object expected");
+                throw TypeError(".Network.getPeersReturn: object expected");
             message.getPeersReturn = $root.GetPeersReturn.fromObject(object.getPeersReturn);
         }
         return message;
     };
 
     /**
-     * Creates a plain object from a Node message. Also converts values to other types if specified.
+     * Creates a plain object from a Network message. Also converts values to other types if specified.
      * @function toObject
-     * @memberof Node
+     * @memberof Network
      * @static
-     * @param {Node} message Node
+     * @param {Network} message Network
      * @param {$protobuf.IConversionOptions} [options] Conversion options
      * @returns {Object.<string,*>} Plain object
      */
-    Node.toObject = function toObject(message, options) {
+    Network.toObject = function toObject(message, options) {
         if (!options)
             options = {};
         var object = {};
@@ -819,17 +819,17 @@ $root.Node = (function() {
     };
 
     /**
-     * Converts this Node to JSON.
+     * Converts this Network to JSON.
      * @function toJSON
-     * @memberof Node
+     * @memberof Network
      * @instance
      * @returns {Object.<string,*>} JSON object
      */
-    Node.prototype.toJSON = function toJSON() {
+    Network.prototype.toJSON = function toJSON() {
         return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
     };
 
-    return Node;
+    return Network;
 })();
 
 $root.Status = (function() {

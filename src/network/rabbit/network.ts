@@ -12,7 +12,7 @@ const logger = getLogger("Network")
 export class RabbitNetwork implements INetwork {
     public readonly port: number
     private server: Server
-    private peers: NetPeer[]
+    private peers: RabbitPeer[]
     private concensus: IConsensus
     private targetPeerCount: number
 

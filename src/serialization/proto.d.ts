@@ -1,201 +1,201 @@
 import * as $protobuf from "protobufjs";
 
-/** Properties of a Node. */
-export interface INode {
+/** Properties of a Network. */
+export interface INetwork {
 
-    /** Node status */
+    /** Network status */
     status?: IStatus;
 
-    /** Node ping */
+    /** Network ping */
     ping?: IPing;
 
-    /** Node pingReturn */
+    /** Network pingReturn */
     pingReturn?: IPingReturn;
 
-    /** Node putTx */
+    /** Network putTx */
     putTx?: IPutTx;
 
-    /** Node putTxReturn */
+    /** Network putTxReturn */
     putTxReturn?: IPutTxReturn;
 
-    /** Node getTxs */
+    /** Network getTxs */
     getTxs?: IGetTxs;
 
-    /** Node getTxsReturn */
+    /** Network getTxsReturn */
     getTxsReturn?: IGetTxsReturn;
 
-    /** Node putBlock */
+    /** Network putBlock */
     putBlock?: IPutBlock;
 
-    /** Node putBlockReturn */
+    /** Network putBlockReturn */
     putBlockReturn?: IPutBlockReturn;
 
-    /** Node getBlocksByHash */
+    /** Network getBlocksByHash */
     getBlocksByHash?: IGetBlocksByHash;
 
-    /** Node getBlocksByHashReturn */
+    /** Network getBlocksByHashReturn */
     getBlocksByHashReturn?: IGetBlocksByHashReturn;
 
-    /** Node getHeadersByHash */
+    /** Network getHeadersByHash */
     getHeadersByHash?: IGetHeadersByHash;
 
-    /** Node getHeadersByHashReturn */
+    /** Network getHeadersByHashReturn */
     getHeadersByHashReturn?: IGetHeadersByHashReturn;
 
-    /** Node getBlocksByRange */
+    /** Network getBlocksByRange */
     getBlocksByRange?: IGetBlocksByRange;
 
-    /** Node getBlocksByRangeReturn */
+    /** Network getBlocksByRangeReturn */
     getBlocksByRangeReturn?: IGetBlocksByRangeReturn;
 
-    /** Node getHeadersByRange */
+    /** Network getHeadersByRange */
     getHeadersByRange?: IGetHeadersByRange;
 
-    /** Node getHeadersByRangeReturn */
+    /** Network getHeadersByRangeReturn */
     getHeadersByRangeReturn?: IGetHeadersByRangeReturn;
 
-    /** Node getPeers */
+    /** Network getPeers */
     getPeers?: IGetPeers;
 
-    /** Node getPeersReturn */
+    /** Network getPeersReturn */
     getPeersReturn?: IGetPeersReturn;
 }
 
-/** Represents a Node. */
-export class Node implements INode {
+/** Represents a Network. */
+export class Network implements INetwork {
 
     /**
-     * Constructs a new Node.
+     * Constructs a new Network.
      * @param [properties] Properties to set
      */
-    constructor(properties?: INode);
+    constructor(properties?: INetwork);
 
-    /** Node status. */
+    /** Network status. */
     public status?: IStatus;
 
-    /** Node ping. */
+    /** Network ping. */
     public ping?: IPing;
 
-    /** Node pingReturn. */
+    /** Network pingReturn. */
     public pingReturn?: IPingReturn;
 
-    /** Node putTx. */
+    /** Network putTx. */
     public putTx?: IPutTx;
 
-    /** Node putTxReturn. */
+    /** Network putTxReturn. */
     public putTxReturn?: IPutTxReturn;
 
-    /** Node getTxs. */
+    /** Network getTxs. */
     public getTxs?: IGetTxs;
 
-    /** Node getTxsReturn. */
+    /** Network getTxsReturn. */
     public getTxsReturn?: IGetTxsReturn;
 
-    /** Node putBlock. */
+    /** Network putBlock. */
     public putBlock?: IPutBlock;
 
-    /** Node putBlockReturn. */
+    /** Network putBlockReturn. */
     public putBlockReturn?: IPutBlockReturn;
 
-    /** Node getBlocksByHash. */
+    /** Network getBlocksByHash. */
     public getBlocksByHash?: IGetBlocksByHash;
 
-    /** Node getBlocksByHashReturn. */
+    /** Network getBlocksByHashReturn. */
     public getBlocksByHashReturn?: IGetBlocksByHashReturn;
 
-    /** Node getHeadersByHash. */
+    /** Network getHeadersByHash. */
     public getHeadersByHash?: IGetHeadersByHash;
 
-    /** Node getHeadersByHashReturn. */
+    /** Network getHeadersByHashReturn. */
     public getHeadersByHashReturn?: IGetHeadersByHashReturn;
 
-    /** Node getBlocksByRange. */
+    /** Network getBlocksByRange. */
     public getBlocksByRange?: IGetBlocksByRange;
 
-    /** Node getBlocksByRangeReturn. */
+    /** Network getBlocksByRangeReturn. */
     public getBlocksByRangeReturn?: IGetBlocksByRangeReturn;
 
-    /** Node getHeadersByRange. */
+    /** Network getHeadersByRange. */
     public getHeadersByRange?: IGetHeadersByRange;
 
-    /** Node getHeadersByRangeReturn. */
+    /** Network getHeadersByRangeReturn. */
     public getHeadersByRangeReturn?: IGetHeadersByRangeReturn;
 
-    /** Node getPeers. */
+    /** Network getPeers. */
     public getPeers?: IGetPeers;
 
-    /** Node getPeersReturn. */
+    /** Network getPeersReturn. */
     public getPeersReturn?: IGetPeersReturn;
 
-    /** Node request. */
+    /** Network request. */
     public request?: ("status"|"ping"|"pingReturn"|"putTx"|"putTxReturn"|"getTxs"|"getTxsReturn"|"putBlock"|"putBlockReturn"|"getBlocksByHash"|"getBlocksByHashReturn"|"getHeadersByHash"|"getHeadersByHashReturn"|"getBlocksByRange"|"getBlocksByRangeReturn"|"getHeadersByRange"|"getHeadersByRangeReturn"|"getPeers"|"getPeersReturn");
 
     /**
-     * Creates a new Node instance using the specified properties.
+     * Creates a new Network instance using the specified properties.
      * @param [properties] Properties to set
-     * @returns Node instance
+     * @returns Network instance
      */
-    public static create(properties?: INode): Node;
+    public static create(properties?: INetwork): Network;
 
     /**
-     * Encodes the specified Node message. Does not implicitly {@link Node.verify|verify} messages.
-     * @param message Node message or plain object to encode
+     * Encodes the specified Network message. Does not implicitly {@link Network.verify|verify} messages.
+     * @param message Network message or plain object to encode
      * @param [writer] Writer to encode to
      * @returns Writer
      */
-    public static encode(message: INode, writer?: $protobuf.Writer): $protobuf.Writer;
+    public static encode(message: INetwork, writer?: $protobuf.Writer): $protobuf.Writer;
 
     /**
-     * Encodes the specified Node message, length delimited. Does not implicitly {@link Node.verify|verify} messages.
-     * @param message Node message or plain object to encode
+     * Encodes the specified Network message, length delimited. Does not implicitly {@link Network.verify|verify} messages.
+     * @param message Network message or plain object to encode
      * @param [writer] Writer to encode to
      * @returns Writer
      */
-    public static encodeDelimited(message: INode, writer?: $protobuf.Writer): $protobuf.Writer;
+    public static encodeDelimited(message: INetwork, writer?: $protobuf.Writer): $protobuf.Writer;
 
     /**
-     * Decodes a Node message from the specified reader or buffer.
+     * Decodes a Network message from the specified reader or buffer.
      * @param reader Reader or buffer to decode from
      * @param [length] Message length if known beforehand
-     * @returns Node
+     * @returns Network
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): Node;
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): Network;
 
     /**
-     * Decodes a Node message from the specified reader or buffer, length delimited.
+     * Decodes a Network message from the specified reader or buffer, length delimited.
      * @param reader Reader or buffer to decode from
-     * @returns Node
+     * @returns Network
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
-    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): Node;
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): Network;
 
     /**
-     * Verifies a Node message.
+     * Verifies a Network message.
      * @param message Plain object to verify
      * @returns `null` if valid, otherwise the reason why it is not
      */
     public static verify(message: { [k: string]: any }): (string|null);
 
     /**
-     * Creates a Node message from a plain object. Also converts values to their respective internal types.
+     * Creates a Network message from a plain object. Also converts values to their respective internal types.
      * @param object Plain object
-     * @returns Node
+     * @returns Network
      */
-    public static fromObject(object: { [k: string]: any }): Node;
+    public static fromObject(object: { [k: string]: any }): Network;
 
     /**
-     * Creates a plain object from a Node message. Also converts values to other types if specified.
-     * @param message Node
+     * Creates a plain object from a Network message. Also converts values to other types if specified.
+     * @param message Network
      * @param [options] Conversion options
      * @returns Plain object
      */
-    public static toObject(message: Node, options?: $protobuf.IConversionOptions): { [k: string]: any };
+    public static toObject(message: Network, options?: $protobuf.IConversionOptions): { [k: string]: any };
 
     /**
-     * Converts this Node to JSON.
+     * Converts this Network to JSON.
      * @returns JSON object
      */
     public toJSON(): { [k: string]: any };

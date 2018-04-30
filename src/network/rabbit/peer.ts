@@ -6,7 +6,7 @@ import { SocketParser } from "./socketBuffer"
 
 const logger = getLogger("Network")
 
-type replyResolve = (reply: proto.IReply) => void
+type replyResolve = (reply: proto.Network) => void
 type replyReject = (reason?: any) => void
 export abstract class BasePeer {
     public socketBuffer: SocketParser
@@ -23,7 +23,7 @@ export abstract class BasePeer {
     protected async onPacket(route: number, buffer: Buffer): Promise<void> {
         logger.info(`Recieved packet route ${route}, ${buffer.length} bytes`)
         try {
-            const res = proto.Node.decode(buffer)
+            const res = proto.Network.decode(buffer)
             // tslint:disable-next-line:no-console
             console.log(res)
             switch (res.request) {
@@ -55,28 +55,28 @@ export abstract class BasePeer {
         }
     }
 
-    protected abstract async respond(route: number, request: proto.Node | proto.INode): Promise<void>
+    protected abstract async respond(route: number, request: proto.Network): Promise<void>
 
-    protected async route(route: number, reply: proto.Node | proto.INode): Promise<void> {
+    protected async route(route: number, reply: proto.Network): Promise<void> {
         const { resolved } = this.replyMap.get(route)
         resolved(reply)
     }
 
-    protected async sendRequest(request: proto.INode): Promise<proto.INode> {
+    protected async sendRequest(request: proto.INetwork): Promise<proto.INetwork> {
         const id = this.newReplyID()
-        const reply = await new Promise<proto.INode>((resolved, reject) => {
+        const reply = await new Promise<proto.INetwork>((resolved, reject) => {
             this.replyMap.set(id, { resolved, reject })
             this.send(id, request)
         })
         this.replyMap.delete(id)
         return reply
     }
-    protected sendReply(id: number, reply: proto.INode): void {
+    protected sendReply(id: number, reply: proto.INetwork): void {
         this.send(id, reply)
     }
 
-    protected send(route: number, data: proto.INode): void {
-        const buffer: any = proto.Node.encode(data).finish()
+    protected send(route: number, data: proto.INetwork): void {
+        const buffer: any = proto.Network.encode(data).finish()
         logger.info(`Sending ${buffer.length} bytes`)
         this.socketBuffer.send(route, buffer)
     }

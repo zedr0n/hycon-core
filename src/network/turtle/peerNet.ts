@@ -51,16 +51,16 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
 
     public async parsePacket(packet: Packet): Promise<any> {
         const data = packet.popBuffer()
-        const res = proto.Node.decode(data)
+        const res = proto.Network.decode(data)
 
         this.onReceiveMessage(res)
     }
 
-    //abstract public onReceiveMessage(res: proto.Node): void
+    // abstract public onReceiveMessage(res: proto.Node): void
 
     // send status
     public sendStatus(block: proto.Status) {
-        const encodeReq = proto.Node.encode({ status: { version: 0, networkid: "hycon" } }).finish()
+        const encodeReq = proto.Network.encode({ status: { version: 0, networkid: "hycon" } }).finish()
         this.sendBuffer(encodeReq)
     }
 
@@ -73,12 +73,12 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
     }
 
     public sendPing() {
-        const encodeReq = proto.Node.encode({ ping: { nonce: this.nonce++ } }).finish()
+        const encodeReq = proto.Network.encode({ ping: { nonce: this.nonce++ } }).finish()
         this.sendBuffer(encodeReq)
     }
 
     public sendPingReturn(userNonce: number) {
-        const encodeReq = proto.Node.encode({ pingReturn: { nonce: userNonce } }).finish()
+        const encodeReq = proto.Network.encode({ pingReturn: { nonce: userNonce } }).finish()
         this.sendBuffer(encodeReq)
     }
 
@@ -91,12 +91,12 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
 
     }
     public sendPutTx(tx: Tx) {
-        const encodeReq = proto.Node.encode({ putTx: { txs: [tx] } }).finish()
+        const encodeReq = proto.Network.encode({ putTx: { txs: [tx] } }).finish()
         this.sendBuffer(encodeReq)
     }
 
     public sendPutTxReturn(success: boolean) {
-        const encodeReq = proto.Node.encode({ putTxReturn: { success } }).finish()
+        const encodeReq = proto.Network.encode({ putTxReturn: { success } }).finish()
         this.sendBuffer(encodeReq)
     }
 
@@ -109,12 +109,12 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
     }
 
     public sendGetTxs(minFee: number) {
-        const encodeReq = proto.Node.encode({ getTxs: { minFee } }).finish()
+        const encodeReq = proto.Network.encode({ getTxs: { minFee } }).finish()
         this.sendBuffer(encodeReq)
     }
 
     public sendGetTxsReturn(success: boolean, txs: Tx[]) {
-        const encodeReq = proto.Node.encode({ getTxsReturn: { success, txs: [] } }).finish()
+        const encodeReq = proto.Network.encode({ getTxsReturn: { success, txs: [] } }).finish()
         this.sendBuffer(encodeReq)
     }
 
@@ -126,12 +126,12 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         })
     }
     public sendPutBlock(block: Block) {
-        const encodeReq = proto.Node.encode({ putBlock: { blocks: [block] } }).finish()
+        const encodeReq = proto.Network.encode({ putBlock: { blocks: [block] } }).finish()
         this.sendBuffer(encodeReq)
     }
 
     public sendPutBlockReturn(success: boolean) {
-        const encodeReq = proto.Node.encode({ putBlockReturn: { success } }).finish()
+        const encodeReq = proto.Network.encode({ putBlockReturn: { success } }).finish()
         this.sendBuffer(encodeReq)
     }
 
@@ -144,12 +144,12 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
     }
 
     public sendGetBlocksByHash(hashes: Uint8Array[]) {
-        const encodeReq = proto.Node.encode({ getBlocksByHash: { hashes } }).finish()
+        const encodeReq = proto.Network.encode({ getBlocksByHash: { hashes } }).finish()
         this.sendBuffer(encodeReq)
     }
 
     public sendGetBlocksByHashReturn(success: boolean, blocks: Block[]) {
-        const encodeReq = proto.Node.encode({ getBlocksByHashReturn: { success, blocks } }).finish()
+        const encodeReq = proto.Network.encode({ getBlocksByHashReturn: { success, blocks } }).finish()
         this.sendBuffer(encodeReq)
     }
 
@@ -164,12 +164,12 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
     }
 
     public sendGetHeadersByHash(hashes: Uint8Array[]) {
-        const encodeReq = proto.Node.encode({ getHeadersByHash: { hashes } }).finish()
+        const encodeReq = proto.Network.encode({ getHeadersByHash: { hashes } }).finish()
         this.sendBuffer(encodeReq)
     }
 
     public sendGetHeadersByHashReturn(success: boolean, headers: BlockHeader[]) {
-        const encodeReq = proto.Node.encode({ getHeadersByHashReturn: { success, headers } }).finish()
+        const encodeReq = proto.Network.encode({ getHeadersByHashReturn: { success, headers } }).finish()
         this.sendBuffer(encodeReq)
     }
 
@@ -184,12 +184,12 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
     }
 
     public sendGetBlocksByRange(fromHeight: number, count: number) {
-        const encodeReq = proto.Node.encode({ getBlocksByRange: { fromHeight, count } }).finish()
+        const encodeReq = proto.Network.encode({ getBlocksByRange: { fromHeight, count } }).finish()
         this.sendBuffer(encodeReq)
     }
 
     public sendGetBlocksByRangeReturn(success: boolean, blocks: Block[]) {
-        const encodeReq = proto.Node.encode({ getBlocksByRangeReturn: { success, blocks } }).finish()
+        const encodeReq = proto.Network.encode({ getBlocksByRangeReturn: { success, blocks } }).finish()
         this.sendBuffer(encodeReq)
     }
 
@@ -201,22 +201,22 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         })
     }
     public sendGetHeadersByRange(fromHeight: number, count: number) {
-        const encodeReq = proto.Node.encode({ getHeadersByRange: { fromHeight, count } }).finish()
+        const encodeReq = proto.Network.encode({ getHeadersByRange: { fromHeight, count } }).finish()
         this.sendBuffer(encodeReq)
     }
 
     public sendGetHeadersByRangeReturn(success: boolean, headers: BlockHeader[]) {
-        const encodeReq = proto.Node.encode({ getHeadersByRangeReturn: { success, headers } }).finish()
+        const encodeReq = proto.Network.encode({ getHeadersByRangeReturn: { success, headers } }).finish()
         this.sendBuffer(encodeReq)
     }
 
     public sendGetPeers(count: number) {
-        const encodeReq = proto.Node.encode({ getPeers: { count } }).finish()
+        const encodeReq = proto.Network.encode({ getPeers: { count } }).finish()
         this.sendBuffer(encodeReq)
     }
 
     public sendGetPeersReturn(success: boolean, peers: proto.Peer[]) {
-        const encodeReq = proto.Node.encode({ getPeersReturn: { success, peers } }).finish()
+        const encodeReq = proto.Network.encode({ getPeersReturn: { success, peers } }).finish()
         this.sendBuffer(encodeReq)
     }
 
@@ -224,7 +224,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         this.connectedCallback = callback
     }
 
-    public onReceiveMessage(res: proto.Node) {
+    public onReceiveMessage(res: proto.Network) {
 
         if (res.status) {
             logger.debug(`Status=${JSON.stringify(res.status)}`)
@@ -236,7 +236,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         }
         if (res.pingReturn) {
             if (this.pingQueue.length > 0) {
-                var cb = this.pingQueue.pop()
+                let cb = this.pingQueue.pop()
                 cb.resolve(res.pingReturn)
             }
             logger.debug(`Ping Response Nonce=${res.pingReturn.nonce}`)
@@ -248,7 +248,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         }
         if (res.putTxReturn) {
             if (this.putTxQueue.length > 0) {
-                var cb = this.putTxQueue.pop()
+                let cb = this.putTxQueue.pop()
                 cb.resolve(res.putTxReturn.success)
             }
             logger.debug(`PutTx Response Success=${res.putTxReturn.success}`)
@@ -259,7 +259,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         }
         if (res.getTxsReturn) {
             if (this.getTxsQueue.length > 0) {
-                var cb = this.getTxsQueue.pop()
+                let cb = this.getTxsQueue.pop()
                 cb.resolve(res.getTxsReturn.txs)
             }
             logger.debug(`GetTxsReturn Response Success=${res.getTxsReturn.success}`)
@@ -273,7 +273,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         }
         if (res.putBlockReturn) {
             if (this.putBlockQueue.length > 0) {
-                var cb = this.putBlockQueue.pop()
+                let cb = this.putBlockQueue.pop()
                 cb.resolve(res.putBlockReturn.success)
             }
 
@@ -286,7 +286,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         }
         if (res.getBlocksByHashReturn) {
             if (this.getBlocksByHashQueue.length > 0) {
-                var cb = this.getBlocksByHashQueue.pop()
+                let cb = this.getBlocksByHashQueue.pop()
                 cb.resolve(res.getBlocksByHashReturn.blocks)
             }
 
@@ -299,7 +299,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         }
         if (res.getHeadersByHashReturn) {
             if (this.getHeadersByHashQueue.length > 0) {
-                var cb = this.getHeadersByHashQueue.pop()
+                let cb = this.getHeadersByHashQueue.pop()
                 cb.resolve(res.getHeadersByHashReturn.headers)
             }
             logger.debug(`getHeadersByHashReturn Response Success=${res.getHeadersByHashReturn.success}`)
@@ -311,7 +311,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         }
         if (res.getBlocksByRangeReturn) {
             if (this.getBlocksByRangeQueue.length > 0) {
-                var cb = this.getBlocksByRangeQueue.pop()
+                let cb = this.getBlocksByRangeQueue.pop()
                 cb.resolve(res.getBlocksByRangeReturn.blocks)
             }
 
@@ -324,7 +324,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         }
         if (res.getHeadersByRangeReturn) {
             if (this.getHeadersByRangeQueue.length > 0) {
-                var cb = this.getHeadersByRangeQueue.pop()
+                let cb = this.getHeadersByRangeQueue.pop()
                 cb.resolve(res.getHeadersByRangeReturn.headers)
             }
             logger.debug(`getHeadersByRangeReturn Response Success=${res.getHeadersByRangeReturn.success}`)

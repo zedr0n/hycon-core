@@ -2,8 +2,8 @@ import { getLogger } from "log4js"
 import { setInterval } from "timers"
 import { Block } from "../../serialization/proto"
 import { Ping } from "../../serialization/proto"
+import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"
-import { INetwork } from "../network"
 import { RabbitPeer } from "./netPeer"
 import { RabbitNetwork } from "./network"
 
@@ -36,6 +36,3 @@ async function testNetwork() {
 }
 
 testNetwork()
-// run the main loop
-setInterval(
-    () => { }, 1000)
