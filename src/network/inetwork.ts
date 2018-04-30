@@ -1,3 +1,4 @@
+import { INode } from "../serialization/proto"
 import { IPeer } from "./ipeer"
 export interface INetwork {
     start(): Promise<boolean>

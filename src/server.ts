@@ -51,15 +51,15 @@ export class Server {
         this.miner = new AppMiner(this)
         this.txPool = new AppTxPool(this)
         this.rest = new RestManager(this)
-        this.network.start()
+
     }
     public run() {
         logger.info("Starting server...")
         this.network.start()
+        this.readOptions()
     }
     private readOptions() {
         const options = commandLineArgs(optionDefinitions)
-        this.options = options
         logger.info(`Options=${JSON.stringify(options)}`)
         logger.info(`Verbose=${options.verbose}`)
         logger.info(`Port=${options.port}`)
@@ -67,5 +67,6 @@ export class Server {
             logger.info("Test Writing")
             this.test = new TestServer(this)
         }
+
     }
 }

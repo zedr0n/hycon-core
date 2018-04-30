@@ -5,10 +5,12 @@ import { INetwork } from "./network"
 import { IPeer } from "./peer"
 import { PeerApp } from "./peerApp"
 const logger = getLogger("Network")
+import { EPROTO } from "constants"
 import { Socket } from "net"
-import { IConsensus } from "../../consensus/consensus"
+import { IConsensus } from "../../consensus/iconsensus"
 import { Server } from "../../server"
 import { UpnpClient, UpnpServer } from "../upnp"
+import { Packet } from "./packet"
 import { Peer } from "./peer"
 import { PeerMode } from "./peerBasic"
 export class AppNetwork implements INetwork {
@@ -53,9 +55,22 @@ export class AppNetwork implements INetwork {
         this.upnpServer = new UpnpServer(this.port)
         this.upnpClient = new UpnpClient(this)
 
+        // add peer
+        const peers = this.server.options.peer
+        if (peers) {
+            for (const peer of peers) {
+                const args = peer.split(":")
+                const ip = args[0]
+                const port = args[1]
+                logger.info(`IP=${ip}  PORT=${port}`)
+                // serverOption.peer.push({ ip, port })
+                this.addClient(ip, port)
+            }
+        }
+
         setInterval(() => {
             this.polling()
-        }, 2000)
+        }, 10000)
         return true
     }
 
@@ -111,4 +126,9 @@ export class AppNetwork implements INetwork {
         return []
     }
 
+    public broadcast(newPacket: Packet): void {
+        for (const p of this.peers) {
+            p.sendPacket(newPacket)
+        }
+    }
 }

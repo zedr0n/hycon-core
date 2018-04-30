@@ -38,6 +38,7 @@ export class PeerApp extends PeerNet {
 
     public async onReceivePutTx(packet: Packet, res: proto.Node) {
         try {
+            logger.debug(`onReceivePutTx ${res.putTx.txs[0].amount}`)
             await this.txPool.putTxs(res.putTx.txs)
             this.sendPutTxReturn(true)
             // broadcast to others
@@ -124,7 +125,7 @@ export class PeerApp extends PeerNet {
         if (res.putTx) {
             await this.onReceivePutTx(packet, res)
         } else if (res.putBlock) {
-            await this.onReceivePutTx(packet, res)
+            await this.onReceivePutBlock(packet, res)
         } else if (res.getTxs) {
             await this.onReceiveGetTxs(packet, res)
         } else if (res.getBlocksByHash) {
