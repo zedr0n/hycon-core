@@ -219,12 +219,12 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
 
     public async parsePacket(packet: Packet): Promise<any> {
         const data = packet.popBuffer()
-        const res = proto.Node.decode(data)
+        const res = proto.Network.decode(data)
 
         await this.onReceiveMessage(packet, res)
     }
 
-    public onReceiveMessage(packet: Packet, res: proto.Node) {
+    public onReceiveMessage(packet: Packet, res: proto.Network) {
         if (res.status) {
             logger.debug(`Status=${JSON.stringify(res.status)}`)
         }

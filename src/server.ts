@@ -29,7 +29,7 @@ const logger = getLogger("Server")
 
 export class Server {
     public network: any = undefined // hycon network
-    public useRabbit = false
+    public useRabbit = true
     public consensus: IConsensus = undefined // the core
     public miner: IMiner = undefined // miner
 
