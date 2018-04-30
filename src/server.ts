@@ -9,6 +9,7 @@ import { INetwork } from "./network/inetwork"
 import { RabbitNetwork } from "./network/rabbit/network" // for speed
 import { AppNetwork } from "./network/turtle/appNetwork" // for development only
 import { RestManager } from "./rest/restManager"
+import { TestServer } from "./testServer"
 import { WalletManager } from "./wallet/walletManager"
 
 const optionDefinitions = [
@@ -36,6 +37,7 @@ export class Server {
     public readonly txPool: AppTxPool = undefined // tx pool
     public readonly rest: RestManager = undefined // api server for hycon
     public options: any // json options
+    public test: TestServer
 
     constructor() {
         this.options = commandLineArgs(optionDefinitions)
@@ -49,11 +51,21 @@ export class Server {
         this.miner = new AppMiner(this)
         this.txPool = new AppTxPool(this)
         this.rest = new RestManager(this)
-
-
+        this.network.start()
     }
     public run() {
         logger.info("Starting server...")
         this.network.start()
+    }
+    private readOptions() {
+        const options = commandLineArgs(optionDefinitions)
+        this.options = options
+        logger.info(`Options=${JSON.stringify(options)}`)
+        logger.info(`Verbose=${options.verbose}`)
+        logger.info(`Port=${options.port}`)
+        if (options.writing) {
+            logger.info("Test Writing")
+            this.test = new TestServer(this)
+        }
     }
 }

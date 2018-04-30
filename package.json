@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "./node_modules/.bin/ts-node src/main.ts --port=8148",
+    "start": "./node_modules/.bin/ts-node src/main.ts --port=8148 --writing",
     "protogen": "pbjs -t static-module -w commonjs -o src/serialization/proto.js proto/main.proto &&  pbts -o src/serialization/proto.d.ts src/serialization/proto.js && ./src/serialization/trim_null.sh",
     "debug": "./node_modules/.bin/ts-node --inspect=9231 --inspect-brk src/main.ts --port=8148",
     "debugNetwork": "./node_modules/.bin/ts-node --inspect=9231 --inspect-brk src/network/turtle/main.ts",
