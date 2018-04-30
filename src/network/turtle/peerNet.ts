@@ -27,7 +27,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
 
     constructor(server: AppNetwork, socket: Socket, mode: PeerMode) {
         super(socket, mode)
-        this.server = server
+        this.network = server
 
     }
 
@@ -36,7 +36,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
 
         switch (this.peerMode) {
             case PeerMode.AcceptedSession:
-                this.server.removePeer(this)
+                this.network.removePeer(this)
                 break
 
             case PeerMode.ConnectedSession:
@@ -47,13 +47,6 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
                 break
         }
 
-    }
-
-    public async parsePacket(packet: Packet): Promise<any> {
-        const data = packet.popBuffer()
-        const res = proto.Network.decode(data)
-
-        this.onReceiveMessage(res)
     }
 
     // abstract public onReceiveMessage(res: proto.Node): void
@@ -224,8 +217,14 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         this.connectedCallback = callback
     }
 
-    public onReceiveMessage(res: proto.Network) {
+    public async parsePacket(packet: Packet): Promise<any> {
+        const data = packet.popBuffer()
+        const res = proto.Node.decode(data)
 
+        await this.onReceiveMessage(packet, res)
+    }
+
+    public onReceiveMessage(packet: Packet, res: proto.Node) {
         if (res.status) {
             logger.debug(`Status=${JSON.stringify(res.status)}`)
         }
@@ -236,19 +235,18 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         }
         if (res.pingReturn) {
             if (this.pingQueue.length > 0) {
-                let cb = this.pingQueue.pop()
+                const cb = this.pingQueue.pop()
                 cb.resolve(res.pingReturn)
             }
             logger.debug(`Ping Response Nonce=${res.pingReturn.nonce}`)
         }
-
         if (res.putTx) {
             logger.debug(`PutTx=${JSON.stringify(res.putTx.txs)}`)
             this.sendPutTxReturn(true)
         }
         if (res.putTxReturn) {
             if (this.putTxQueue.length > 0) {
-                let cb = this.putTxQueue.pop()
+                const cb = this.putTxQueue.pop()
                 cb.resolve(res.putTxReturn.success)
             }
             logger.debug(`PutTx Response Success=${res.putTxReturn.success}`)
@@ -259,7 +257,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         }
         if (res.getTxsReturn) {
             if (this.getTxsQueue.length > 0) {
-                let cb = this.getTxsQueue.pop()
+                const cb = this.getTxsQueue.pop()
                 cb.resolve(res.getTxsReturn.txs)
             }
             logger.debug(`GetTxsReturn Response Success=${res.getTxsReturn.success}`)
@@ -273,7 +271,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         }
         if (res.putBlockReturn) {
             if (this.putBlockQueue.length > 0) {
-                let cb = this.putBlockQueue.pop()
+                const cb = this.putBlockQueue.pop()
                 cb.resolve(res.putBlockReturn.success)
             }
 
@@ -286,7 +284,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         }
         if (res.getBlocksByHashReturn) {
             if (this.getBlocksByHashQueue.length > 0) {
-                let cb = this.getBlocksByHashQueue.pop()
+                const cb = this.getBlocksByHashQueue.pop()
                 cb.resolve(res.getBlocksByHashReturn.blocks)
             }
 
@@ -299,7 +297,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         }
         if (res.getHeadersByHashReturn) {
             if (this.getHeadersByHashQueue.length > 0) {
-                let cb = this.getHeadersByHashQueue.pop()
+                const cb = this.getHeadersByHashQueue.pop()
                 cb.resolve(res.getHeadersByHashReturn.headers)
             }
             logger.debug(`getHeadersByHashReturn Response Success=${res.getHeadersByHashReturn.success}`)
@@ -311,7 +309,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         }
         if (res.getBlocksByRangeReturn) {
             if (this.getBlocksByRangeQueue.length > 0) {
-                let cb = this.getBlocksByRangeQueue.pop()
+                const cb = this.getBlocksByRangeQueue.pop()
                 cb.resolve(res.getBlocksByRangeReturn.blocks)
             }
 
@@ -324,7 +322,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         }
         if (res.getHeadersByRangeReturn) {
             if (this.getHeadersByRangeQueue.length > 0) {
-                let cb = this.getHeadersByRangeQueue.pop()
+                const cb = this.getHeadersByRangeQueue.pop()
                 cb.resolve(res.getHeadersByRangeReturn.headers)
             }
             logger.debug(`getHeadersByRangeReturn Response Success=${res.getHeadersByRangeReturn.success}`)

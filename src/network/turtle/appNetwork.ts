@@ -6,6 +6,7 @@ import { IPeer } from "./peer"
 import { PeerApp } from "./peerApp"
 const logger = getLogger("Network")
 import { Socket } from "net"
+import { IConsensus } from "../../consensus/consensus"
 import { Server } from "../../server"
 import { UpnpClient, UpnpServer } from "../upnp"
 import { PeerMode } from "./peerBasic"
@@ -18,6 +19,7 @@ export class AppNetwork implements INetwork {
     public clientTable: any = {}
     public upnpServer: UpnpServer
     public upnpClient: UpnpClient
+    public consensus: IConsensus
 
     constructor(port: number, server: Server) {
         if (port) {
@@ -25,10 +27,17 @@ export class AppNetwork implements INetwork {
         } else {
             this.port = 8148
         }
-        this.server = server
+        if (server) {
+            this.server = server
+        }
         logger.debug(`TcpNetwork Port=${port}`)
     }
     public start(): boolean {
+        // connect
+        if (this.server) {
+            this.consensus = this.server.consensus
+        }
+
         logger.debug(`Tcp Network Started`)
         this.tcp = net.createServer()
         this.tcp.listen(this.port, () => {

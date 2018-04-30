@@ -20,7 +20,7 @@ export enum PeerState {
 }
 
 export abstract class PeerBasic {
-    public server: AppNetwork
+    public network: AppNetwork
     public socket: Socket
     public socketBuffer = new SocketBuffer
     public peerMode: PeerMode = PeerMode.AcceptedSession
@@ -37,7 +37,6 @@ export abstract class PeerBasic {
     protected getHeadersByHashQueue: any[] = []
     protected getBlocksByRangeQueue: any[] = []
     protected getHeadersByRangeQueue: any[] = []
-
 
     protected connectedCallback: () => void = undefined
 
@@ -120,8 +119,21 @@ export abstract class PeerBasic {
     public sendBuffer(encodeReq: Uint8Array) {
         const newPacket = new Packet()
         newPacket.pushBuffer(new Buffer(encodeReq))
+        this.sendPacket(newPacket)
+    }
+    public sendPacket(newPacket: Packet) {
         const encoded = newPacket.pack()
         this.socket.write(encoded)
+    }
+
+    // except the source
+    public broadcast(newPacket: Packet) {
+        this.network.peers.forEach((e) => {
+            if (e as PeerBasic !== this) {
+                e.sendPacket(newPacket)
+            }
+        })
+
     }
 
 }

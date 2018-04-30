@@ -50,6 +50,7 @@ export class Server {
         this.txPool = new AppTxPool(this)
         this.rest = new RestManager(this)
 
+
     }
     public run() {
         logger.info("Starting server...")
