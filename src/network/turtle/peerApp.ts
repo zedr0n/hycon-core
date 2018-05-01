@@ -36,7 +36,7 @@ export class PeerApp extends PeerNet {
         }
     }
 
-    public async onReceivePutTx(packet: Packet, res: proto.Node) {
+    public async onReceivePutTx(packet: Packet, res: proto.Network) {
         try {
             logger.debug(`onReceivePutTx ${res.putTx.txs[0].amount}`)
             await this.txPool.putTxs(res.putTx.txs)
@@ -48,7 +48,7 @@ export class PeerApp extends PeerNet {
             this.sendPutTxReturn(false)
         }
     }
-    public async onReceivePutBlock(packet: Packet, res: proto.Node) {
+    public async onReceivePutBlock(packet: Packet, res: proto.Network) {
         try {
             logger.debug(`onReceivePutBlock  TxCount=${res.putBlock.blocks[0].txs.length}`)
             for (const block of res.putBlock.blocks) {
@@ -63,7 +63,7 @@ export class PeerApp extends PeerNet {
         }
     }
 
-    public async onReceiveGetTxs(packet: Packet, res: proto.Node) {
+    public async onReceiveGetTxs(packet: Packet, res: proto.Network) {
         try {
             const txs: Tx[] = await this.server.txPool.getTxs(res.getTxs.minFee as number)
             this.sendGetTxsReturn(true, txs)
@@ -71,7 +71,7 @@ export class PeerApp extends PeerNet {
             this.sendGetTxsReturn(false, [])
         }
     }
-    public async onReceiveGetBlocksByHash(packet: Packet, res: proto.Node) {
+    public async onReceiveGetBlocksByHash(packet: Packet, res: proto.Network) {
         const hashes = res.getBlocksByHash.hashes
         const blocks: any[] = []
         try {
@@ -84,7 +84,7 @@ export class PeerApp extends PeerNet {
             this.sendGetBlocksByHashReturn(false, [])
         }
     }
-    public async onReceiveGetHeadersByHash(packet: Packet, res: proto.Node) {
+    public async onReceiveGetHeadersByHash(packet: Packet, res: proto.Network) {
         const hashes = res.getHeadersByHash.hashes
         const headers: any[] = []
         try {
@@ -98,7 +98,7 @@ export class PeerApp extends PeerNet {
         }
     }
 
-    public async onReceiveGetBlocksByRange(packet: Packet, res: proto.Node) {
+    public async onReceiveGetBlocksByRange(packet: Packet, res: proto.Network) {
         try {
             const blocks = await this.consensus.getBlocksRange(
                 res.getBlocksByRange.fromHeight as number,
@@ -108,7 +108,7 @@ export class PeerApp extends PeerNet {
             this.sendGetBlocksByRangeReturn(false, [])
         }
     }
-    public async onReceiveGetHeadersByRange(packet: Packet, res: proto.Node) {
+    public async onReceiveGetHeadersByRange(packet: Packet, res: proto.NetworkNode) {
         try {
             const blocks = await this.consensus.getHeadersRange(
                 res.getHeadersByRange.fromHeight as number,
@@ -118,11 +118,11 @@ export class PeerApp extends PeerNet {
             this.sendGetHeadersByRangeReturn(false, [])
         }
     }
-    public async onReceiveGetPeers(packet: Packet, res: proto.Node) {
+    public async onReceiveGetPeers(packet: Packet, res: proto.Network) {
         const peers: proto.Peer[] = this.network.getPeers(res.getPeers.count as number)
         this.sendGetPeersReturn(true, peers)
     }
-    public async onReceiveMessage(packet: Packet, res: proto.Node) {
+    public async onReceiveMessage(packet: Packet, res: proto.Network) {
         if (res.putTx) {
             await this.onReceivePutTx(packet, res)
         } else if (res.putBlock) {

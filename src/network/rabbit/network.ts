@@ -1,7 +1,9 @@
 import { getLogger } from "log4js"
-import { createConnection, createServer, Server, Socket } from "net"
+import { createConnection, createServer, Socket } from "net"
+import * as net from "net"
 import { IConsensus } from "../../consensus/iconsensus"
 import * as proto from "../../serialization/proto"
+import { Server } from "../../server"
 import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"
 import { RabbitPeer } from "./netPeer"
@@ -11,38 +13,52 @@ const logger = getLogger("Network")
 
 export class RabbitNetwork implements INetwork {
     public readonly port: number
-    private server: Server
+    private hycon: Server
+    private server: net.Server
     private peers: RabbitPeer[]
-    private concensus: IConsensus
     private targetPeerCount: number
 
-    constructor(concensus: IConsensus, port: number = 8148) {
+    constructor(hycon: Server, port: number = 8148) {
         this.port = port
         this.peers = []
         this.targetPeerCount = 3
-        this.concensus = concensus
+        this.hycon = hycon
         logger.debug(`TcpNetwork Port=${port}`)
     }
 
-    public broadcast(newPacket: Uint8Array): void {
-        for (const p of this.peers) {
-            p.sendBuffer(newPacket)
+    public broadcast(packet: Buffer, exempt: IPeer): void {
+        for (const peer of this.peers) {
+            if (exempt !== peer) {
+                peer.sendPacket(packet)
+            }
         }
     }
     public async start(): Promise<boolean> {
-        return new Promise<boolean>((resolved, rejected) => {
-            logger.debug(`Tcp Network Started`)
-            this.server = createServer((socket) => this.newConnection(socket))
-            this.server.listen(this.port, () => {
-                resolved(true)
-                logger.info(`Listening ${this.port}`)
-            })
-
-            this.server.on("error", (error) => logger.error(`${error}`))
-
-            setInterval(() => logger.debug(`Peers Count=${this.peers.length}`), 1000)
-            setInterval(() => this.findPeers(), 1000)
+        // TODO: Handle error
+        logger.debug(`Tcp Network Started`)
+        this.server = createServer((socket) => this.newConnection(socket))
+        this.server.listen(this.port, () => {
+            logger.info(`Listening ${this.port}`)
+            return true
         })
+
+        this.server.on("error", (error) => logger.error(`${error}`))
+        setInterval(() => logger.debug(`Peers Count=${this.peers.length}`), 1000)
+        setInterval(() => this.findPeers(), 1000)
+
+        // add peer
+        if (this.hycon) {
+            const peers = this.hycon.options.peer
+            for (const peer of peers) {
+                const args = peer.split(":")
+                const ip = args[0]
+                const port = args[1]
+                logger.info(`IP=${ip}  PORT=${port}`)
+                this.addClient(ip, port)
+            }
+        }
+
+        return true
     }
 
     public async addClient(host: string, port: number): Promise<IPeer> {
@@ -77,7 +93,7 @@ export class RabbitNetwork implements INetwork {
 
     private newConnection(socket: Socket): RabbitPeer {
         logger.info(`Making peer`)
-        const peer = new RabbitPeer(socket, this.concensus)
+        const peer = new RabbitPeer(socket, this, this.hycon.consensus, this.hycon.txPool)
         socket.on("close", (error) => { this.removePeer(peer) })
         this.peers.push(peer)
         return peer

@@ -6,7 +6,9 @@ import { SocketParser } from "./socketBuffer"
 
 const logger = getLogger("Network")
 
-type replyResolve = (reply: proto.Network) => void
+// tslint:disable-next-line:interface-name
+interface ReplyAndPacket { reply: proto.Network, packet: Buffer }
+type replyResolve = (reply: ReplyAndPacket) => void
 type replyReject = (reason?: any) => void
 export abstract class BasePeer {
     public socketBuffer: SocketParser
@@ -19,11 +21,14 @@ export abstract class BasePeer {
         this.socketBuffer = new SocketParser(socket, (route, buffer) => this.onPacket(route, buffer))
         socket.on("close", () => this.close())
     }
+    public sendPacket(buffer: Buffer): void {
+        this.socketBuffer.send(0, buffer)
+    }
 
-    protected async onPacket(route: number, buffer: Buffer): Promise<void> {
-        logger.info(`Recieved packet route ${route}, ${buffer.length} bytes`)
+    protected async onPacket(route: number, packet: Buffer): Promise<void> {
+        logger.info(`Recieved packet route ${route}, ${packet.length} bytes`)
         try {
-            const res = proto.Network.decode(buffer)
+            const res = proto.Network.decode(packet)
             // tslint:disable-next-line:no-console
             console.log(res)
             switch (res.request) {
@@ -36,7 +41,7 @@ export abstract class BasePeer {
                 case "getBlocksByRange":
                 case "getHeadersByRange":
                 case "getPeers":
-                    this.respond(route, res)
+                    this.respond(route, res, packet)
                     break
                 case "pingReturn":
                 case "putTxReturn":
@@ -47,7 +52,7 @@ export abstract class BasePeer {
                 case "getBlocksByRangeReturn":
                 case "getHeadersByRangeReturn":
                 case "getPeersReturn":
-                    this.route(route, res)
+                    this.route(route, res, packet)
                     break
             }
         } catch (e) {
@@ -55,24 +60,27 @@ export abstract class BasePeer {
         }
     }
 
-    protected abstract async respond(route: number, request: proto.Network): Promise<void>
+    protected abstract async recieveBroadcast(request: proto.Network, packet: Buffer): Promise<void>
 
-    protected async route(route: number, reply: proto.Network): Promise<void> {
-        const { resolved } = this.replyMap.get(route)
-        resolved(reply)
+    protected abstract async respond(route: number, request: proto.Network, packet: Buffer): Promise<void>
+
+    protected async route(route: number, reply: proto.Network, packet: Buffer): Promise<void> {
+        try {
+            const { resolved } = this.replyMap.get(route)
+            resolved({ reply, packet })
+        } catch (e) {
+            this.protocolError()
+        }
     }
 
-    protected async sendRequest(request: proto.INetwork): Promise<proto.INetwork> {
+    protected async sendRequest(request: proto.INetwork): Promise<ReplyAndPacket> {
         const id = this.newReplyID()
-        const reply = await new Promise<proto.INetwork>((resolved, reject) => {
+        const reply = await new Promise<ReplyAndPacket>((resolved, reject) => {
             this.replyMap.set(id, { resolved, reject })
             this.send(id, request)
         })
         this.replyMap.delete(id)
         return reply
-    }
-    protected sendReply(id: number, reply: proto.INetwork): void {
-        this.send(id, reply)
     }
 
     protected send(route: number, data: proto.INetwork): void {

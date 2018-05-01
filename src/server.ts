@@ -1,6 +1,7 @@
 import commandLineArgs = require("command-line-args")
 import { getLogger } from "log4js"
 import { AppTxPool } from "./common/appTxPool"
+import { ITxPool } from "./common/txPool";
 import { AppConsensus } from "./consensus/appConsensus"
 import { IConsensus } from "./consensus/iconsensus"
 import { AppMiner } from "./miner/appMiner"
@@ -33,7 +34,7 @@ export class Server {
     public readonly network: INetwork = undefined // hycon network
     public readonly miner: IMiner = undefined // miner
     public readonly wallet: WalletManager = undefined
-    public readonly txPool: AppTxPool = undefined // tx pool
+    public readonly txPool: ITxPool = undefined // tx pool
     public readonly rest: RestManager = undefined // api server for hycon
     public options: any // json options
     public test: TestServer
@@ -47,7 +48,7 @@ export class Server {
         this.consensus = new AppConsensus(this)
         if (this.useRabbit) {
             // rabbit
-            this.network = new RabbitNetwork(this.consensus, this.options.port)
+            this.network = new RabbitNetwork(this, this.options.port)
         } else {
             // turtle
             this.network = new AppNetwork(this.options.port, this)

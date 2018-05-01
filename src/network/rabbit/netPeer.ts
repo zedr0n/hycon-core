@@ -1,28 +1,35 @@
 import { getLogger } from "log4js"
 import { Socket } from "net"
-import { Block } from "../../common/block"
+import { AnyBlock, Block } from "../../common/block"
 import { AnyBlockHeader, BlockHeader } from "../../common/blockHeader"
+import { ITxPool } from "../../common/txPool"
 import { SignedTx } from "../../common/txSigned"
 import { IConsensus } from "../../consensus/iconsensus"
 import * as proto from "../../serialization/proto"
 import { Hash } from "../../util/hash"
+import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"
 import { BasePeer } from "./peer"
 
 const logger = getLogger("NetPeer")
 
+interface IResponse { message: proto.INetwork, relay: boolean }
 export class RabbitPeer extends BasePeer implements IPeer {
     private concensus: IConsensus
+    private txPool: ITxPool
+    private network: INetwork
 
-    constructor(socket: Socket, concensus: IConsensus) {
+    constructor(socket: Socket, network: INetwork, concensus: IConsensus, txPool: ITxPool) {
         super(socket)
         // tslint:disable-next-line:max-line-length
         logger.info(`New netpeer ${socket.localAddress}:${socket.localPort} --> ${socket.remoteAddress}:${socket.remotePort}`)
+        this.network = network
         this.concensus = concensus
+        this.txPool = txPool
     }
 
     public async status(): Promise<proto.IStatus> {
-        const reply = await this.sendRequest({ status: { version: 0, networkid: "hycon" } })
+        const { reply, packet } = await this.sendRequest({ status: { version: 0, networkid: "hycon" } })
         if (reply.status === undefined) {
             this.protocolError()
             throw new Error("Invalid response")
@@ -33,7 +40,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
 
     public async ping(): Promise<void> {
         const nonce = Math.round(Math.random() * Math.pow(2, 31))
-        const reply = await this.sendRequest({ ping: { nonce } })
+        const { reply, packet } = await this.sendRequest({ ping: { nonce } })
         if (reply.pingReturn === undefined) {
             this.protocolError()
             throw new Error("Invalid response")
@@ -43,7 +50,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     public async putTxs(txs: SignedTx[]): Promise<boolean> {
-        const reply = await this.sendRequest({ putTx: { txs } })
+        const { reply, packet } = await this.sendRequest({ putTx: { txs } })
         if (reply.putTxReturn === undefined) {
             this.protocolError()
             throw new Error("Invalid response")
@@ -53,7 +60,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     public async getTxs(minFee?: number): Promise<SignedTx[]> {
-        const reply = await this.sendRequest({ getTxs: { minFee } })
+        const { reply, packet } = await this.sendRequest({ getTxs: { minFee } })
         if (reply.getTxsReturn === undefined) {
             this.protocolError()
             throw new Error("Invalid response")
@@ -68,7 +75,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     public async putBlocks(blocks: Block[]): Promise<boolean> {
-        const reply = await this.sendRequest({ putBlock: { blocks } })
+        const { reply, packet } = await this.sendRequest({ putBlock: { blocks } })
         if (reply.putBlockReturn === undefined) {
             this.protocolError()
             throw new Error("Invalid response")
@@ -78,7 +85,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     public async getBlocksByHashes(hashes: Hash[]): Promise<Block[]> {
-        const reply = await this.sendRequest({ getBlocksByHash: { hashes } })
+        const { reply, packet } = await this.sendRequest({ getBlocksByHash: { hashes } })
         if (reply.getBlocksByHashReturn === undefined) {
             this.protocolError()
             throw new Error("Invalid response")
@@ -92,7 +99,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     public async getHeadersByHashes(hashes: Hash[]): Promise<AnyBlockHeader[]> {
-        const reply = await this.sendRequest({ getHeadersByHash: { hashes } })
+        const { reply, packet } = await this.sendRequest({ getHeadersByHash: { hashes } })
         if (reply.getHeadersByHashReturn === undefined) {
             this.protocolError()
             throw new Error("Invalid response")
@@ -106,7 +113,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     public async getBlocksByRange(fromHeight: number, count: number): Promise<Block[]> {
-        const reply = await this.sendRequest({ getBlocksByRange: { fromHeight, count } })
+        const { reply, packet } = await this.sendRequest({ getBlocksByRange: { fromHeight, count } })
         if (reply.getBlocksByRangeReturn === undefined) {
             this.protocolError()
             throw new Error("Invalid response")
@@ -120,7 +127,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     public async getHeadersByRange(fromHeight: number, count: number): Promise<AnyBlockHeader[]> {
-        const reply = await this.sendRequest({ getHeadersByRange: { fromHeight, count } })
+        const { reply, packet } = await this.sendRequest({ getHeadersByRange: { fromHeight, count } })
         if (reply.getHeadersByRangeReturn === undefined) {
             this.protocolError()
             throw new Error("Invalid response")
@@ -133,90 +140,148 @@ export class RabbitPeer extends BasePeer implements IPeer {
         return headers
     }
 
-    protected async respond(id: number, request: proto.Network): Promise<void> {
+    protected async recieveBroadcast(request: proto.Network, packet: Buffer) {
+        switch (request.request) {
+            case "putBlock":
+                const promises: Array<Promise<boolean>> = []
+                for (const iBlock of request.putBlock.blocks) {
+                    try {
+                        const block = new Block(iBlock)
+                        promises.push(this.concensus.putBlock(block))
+                    } catch (e) {
+                        logger.info(`Could not put block: ${e}`)
+                    }
+                }
+                const success = await Promise.all(promises)
+                success.filter((v) => v)
+                if (success.length === request.putBlock.blocks.length) {
+                    this.network.broadcast(packet, this)
+                }
+                break
+            default:
+                this.protocolError()
+                break
+        }
+
+    }
+
+    protected async respond(id: number, request: proto.Network, packet: Buffer): Promise<void> {
         logger.info(`Must respond to ${request.request}`)
+        let response: IResponse
+        const reply = id !== 0
         switch (request.request) {
             case "status":
-                this.respondStatus(id, request[request.request])
+                response = await this.respondStatus(reply, request[request.request])
                 break
             case "ping":
-                this.respondPing(id, request[request.request])
+                response = await this.respondPing(reply, request[request.request])
                 break
             case "putTx":
-                this.respondPutTx(id, request[request.request])
+                response = await this.respondPutTx(reply, request[request.request])
                 break
             case "getTxs":
-                this.respondGetTxs(id, request[request.request])
+                response = await this.respondGetTxs(reply, request[request.request])
                 break
             case "putBlock":
-                this.respondPutBlock(id, request[request.request])
+                response = await this.respondPutBlock(reply, request[request.request])
                 break
             case "getBlocksByHash":
-                this.respondGetBlocksByHash(id, request[request.request])
+                response = await this.respondGetBlocksByHash(reply, request[request.request])
                 break
             case "getHeadersByHash":
-                this.respondGetHeadersByHash(id, request[request.request])
+                response = await this.respondGetHeadersByHash(reply, request[request.request])
                 break
             case "getBlocksByRange":
-                this.respondGetBlocksByRange(id, request[request.request])
+                response = await this.respondGetBlocksByRange(reply, request[request.request])
                 break
             case "getHeadersByRange":
-                this.respondGetHeadersByRange(id, request[request.request])
+                response = await this.respondGetHeadersByRange(reply, request[request.request])
                 break
         }
-    }
-
-    private respondStatus(id: number, status: proto.IStatus) {
-        this.sendReply(id, { status: { version: 0, networkid: "hycon" } })
-    }
-
-    private respondPing(id: number, request: proto.IPing) {
-        this.sendReply(id, { pingReturn: { nonce: request.nonce } })
-    }
-
-    private respondPutTx(id: number, request: proto.IPutTx) {
-        this.sendReply(id, { putTxReturn: { success: true } })
-    }
-
-    private respondGetTxs(id: number, request: proto.IGetTxs) {
-        this.sendReply(id, { getTxsReturn: { success: false, txs: [] } })
-    }
-
-    private async respondPutBlock(id: number, request: proto.IPutBlock) {
-        const promises: Array<Promise<boolean>> = []
-        for (const iblock of request.blocks) {
-            const block = new Block(iblock)
-            promises.push(this.concensus.putBlock(block))
+        if (id !== 0 && response.message !== undefined) {
+            this.send(id, response.message)
         }
-        const results = await Promise.all(promises)
-        const success = results.every((value) => value)
-        this.sendReply(id, { putBlockReturn: { success } })
+        if (response.relay) {
+            this.network.broadcast(packet, this)
+        }
     }
 
-    private async respondGetBlocksByHash(id: number, request: proto.IGetBlocksByHash): Promise<void> {
+    private async respondStatus(reply: boolean, request: proto.IStatus): Promise<IResponse> {
+        const message: proto.INetwork = { status: { version: 0, networkid: "hycon" } }
+        const relay = false
+        return { message, relay }
+    }
+
+    private async respondPing(reply: boolean, request: proto.IPing): Promise<IResponse> {
+        const message: proto.INetwork = { pingReturn: { nonce: request.nonce } }
+        const relay = false
+        return { message, relay }
+    }
+
+    private async respondPutTx(reply: boolean, request: proto.IPutTx): Promise<IResponse> {
+        let success = false
+        if (request.txs !== undefined) {
+            try {
+                const n = this.txPool.putTxs(request.txs)
+                success = (n === request.txs.length)
+            } catch (e) {
+                logger.info(`Failed to putTx: ${e}`)
+            }
+        }
+        return { message: { putTxReturn: { success } }, relay: success }
+    }
+
+    private async respondGetTxs(reply: boolean, request: proto.IGetTxs): Promise<IResponse> {
+        const message: proto.INetwork = { getTxsReturn: { success: false, txs: [] } }
+        const relay = false
+        return { message, relay }
+    }
+
+    private async respondPutBlock(reply: boolean, request: proto.IPutBlock): Promise<IResponse> {
+        let relay = false
         try {
-            const blockPromise: Array<Promise<Block>> = []
+            const promises: Array<Promise<boolean>> = []
+            for (const iblock of request.blocks) {
+                const block = new Block(iblock)
+                promises.push(this.concensus.putBlock(block))
+            }
+            const results = await Promise.all(promises)
+            relay = results.every((value) => value)
+        } catch (e) {
+            logger.info(`Failed to put block: ${e}`)
+        }
+        return { message: { putBlockReturn: { success: relay } }, relay }
+    }
+
+    private async respondGetBlocksByHash(reply: boolean, request: proto.IGetBlocksByHash): Promise<IResponse> {
+        let message: proto.INetwork
+        try {
+            const blockPromise: Array<Promise<AnyBlock>> = []
             for (const iHash of request.hashes) {
                 const hash = new Hash(iHash)
                 blockPromise.push(this.concensus.getBlocksByHash(hash))
             }
             const blocks = await Promise.all(blockPromise)
-            this.sendReply(id, { getBlocksByHashReturn: { success: true, blocks } })
+            message = { getBlocksByHashReturn: { success: true, blocks } }
         } catch (e) {
-            logger.debug(e)
-            this.sendReply(id, { getBlocksByHashReturn: { success: false } })
+            logger.info(`Failed to getBlockByHash: ${e}`)
+            message = { getBlocksByHashReturn: { success: false } }
         }
+        return { message, relay: false }
     }
 
-    private respondGetHeadersByHash(id: number, request: proto.IGetHeadersByHash) {
-        this.sendReply(id, { getHeadersByHashReturn: { success: false, headers: [] } })
+    private async respondGetHeadersByHash(reply: boolean, request: proto.IGetHeadersByHash): Promise<IResponse> {
+        const message: proto.INetwork = { getHeadersByHashReturn: { success: true, headers: [] } }
+        return { message, relay: false }
     }
 
-    private respondGetBlocksByRange(id: number, request: proto.IGetBlocksByRange) {
-        this.sendReply(id, { getBlocksByRangeReturn: { success: false, blocks: [] } })
+    private async respondGetBlocksByRange(reply: boolean, request: proto.IGetBlocksByRange): Promise<IResponse> {
+        const message: proto.INetwork = { getBlocksByRangeReturn: { success: false, blocks: [] } }
+        return { message, relay: false }
     }
 
-    private respondGetHeadersByRange(id: number, request: proto.IGetHeadersByRange) {
-        this.sendReply(id, { getHeadersByRangeReturn: { success: false, headers: [] } })
+    private async respondGetHeadersByRange(reply: boolean, request: proto.IGetHeadersByRange): Promise<IResponse> {
+        const message: proto.INetwork = { getHeadersByRangeReturn: { success: false, headers: [] } }
+        return { message, relay: false }
     }
 }
