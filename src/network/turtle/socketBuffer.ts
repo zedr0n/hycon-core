@@ -6,8 +6,8 @@ export class SocketBuffer {
     public state = State.Head
 
     public length = HeaderSize
-    public packet!: Packet | null
-    public packetCallback!: (packet: Packet) => void
+    public packet: Packet | null
+    public packetCallback: (packet: Packet) => void
 
     constructor() {
         this.prepare()

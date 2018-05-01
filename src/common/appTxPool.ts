@@ -1,127 +1,125 @@
 import { getLogger } from "log4js"
+import { NewTx } from "../serialization/proto"
 import { Server } from "../server"
 import { Hash } from "../util/hash"
 import { ITxPool } from "./itxPool"
 import { SignedTx } from "./txSigned"
 
 const logger = getLogger("AppTxPool")
+interface ITxCallback {
+    callback: (txs: SignedTx[]) => void,
+    n: number
+}
 export class AppTxPool implements ITxPool {
-    private txPool: SignedTx[] = []
     private server: Server
-    private topNumber: number = 10
-    private topList: SignedTx[] = []
-    private txListCallbacks: Array<(txs: SignedTx[]) => void> = []
+    private txs: SignedTx[]
+    private callbacks: ITxCallback[]
+    private minFee: number
+
     constructor(server: Server) {
         this.server = server
+        this.txs = []
+        this.callbacks = []
+        this.minFee = 0
     }
 
-    public async putTxs(txs: SignedTx[]): Promise<number> {
-        try {
-            let putCount = 0
-            const isExited = txs.every((stx: SignedTx) => this.existCheck(stx))
-            if (isExited) {
-                return Promise.reject(`Duplicate Tx `)
-            }
-            for (const tx of txs) {
-                if (await this.server.consensus.validateTx(tx)) {
-                    this.queue(tx)
-                    putCount++
-                    break
-                }
-            }
-            return Promise.resolve(putCount)
-        } catch (e) {
-            return Promise.reject(`Fail to put Txs : ${e}`)
-        }
+    public async putTxs(newTxs: SignedTx[]): Promise<number> {
+        const { count, lowestIndex } = await this.insert(newTxs)
+        this.callback(lowestIndex)
+        return count
     }
-    public async delTxs(txs: SignedTx[]): Promise<number> {
-        return 0
-    }
+
     public updateTx(txs: SignedTx[], n: number): SignedTx[] {
         this.remove(txs)
-        return this.getTxs(n)
+        return this.txs.slice(0, n)
     }
 
-    public onTopTxChanges(count: number, callback: (txs: SignedTx[]) => void): void {
-        this.topNumber = count
-        this.txListCallbacks.push(callback)
+    public onTopTxChanges(n: number, callback: (txs: SignedTx[]) => void): void {
+        this.callbacks.push({ callback, n })
     }
 
-    private queue(tx: SignedTx) {
-        let isInserted = false
-        for (const txEle of this.txPool) {
-            if (txEle.fee < tx.fee) {
-                this.txPool.splice(this.txPool.indexOf(txEle), 0, tx)
-                this.topTxCallback()
-                isInserted = true
+    private async insert(newTxs: SignedTx[]): Promise<{ count: number, lowestIndex?: number }> {
+        newTxs.sort((a, b) => b.fee - a.fee)
+        let lowestIndex
+        let count = 0
+        let i = 0
+        let j = 0
+        while (i < newTxs.length && j < this.txs.length) {
+            if (newTxs[i].fee < this.minFee) {
+                return { count, lowestIndex }
+            }
+            try {
+                if (newTxs[i].fee === this.txs[j].fee) {
+                    if (this.txs[j].equals(newTxs[i])) {
+                        i++
+                    } else {
+                        j++
+                    }
+                } else if (newTxs[i].fee > this.txs[j].fee) {
+                    if (await this.server.consensus.validateTx(newTxs[i])) {
+                        this.txs.splice(j, 0, newTxs[i])
+                        if (count === 0) {
+                            lowestIndex = j
+                        }
+                        i++
+                        j++
+                        count++
+                    }
+                } else {
+                    j++
+                }
+            } catch (e) {
+                logger.debug(`Failed to add Tx: ${e}`)
             }
         }
-        if (!isInserted) {
-            this.txPool.push(tx)
-            this.topTxCallback()
+        while (i < newTxs.length) {
+            if (newTxs[i].fee < this.minFee) {
+                return { count, lowestIndex }
+            }
+            try {
+                if (await this.server.consensus.validateTx(newTxs[i])) {
+                    this.txs.push(newTxs[i])
+                }
+            } catch (e) {
+                logger.debug(`Failed to add Tx: ${e}`)
+            }
         }
+        return { count, lowestIndex }
     }
 
     private remove(txs: SignedTx[]) {
         txs.sort((a, b) => b.fee - a.fee)
-        let poolIndex = 0
-        for (const tx of txs) {
-            for (let i = poolIndex; i < this.txPool.length; i++) {
-                const txElement = this.txPool[i]
-                if (txElement.equals(tx)) {
-                    this.txPool.splice(i, 1)
-                    poolIndex = i
-                    break
-                }
-            }
-        }
-    }
-
-    private existCheck(tx: SignedTx): boolean {
-        let isExsited = false
-        for (const txEle of this.txPool) {
-            if (txEle.equals(tx)) {
-                isExsited = true
-                break
-            }
-        }
-        return isExsited
-    }
-
-    private getTxs(n: number): SignedTx[] {
-        if (n >= this.txPool.length) {
-            return this.txPool.slice()
-        } else {
-            const txs = []
-            for (let i = 0; i < n; i++) {
-                txs.push(this.txPool[i])
-            }
-            return txs
-        }
-    }
-
-    private topTxCallback(): void {
-        if (this.txPool.length < this.topNumber) {
-            return
-        } else {
-            const currentTop: SignedTx[] = []
-            for (let i = 0; i < this.topNumber; i++) {
-                if (this.topList.indexOf(this.txPool[i]) === -1) {
-                    currentTop.push(this.txPool[i])
-                    if (currentTop.length === this.topNumber) {
-                        this.topList = currentTop
-                        this.callback()
-                    }
+        let i = 0
+        let j = 0
+        let k = 0
+        while (i < txs.length && (j + k) < this.txs.length) {
+            if (txs[i].fee < this.txs[j].fee) {
+                j++
+            } else if (txs[i].fee > this.txs[j].fee) {
+                i++
+            } else {
+                if (txs[i].fee > this.txs[j + k].fee) {
+                    i++
+                    k = 0
+                } else if (txs[i].fee < this.txs[j + k].fee) {
+                    logger.error("TxPool seems to be out of order")
                 } else {
-                    break
+                    if (this.txs[j + k].equals(txs[i])) {
+                        this.txs.slice(j + k, 1)
+                    } else {
+                        k++
+                    }
                 }
             }
         }
     }
 
-    private callback(): void {
-        for (const callBackFunction of this.txListCallbacks) {
-            callBackFunction(this.getTxs(this.topNumber))
+    private callback(lowestIndex: number): void {
+        lowestIndex += 1
+        for (const callback of this.callbacks) {
+            if (callback.n >= lowestIndex) {
+                setImmediate(this.callback, this.txs.slice(0, callback.n))
+            }
         }
     }
 }
