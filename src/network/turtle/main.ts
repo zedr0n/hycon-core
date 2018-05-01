@@ -1,7 +1,7 @@
 import { getLogger } from "log4js"
 import { Block } from "../../serialization/proto"
 import { Ping } from "../../serialization/proto"
-import { AppNetwork } from "./appNetwork"
+import { TurtleNetwork } from "./appNetwork"
 import { INetwork } from "./network"
 import { IPeer } from "./peer"
 import { PeerApp } from "./peerApp"
@@ -24,7 +24,7 @@ async function pollingNewone() {
 }
 function testNetwork() {
     logger.debug(`Network`)
-    const tcp: AppNetwork = new AppNetwork(undefined, undefined)
+    const tcp: TurtleNetwork = new TurtleNetwork(undefined, undefined)
     tcp.start()
     sampleClient = tcp.addClient("localhost", 8148)
     tcp.addClient("localhost", 8148)

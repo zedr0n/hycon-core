@@ -9,7 +9,7 @@ import * as proto from "../../serialization/proto"
 import { Server } from "../../server"
 import { GetHeadersByHashReturn, IPutBlockReturn, PutBlock, PutBlockReturn } from "../serialization/proto"
 import { IPingReturn, IPutTxReturn, Ping, PingReturn, PutTx, PutTxReturn, Tx } from "../serialization/proto"
-import { AppNetwork } from "./appNetwork"
+import { TurtleNetwork } from "./appNetwork"
 import { Packet } from "./packet"
 import { IPeer } from "./peer"
 import { PeerBasic, PeerMode, PeerState } from "./peerBasic"
@@ -24,7 +24,7 @@ export class PeerApp extends PeerNet {
     private txPool: ITxPool
 
     private server: Server
-    constructor(server: AppNetwork, socket: Socket, mode: PeerMode) {
+    constructor(server: TurtleNetwork, socket: Socket, mode: PeerMode) {
         super(server, socket, mode)
         this.server = server.server
 

@@ -13,7 +13,7 @@ import { UpnpClient, UpnpServer } from "../upnp"
 import { Packet } from "./packet"
 import { Peer } from "./peer"
 import { PeerMode } from "./peerBasic"
-export class AppNetwork implements INetwork {
+export class TurtleNetwork implements INetwork {
     public static defaultPort = 8148
     public server: Server
     public tcp: net.Server
@@ -35,7 +35,7 @@ export class AppNetwork implements INetwork {
         }
         logger.debug(`TcpNetwork Port=${port}`)
     }
-    public start(): boolean {
+    public async start(): Promise<boolean> {
         // connect
         if (this.server) {
             this.consensus = this.server.consensus

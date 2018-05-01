@@ -1,7 +1,7 @@
 import { getLogger } from "log4js"
 import * as net from "net"
 import { Socket } from "net"
-import { AppNetwork } from "./appNetwork"
+import { TurtleNetwork } from "./appNetwork"
 import { Packet } from "./packet"
 import { IPeer } from "./peer"
 import { SocketBuffer } from "./socketBuffer"
@@ -20,7 +20,7 @@ export enum PeerState {
 }
 
 export abstract class PeerBasic {
-    public network: AppNetwork
+    public network: TurtleNetwork
     public socket: Socket
     public socketBuffer = new SocketBuffer
     public peerMode: PeerMode = PeerMode.AcceptedSession

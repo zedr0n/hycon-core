@@ -1,14 +1,14 @@
 import commandLineArgs = require("command-line-args")
 import { getLogger } from "log4js"
 import { AppTxPool } from "./common/appTxPool"
-import { ITxPool } from "./common/txPool";
+import { ITxPool } from "./common/txPool"
 import { AppConsensus } from "./consensus/appConsensus"
 import { IConsensus } from "./consensus/iconsensus"
 import { AppMiner } from "./miner/appMiner"
 import { IMiner } from "./miner/miner"
 import { INetwork } from "./network/inetwork"
 import { RabbitNetwork } from "./network/rabbit/network" // for speed
-import { AppNetwork } from "./network/turtle/appNetwork" // for development only
+import { TurtleNetwork } from "./network/turtle/turtleNetwork" // for development only
 import { RestManager } from "./rest/restManager"
 import { TestServer } from "./testServer"
 import { WalletManager } from "./wallet/walletManager"
@@ -29,7 +29,7 @@ const optionDefinitions = [
 const logger = getLogger("Server")
 
 export class Server {
-    public useRabbit = true
+    public useRabbit = false
     public readonly consensus: IConsensus = undefined // the core
     public readonly network: INetwork = undefined // hycon network
     public readonly miner: IMiner = undefined // miner
@@ -51,7 +51,7 @@ export class Server {
             this.network = new RabbitNetwork(this, this.options.port)
         } else {
             // turtle
-            this.network = new AppNetwork(this.options.port, this)
+            this.network = new TurtleNetwork(this.options.port, this)
         }
 
         this.wallet = new WalletManager(this)
