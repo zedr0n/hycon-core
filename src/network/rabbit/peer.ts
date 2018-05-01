@@ -35,6 +35,7 @@ export abstract class BasePeer {
                 case "status":
                 case "ping":
                 case "getTxs":
+                case "putTx":
                 case "putBlock":
                 case "getBlocksByHash":
                 case "getHeadersByHash":

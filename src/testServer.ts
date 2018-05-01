@@ -25,9 +25,8 @@ export class TestServer {
         // logger.debug(`Make Tx  Current Queue=${this.txs.length}`)
         const newTx = new Tx({ amount: this.index++, fee: Math.random() * 10 })
         this.txs.push(newTx)
-
         const encoded: Uint8Array = proto.Network.encode({ putTx: { txs: [newTx] } }).finish()
-        this.server.network.broadcast(encoded)
+        this.server.network.broadcast(new Buffer(encoded), null)
     }
 
     private async makeBlock() {
@@ -36,6 +35,6 @@ export class TestServer {
         this.txs = []
 
         const encoded: Uint8Array = proto.Network.encode({ putBlock: { blocks: [newBlock] } }).finish()
-        this.server.network.broadcast(encoded)
+        this.server.network.broadcast(new Buffer(encoded), null)
     }
 }

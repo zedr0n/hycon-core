@@ -29,7 +29,7 @@ const optionDefinitions = [
 const logger = getLogger("Server")
 
 export class Server {
-    public useRabbit = false
+    public useRabbit = true
     public readonly consensus: IConsensus = undefined // the core
     public readonly network: INetwork = undefined // hycon network
     public readonly miner: IMiner = undefined // miner

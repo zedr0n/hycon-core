@@ -222,7 +222,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
         let success = false
         if (request.txs !== undefined) {
             try {
-                const n = this.txPool.putTxs(request.txs)
+                const n = await this.txPool.putTxs(request.txs)
                 success = (n === request.txs.length)
             } catch (e) {
                 logger.info(`Failed to putTx: ${e}`)
