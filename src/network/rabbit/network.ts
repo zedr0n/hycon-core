@@ -1,3 +1,4 @@
+
 import { getLogger } from "log4js"
 import { createConnection, createServer, Socket } from "net"
 import * as net from "net"
@@ -8,9 +9,8 @@ import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"
 import { RabbitPeer } from "./netPeer"
 import { SocketParser } from "./socketBuffer"
-
 const logger = getLogger("Network")
-
+const randomInt = require("random-int")
 export class RabbitNetwork implements INetwork {
     public readonly port: number
     private hycon: Server
@@ -107,14 +107,22 @@ export class RabbitNetwork implements INetwork {
     }
 
     public getRandomPeer(): IPeer {
-        // TODO: Random
-        if (this.peers.length > 0) {
-            return this.peers[0]
+        if (this.peers.length === 0) {
+            throw new Error("No Peers")
         }
-        throw new Error("Method not implemented.")
+        const chosen = randomInt(0, this.peers.length - 1)
+        return this.peers[chosen]
     }
-    public getRandomPeers(count: number): IPeer {
-        throw new Error("Method not implemented.")
+    public getRandomPeers(count: number): IPeer[] {
+        if (this.peers.length === 0) {
+            throw new Error("No Peers")
+        }
+        const ret: IPeer[] = []
+        for (let i = 0; i < count; i++) {
+            const chosen = randomInt(0, this.peers.length - 1)
+            ret.push(chosen)
+        }
+        return ret
     }
 
     private newConnection(socket: Socket): RabbitPeer {
