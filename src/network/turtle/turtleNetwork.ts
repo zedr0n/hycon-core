@@ -12,7 +12,6 @@ import { IPeer } from "../ipeer"
 import { UpnpClient, UpnpServer } from "../upnp"
 import { Packet } from "./packet"
 import { PeerBasic, PeerMode } from "./peerBasic"
-
 export class TurtleNetwork implements INetwork {
     public static defaultPort = 8148
     public server: Server

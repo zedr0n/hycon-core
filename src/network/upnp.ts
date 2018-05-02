@@ -31,8 +31,8 @@ export class UpnpServer {
     public run() {
         const myLocation = UpnpServer.product + UpnpServer.networkid + "://" + ip.address() + ":" + UpnpServer.port
         logger.debug(`Upnp Server`)
-        const Server = require("node-ssdp").Server
-        const server = new Server({
+        const SSDPServer = require("node-ssdp").Server
+        const server = new SSDPServer({
             location: myLocation,
             sourcePort: 1900,
             udn: `${UpnpServer.product}:${UpnpServer.version}`,
@@ -45,11 +45,11 @@ export class UpnpServer {
 
 // tslint:disable-next-line:max-classes-per-file
 export class UpnpClient {
-    private server: Server
     public static threshold: number = 5 * 1000
     public localPeer: Map<string, string>
     public appNetwork: INetwork
     public count: number = 0
+    private server: Server
 
     constructor(appNetwork: INetwork, server: Server) {
         this.appNetwork = appNetwork
