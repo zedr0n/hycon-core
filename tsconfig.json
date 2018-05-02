@@ -5,7 +5,7 @@
         "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,
-        "outFile": "hycon.js",
+        "outDir": "build",
         "sourceMap": true,
         "typeRoots": [
             "./node_modules/@types",

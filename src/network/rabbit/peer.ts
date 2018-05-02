@@ -26,7 +26,7 @@ export abstract class BasePeer {
     }
 
     protected async onPacket(route: number, packet: Buffer): Promise<void> {
-        logger.info(`Recieved packet route ${route}, ${packet.length} bytes`)
+        // logger.info(` route ${route}, ${packet.length} bytes`)
         try {
             const res = proto.Network.decode(packet)
             // tslint:disable-next-line:no-console
@@ -86,7 +86,7 @@ export abstract class BasePeer {
 
     protected send(route: number, data: proto.INetwork): void {
         const buffer: any = proto.Network.encode(data).finish()
-        logger.info(`Sending ${buffer.length} bytes`)
+        // logger.info(`Sending ${buffer.length} bytes`)
         this.socketBuffer.send(route, buffer)
     }
 

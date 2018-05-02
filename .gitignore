@@ -1,4 +1,5 @@
 *.ts-e
+build
 logs
 node_modules
 test.ts

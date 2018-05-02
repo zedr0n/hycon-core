@@ -166,7 +166,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     protected async respond(id: number, request: proto.Network, packet: Buffer): Promise<void> {
-        logger.info(`Must respond to ${request.request}`)
+        // logger.info(`Must respond to ${request.request}`)
         let response: IResponse
         const reply = id !== 0
         switch (request.request) {
@@ -225,7 +225,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 const n = await this.txPool.putTxs(request.txs)
                 success = (n === request.txs.length)
             } catch (e) {
-                logger.info(`Failed to putTx: ${e}`)
+                // logger.info(`Failed to putTx: ${e}`)
             }
         }
         return { message: { putTxReturn: { success } }, relay: success }

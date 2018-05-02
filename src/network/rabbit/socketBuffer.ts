@@ -40,7 +40,7 @@ export class SocketParser {
             throw new Error("Buffer too large")
         }
         // tslint:disable-next-line:max-line-length
-        logger.info(`Sending ${buffer.length} bytes from ${this.socket.localAddress}:${this.socket.localPort} --> ${this.socket.remoteAddress}:${this.socket.remotePort}`)
+        // logger.info(`Sending ${buffer.length} bytes from ${this.socket.localAddress}:${this.socket.localPort} --> ${this.socket.remoteAddress}:${this.socket.remotePort}`)
         this.socket.write(headerPrefix)
         this.writeBuffer.writeUInt32LE(route, 0)
         this.writeBuffer.writeUInt32LE(buffer.length, 4)
@@ -55,7 +55,7 @@ export class SocketParser {
 
     private receive(src: Buffer): void {
         // tslint:disable-next-line:max-line-length
-        logger.info(`Recieving ${src.length} bytes ${this.socket.localAddress}:${this.socket.localPort} <-- ${this.socket.localAddress}:${this.socket.localPort}`)
+        // logger.info(`Recieving ${src.length} bytes ${this.socket.localAddress}:${this.socket.localPort} <-- ${this.socket.localAddress}:${this.socket.localPort}`)
         try {
             this.parse(src)
         } catch (e) {
@@ -110,7 +110,7 @@ export class SocketParser {
         if (this.parseIndex === 0 && newBytesAvailable >= 4) {
             const uint32 = newData.readUInt32LE(newDataIndex)
             newDataIndex += 4
-            logger.info(`Got Uint32 directly ${uint32}`)
+            // logger.info(`Got Uint32 directly ${uint32}`)
             return { newDataIndex, uint32 }
         } else {
             const sourceEnd = newDataIndex + Math.min(newBytesAvailable, 4)
@@ -119,7 +119,7 @@ export class SocketParser {
             this.parseIndex += bytesCopied
             if (this.parseIndex === 4) {
                 const uint32 = this.scrapBuffer.readUInt32LE(0)
-                logger.info(`Got Uint32 ${uint32}`)
+                // logger.info(`Got Uint32 ${uint32}`)
                 return { newDataIndex, uint32 }
             } else {
                 // tslint:disable-next-line:max-line-length
@@ -161,7 +161,7 @@ export class SocketParser {
         newDataIndex += bytesCopied
         this.parseIndex += bytesCopied
         if (this.parseIndex === this.bodyBuffer.length) {
-            logger.info(`Got body (${this.bodyBuffer.length} bytes)`)
+            // logger.info(`Got body (${this.bodyBuffer.length} bytes)`)
             if (this.packetCallback) {
                 this.packetCallback(this.route, this.bodyBuffer)
             } else {
