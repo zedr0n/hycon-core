@@ -1,4 +1,3 @@
-import * as bigInteger from "big-integer"
 import { getLogger } from "log4js"
 import Long = require("long")
 import { Block } from "../common/block"
@@ -9,10 +8,6 @@ import { IMiner } from "./miner"
 import { StratumServer } from "./stratumServer"
 
 const logger = getLogger("Miner")
-
-// TODO
-type StateTransition = any
-type BigInteger = bigInteger.BigInteger
 
 export class MinerServer implements IMiner {
 
@@ -34,9 +29,8 @@ export class MinerServer implements IMiner {
     private cpuMiner: CpuMiner
     private block: Block | undefined
     private prehash: Uint8Array | undefined
-    private stateTransition: StateTransition | undefined
     private target: Uint8Array
-    private listCallBackNewBlock: Function[]
+    private listCallBackNewBlock: (block: any) => void
 
     public constructor() {
         this.init()
@@ -74,7 +68,7 @@ export class MinerServer implements IMiner {
         this.stratumServer.putWork(this.prehash, this.target, jobUnit)
     }
     public async submitNonce(nonce: string): Promise<boolean> {
-        if (this.block && this.prehash && this.stateTransition) {
+        if (this.block && this.prehash) {
             if (!(await this.checkNonce(nonce))) {
                 logger.info(`Fail to search nonce !!! - PREHASH : ${this.prehash}   NONCE : ${nonce}`)
                 return false
@@ -85,7 +79,7 @@ export class MinerServer implements IMiner {
             this.block.header.nonce = Long.fromString(nonce, true, 16)
 
             // TODO Server.trackIncomingBlock()
-            this.listCallBackNewBlock[0](this.block, this.stateTransition)
+            this.listCallBackNewBlock(this.block)
 
             this.stop()
 
@@ -111,16 +105,15 @@ export class MinerServer implements IMiner {
         this.stratumServer.stop()
     }
     public addCallbackNewBlock(callback: (block: any) => void, priority?: number): void {
-        this.listCallBackNewBlock.push(callback)
+        this.listCallBackNewBlock = callback
     }
     public removeCallbackNewBlock(callback: (block: any) => void): void {
-        this.listCallBackNewBlock.pop()
+        this.listCallBackNewBlock = null
     }
 
     private init() {
         this.block = undefined
         this.prehash = undefined
-        this.stateTransition = undefined
         this.target = undefined
     }
 
@@ -142,10 +135,10 @@ export class MinerServer implements IMiner {
         }
     }
 
-    private calculateJobUnit(): bigInt.BigInteger {
+    private calculateJobUnit(): Long {
 
         const miners = this.stratumServer.getMinerCount() + (MinerServer.useCpuMiner ? 1 : 0)
-        const maxNonce = bigInteger("FFFFFFFFFFFFFFFF", 16)
+        const maxNonce = Long.MAX_UNSIGNED_VALUE
         const unit = maxNonce.divide(miners)
         return unit
     }

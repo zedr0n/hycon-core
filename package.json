@@ -40,7 +40,6 @@
   },
   "dependencies": {
     "base-58": "0.0.1",
-    "big-integer": "^1.6.28",
     "bip39": "^2.5.0",
     "blake2b": "^2.1.2",
     "command-line-args": "^5.0.2",
@@ -54,7 +53,7 @@
     "merkle-lib": "^2.0.10",
     "nat-upnp": "^1.1.1",
     "net": "^1.0.2",
-    "node-cryptonight": "^1.0.1",
+    "node-cryptonight": "https://github.com/dev-jbam/node-cryptonight.git",
     "node-ssdp": "^3.3.0",
     "protobufjs": "^6.8.6",
     "random-int": "^1.0.0",

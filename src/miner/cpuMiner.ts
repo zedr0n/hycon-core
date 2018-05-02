@@ -1,16 +1,15 @@
-import * as bigInteger from 'big-integer'
-type BigInteger = bigInteger.BigInteger
-import { MinerServer } from "./minerSever"
+import { getLogger } from "log4js"
+import Long = require("long")
 import { Hash } from "../util/hash"
-import { getLogger } from 'log4js'
-const logger = getLogger('CpuMiner')
+import { MinerServer } from "./minerSever"
+const logger = getLogger("CpuMiner")
 
 export class CpuMiner {
     private minerServer: MinerServer
     private prehash: Uint8Array | undefined
     private target: Uint8Array | undefined
-    private nonce: BigInteger | undefined
-    private lastNonce: BigInteger | undefined
+    private nonce: Long | undefined
+    private lastNonce: Long | undefined
 
     private isMining: boolean
 
@@ -33,21 +32,21 @@ export class CpuMiner {
     }
 
     public async mine() {
-        while(true) {
-            if(this.prehash === undefined || this.target === undefined || this.isMining === false) {
+        while (true) {
+            if (this.prehash === undefined || this.target === undefined || this.isMining === false) {
                 await sleep(1000)
             } else {
-                this.nonce = bigInteger(0)
+                this.nonce = Long.UZERO
 
-                while(this.nonce.compare(this.lastNonce)) {
+                while (this.nonce.compare(this.lastNonce)) {
                     const result = await CpuMiner.hash(this.prehash, this.nonce.toString(16))
 
-                    if( (result[0] < this.target[0]) || ( (result[0] == this.target[0]) && (result[1] < this.target[1]) ) ) {
+                    if ( (result[0] < this.target[0]) || ( (result[0] === this.target[0]) && (result[1] < this.target[1]) ) ) {
                         logger.debug(`>>>>>>>>Submit nonce : ${this.nonce.toString(16)}`)
                         this.minerServer.submitNonce(this.nonce.toString(16))
                     }
 
-                    this.nonce = this.nonce.add(1)
+                    this.nonce = this.nonce.add(Long.UONE)
                 }
 
                 this.isMining = false
@@ -55,36 +54,37 @@ export class CpuMiner {
         }
     }
 
+    // tslint:disable-next-line:member-ordering
     public static async hash(prehash: Uint8Array, nonce: string): Promise<Uint8Array> {
         try {
             const bufBlock = new Uint8Array(MinerServer.LEN_BLOB)
-            
+
             // set prehash
             bufBlock.set(prehash)
 
             // set nonce
-            const strNonce = (nonce.length >= MinerServer.LEN_NONCE) ? nonce : new Array(MinerServer.LEN_NONCE - nonce.length + 1).join('0') + nonce;
-            let bufNonce = new Uint8Array(Buffer.from(strNonce, 'hex'))
+            const strNonce = (nonce.length >= MinerServer.LEN_NONCE) ? nonce : new Array(MinerServer.LEN_NONCE - nonce.length + 1).join("0") + nonce
+            const bufNonce = new Uint8Array(Buffer.from(strNonce, "hex"))
             bufBlock.set(bufNonce.reverse(), prehash.length)
 
             // run hash
             const ret = Hash.hashCryptonight(bufBlock)
             return Promise.resolve(ret)
 
-        } catch(e) {
+        } catch (e) {
             logger.error(`Fail to hash in Miner : ${e}`)
             return Promise.reject(e)
         }
     }
 
-    public putWork(prehash: Uint8Array, target: Uint8Array, lastNonce: BigInteger) {
+    public putWork(prehash: Uint8Array, target: Uint8Array, lastNonce: Long) {
         this.prehash = prehash
         this.target = target
-        this.nonce = bigInteger(0)
+        this.nonce = Long.UZERO
         this.lastNonce = lastNonce
     }
 
-    private init(){
+    private init() {
         this.prehash = undefined
         this.target = undefined
         this.nonce = undefined
@@ -93,5 +93,5 @@ export class CpuMiner {
 }
 
 function sleep(ms = 0) {
-    return new Promise(r => setTimeout(r, ms));
+    return new Promise((r) => setTimeout(r, ms))
 }
