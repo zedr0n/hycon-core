@@ -17,4 +17,5 @@ export interface IPeer {
     getHeadersByHashes(hashes: Hash[]): Promise<AnyBlockHeader[]>
     getBlocksByRange(fromHeight: number, count: number): Promise<Block[]>
     getHeadersByRange(fromHeight: number, count: number): Promise<AnyBlockHeader[]>
+    getTip(): { hash: Hash, height: number }
 }
