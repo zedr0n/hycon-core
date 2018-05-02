@@ -159,10 +159,26 @@ export class SingleChain implements IConsensus {
         }
     }
 
-    public getHeadersRange(fromHeight: number, count?: number): Promise<AnyBlockHeader[]> {
+    public async getHeadersRange(fromHeight: number, count?: number): Promise<AnyBlockHeader[]> {
         try {
-            const headerArray = this.db.getHeadersRange(fromHeight, count)
-            return Promise.resolve(headerArray)
+            if (this.forkHeight < fromHeight) { return Promise.resolve([]) }
+            const dbBlocks = await this.db.getDBBlocksRange(fromHeight, count)
+            if (this.forkHeight === -1) {
+                const headers = []
+                for (const dbBlock of dbBlocks) {
+                    headers.push(dbBlock.header)
+                }
+                return Promise.resolve(headers)
+            } else {
+                const toHeight = this.forkHeight - 1
+                const headers = []
+                for (const dbBlock of dbBlocks) {
+                    if (dbBlocks[dbBlocks.length - 1].height <= toHeight) {
+                        headers.push(dbBlock.header)
+                    }
+                }
+                return Promise.resolve(headers)
+            }
         } catch (e) {
             logger.error(`Fail to getHeadersRange : ${e}`)
             Promise.reject(e)

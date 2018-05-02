@@ -310,6 +310,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     private async respondGetHeadersByRange(reply: boolean, request: proto.IGetHeadersByRange): Promise<IResponse> {
+        this.concensus.getHeadersRange(Number(request.fromHeight), Number(request.count))
         const message: proto.INetwork = { getHeadersByRangeReturn: { success: false, headers: [] } }
         return { message, relay: false }
     }

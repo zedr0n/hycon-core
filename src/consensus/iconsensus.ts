@@ -13,7 +13,7 @@ export type NewBlockCallback = (block: AnyBlock) => void
 export interface IConsensus {
     init(): Promise<void>
     putBlock(block: Block): Promise<boolean>
-    putHeader(header: BlockHeader): Promise<boolean>
+    putHeader(header: AnyBlockHeader): Promise<boolean>
     addCallbackNewBlock(callback: NewBlockCallback, priority?: number): void
     removeCallbackNewBlock(callback: NewBlockCallback): void
     getBlockByHash(hash: Hash): Promise<AnyBlock>

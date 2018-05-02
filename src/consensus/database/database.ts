@@ -248,6 +248,7 @@ export class Database {
             return Promise.reject(e)
         }
     }
+
     public async getHeadersRange(fromHeight: number, count?: number): Promise<AnyBlockHeader[]> {
         try {
             const dbBlockArray = await this.getDBBlocksRange(fromHeight, count)
@@ -258,6 +259,42 @@ export class Database {
             return Promise.resolve(headerArray)
         } catch (e) {
             logger.error(`getHeadersRange failed\n${e}`)
+            return Promise.reject(e)
+        }
+    }
+
+    public async getDBBlocksRange(fromHeight: number, count?: number): Promise<DBBlock[]> {
+        let decodingDBEntry = false
+        try {
+            const dbBlockArray: DBBlock[] = []
+            this.database.createReadStream({ gt: "b", lt: "c" })
+                .on("data", (data: any) => {
+                    decodingDBEntry = true
+                    const dbBlock = DBBlock.decode(data.value)
+                    if (dbBlock.height >= fromHeight) {
+                        let isInserted = false
+                        for (const b of dbBlockArray) {
+                            if (b.height >= dbBlock.height) {
+                                dbBlockArray.splice(dbBlockArray.indexOf(b), 0, dbBlock)
+                                isInserted = true
+                                break
+                            }
+                        }
+                        if (!isInserted) {
+                            dbBlockArray.push(dbBlock)
+                        }
+                    }
+                })
+                .on("end", () => {
+                    if (dbBlockArray.length > count) { dbBlockArray.slice(0, count) }
+                    return Promise.resolve(dbBlockArray)
+                })
+        } catch (e) {
+            logger.error(`getBlocksRange failed\n${e}`)
+            if (decodingDBEntry) {
+                // TODO: Schedule rerequest or file lookup
+                logger.debug(`Could not decode block in getDBBlocksRange`)
+            }
             return Promise.reject(e)
         }
     }
@@ -356,42 +393,6 @@ export class Database {
                 const decodeError = new DecodeError()
                 decodeError.hash = hash
                 throw decodeError
-            }
-            return Promise.reject(e)
-        }
-    }
-
-    private async getDBBlocksRange(fromHeight: number, count?: number): Promise<DBBlock[]> {
-        let decodingDBEntry = false
-        try {
-            const dbBlockArray: DBBlock[] = []
-            this.database.createReadStream({ gt: "b", lt: "c" })
-                .on("data", (data: any) => {
-                    decodingDBEntry = true
-                    const dbBlock = DBBlock.decode(data.value)
-                    if (dbBlock.height >= fromHeight) {
-                        let isInserted = false
-                        for (const b of dbBlockArray) {
-                            if (b.height >= dbBlock.height) {
-                                dbBlockArray.splice(dbBlockArray.indexOf(b), 0, dbBlock)
-                                isInserted = true
-                                break
-                            }
-                        }
-                        if (!isInserted) {
-                            dbBlockArray.push(dbBlock)
-                        }
-                    }
-                })
-                .on("end", () => {
-                    if (dbBlockArray.length > count) { dbBlockArray.slice(0, count) }
-                    return Promise.resolve(dbBlockArray)
-                })
-        } catch (e) {
-            logger.error(`getBlocksRange failed\n${e}`)
-            if (decodingDBEntry) {
-                // TODO: Schedule rerequest or file lookup
-                logger.debug(`Could not decode block in getDBBlocksRange`)
             }
             return Promise.reject(e)
         }
