@@ -51,7 +51,7 @@
     "node-ssdp": "^3.3.0",
     "protobufjs": "^6.8.6",
     "random-int": "^1.0.0",
-    "rocksdb": "^2.0.0",
+    "rocksdb": "https://github.com/Team-Hycon/rocksdb.git",
     "secp256k1": "^3.5.0",
     "sha256": "^0.2.0",
     "wallet.ts": "^0.2.5"
