@@ -10,14 +10,20 @@ import { Hash } from "../../util/hash"
 import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"
 import { BasePeer } from "./peer"
+import { setInterval } from "timers";
 
 const logger = getLogger("NetPeer")
 
 interface IResponse { message: proto.INetwork, relay: boolean }
 export class RabbitPeer extends BasePeer implements IPeer {
+    getTip(): { hash: Hash; height: number; } {
+        throw new Error("Method not implemented.");
+    }
     private concensus: IConsensus
     private txPool: ITxPool
     private network: INetwork
+
+    private myStatus: proto.Status = new proto.Status()
 
     constructor(socket: Socket, network: INetwork, concensus: IConsensus, txPool: ITxPool) {
         super(socket)
@@ -26,27 +32,30 @@ export class RabbitPeer extends BasePeer implements IPeer {
         this.network = network
         this.concensus = concensus
         this.txPool = txPool
+
+        // set status
+        this.myStatus.version = 0
+        this.myStatus.networkid = "hycon"
+
     }
 
     public async status(): Promise<proto.IStatus> {
-        const { reply, packet } = await this.sendRequest({ status: { version: 0, networkid: "hycon" } })
-        if (reply.status === undefined) {
+        const { reply, packet } = await this.sendRequest({ status: this.myStatus })
+        if (reply.statusReturn === undefined) {
             this.protocolError()
             throw new Error("Invalid response")
         }
-
-        return reply.status
+        return reply.statusReturn.status
     }
 
-    public async ping(): Promise<void> {
+    public async ping(): Promise<number> {
         const nonce = Math.round(Math.random() * Math.pow(2, 31))
         const { reply, packet } = await this.sendRequest({ ping: { nonce } })
         if (reply.pingReturn === undefined) {
             this.protocolError()
             throw new Error("Invalid response")
         }
-
-        return
+        return reply.pingReturn.nonce as number
     }
 
     public async putTxs(txs: SignedTx[]): Promise<boolean> {
@@ -191,7 +200,9 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     private async respondStatus(reply: boolean, request: proto.IStatus): Promise<IResponse> {
-        const message: proto.INetwork = { status: { version: 0, networkid: "hycon" } }
+        const message: proto.INetwork = {
+            statusReturn: { status: this.myStatus, success: true }
+        }
         const relay = false
         return { message, relay }
     }
@@ -279,5 +290,16 @@ export class RabbitPeer extends BasePeer implements IPeer {
     private async respondGetHeadersByRange(reply: boolean, request: proto.IGetHeadersByRange): Promise<IResponse> {
         const message: proto.INetwork = { getHeadersByRangeReturn: { success: false, headers: [] } }
         return { message, relay: false }
+    }
+
+    private async polling() {
+        let result: number = await this.ping()
+        logger.debug(`Ping=${result}`)
+    }
+
+    public async onConnected() {
+        setInterval(() => { this.polling() }, 5000)
+        var peerStatus = await this.status()
+        logger.debug(`My Status=${JSON.stringify(this.myStatus)}  Peer Status=${JSON.stringify(peerStatus)}`)
     }
 }

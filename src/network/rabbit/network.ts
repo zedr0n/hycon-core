@@ -52,7 +52,7 @@ export class RabbitNetwork implements INetwork {
         })
 
         this.server.on("error", (error) => logger.error(`${error}`))
-        setInterval(() => logger.debug(`Peers Count=${this.peers.length}`), 1000)
+        setInterval(() => logger.debug(`Peers Count=${this.peers.length}`), 5000)
         setInterval(() => this.findPeers(), 1000)
 
         // upnp
@@ -142,7 +142,7 @@ export class RabbitNetwork implements INetwork {
             logger.error(`${error}`)
         })
         this.peers.push(peer)
-
+        peer.onConnected()
         return peer
     }
 

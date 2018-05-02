@@ -42,6 +42,7 @@ export abstract class BasePeer {
                 case "getPeers":
                     this.respond(route, res, packet)
                     break
+                case "statusReturn":
                 case "pingReturn":
                 case "putTxReturn":
                 case "getTxsReturn":
@@ -52,6 +53,9 @@ export abstract class BasePeer {
                 case "getHeadersByRangeReturn":
                 case "getPeersReturn":
                     this.route(route, res, packet)
+                    break
+                default:
+                    logger.debug(`Unsupported Protocol=${res.request}`)
                     break
             }
         } catch (e) {

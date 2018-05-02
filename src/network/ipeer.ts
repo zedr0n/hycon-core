@@ -4,12 +4,13 @@ import { AnyBlockHeader } from "../common/blockHeader"
 import { SignedTx } from "../common/txSigned"
 import * as proto from "../serialization/proto"
 import { Hash } from "../util/hash"
+import { IStatus } from "../serialization/proto"
 
 type PingResponse = any // TODO: define type
 
 export interface IPeer {
-    status(): Promise<proto.IStatus>
-    ping(): Promise<void>
+    status(): Promise<IStatus>
+    ping(): Promise<number>
     putTxs(txs: SignedTx[]): Promise<boolean>
     getTxs(minFee?: number): Promise<SignedTx[]>
     putBlocks(blocks: Block[]): Promise<boolean>

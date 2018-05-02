@@ -15,12 +15,16 @@ import { IPeer } from "../ipeer"
 import { Packet } from "./packet"
 import { PeerBasic, PeerMode, PeerState } from "./peerBasic"
 import { TurtleNetwork } from "./turtleNetwork"
+import { Hash } from "../../util/hash"
 // tslint:disable-next-line:no-var-requires
 const delay = require("delay")
 const logger = getLogger("NetPeer")
 logger.level = "debug"
 
 export abstract class PeerNet extends PeerBasic implements IPeer {
+    getTip(): { hash: Hash; height: number; } {
+        throw new Error("Method not implemented.");
+    }
     private static MaxTryCount = 20
     private static PollingStep = 100  // milli seconds
 
@@ -52,7 +56,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
 
     // abstract public onReceiveMessage(res: proto.Node): void
 
-    public status(): Promise<proto.Status> {
+    public status(): Promise<proto.IStatus> {
         return new Promise<proto.Status>((resolve, reject) => {
             const status = new proto.Status()
             this.sendStatus(status)
@@ -67,8 +71,8 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
     }
 
     // ping
-    public async ping(): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
+    public async ping(): Promise<number> {
+        return new Promise<number>((resolve, reject) => {
             this.sendPing()
             this.pingQueue.push({ resolve, reject })
         })
@@ -241,7 +245,7 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
         if (res.pingReturn) {
             if (this.pingQueue.length > 0) {
                 const cb = this.pingQueue.pop()
-                cb.resolve(res.pingReturn)
+                cb.resolve(res.pingReturn.nonce)
             }
             logger.debug(`Ping Response Nonce=${res.pingReturn.nonce}`)
         }

@@ -16,6 +16,7 @@ $root.Network = (function() {
      * @exports INetwork
      * @interface INetwork
      * @property {IStatus|null} [status] Network status
+     * @property {IStatusReturn|null} [statusReturn] Network statusReturn
      * @property {IPing|null} [ping] Network ping
      * @property {IPingReturn|null} [pingReturn] Network pingReturn
      * @property {IPutTx|null} [putTx] Network putTx
@@ -58,6 +59,14 @@ $root.Network = (function() {
      * @instance
      */
     Network.prototype.status = null;
+
+    /**
+     * Network statusReturn.
+     * @member {IStatusReturn|null|undefined} statusReturn
+     * @memberof Network
+     * @instance
+     */
+    Network.prototype.statusReturn = null;
 
     /**
      * Network ping.
@@ -208,12 +217,12 @@ $root.Network = (function() {
 
     /**
      * Network request.
-     * @member {"status"|"ping"|"pingReturn"|"putTx"|"putTxReturn"|"getTxs"|"getTxsReturn"|"putBlock"|"putBlockReturn"|"getBlocksByHash"|"getBlocksByHashReturn"|"getHeadersByHash"|"getHeadersByHashReturn"|"getBlocksByRange"|"getBlocksByRangeReturn"|"getHeadersByRange"|"getHeadersByRangeReturn"|"getPeers"|"getPeersReturn"|undefined} request
+     * @member {"status"|"statusReturn"|"ping"|"pingReturn"|"putTx"|"putTxReturn"|"getTxs"|"getTxsReturn"|"putBlock"|"putBlockReturn"|"getBlocksByHash"|"getBlocksByHashReturn"|"getHeadersByHash"|"getHeadersByHashReturn"|"getBlocksByRange"|"getBlocksByRangeReturn"|"getHeadersByRange"|"getHeadersByRangeReturn"|"getPeers"|"getPeersReturn"|undefined} request
      * @memberof Network
      * @instance
      */
     Object.defineProperty(Network.prototype, "request", {
-        get: $util.oneOfGetter($oneOfFields = ["status", "ping", "pingReturn", "putTx", "putTxReturn", "getTxs", "getTxsReturn", "putBlock", "putBlockReturn", "getBlocksByHash", "getBlocksByHashReturn", "getHeadersByHash", "getHeadersByHashReturn", "getBlocksByRange", "getBlocksByRangeReturn", "getHeadersByRange", "getHeadersByRangeReturn", "getPeers", "getPeersReturn"]),
+        get: $util.oneOfGetter($oneOfFields = ["status", "statusReturn", "ping", "pingReturn", "putTx", "putTxReturn", "getTxs", "getTxsReturn", "putBlock", "putBlockReturn", "getBlocksByHash", "getBlocksByHashReturn", "getHeadersByHash", "getHeadersByHashReturn", "getBlocksByRange", "getBlocksByRangeReturn", "getHeadersByRange", "getHeadersByRangeReturn", "getPeers", "getPeersReturn"]),
         set: $util.oneOfSetter($oneOfFields)
     });
 
@@ -243,42 +252,44 @@ $root.Network = (function() {
             writer = $Writer.create();
         if (message.status != null && message.hasOwnProperty("status"))
             $root.Status.encode(message.status, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+        if (message.statusReturn != null && message.hasOwnProperty("statusReturn"))
+            $root.StatusReturn.encode(message.statusReturn, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
         if (message.ping != null && message.hasOwnProperty("ping"))
-            $root.Ping.encode(message.ping, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+            $root.Ping.encode(message.ping, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
         if (message.pingReturn != null && message.hasOwnProperty("pingReturn"))
-            $root.PingReturn.encode(message.pingReturn, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+            $root.PingReturn.encode(message.pingReturn, writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
         if (message.putTx != null && message.hasOwnProperty("putTx"))
-            $root.PutTx.encode(message.putTx, writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
+            $root.PutTx.encode(message.putTx, writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
         if (message.putTxReturn != null && message.hasOwnProperty("putTxReturn"))
-            $root.PutTxReturn.encode(message.putTxReturn, writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
+            $root.PutTxReturn.encode(message.putTxReturn, writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
         if (message.getTxs != null && message.hasOwnProperty("getTxs"))
-            $root.GetTxs.encode(message.getTxs, writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
+            $root.GetTxs.encode(message.getTxs, writer.uint32(/* id 7, wireType 2 =*/58).fork()).ldelim();
         if (message.getTxsReturn != null && message.hasOwnProperty("getTxsReturn"))
-            $root.GetTxsReturn.encode(message.getTxsReturn, writer.uint32(/* id 7, wireType 2 =*/58).fork()).ldelim();
+            $root.GetTxsReturn.encode(message.getTxsReturn, writer.uint32(/* id 8, wireType 2 =*/66).fork()).ldelim();
         if (message.putBlock != null && message.hasOwnProperty("putBlock"))
-            $root.PutBlock.encode(message.putBlock, writer.uint32(/* id 8, wireType 2 =*/66).fork()).ldelim();
+            $root.PutBlock.encode(message.putBlock, writer.uint32(/* id 9, wireType 2 =*/74).fork()).ldelim();
         if (message.putBlockReturn != null && message.hasOwnProperty("putBlockReturn"))
-            $root.PutBlockReturn.encode(message.putBlockReturn, writer.uint32(/* id 9, wireType 2 =*/74).fork()).ldelim();
+            $root.PutBlockReturn.encode(message.putBlockReturn, writer.uint32(/* id 10, wireType 2 =*/82).fork()).ldelim();
         if (message.getBlocksByHash != null && message.hasOwnProperty("getBlocksByHash"))
-            $root.GetBlocksByHash.encode(message.getBlocksByHash, writer.uint32(/* id 10, wireType 2 =*/82).fork()).ldelim();
+            $root.GetBlocksByHash.encode(message.getBlocksByHash, writer.uint32(/* id 11, wireType 2 =*/90).fork()).ldelim();
         if (message.getBlocksByHashReturn != null && message.hasOwnProperty("getBlocksByHashReturn"))
-            $root.GetBlocksByHashReturn.encode(message.getBlocksByHashReturn, writer.uint32(/* id 11, wireType 2 =*/90).fork()).ldelim();
+            $root.GetBlocksByHashReturn.encode(message.getBlocksByHashReturn, writer.uint32(/* id 12, wireType 2 =*/98).fork()).ldelim();
         if (message.getHeadersByHash != null && message.hasOwnProperty("getHeadersByHash"))
-            $root.GetHeadersByHash.encode(message.getHeadersByHash, writer.uint32(/* id 12, wireType 2 =*/98).fork()).ldelim();
+            $root.GetHeadersByHash.encode(message.getHeadersByHash, writer.uint32(/* id 13, wireType 2 =*/106).fork()).ldelim();
         if (message.getHeadersByHashReturn != null && message.hasOwnProperty("getHeadersByHashReturn"))
-            $root.GetHeadersByHashReturn.encode(message.getHeadersByHashReturn, writer.uint32(/* id 13, wireType 2 =*/106).fork()).ldelim();
+            $root.GetHeadersByHashReturn.encode(message.getHeadersByHashReturn, writer.uint32(/* id 14, wireType 2 =*/114).fork()).ldelim();
         if (message.getBlocksByRange != null && message.hasOwnProperty("getBlocksByRange"))
-            $root.GetBlocksByRange.encode(message.getBlocksByRange, writer.uint32(/* id 14, wireType 2 =*/114).fork()).ldelim();
+            $root.GetBlocksByRange.encode(message.getBlocksByRange, writer.uint32(/* id 15, wireType 2 =*/122).fork()).ldelim();
         if (message.getBlocksByRangeReturn != null && message.hasOwnProperty("getBlocksByRangeReturn"))
-            $root.GetBlocksByRangeReturn.encode(message.getBlocksByRangeReturn, writer.uint32(/* id 15, wireType 2 =*/122).fork()).ldelim();
+            $root.GetBlocksByRangeReturn.encode(message.getBlocksByRangeReturn, writer.uint32(/* id 16, wireType 2 =*/130).fork()).ldelim();
         if (message.getHeadersByRange != null && message.hasOwnProperty("getHeadersByRange"))
-            $root.GetHeadersByRange.encode(message.getHeadersByRange, writer.uint32(/* id 16, wireType 2 =*/130).fork()).ldelim();
+            $root.GetHeadersByRange.encode(message.getHeadersByRange, writer.uint32(/* id 17, wireType 2 =*/138).fork()).ldelim();
         if (message.getHeadersByRangeReturn != null && message.hasOwnProperty("getHeadersByRangeReturn"))
-            $root.GetHeadersByRangeReturn.encode(message.getHeadersByRangeReturn, writer.uint32(/* id 17, wireType 2 =*/138).fork()).ldelim();
+            $root.GetHeadersByRangeReturn.encode(message.getHeadersByRangeReturn, writer.uint32(/* id 18, wireType 2 =*/146).fork()).ldelim();
         if (message.getPeers != null && message.hasOwnProperty("getPeers"))
-            $root.GetPeers.encode(message.getPeers, writer.uint32(/* id 18, wireType 2 =*/146).fork()).ldelim();
+            $root.GetPeers.encode(message.getPeers, writer.uint32(/* id 19, wireType 2 =*/154).fork()).ldelim();
         if (message.getPeersReturn != null && message.hasOwnProperty("getPeersReturn"))
-            $root.GetPeersReturn.encode(message.getPeersReturn, writer.uint32(/* id 19, wireType 2 =*/154).fork()).ldelim();
+            $root.GetPeersReturn.encode(message.getPeersReturn, writer.uint32(/* id 20, wireType 2 =*/162).fork()).ldelim();
         return writer;
     };
 
@@ -317,57 +328,60 @@ $root.Network = (function() {
                 message.status = $root.Status.decode(reader, reader.uint32());
                 break;
             case 2:
-                message.ping = $root.Ping.decode(reader, reader.uint32());
+                message.statusReturn = $root.StatusReturn.decode(reader, reader.uint32());
                 break;
             case 3:
-                message.pingReturn = $root.PingReturn.decode(reader, reader.uint32());
+                message.ping = $root.Ping.decode(reader, reader.uint32());
                 break;
             case 4:
-                message.putTx = $root.PutTx.decode(reader, reader.uint32());
+                message.pingReturn = $root.PingReturn.decode(reader, reader.uint32());
                 break;
             case 5:
-                message.putTxReturn = $root.PutTxReturn.decode(reader, reader.uint32());
+                message.putTx = $root.PutTx.decode(reader, reader.uint32());
                 break;
             case 6:
-                message.getTxs = $root.GetTxs.decode(reader, reader.uint32());
+                message.putTxReturn = $root.PutTxReturn.decode(reader, reader.uint32());
                 break;
             case 7:
-                message.getTxsReturn = $root.GetTxsReturn.decode(reader, reader.uint32());
+                message.getTxs = $root.GetTxs.decode(reader, reader.uint32());
                 break;
             case 8:
-                message.putBlock = $root.PutBlock.decode(reader, reader.uint32());
+                message.getTxsReturn = $root.GetTxsReturn.decode(reader, reader.uint32());
                 break;
             case 9:
-                message.putBlockReturn = $root.PutBlockReturn.decode(reader, reader.uint32());
+                message.putBlock = $root.PutBlock.decode(reader, reader.uint32());
                 break;
             case 10:
-                message.getBlocksByHash = $root.GetBlocksByHash.decode(reader, reader.uint32());
+                message.putBlockReturn = $root.PutBlockReturn.decode(reader, reader.uint32());
                 break;
             case 11:
-                message.getBlocksByHashReturn = $root.GetBlocksByHashReturn.decode(reader, reader.uint32());
+                message.getBlocksByHash = $root.GetBlocksByHash.decode(reader, reader.uint32());
                 break;
             case 12:
-                message.getHeadersByHash = $root.GetHeadersByHash.decode(reader, reader.uint32());
+                message.getBlocksByHashReturn = $root.GetBlocksByHashReturn.decode(reader, reader.uint32());
                 break;
             case 13:
-                message.getHeadersByHashReturn = $root.GetHeadersByHashReturn.decode(reader, reader.uint32());
+                message.getHeadersByHash = $root.GetHeadersByHash.decode(reader, reader.uint32());
                 break;
             case 14:
-                message.getBlocksByRange = $root.GetBlocksByRange.decode(reader, reader.uint32());
+                message.getHeadersByHashReturn = $root.GetHeadersByHashReturn.decode(reader, reader.uint32());
                 break;
             case 15:
-                message.getBlocksByRangeReturn = $root.GetBlocksByRangeReturn.decode(reader, reader.uint32());
+                message.getBlocksByRange = $root.GetBlocksByRange.decode(reader, reader.uint32());
                 break;
             case 16:
-                message.getHeadersByRange = $root.GetHeadersByRange.decode(reader, reader.uint32());
+                message.getBlocksByRangeReturn = $root.GetBlocksByRangeReturn.decode(reader, reader.uint32());
                 break;
             case 17:
-                message.getHeadersByRangeReturn = $root.GetHeadersByRangeReturn.decode(reader, reader.uint32());
+                message.getHeadersByRange = $root.GetHeadersByRange.decode(reader, reader.uint32());
                 break;
             case 18:
-                message.getPeers = $root.GetPeers.decode(reader, reader.uint32());
+                message.getHeadersByRangeReturn = $root.GetHeadersByRangeReturn.decode(reader, reader.uint32());
                 break;
             case 19:
+                message.getPeers = $root.GetPeers.decode(reader, reader.uint32());
+                break;
+            case 20:
                 message.getPeersReturn = $root.GetPeersReturn.decode(reader, reader.uint32());
                 break;
             default:
@@ -412,6 +426,16 @@ $root.Network = (function() {
                 var error = $root.Status.verify(message.status);
                 if (error)
                     return "status." + error;
+            }
+        }
+        if (message.statusReturn != null && message.hasOwnProperty("statusReturn")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.StatusReturn.verify(message.statusReturn);
+                if (error)
+                    return "statusReturn." + error;
             }
         }
         if (message.ping != null && message.hasOwnProperty("ping")) {
@@ -614,6 +638,11 @@ $root.Network = (function() {
                 throw TypeError(".Network.status: object expected");
             message.status = $root.Status.fromObject(object.status);
         }
+        if (object.statusReturn != null) {
+            if (typeof object.statusReturn !== "object")
+                throw TypeError(".Network.statusReturn: object expected");
+            message.statusReturn = $root.StatusReturn.fromObject(object.statusReturn);
+        }
         if (object.ping != null) {
             if (typeof object.ping !== "object")
                 throw TypeError(".Network.ping: object expected");
@@ -724,6 +753,11 @@ $root.Network = (function() {
             object.status = $root.Status.toObject(message.status, options);
             if (options.oneofs)
                 object.request = "status";
+        }
+        if (message.statusReturn != null && message.hasOwnProperty("statusReturn")) {
+            object.statusReturn = $root.StatusReturn.toObject(message.statusReturn, options);
+            if (options.oneofs)
+                object.request = "statusReturn";
         }
         if (message.ping != null && message.hasOwnProperty("ping")) {
             object.ping = $root.Ping.toObject(message.ping, options);
@@ -1123,6 +1157,221 @@ $root.Status = (function() {
     };
 
     return Status;
+})();
+
+$root.StatusReturn = (function() {
+
+    /**
+     * Properties of a StatusReturn.
+     * @exports IStatusReturn
+     * @interface IStatusReturn
+     * @property {boolean|null} [success] StatusReturn success
+     * @property {IStatus|null} [status] StatusReturn status
+     */
+
+    /**
+     * Constructs a new StatusReturn.
+     * @exports StatusReturn
+     * @classdesc Represents a StatusReturn.
+     * @implements IStatusReturn
+     * @constructor
+     * @param {IStatusReturn=} [properties] Properties to set
+     */
+    function StatusReturn(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * StatusReturn success.
+     * @member {boolean} success
+     * @memberof StatusReturn
+     * @instance
+     */
+    StatusReturn.prototype.success = false;
+
+    /**
+     * StatusReturn status.
+     * @member {IStatus|null|undefined} status
+     * @memberof StatusReturn
+     * @instance
+     */
+    StatusReturn.prototype.status = null;
+
+    /**
+     * Creates a new StatusReturn instance using the specified properties.
+     * @function create
+     * @memberof StatusReturn
+     * @static
+     * @param {IStatusReturn=} [properties] Properties to set
+     * @returns {StatusReturn} StatusReturn instance
+     */
+    StatusReturn.create = function create(properties) {
+        return new StatusReturn(properties);
+    };
+
+    /**
+     * Encodes the specified StatusReturn message. Does not implicitly {@link StatusReturn.verify|verify} messages.
+     * @function encode
+     * @memberof StatusReturn
+     * @static
+     * @param {IStatusReturn} message StatusReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    StatusReturn.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.success != null && message.hasOwnProperty("success"))
+            writer.uint32(/* id 1, wireType 0 =*/8).bool(message.success);
+        if (message.status != null && message.hasOwnProperty("status"))
+            $root.Status.encode(message.status, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified StatusReturn message, length delimited. Does not implicitly {@link StatusReturn.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof StatusReturn
+     * @static
+     * @param {IStatusReturn} message StatusReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    StatusReturn.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a StatusReturn message from the specified reader or buffer.
+     * @function decode
+     * @memberof StatusReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {StatusReturn} StatusReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    StatusReturn.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StatusReturn();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.success = reader.bool();
+                break;
+            case 2:
+                message.status = $root.Status.decode(reader, reader.uint32());
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a StatusReturn message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof StatusReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {StatusReturn} StatusReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    StatusReturn.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a StatusReturn message.
+     * @function verify
+     * @memberof StatusReturn
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    StatusReturn.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.success != null && message.hasOwnProperty("success"))
+            if (typeof message.success !== "boolean")
+                return "success: boolean expected";
+        if (message.status != null && message.hasOwnProperty("status")) {
+            var error = $root.Status.verify(message.status);
+            if (error)
+                return "status." + error;
+        }
+        return null;
+    };
+
+    /**
+     * Creates a StatusReturn message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof StatusReturn
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {StatusReturn} StatusReturn
+     */
+    StatusReturn.fromObject = function fromObject(object) {
+        if (object instanceof $root.StatusReturn)
+            return object;
+        var message = new $root.StatusReturn();
+        if (object.success != null)
+            message.success = Boolean(object.success);
+        if (object.status != null) {
+            if (typeof object.status !== "object")
+                throw TypeError(".StatusReturn.status: object expected");
+            message.status = $root.Status.fromObject(object.status);
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a StatusReturn message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof StatusReturn
+     * @static
+     * @param {StatusReturn} message StatusReturn
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    StatusReturn.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults) {
+            object.success = false;
+            object.status = null;
+        }
+        if (message.success != null && message.hasOwnProperty("success"))
+            object.success = message.success;
+        if (message.status != null && message.hasOwnProperty("status"))
+            object.status = $root.Status.toObject(message.status, options);
+        return object;
+    };
+
+    /**
+     * Converts this StatusReturn to JSON.
+     * @function toJSON
+     * @memberof StatusReturn
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    StatusReturn.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return StatusReturn;
 })();
 
 $root.Ping = (function() {

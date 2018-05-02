@@ -7,33 +7,34 @@ import "peer.proto";
 message Network { 
     oneof request {
         Status status=1;
+        StatusReturn statusReturn=2;
 
-        Ping ping=2;
-        PingReturn pingReturn=3;
+        Ping ping=3;
+        PingReturn pingReturn=4;
 
-        PutTx putTx=4;
-        PutTxReturn putTxReturn=5;
+        PutTx putTx=5;
+        PutTxReturn putTxReturn=6;
 
-        GetTxs getTxs=6;
-        GetTxsReturn getTxsReturn=7;
+        GetTxs getTxs=7;
+        GetTxsReturn getTxsReturn=8;
 
-        PutBlock putBlock=8;
-        PutBlockReturn putBlockReturn=9;
+        PutBlock putBlock=9;
+        PutBlockReturn putBlockReturn=10;
 
-        GetBlocksByHash getBlocksByHash=10;
-        GetBlocksByHashReturn getBlocksByHashReturn=11;
+        GetBlocksByHash getBlocksByHash=11;
+        GetBlocksByHashReturn getBlocksByHashReturn=12;
 
-        GetHeadersByHash getHeadersByHash=12;
-        GetHeadersByHashReturn getHeadersByHashReturn=13;
+        GetHeadersByHash getHeadersByHash=13;
+        GetHeadersByHashReturn getHeadersByHashReturn=14;
 
-        GetBlocksByRange getBlocksByRange=14;
-        GetBlocksByRangeReturn getBlocksByRangeReturn=15;
+        GetBlocksByRange getBlocksByRange=15;
+        GetBlocksByRangeReturn getBlocksByRangeReturn=16;
         
-        GetHeadersByRange getHeadersByRange=16;
-        GetHeadersByRangeReturn getHeadersByRangeReturn=17;
+        GetHeadersByRange getHeadersByRange=17;
+        GetHeadersByRangeReturn getHeadersByRangeReturn=18;
        
-        GetPeers getPeers=18;
-        GetPeersReturn getPeersReturn=19;
+        GetPeers getPeers=19;
+        GetPeersReturn getPeersReturn=20;
     }
 }
 
@@ -43,6 +44,11 @@ message Status {
     bytes hash=3;
     string ip=4;
     int32 port=5;
+}
+
+message StatusReturn {
+    bool success=1;
+    Status status=2;
 }
 
 message Ping {
