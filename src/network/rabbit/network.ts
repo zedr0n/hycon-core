@@ -1,15 +1,17 @@
 
 import { getLogger } from "log4js"
-import { createConnection, createServer, Socket } from "net"
 import * as net from "net"
+import { createConnection, createServer, Socket } from "net"
 import { IConsensus } from "../../consensus/iconsensus"
 import * as proto from "../../serialization/proto"
 import { Server } from "../../server"
 import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"
+import { UpnpClient, UpnpServer } from "../upnp"
 import { RabbitPeer } from "./netPeer"
 import { SocketParser } from "./socketBuffer"
 const logger = getLogger("Network")
+// tslint:disable-next-line:no-var-requires
 const randomInt = require("random-int")
 export class RabbitNetwork implements INetwork {
     public readonly port: number
@@ -19,6 +21,9 @@ export class RabbitNetwork implements INetwork {
     private targetPeerCount: number
 
     private peerTable: Map<string, RabbitPeer> = new Map()
+
+    private upnpServer: UpnpServer
+    private upnpClient: UpnpClient
 
     constructor(hycon: Server, port: number = 8148) {
         this.port = port
@@ -49,6 +54,10 @@ export class RabbitNetwork implements INetwork {
         this.server.on("error", (error) => logger.error(`${error}`))
         setInterval(() => logger.debug(`Peers Count=${this.peers.length}`), 1000)
         setInterval(() => this.findPeers(), 1000)
+
+        // upnp
+        this.upnpServer = new UpnpServer(this.port)
+        this.upnpClient = new UpnpClient(this)
 
         // add peer
         if (this.hycon) {
