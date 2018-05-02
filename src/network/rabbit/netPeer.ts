@@ -140,31 +140,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
         return headers
     }
 
-    protected async recieveBroadcast(request: proto.Network, packet: Buffer) {
-        switch (request.request) {
-            case "putBlock":
-                const promises: Array<Promise<boolean>> = []
-                for (const iBlock of request.putBlock.blocks) {
-                    try {
-                        const block = new Block(iBlock)
-                        promises.push(this.concensus.putBlock(block))
-                    } catch (e) {
-                        logger.info(`Could not put block: ${e}`)
-                    }
-                }
-                const success = await Promise.all(promises)
-                success.filter((v) => v)
-                if (success.length === request.putBlock.blocks.length) {
-                    this.network.broadcast(packet, this)
-                }
-                break
-            default:
-                this.protocolError()
-                break
-        }
-
-    }
-
+    // this is called in BasePeer's onPacket
     protected async respond(id: number, request: proto.Network, packet: Buffer): Promise<void> {
         // logger.info(`Must respond to ${request.request}`)
         let response: IResponse
@@ -198,12 +174,20 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 response = await this.respondGetHeadersByRange(reply, request[request.request])
                 break
         }
-        if (id !== 0 && response.message !== undefined) {
-            this.send(id, response.message)
+
+        if (reply) { // i'm replying for the request
+            if (response.message !== undefined) {
+                this.send(id, response.message)
+            }
+        } else {
+            // broadcast mode
+            if (response.relay) {
+                // only request was successfully processed
+                // we will relay
+                this.network.broadcast(packet, this)
+            }
         }
-        if (response.relay) {
-            this.network.broadcast(packet, this)
-        }
+
     }
 
     private async respondStatus(reply: boolean, request: proto.IStatus): Promise<IResponse> {
@@ -226,12 +210,15 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 for (const tx of request.txs) {
                     signedTxs.push(new SignedTx(tx))
                 }
-                const n = await this.txPool.putTxs(signedTxs)
-                success = (n === request.txs.length)
+                // const n = await this.txPool.putTxs(signedTxs)
+                // success = (n === request.txs.length)
+                success = false
             } catch (e) {
                 // logger.info(`Failed to putTx: ${e}`)
             }
         }
+
+        logger.debug(`PutTx`)
         return { message: { putTxReturn: { success } }, relay: success }
     }
 
@@ -244,6 +231,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     private async respondPutBlock(reply: boolean, request: proto.IPutBlock): Promise<IResponse> {
         let relay = false
         try {
+            /*
             const promises: Array<Promise<boolean>> = []
             for (const iblock of request.blocks) {
                 const block = new Block(iblock)
@@ -251,9 +239,13 @@ export class RabbitPeer extends BasePeer implements IPeer {
             }
             const results = await Promise.all(promises)
             relay = results.every((value) => value)
+             */
+            relay = false
+
         } catch (e) {
             logger.info(`Failed to put block: ${e}`)
         }
+        logger.debug(`PutBlock`)
         return { message: { putBlockReturn: { success: relay } }, relay }
     }
 

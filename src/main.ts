@@ -3,7 +3,10 @@ import { Server } from "./server"
 
 configure({
     appenders: {
-        console: { type: "stdout" },
+        // console: { type: "stdout" },
+        console: {
+            type: "log4js-protractor-appender",
+        },
         fileLogs: {
             filename: `./logs/${new Date().getFullYear()}-${(new Date().getMonth()) + 1}-${new Date().getDate()}/logFile.log`,
             keepFileExt: true,

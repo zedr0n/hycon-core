@@ -18,13 +18,15 @@ export class AppTxPool implements ITxPool {
     public async putTxs(txs: SignedTx[]): Promise<number> {
         try {
             let putCount = 0
+            const isExited = txs.every((stx: SignedTx) => this.existCheck(stx))
+            if (isExited) {
+                return Promise.reject(`Duplicate Tx `)
+            }
             for (const tx of txs) {
-                if (!this.existCheck(tx)) {
-                    if (await this.server.consensus.validateTx(tx)) {
-                        this.queue(tx)
-                        putCount++
-                    }
-
+                if (await this.server.consensus.validateTx(tx)) {
+                    this.queue(tx)
+                    putCount++
+                    break
                 }
             }
             return Promise.resolve(putCount)

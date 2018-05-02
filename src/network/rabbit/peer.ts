@@ -29,8 +29,6 @@ export abstract class BasePeer {
         // logger.info(` route ${route}, ${packet.length} bytes`)
         try {
             const res = proto.Network.decode(packet)
-            // tslint:disable-next-line:no-console
-            console.log(res)
             switch (res.request) {
                 case "status":
                 case "ping":
@@ -60,8 +58,6 @@ export abstract class BasePeer {
             this.protocolError()
         }
     }
-
-    protected abstract async recieveBroadcast(request: proto.Network, packet: Buffer): Promise<void>
 
     protected abstract async respond(route: number, request: proto.Network, packet: Buffer): Promise<void>
 
