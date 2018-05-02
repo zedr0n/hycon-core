@@ -33,7 +33,7 @@ export class MinerServer implements IMiner {
     private block: Block | undefined
     private prehash: Uint8Array | undefined
     private target: Uint8Array
-    private listCallBackNewBlock: (block: any) => void
+    private listCallBackNewBlock: (block: Block) => void
 
     public constructor(server: Server, stratumPort: number) {
         this.init()
@@ -74,7 +74,7 @@ export class MinerServer implements IMiner {
     }
     public async submitNonce(nonce: string): Promise<boolean> {
         return new Promise<boolean>(async (resolve, reject) => {
-            if ( this.block === undefined || this.prehash === undefined ) {
+            if (this.block === undefined || this.prehash === undefined) {
                 return resolve(false)
             }
 
@@ -85,7 +85,9 @@ export class MinerServer implements IMiner {
                 this.block.header.nonce = Long.fromString(nonce, true, 16)
 
                 // TODO Server.trackIncomingBlock()
-                this.listCallBackNewBlock(this.block)
+                if (this.listCallBackNewBlock !== undefined) {
+                    this.listCallBackNewBlock(this.block)
+                }
 
                 resolve(true)
 
@@ -116,7 +118,7 @@ export class MinerServer implements IMiner {
         this.listCallBackNewBlock = callback
     }
     public removeCallbackNewBlock(callback: (block: any) => void): void {
-        this.listCallBackNewBlock = null
+        this.listCallBackNewBlock = undefined
     }
 
     private init() {

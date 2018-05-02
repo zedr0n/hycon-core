@@ -1,7 +1,6 @@
 import { getLogger } from "log4js"
 import { NewTx } from "../serialization/proto"
 import { Server } from "../server"
-import { Hash } from "../util/hash"
 import { ITxPool } from "./itxPool"
 import { SignedTx } from "./txSigned"
 
@@ -10,7 +9,7 @@ interface ITxCallback {
     callback: (txs: SignedTx[]) => void,
     n: number
 }
-export class AppTxPool implements ITxPool {
+export class TxPool implements ITxPool {
     private server: Server
     private txs: SignedTx[]
     private callbacks: ITxCallback[]
@@ -29,9 +28,9 @@ export class AppTxPool implements ITxPool {
         return count
     }
 
-    public updateTx(txs: SignedTx[], n: number): SignedTx[] {
-        this.remove(txs)
-        return this.txs.slice(0, n)
+    public updateTxs(old: SignedTx[], maxReturn?: number): SignedTx[] {
+        this.remove(old)
+        return this.txs.slice(0, maxReturn)
     }
 
     public onTopTxChanges(n: number, callback: (txs: SignedTx[]) => void): void {
@@ -56,7 +55,7 @@ export class AppTxPool implements ITxPool {
                         j++
                     }
                 } else if (newTxs[i].fee > this.txs[j].fee) {
-                    if (await this.server.consensus.validateTx(newTxs[i])) {
+                    if (await this.server.consensus.isTxValid(newTxs[i])) {
                         this.txs.splice(j, 0, newTxs[i])
                         if (count === 0) {
                             lowestIndex = j
@@ -77,7 +76,7 @@ export class AppTxPool implements ITxPool {
                 return { count, lowestIndex }
             }
             try {
-                if (await this.server.consensus.validateTx(newTxs[i])) {
+                if (await this.server.consensus.isTxValid(newTxs[i])) {
                     this.txs.push(newTxs[i])
                 }
             } catch (e) {

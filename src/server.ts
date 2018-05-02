@@ -8,6 +8,7 @@ import { Block } from "./common/block"
 import { ITxPool } from "./common/itxPool"
 import { TxList } from "./common/txList"
 import { SignedTx } from "./common/txSigned"
+import { AppConsensus } from "./consensus/appConsensus"
 import { Database } from "./consensus/database/database"
 import { WorldState } from "./consensus/database/worldState"
 import { IConsensus } from "./consensus/iconsensus"
@@ -65,7 +66,7 @@ export class Server {
 
         this.wallet = new WalletManager(this)
         this.miner = new MinerServer(this, this.options.str_port)
-        this.txPool = new AppTxPool(this)
+        this.txPool = new TxPool(this)
         this.rest = new RestManager(this)
     }
     public async run() {

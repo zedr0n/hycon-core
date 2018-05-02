@@ -1,10 +1,9 @@
 import { getLogger } from "log4js"
 import { SignedTx } from "./common/txSigned"
-
 import { Block, INetwork, Tx } from "./serialization/proto"
 import * as proto from "./serialization/proto"
-
 import { Server } from "./server"
+
 const logger = getLogger("TestServer")
 
 export class TestServer {

@@ -268,15 +268,11 @@ export class RabbitPeer extends BasePeer implements IPeer {
         let success = false
         if (request.txs !== undefined) {
             try {
-                const signedTxs: SignedTx[] = []
-                for (const tx of request.txs) {
-                    signedTxs.push(new SignedTx(tx))
-                }
-                // const n = await this.txPool.putTxs(signedTxs)
-                // success = (n === request.txs.length)
-                success = false
+                const txs = request.txs.map((tx) => new SignedTx(tx))
+                const n = await this.txPool.putTxs(txs)
+                success = (n === request.txs.length)
             } catch (e) {
-                // logger.info(`Failed to putTx: ${e}`)
+                logger.info(`Failed to putTx: ${e}`)
             }
         }
 
