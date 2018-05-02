@@ -5,6 +5,10 @@ export class AppConsensus implements IConsensus {
     constructor(server: Server) {
         this.server = server
     }
+
+    public async validateTx(tx: any): Promise<boolean> {
+        return true
+    }
     public putBlock(block: any): Promise<boolean> {
         throw new Error("Method not implemented.")
     }

@@ -1,10 +1,11 @@
-import * as ip from 'ip'
-import { getLogger } from 'log4js'
-import { INetwork } from './network'
-import { AppNetwork } from './appNetwork'
+import * as ip from "ip"
+import { getLogger } from "log4js"
+import { INetwork } from "./inetwork"
+//import { TurtleNetwork } from "./turtle/turtleNetwork"
 
-const logger = getLogger('Upnp')
+const logger = getLogger("Upnp")
 logger.level = "debug"
+type TurtleNetwork = any;
 
 export class UpnpServer {
 
@@ -23,13 +24,13 @@ export class UpnpServer {
     }
 
     public run() {
-        let myLocation = UpnpServer.product + UpnpServer.networkid + '://' + ip.address() + ':' + UpnpServer.port
+        const myLocation = UpnpServer.product + UpnpServer.networkid + "://" + ip.address() + ":" + UpnpServer.port
         logger.debug(`Upnp Server`)
-        const Server = require('node-ssdp').Server
+        const Server = require("node-ssdp").Server
         const server = new Server({
             location: myLocation,
             sourcePort: 1900,
-            udn: `${UpnpServer.product}:${UpnpServer.version}`
+            udn: `${UpnpServer.product}:${UpnpServer.version}`,
         })
 
         server.start()
@@ -37,55 +38,56 @@ export class UpnpServer {
     }
 }
 
-export class UpnpClient{
+// tslint:disable-next-line:max-classes-per-file
+export class UpnpClient {
 
-    public localPeer: Map<string,string>
+    public localPeer: Map<string, string>
     public static threshold: number = 30 * 1000
-    public appNetwork:AppNetwork
-    public count:number = 0
+    public appNetwork: TurtleNetwork
+    public count: number = 0
 
-    constructor(appNetwork:AppNetwork){
+    constructor(appNetwork: TurtleNetwork) {
         this.appNetwork = appNetwork
         this.localPeer = new Map()
-        setTimeout(()=>{
+        setTimeout(() => {
             this.run()
         }, 100)
-        setInterval(()=>{
+        setInterval(() => {
             this.updateLocalPeer()
-        },30*1000)
+        }, 30 * 1000)
     }
 
-    public updateLocalPeer(){
-        let date = Date.now()   
-        this.localPeer.forEach((value, key)=>{
-            if(date - Date.parse(value) > UpnpClient.threshold){
+    public updateLocalPeer() {
+        const date = Date.now()
+        this.localPeer.forEach((value, key) => {
+            if (date - Date.parse(value) > UpnpClient.threshold) {
                 this.localPeer.delete(key)
-            }  
+            }
         })
         logger.debug("localPeer: ", this.localPeer)
     }
-    
-    public run(){
+
+    public run() {
         logger.debug(`Upnp Client`)
-        const Client = require('node-ssdp').Client
+        const Client = require("node-ssdp").Client
         const client = new Client()
 
-        client.search('urn:schemas-upnp-org:service:ContentDirectory:1')
+        client.search("urn:schemas-upnp-org:service:ContentDirectory:1")
 
-        setInterval(()=>{
-            client.search('ssdp:all')
-        }, 5*1000)
+        setInterval(() => {
+            client.search("ssdp:all")
+        }, 5 * 1000)
 
-        client.on('response', (headers: any, code: any, rdebug: any) => {
-            let ipaddress = rdebug.address
-            let regex = /(\S+):\/\/([\.\d]+):(\d+)/g
-            let match = regex.exec(headers.LOCATION)
+        client.on("response", (headers: any, code: any, rdebug: any) => {
+            const ipaddress = rdebug.address
+            const regex = /(\S+):\/\/([\.\d]+):(\d+)/g
+            const match = regex.exec(headers.LOCATION)
             if (match) {
-                let [product, localIP, localPort] = match.slice(1, 4)
-                let isLocal = ipaddress === localIP && Number(localPort) === UpnpServer.port
-                let fullProduct = UpnpServer.product + UpnpServer.networkid
-                let isSameProduct = product === fullProduct
-                let date = headers.DATE
+                const [product, localIP, localPort] = match.slice(1, 4)
+                const isLocal = ipaddress === localIP && Number(localPort) === UpnpServer.port
+                const fullProduct = UpnpServer.product + UpnpServer.networkid
+                const isSameProduct = product === fullProduct
+                const date = headers.DATE
 
                 if (!isLocal && isSameProduct) {
                     // logger.debug(`debug = ${JSON.stringify(headers)}`)
@@ -94,19 +96,19 @@ export class UpnpClient{
                     // logger.debug("IS LOCAL:", isLocal)
                     // logger.debug("DATE:", date)
                     // logger.debug(`DETECT IP Local=${isLocal} Product=${product} IP=${localIP} Port=${localPort}`)
-                    if(!this.localPeer.has(`${localIP}:${localPort}`)){
-                        this.appNetwork.addClient(localIP,parseInt(localPort,10))
+                    if (!this.localPeer.has(`${localIP}:${localPort}`)) {
+                        this.appNetwork.addClient(localIP, parseInt(localPort, 10))
                         this.count++
                     }
                     logger.debug(`addClient() been called: ${this.count.toString()} times`)
                     this.localPeer.set(`${localIP}:${localPort}`, date)
-                    
+
                 }
             } else {
-                logger.error('Invalid format: headers.LOCATION')
-                throw Error('Invalid format: headers.LOCATION')
+                logger.error("Invalid format: headers.LOCATION")
+                throw Error("Invalid format: headers.LOCATION")
             }
-            
+
         })
 
     }

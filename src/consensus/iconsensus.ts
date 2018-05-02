@@ -21,4 +21,5 @@ export interface IConsensus {
     getHeadersRange(fromHeight: number, count?: number): Promise<AnyBlockHeader[]>
     getAccount(address: Address): Promise<Account>
     getLastTxs(address: Address, count?: number): Promise<SignedTx[]>
+    validateTx(tx: SignedTx): Promise<boolean>
 }

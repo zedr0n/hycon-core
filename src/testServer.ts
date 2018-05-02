@@ -1,7 +1,7 @@
 import { getLogger } from "log4js"
 import { SignedTx } from "./common/txSigned"
-import { Packet } from "./network/turtle/packet"
-import { Block, INode, Tx } from "./serialization/proto"
+
+import { Block, INetwork, Tx } from "./serialization/proto"
 import * as proto from "./serialization/proto"
 
 import { Server } from "./server"

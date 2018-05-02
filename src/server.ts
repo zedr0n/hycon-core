@@ -8,7 +8,6 @@ import { AppMiner } from "./miner/appMiner"
 import { IMiner } from "./miner/miner"
 import { INetwork } from "./network/inetwork"
 import { RabbitNetwork } from "./network/rabbit/network" // for speed
-import { TurtleNetwork } from "./network/turtle/turtleNetwork" // for development only
 import { RestManager } from "./rest/restManager"
 import { TestServer } from "./testServer"
 import { WalletManager } from "./wallet/walletManager"
@@ -46,13 +45,7 @@ export class Server {
         logger.info(`Port=${this.options.port}`)
 
         this.consensus = new AppConsensus(this)
-        if (this.useRabbit) {
-            // rabbit
-            this.network = new RabbitNetwork(this, this.options.port)
-        } else {
-            // turtle
-            this.network = new TurtleNetwork(this.options.port, this)
-        }
+        this.network = new RabbitNetwork(this, this.options.port)
 
         this.wallet = new WalletManager(this)
         this.miner = new AppMiner(this)

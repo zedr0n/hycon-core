@@ -1,6 +1,9 @@
 import { IConsensus } from "./iconsensus"
 
 export class Database implements IConsensus {
+    public validateTx(tx: any): Promise<boolean> {
+        throw new Error("Method not implemented.")
+    }
     public putBlock(block: any): Promise<boolean> {
         throw new Error("Method not implemented.")
     }

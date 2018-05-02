@@ -23,12 +23,16 @@ export class AppTxPool implements ITxPool {
                         this.queue(tx)
                         putCount++
                     }
+
                 }
             }
             return Promise.resolve(putCount)
         } catch (e) {
             return Promise.reject(`Fail to put Txs : ${e}`)
         }
+    }
+    public async delTxs(txs: SignedTx[]): Promise<number> {
+        return 0
     }
     public updateTx(txs: SignedTx[], n: number): SignedTx[] {
         this.remove(txs)
