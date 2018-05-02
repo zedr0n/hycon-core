@@ -2,7 +2,7 @@ import { getLogger } from "log4js"
 import { Socket } from "net"
 import { AnyBlock, Block } from "../../common/block"
 import { AnyBlockHeader, BlockHeader } from "../../common/blockHeader"
-import { ITxPool } from "../../common/txPool"
+import { ITxPool } from "../../common/itxPool"
 import { SignedTx } from "../../common/txSigned"
 import { IConsensus } from "../../consensus/iconsensus"
 import * as proto from "../../serialization/proto"
@@ -222,7 +222,11 @@ export class RabbitPeer extends BasePeer implements IPeer {
         let success = false
         if (request.txs !== undefined) {
             try {
-                const n = await this.txPool.putTxs(request.txs)
+                const signedTxs: SignedTx[] = []
+                for (const tx of request.txs) {
+                    signedTxs.push(new SignedTx(tx))
+                }
+                const n = await this.txPool.putTxs(signedTxs)
                 success = (n === request.txs.length)
             } catch (e) {
                 // logger.info(`Failed to putTx: ${e}`)
