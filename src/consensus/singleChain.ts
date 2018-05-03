@@ -10,8 +10,8 @@ import { TxPool } from "../common/txPool"
 import { SignedTx } from "../common/txSigned"
 import { Server } from "../server"
 import * as utils from "../util/difficulty"
+import * as graph from "../util/graph"
 import { Hash } from "../util/hash"
-import * as graph from "../util/visGraph"
 import { Account } from "./database/account"
 import { Database } from "./database/database"
 import { DBBlock } from "./database/dbblock"
@@ -51,7 +51,7 @@ export class SingleChain implements IConsensus {
                 genesis.header.stateRoot = transition.currentStateRoot
                 await this.worldState.print(transition.currentStateRoot)
                 await this.putBlock(genesis)
-                graph.initVisualDAG(genesis.header)
+                graph.initGraph(genesis.header)
             } else {
                 if (!(new Hash(genesisInDB).equals(genesisHash))) {
                     logger.error(`Genesis in DB and file are not matched.`)
@@ -83,7 +83,7 @@ export class SingleChain implements IConsensus {
                 if (!verifyResult.isVerified) { return false }
                 const transitionResult = verifyResult.stateTransition
                 await this.worldState.putPending(transitionResult.batch, transitionResult.mapAccount)
-                graph.addToVisualDAG(block.header, "skyblue")
+                graph.addToGraph(block.header, graph.gcolor.Outgoing)
             }
             const { current, currentHash, previous } = await this.db.putBlock(block)
 
@@ -367,7 +367,7 @@ export class SingleChain implements IConsensus {
                         if (blk instanceof Block) { await this.server.txPool.putTxs(blk.txs) }
                         await this.db.delBlock(hash)
                         await this.worldState.pruneStateRoot(b.header.stateRoot)
-                        if (blk instanceof Block) { graph.removeFromVisualDAG(blk.header) }
+                        if (blk instanceof Block) { graph.removeFromGraph(blk.header) }
                     }
                 }
                 for (const b of mainChain) {

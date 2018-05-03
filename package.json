@@ -18,7 +18,7 @@
     "testNetwork3": "./node_modules/.bin/ts-node src/main.ts --port=8153 --networkid=3 --str_port=9083 --writing",
     "clear": "rm -rf deleteme* ./wallet",
     "wallet": "./node_modules/.bin/ts-node src/main.ts --wallet",
-    "reorg": "rm -rf deleteme* && ./node_modules/.bin/ts-node src/consensus/reorg_test.ts"
+    "visTest": "./node_modules/.bin/ts-node src/util/visTest.ts"
   },
   "author": "",
   "license": "ISC",
