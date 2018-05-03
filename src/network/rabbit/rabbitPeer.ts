@@ -11,7 +11,9 @@ import * as proto from "../../serialization/proto"
 import { Hash } from "../../util/hash"
 import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"
+import { PeerDb } from "../peerDb"
 import { BasePeer } from "./basePeer"
+
 const logger = getLogger("NetPeer")
 
 interface IResponse { message: proto.INetwork, relay: boolean }
@@ -22,7 +24,10 @@ export class RabbitPeer extends BasePeer implements IPeer {
     private myStatus: proto.Status = new proto.Status()
     private connected: boolean = false
 
-    constructor(socket: Socket, network: INetwork, concensus: IConsensus, txPool: ITxPool) {
+    private isBootnode: boolean = false
+    private peerDB: PeerDb
+
+    constructor(socket: Socket, network: INetwork, concensus: IConsensus, txPool: ITxPool, isBootnode?: boolean) {
         super(socket)
         // tslint:disable-next-line:max-line-length
         logger.info(`New Netpeer Local=${socket.localAddress}:${socket.localPort} --> Remote=${socket.remoteAddress}:${socket.remotePort}`)
@@ -32,10 +37,14 @@ export class RabbitPeer extends BasePeer implements IPeer {
         // set status
         this.myStatus.version = 0
         this.myStatus.networkid = "hycon"
+
+        this.isBootnode = isBootnode
+
     }
 
-    public getTip(): { hash: Hash; height: number; } {
-        throw new Error("Method not implemented.")
+    public setStatus(ip: string, port: number): void {
+        this.myStatus.ip = ip
+        this.myStatus.port = port
     }
 
     public async status(): Promise<proto.IStatus> {
@@ -224,6 +233,10 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     private async respondStatus(reply: boolean, request: proto.IStatus): Promise<IResponse> {
+        if (this.isBootnode) {
+            this.peerDB = new PeerDb()
+            await this.peerDB.registerPeer(request.ip, request.port)
+        }
         const message: proto.INetwork = {
             statusReturn: { status: this.myStatus, success: true },
         }
@@ -318,4 +331,4 @@ export class RabbitPeer extends BasePeer implements IPeer {
         const message: proto.INetwork = { getHeadersByRangeReturn: { success: false, headers: [] } }
         return { message, relay: false }
     }
-} //end of class
+} // end of class

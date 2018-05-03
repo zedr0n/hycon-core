@@ -8,6 +8,8 @@ package-lock.json
 test.ts
 deleteme*/
 .DS_Store
+peerdb
+
 
 PeerList.db
 wallet/

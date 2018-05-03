@@ -1,11 +1,68 @@
 import { getLogger } from "log4js"
-import natUpnp = require("nat-upnp") // TODO: Add typing information
+import * as natUpnp from "nat-upnp"
+import * as network from "network"
+import { INetwork } from "./inetwork"
+import { IPeer } from "./ipeer"
+import * as proto from "../serialization/proto"
 
 const client = natUpnp.createClient()
 const logger = getLogger("Nat")
 logger.level = "debug"
 
 export class NatUpnp {
+
+    public publicIp: string
+    private privatePort: number
+    private publicPort: number
+    private network: INetwork
+    private static bootNode: any[] = [
+        {ip: 'hycon.io', port: 8080},
+        {ip: 'hycon.io', port: 8080},
+        {ip: 'hycon.io', port: 8080}
+    ]
+
+    // constructor(port: number) {
+    //     this.publicIp = ""
+    //     this.privatePort = port
+    //     this.publicPort = NaN
+    //     setTimeout(() => {
+    //         this.run()
+    //     }, 5000)
+    // }
+
+    //test
+    constructor(port: number, network:INetwork) {
+        this.publicIp = ""
+        this.privatePort = port
+        this.publicPort = NaN
+        this.network = network
+        setTimeout(() => {
+            this.run()
+        }, 500)
+    }
+
+    public async run() {
+        try {
+            this.publicPort = await NatUpnp.mapPort(this.privatePort)
+        } catch (e) {
+            this.publicPort = NaN
+            logger.error(`Upnp Error: ${e}, please confirm your router supports UPNP and that UPNP is enabled.`)
+        }
+        try {
+            this.publicIp = await NatUpnp.externalIp()
+            logger.info(`External Ip=${this.publicIp}`)
+        } catch (e) {
+            this.publicIp = ""
+        }
+
+        if(!isNaN(this.publicPort) && this.publicIp != ""){
+            let index = Math.floor( Math.random() * NatUpnp.bootNode.length )
+            let bootNode: IPeer = await this.network.addClient(NatUpnp.bootNode[index].ip, NatUpnp.bootNode[index].port)
+            bootNode.setStatus(this.publicIp, this.publicPort)
+            await bootNode.status()
+        }
+    }
+
     private static async _mapPort(privatePort: number, publicPort: number, ttl: number = 10) {
         return await new Promise((resolve, reject) => {
             client.portMapping({
@@ -44,71 +101,17 @@ export class NatUpnp {
             })
         })
     }
-    public publicIp: string
-    private privatePort: number
-    private publicPort: number
 
-    constructor(port: number) {
-        this.publicIp = ""
-        this.privatePort = port
-        this.publicPort = NaN
-        setTimeout(() => {
-            this.run()
-        }, 5000)
+    private static async externalIp(): Promise<any> {
+        let pubIp: string
+        pubIp = await NatUpnp._externalIp()
+        if( pubIp == '0.0.0.0'){
+            return await new Promise((resolve,reject)=>{
+                network.get_public_ip((err:any, ip:any)=>{
+                    if(err) {reject(`Get external IP failed`)}
+                    resolve(ip)
+                })                    
+            })
+        }else return pubIp
     }
-
-    public async run() {
-        try {
-            this.publicPort = await NatUpnp.mapPort(this.privatePort)
-        } catch (e) {
-            this.publicPort = NaN
-            logger.error(`Upnp Error: ${e}, please confirm your router supports UPNP and that UPNP is enabled.`)
-        }
-        try {
-            this.publicIp = await NatUpnp._externalIp()
-            logger.info(`External Ip=${this.publicIp}`)
-        } catch (e) {
-            this.publicIp = ""
-        }
-
-        // if (this.server && this.server.upnpServer) {
-        //     this.server.sendMyInfo(this.server.upnpServer.serverId, this.publicIp, NatUpnp.publicPort)
-        // }
-
-        // result = await new Promise(function (resolve, reject) {
-        //     client.getMappings(function (err: any, results: any) {
-        //         if (err) reject("get mappings fail")
-
-        //         var newresult = { items: results };
-        //         resolve(newresult)
-        //     });
-        // })
-
-        // this.portList = []
-        // for (let item of result.items) {
-        //     let publicPort = item.public.port
-        //     let privateIp = item.private.host
-        //     let privatePort = item.private.port
-        //     let newone = {
-        //         publicIp: this.publicIp, publicPort: publicPort,
-        //         privateIp: privateIp, privatePort: privatePort
-        //     }
-        //     //logger.info(`${JSON.stringify(newone)}`)
-        //     logger.info(`${this.publicIp}:${publicPort} -> ${privateIp}:${privatePort}`)
-        //     this.portList.push(newone)
-        // }
-
-        // /*
-        //         client.getMappings({ local: true }, function (err: any, results: any) {
-        //             logger.debug(`Local GetMappings Upnp err=${err}  results=${JSON.stringify(results)}`)
-        //         });*/
-
-        // test code
-        /*if (this.server && this.server.upnpServer) {
-            // this.server.sendMyInfo(this.publicIp, NatUpnp.publicPort)
-            var name = this.server.upnpServer.serverId
-            this.server.sendMyInfo(name, "1.2.3.4", 8085)
-        }*/
-    }
-
 }

@@ -1,142 +1,25 @@
-// import * as fs from 'fs-extra'
-// import * as protobuf from 'protobufjs'
-// import * as proto from '../serialization/proto'
-// import { PeerApp } from "./peerApp"
-// import { getLogger } from 'log4js'
-// const logger = getLogger('PeerDb')
-
-// export class PeerDb {
-//     public peers: PeerApp[] = []
-//     public pendingSave: boolean = false
-//     public filename!: string
-//     constructor() {
-//         this.pendingSave = false
-//     }
-
-//     public async peerDbInit(param: string | Peer[]): Promise<undefined> {
-//         try {
-//             if (typeof param == 'string') {
-//                 this.filename = param
-//                 await this.load(this.filename)
-//             } else if (param !== undefined) {
-//                 await this.addAll(param, false)
-//             }
-//             return Promise.resolve(undefined)
-//         } catch (e) {
-//             logger.error(`Fail to peerList Initialization : ${e}`)
-//             return Promise.reject(e)
-//         }
-//     }
-
-//     public async load(filename?: string): Promise<boolean> {
-//         if (filename == undefined) {
-//             if (this.filename == undefined) {
-//                 this.filename = './peers'
-//             }
-//             filename = this.filename
-//         } else {
-//             this.filename = filename
-//         }
-
-//         try {
-//             const buf = fs.readFileSync(filename)
-//             const newPeers = proto.Peers.decode(buf)
-//             let count = 0
-//             for (const peer of newPeers.peers) {
-//                 if (await this.add(new Peer(peer), false)) {
-//                     count++
-//                 }
-//             }
-//             return Promise.resolve(true)
-//         } catch (e) {
-//             logger.error(`Fail to load peer : ${e}`)
-//         }
-//         return Promise.resolve(false)
-//     }
-
-//     private async _save(filename: string): Promise<boolean> {
-//         this.pendingSave = false
-//         if (filename == undefined) {
-//             return false
-//         }
-//         const buf = proto.Peers.encode({ peers: this.peers }).finish()
-//         try {
-//             await fs.writeFile(filename, buf, { encoding: 'buffer', flag: 'w' })
-//             return Promise.resolve(true)
-//         } catch (e) {
-//             logger.error(`Fail to save peer : ${e}`)
-//         }
-//         return Promise.resolve(false)
-//     }
-
-//     public async save(filename: string = this.filename) {
-//         if (!this.pendingSave) {
-//             this.pendingSave = true
-//             setTimeout(async () => { await this._save(filename) }, 100)
-//         }
-//     }
-
-//     //adds peer to peer list, will be called after comparing list
-//     public async add(peer: Peer, save: boolean = true): Promise<boolean> {
-//         for (let i = 0; i < this.peers.length; i++) {
-//             if (this.peers[i].equals(peer)) {
-//                 return Promise.resolve(false)
-//             }
-//         }
-
-//         this.peers.push(peer)
-
-//         if (save) {
-//             await this.save()
-//         }
-//         return Promise.resolve(true)
-//     }
-
-//     public async addAll(peers: Peer[], save: boolean = true): Promise<number> {
-//         let count = 0;
-//         for (const peer of peers) {
-//             if (await this.add(peer, false)) {
-//                 count++
-//             }
-//         }
-//         if (save) {
-//             await this.save()
-//         }
-//         return Promise.resolve(count)
-//     }
-
-//     //removes peer from list, maybe after period of inactivity
-//     public remove(peer: Peer): boolean {
-//         return Collections.arrays.remove(
-//             this.peers,
-//             peer,
-//             Peer.prototype.equals.bind(peer),
-//         );
-//     }
-
-//     //exports a random peer
-//     public random(): Peer {
-//         const index = Math.floor(Math.random() * this.peers.length);
-//         return this.peers[index]
-//     }
-// }
-
-
-// import { Server } from './server'
 import { getLogger } from 'log4js'
-const logger = getLogger('PeerDb')
+import { Hash } from '../util/hash'
+import * as base58 from 'base-58'
+import { resolve } from 'path';
+import { reject } from 'delay';
 const levelup = require('levelup') // javascript binding
 const rocksdb = require('rocksdb')  // c++ binding
+const logger = getLogger('PeerDb')
+logger.level = "debug"
 
 export class PeerDb {    
     public db: any // database
+    public keys: string[]
 
     constructor() {
         this.db = levelup(rocksdb('./peerdb'))
 
-        setTimeout(() => {
-            this.run()
-        }, 1000);
+        setInterval(() => {
+            this.maintainKyes()
+        }, 5*60*1000)
+
+
     }
 
     public async put(key: string, data: any) {
@@ -148,6 +31,7 @@ export class PeerDb {
             })
         })
     }
+
     public async get(key: string): Promise<any> {
         return new Promise((resolve, reject) => {
             this.db.get(key, (err: any, value: any) => {
@@ -157,32 +41,69 @@ export class PeerDb {
             })
         })
     }
-    public async listAll() {
+
+    public async listAll(): Promise<any> {
         return new Promise((resolve, reject) => {
-            var index = 1
-            this.db.createReadStream({ gt: "a", lt: "z" })
-                .on('data', (data: any) => {
-                    logger.debug(`${index}  Key=${data.key} Data=${data.value}`)
-                    index++
+            let keys:string[] = []
+            this.db.createKeyStream()
+                .on('data', (key: string) => {
+                    keys.push(key.toString())
                 })
                 .on('end', function () {
-                    logger.debug(`Done`)
-                    resolve()
+                    logger.debug(`list all`)
+                    resolve(keys)
                 })
         })
     }
-    public async run() {
-        //var key = "apple" + new Date().toString()
-        //var data = { Ip: '127.0.0.1', Port: 8148, Time: new Date().toString() }
-        //await this.put(key, data)
-        //var data2 = JSON.parse(await this.get(key))
-        await this.listAll()
-        logger.debug(`Done`)
+
+    public async clearAll(){
+        return new Promise((resolve,reject)=>{
+            this.db.createKeyStream()
+            .on('data', (key:any)=>{
+                this.db.del(key)
+            })
+            .on('end', () =>{
+                logger.debug('clear db')
+                resolve()
+            })
+        })
     }
-    // name , ip, port
-    public async registerPeer(info: any) {
-        logger.debug(`Register Peer ${info.name} ${info.ip}:${info.port}`)
-        await this.put(info.name, { name: info.name, ip: info.ip, port: info.port })
+
+    // hash, ip, port, timeStamp
+    public async registerPeer(ip:string, port:number): Promise<any> {
+        let key = base58.encode(Hash.hash(ip+port.toString()))
+        let date = Date.now()
+        logger.debug(`Register Peer ${key}: {${ip},${port},${date}}`)
+        return await this.put(key, { ip: ip, port: port, timeStamp: date })
+    }
+
+    public async getRandomPeers(n:number): Promise<string[]>{
+        if(n<this.keys.length){
+            let randomlist:number[] = []
+            let peerList:string[] = []
+            while(randomlist.length <= n){
+                let randomKey = Math.floor(Math.random()*this.keys.length)
+                if(!randomlist.find((ele)=>ele==randomKey)){
+                    randomlist.push(randomKey)
+                    let peer = await this.get(this.keys[randomKey])
+                    peerList.push(peer.toString())
+                }
+            }
+            return resolve(peerList)
+        }
+    }
+
+    public async maintainKyes() {
+        //await this.clearAll()
+        // this.registerPeer('192.168.1.100', 8080)
+        // this.registerPeer('192.168.1.100', 8081)
+        // this.registerPeer('192.168.1.100', 8082)
+        // this.registerPeer('192.168.1.100', 8083)
+        // this.registerPeer('192.168.1.100', 8083)
+        this.keys = await this.listAll()
+       // let res = await this.get('GHtUT9ysVsYddA9zmadCjYYGovveEkbj1yAmEK57NExp')
+        //logger.debug(res.toString())
+        // console.log(this.keys)
     }
 }
 
