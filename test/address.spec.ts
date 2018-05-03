@@ -6,7 +6,7 @@ describe('Address', () => {
     let address: Address
 
     it('Should assign a buffer from a string', () => {
-        const str = 'PhineasGageC5jJ'
+        const str = 'HhineasGageC5jJ'
         address = new Address(str)
         expect(address).toBeDefined()
     })
@@ -27,7 +27,7 @@ describe('Address', () => {
     })
 
     it('toString(): Should return a base 58 encoded string representation of the address', () => {
-        const str = 'PhineasGageC5jJ'
+        const str = 'HhineasGageC5jJ'
         const encodeSpy = spyOn(Base58, 'encode').and.returnValue('TestStringReturn')
         const decodeSpy = spyOn(Base58, 'decode').and.returnValue(new Uint8Array(0))
         const sliceSpy = spyOn(String.prototype, 'slice').and.returnValue('slice')
@@ -57,10 +57,11 @@ describe('Address', () => {
     })
 
     it('equals(): Should return true if the addresses are the same', () => {
-        const str = 'PhineasGageC5jJ'
+        const str = 'HhineasGageC5jJ'
         const address = new Address(str)
         const address2 = new Address(str)
         expect(address.equals(address2)).toBeTruthy()
         expect(address2.equals(address)).toBeTruthy()
     })
+    
 })

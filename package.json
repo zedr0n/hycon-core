@@ -33,6 +33,7 @@
     "istanbul": "^0.4.5",
     "jasmine": "^3.1.0",
     "protobufjs": "^6.8.6",
+    "remap-istanbul": "^0.11.1",
     "ts-node": "4.0.1",
     "tslint": "^5.9.1",
     "typescript": "^2.8.1"
