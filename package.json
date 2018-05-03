@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "./node_modules/.bin/ts-node src/main.ts --networkid=3 --port=8148 --writing ",
-    "start2": "./node_modules/.bin/ts-node src/main.ts --networkid=3 --port=8149",
+    "start": "./node_modules/.bin/ts-node src/main.ts --networkid=3 --port=8148 --writing --str_port=9081",
+    "start2": "./node_modules/.bin/ts-node src/main.ts --networkid=3 --port=8149 --str_port=9082",
     "protogen": "pbjs -t static-module -w commonjs -o src/serialization/proto.js proto/main.proto &&  pbts -o src/serialization/proto.d.ts src/serialization/proto.js && ./src/serialization/trim_null.sh",
-    "debug": "./node_modules/.bin/ts-node --inspect=9231 --inspect-brk src/main.ts --port=8148  --networkid=3  --writing",
-    "debug2": "./node_modules/.bin/ts-node  --inspect=9232 --inspect-brk  src/main.ts --port=8149  --networkid=3 ",
+    "debug": "./node_modules/.bin/ts-node --inspect=9231 --inspect-brk src/main.ts --port=8148  --networkid=3  --writing --str_port=9081",
+    "debug2": "./node_modules/.bin/ts-node  --inspect=9232 --inspect-brk  src/main.ts --port=8149  --networkid=3 --str_port=9082",
     "test": "rm -rf build && tsc && istanbul cover node_modules/jasmine/bin/jasmine.js -x **/proto.*  -- --config=jasmine.json && remap-istanbul -i ./coverage/coverage.json -o ./coverage/remap-report -t html",
     "debugNetwork": "./node_modules/.bin/ts-node --inspect=9231 --inspect-brk src/network/turtle/main.ts",
     "startNetwork": "./node_modules/.bin/ts-node src/network/turtle/main.ts --port=8148",
@@ -53,13 +53,14 @@
     "merkle-lib": "^2.0.10",
     "nat-upnp": "^1.1.1",
     "net": "^1.0.2",
-    "node-cryptonight": "https://github.com/dev-jbam/node-cryptonight.git",
+    "node-cryptonight": "git://github.com/dev-jbam/node-cryptonight.git",
     "node-ssdp": "^3.3.0",
     "protobufjs": "^6.8.6",
     "random-int": "^1.0.0",
-    "rocksdb": "https://github.com/Team-Hycon/rocksdb.git",
+    "rocksdb": "git://github.com/Team-Hycon/rocksdb.git",
     "secp256k1": "^3.5.0",
     "sha256": "^0.2.0",
+    "stratum": "^0.2.4",
     "wallet.ts": "^0.2.5"
   }
 }

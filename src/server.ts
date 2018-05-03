@@ -7,8 +7,9 @@ import { ITxPool } from "./common/itxPool"
 import { SignedTx } from "./common/txSigned"
 import { IConsensus } from "./consensus/iconsensus"
 import { SingleChain } from "./consensus/singleChain"
-import { AppMiner } from "./miner/appMiner"
 import { IMiner } from "./miner/miner"
+import { MinerServer } from "./miner/minerSever"
+import { StratumServer } from "./miner/stratumServer"
 import { INetwork } from "./network/inetwork"
 import { RabbitNetwork } from "./network/rabbit/network" // for speed
 import { RestManager } from "./rest/restManager"
@@ -52,15 +53,16 @@ export class Server {
         this.network = new RabbitNetwork(this, this.options.port)
 
         this.wallet = new WalletManager(this)
-        this.miner = new AppMiner(this)
+        this.miner = new MinerServer(this, this.options.str_port)
         this.txPool = new AppTxPool(this)
         this.rest = new RestManager(this)
     }
     public async run() {
         await this.consensus.init()
         logger.info("Starting server...")
-        this.network.start()
         this.readOptions()
+        this.network.start()
+        this.miner.start()
     }
     private readOptions() {
         const options = commandLineArgs(optionDefinitions)
@@ -71,7 +73,9 @@ export class Server {
             logger.info("Test Writing")
             this.test = new TestServer(this)
         }
-
+        if (options.mine) {
+            MinerServer.useCpuMiner = true
+        }
     }
 
     // TODO : Block, hash, SignedTx, randomBytes import, and testMakeBlock(db, consensus) remove

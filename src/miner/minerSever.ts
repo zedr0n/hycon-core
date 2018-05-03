@@ -1,8 +1,10 @@
 import { getLogger } from "log4js"
 import Long = require("long")
 import { Block } from "../common/block"
+import { Server } from "../server"
 import { Hash } from "../util/hash"
 import * as util from "../util/miningUtil"
+import { zeroPad } from "../util/miningUtil"
 import { CpuMiner } from "./cpuMiner"
 import { IMiner } from "./miner"
 import { StratumServer } from "./stratumServer"
@@ -24,7 +26,8 @@ export class MinerServer implements IMiner {
     public static readonly LEN_HEX_RESULT: number = 64
 
     // variable
-    public static useCpuMiner: boolean = true
+    public static useCpuMiner: boolean = false
+    private server: Server
     private stratumServer: StratumServer
     private cpuMiner: CpuMiner
     private block: Block | undefined
@@ -32,17 +35,17 @@ export class MinerServer implements IMiner {
     private target: Uint8Array
     private listCallBackNewBlock: (block: any) => void
 
-    public constructor() {
+    public constructor(server: Server, stratumPort: number) {
         this.init()
 
-        this.stratumServer = new StratumServer(this)
-        if (MinerServer.useCpuMiner) {
-            this.cpuMiner = new CpuMiner(this)
-        }
+        this.server = server
+
+        this.stratumServer = new StratumServer(this, stratumPort)
+        this.cpuMiner = new CpuMiner(this)
     }
 
     public newCandidateBlock(candidateBlock: Block): void {
-        logger.info(`Send candidate block to miner : ${candidateBlock.header.preHash().toString()}`)
+        this.start()
 
         // check same block
         const hash = candidateBlock.header.preHash()
@@ -61,6 +64,8 @@ export class MinerServer implements IMiner {
         // check miner count
         const jobUnit = this.calculateJobUnit()
 
+        logger.info(`Send candidate block to miner - prehash : ${Buffer.from(candidateBlock.header.preHash().buffer).toString("hex")} / target : ${Buffer.from(this.target.buffer).toString("hex")}`)
+
         // notify cpuminer and stratum server
         if (MinerServer.useCpuMiner) {
             this.cpuMiner.putWork(this.prehash, this.target, jobUnit)
@@ -68,25 +73,28 @@ export class MinerServer implements IMiner {
         this.stratumServer.putWork(this.prehash, this.target, jobUnit)
     }
     public async submitNonce(nonce: string): Promise<boolean> {
-        if (this.block && this.prehash) {
-            if (!(await this.checkNonce(nonce))) {
-                logger.info(`Fail to search nonce !!! - PREHASH : ${this.prehash}   NONCE : ${nonce}`)
-                return false
+        return new Promise<boolean>(async (resolve, reject) => {
+            if ( this.block === undefined || this.prehash === undefined ) {
+                return resolve(false)
             }
 
-            logger.info(`Success to search nonce !!! - PREHASH : ${this.prehash}   NONCE : ${nonce}`)
+            const result = await this.checkNonce(nonce)
+            if (result) {
+                logger.info(`Success to search nonce !!! - PREHASH : ${Buffer.from(this.prehash.buffer).toString("hex")} /  NONCE : ${zeroPad(nonce, MinerServer.LEN_HEX_NONCE)}`)
 
-            this.block.header.nonce = Long.fromString(nonce, true, 16)
+                this.block.header.nonce = Long.fromString(nonce, true, 16)
 
-            // TODO Server.trackIncomingBlock()
-            this.listCallBackNewBlock(this.block)
+                // TODO Server.trackIncomingBlock()
+                this.listCallBackNewBlock(this.block)
 
-            this.stop()
+                resolve(true)
 
-            return Promise.resolve(true)
-        } else {
-            return Promise.reject(false)
-        }
+                this.stop()
+            } else {
+                logger.info(`Fail to search nonce !!! - PREHASH : ${Buffer.from(this.prehash.buffer).toString("hex")} /  NONCE : ${zeroPad(nonce, MinerServer.LEN_HEX_NONCE)}`)
+                resolve(false)
+            }
+        })
     }
     public start(): void {
         this.init()
@@ -118,21 +126,20 @@ export class MinerServer implements IMiner {
     }
 
     private async checkNonce(nonce: string): Promise<boolean> {
-        try {
+        return new Promise<boolean>(async (resolve, reject) => {
             if (this.prehash === undefined) {
-                return Promise.resolve(false)
+                return resolve(false)
             }
-
             const result = await CpuMiner.hash(this.prehash, nonce)
             if ((result[0] < this.target[0] || ((result[0] === this.target[0]) && (result[1] < this.target[1])))) {
-                logger.debug(`HASH : ${result}`)
-                return Promise.resolve(true)
+                logger.debug(`HASH Result : ${Buffer.from(result.buffer).toString("hex")}`)
+                resolve(true)
             } else {
-                return Promise.resolve(true)
+                logger.debug(`HASH Result : ${Buffer.from(result.buffer).toString("hex")}`)
+                resolve(false)
             }
-        } catch (e) {
-            return Promise.reject(`Fail to check nonce !!! : ${e}`)
-        }
+
+        })
     }
 
     private calculateJobUnit(): Long {

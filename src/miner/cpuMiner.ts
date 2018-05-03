@@ -1,6 +1,7 @@
 import { getLogger } from "log4js"
 import Long = require("long")
 import { Hash } from "../util/hash"
+import { zeroPad } from "../util/miningUtil"
 import { MinerServer } from "./minerSever"
 const logger = getLogger("CpuMiner")
 
@@ -42,7 +43,7 @@ export class CpuMiner {
                     const result = await CpuMiner.hash(this.prehash, this.nonce.toString(16))
 
                     if ( (result[0] < this.target[0]) || ( (result[0] === this.target[0]) && (result[1] < this.target[1]) ) ) {
-                        logger.debug(`>>>>>>>>Submit nonce : ${this.nonce.toString(16)}`)
+                        logger.debug(`>>>>>>>>Submit - nonce : ${zeroPad(this.nonce.toString(16), MinerServer.LEN_HEX_NONCE)} / hash : ${Buffer.from(result.buffer).toString("hex")}`)
                         this.minerServer.submitNonce(this.nonce.toString(16))
                     }
 
@@ -60,7 +61,7 @@ export class CpuMiner {
             const bufBlock = new Uint8Array(MinerServer.LEN_BLOB)
 
             // set prehash
-            bufBlock.set(prehash)
+            bufBlock.set(new Uint8Array(prehash).reverse())
 
             // set nonce
             const strNonce = (nonce.length >= MinerServer.LEN_NONCE) ? nonce : new Array(MinerServer.LEN_NONCE - nonce.length + 1).join("0") + nonce

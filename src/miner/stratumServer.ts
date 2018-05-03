@@ -10,8 +10,7 @@ const logger = getLogger("Stratum")
 export class StratumServer {
     private minerServer: MinerServer
 
-    // tslint:disable-next-line:member-ordering
-    public static port: number
+    private port: number
     private net: any = undefined
 
     private prehash: Uint8Array | undefined
@@ -19,9 +18,11 @@ export class StratumServer {
     private socketsId: any[] = []
     private mapSocket: Map<string, any> = new Map<string, any>()
 
-    constructor(minerServer: MinerServer) {
+    constructor(minerServer: MinerServer, port: number) {
         logger.debug(`Stratum Server`)
-        this.net = new LibStratum({settings: {port: StratumServer.port}})
+        this.minerServer = minerServer
+        this.port = port
+        this.net = new LibStratum({settings: {port: this.port}})
 
         this.initialize()
     }
@@ -41,7 +42,7 @@ export class StratumServer {
     }
 
     public putWork(prehash: Uint8Array, target: Uint8Array, jobUnit: Long) {
-        logger.debug(`>>>>>>>>>Put Work in stratumServer : ${Buffer.from(prehash.buffer).toString("hex")}`)
+        logger.info(`>>>>>>>>>Put Work in stratumServer : ${Buffer.from(prehash.buffer).toString("hex")}`)
         this.prehash = prehash
         this.target = target
 
@@ -76,11 +77,11 @@ export class StratumServer {
         const self = this
         this.net.on("mining", async (req: any, deferred: any, socket: any) => {
             if (self.socketsId.indexOf(socket.id) === -1) {
-                logger.info(`New miner socket is connected : ${socket.id}`)
+                logger.info(`New miner socket(${socket.id}) connected`)
                 self.socketsId.push(socket.id)
                 self.mapSocket.set(socket.id, socket)
             }
-
+            logger.debug(req)
             switch (req.method) {
                 case "subscribe":
                     deferred.resolve([
@@ -91,14 +92,14 @@ export class StratumServer {
                     ])
                     break
                 case "authorize":
-                    logger.debug("authorize=", req)
-                    logger.debug("Authorizing worker " + req.params[0] + "   " + req.params[1])
+                    logger.info(`Authorizing worker id : ${req.params[0]} /  pw : ${req.params[1]}`)
                     deferred.resolve([true])
                     deferred.promise.then( () => { })
                     break
                 case "submit":
                     logger.debug(`Submit id : ${req.id} / nonce : ${req.params.nonce} / result : ${req.params.result}`)
-                    deferred.resolve([await self.completeWork(req.params.nonce)])
+                    const result = await self.completeWork(req.params.nonce)
+                    deferred.resolve(result)
                     break
                 default:
                     deferred.reject(LibStratum.errors.METHOD_NOT_FOUND)
@@ -114,7 +115,7 @@ export class StratumServer {
         })
 
         this.net.on("close", (socketId: any) => {
-            logger.info(`Stratum Socket closed : ${socketId}`)
+            logger.info(`Miner socket(${socketId}) closed `)
             self.mapSocket.delete(socketId)
             self.socketsId.splice(self.socketsId.indexOf(socketId), 1)
         })
@@ -123,9 +124,10 @@ export class StratumServer {
     private async completeWork(nonce: string): Promise<boolean> {
         try {
             if (this.prehash === undefined || this.target === undefined) {
-                return await this.minerServer.submitNonce(nonce)
+                logger.debug(`This Block is already confirm (NONCE : ${nonce})`)
+                return Promise.resolve(false)
             } else {
-                return Promise.reject(`This nonce(${nonce}) is already confirm`)
+                return await this.minerServer.submitNonce(nonce)
             }
         } catch (e) {
             return Promise.reject(`Fail to submit nonce : ${e}`)
