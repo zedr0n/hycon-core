@@ -56,18 +56,20 @@ export class RabbitNetwork implements INetwork {
         setInterval(() => { this.polling() }, 2000)
 
         // upnp
-        this.upnpServer = new UpnpServer(this.port)
-        this.upnpClient = new UpnpClient(this)
+        this.upnpServer = new UpnpServer(this.port, this.hycon)
+        this.upnpClient = new UpnpClient(this, this.hycon)
 
         // add peer
         if (this.hycon) {
             const peers = this.hycon.options.peer
-            for (const peer of peers) {
-                const args = peer.split(":")
-                const ip = args[0]
-                const port = args[1]
-                logger.info(`IP=${ip}  PORT=${port}`)
-                this.addClient(ip, port).catch((e) => logger.error(`Failed to connect to client: ${e}`))
+            if (peers) {
+                for (const peer of peers) {
+                    const args = peer.split(":")
+                    const ip = args[0]
+                    const port = args[1]
+                    logger.info(`IP=${ip}  PORT=${port}`)
+                    this.addClient(ip, port).catch((e) => logger.error(`Failed to connect to client: ${e}`))
+                }
             }
         }
 
@@ -75,6 +77,7 @@ export class RabbitNetwork implements INetwork {
     }
 
     public async addClient(host: string, port: number): Promise<IPeer> {
+        logger.log(`AddClient IP=${host} PORT=${port}`)
         return new Promise<IPeer>((resolved, reject) => {
             const key = Buffer.from(`${host}:${port}`).toString()
             if (this.peerTable.has(key)) {
@@ -135,7 +138,6 @@ export class RabbitNetwork implements INetwork {
     }
 
     private newConnection(socket: Socket): RabbitPeer {
-        logger.info(`Making peer`)
         const peer = new RabbitPeer(socket, this, this.hycon.consensus, this.hycon.txPool)
         socket.on("close", (error) => { this.removePeer(peer) })
         socket.on("error", (error) => {

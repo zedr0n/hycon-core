@@ -1,5 +1,6 @@
 import * as ip from "ip"
 import { getLogger } from "log4js"
+import { Server } from "../server"
 import { INetwork } from "./inetwork"
 
 const logger = getLogger("Upnp")
@@ -14,9 +15,14 @@ export class UpnpServer {
     public static version: string = "1.0.0"
 
     public info: any = {}
+    private server: Server
 
-    constructor(port: number) {
+    constructor(port: number, server: Server) {
         UpnpServer.port = port
+        this.server = server
+        if (server.options.networkid) {
+            UpnpServer.networkid = server.options.networkid
+        }
         setTimeout(() => {
             this.run()
         }, 100)
@@ -39,21 +45,22 @@ export class UpnpServer {
 
 // tslint:disable-next-line:max-classes-per-file
 export class UpnpClient {
-
-    public static threshold: number = 30 * 1000
+    private server: Server
+    public static threshold: number = 5 * 1000
     public localPeer: Map<string, string>
     public appNetwork: INetwork
     public count: number = 0
 
-    constructor(appNetwork: INetwork) {
+    constructor(appNetwork: INetwork, server: Server) {
         this.appNetwork = appNetwork
         this.localPeer = new Map()
+        this.server = server
         setTimeout(() => {
             this.run()
         }, 100)
         setInterval(() => {
             this.updateLocalPeer()
-        }, 30 * 1000)
+        }, 5 * 1000)
     }
 
     public updateLocalPeer() {
@@ -63,7 +70,7 @@ export class UpnpClient {
                 this.localPeer.delete(key)
             }
         })
-        logger.debug("localPeer: ", this.localPeer)
+        // logger.debug("localPeer: ", this.localPeer)
     }
 
     public run() {
@@ -75,7 +82,7 @@ export class UpnpClient {
 
         setInterval(() => {
             client.search("ssdp:all")
-        }, 5 * 1000)
+        }, 2 * 1000)
 
         client.on("response", (headers: any, code: any, rdebug: any) => {
             const ipaddress = rdebug.address
@@ -99,7 +106,7 @@ export class UpnpClient {
                         this.appNetwork.addClient(localIP, parseInt(localPort, 10))
                         this.count++
                     }
-                    logger.debug(`addClient() been called: ${this.count.toString()} times`)
+                    // logger.debug(`addClient() been called: ${this.count.toString()} times`)
                     this.localPeer.set(`${localIP}:${localPort}`, date)
 
                 }

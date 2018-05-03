@@ -52,8 +52,8 @@ export class TurtleNetwork implements INetwork {
         })
 
         // upnp
-        this.upnpServer = new UpnpServer(this.port)
-        this.upnpClient = new UpnpClient(this)
+        this.upnpServer = new UpnpServer(this.port, this.server)
+        this.upnpClient = new UpnpClient(this, this.server)
 
         // add peer
         if (this.server) {

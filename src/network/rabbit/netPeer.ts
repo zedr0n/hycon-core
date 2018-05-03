@@ -29,7 +29,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     constructor(socket: Socket, network: INetwork, concensus: IConsensus, txPool: ITxPool) {
         super(socket)
         // tslint:disable-next-line:max-line-length
-        logger.info(`New netpeer ${socket.localAddress}:${socket.localPort} --> ${socket.remoteAddress}:${socket.remotePort}`)
+        logger.info(`New Netpeer Local=${socket.localAddress}:${socket.localPort} --> Remote=${socket.remoteAddress}:${socket.remotePort}`)
         this.network = network
         this.concensus = concensus
         this.txPool = txPool
@@ -159,7 +159,6 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     public async onConnected() {
-        logger.debug(`onConnected`)
         const peerStatus = await this.status()
         logger.debug(`My Status=${JSON.stringify(this.myStatus)}  Peer Status=${JSON.stringify(peerStatus)}`)
         this.connected = true
@@ -171,7 +170,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 return
             }
             const result: number = await this.ping()
-            logger.debug(`Ping=${result}`)
+            // logger.debug(`Ping=${result}`)
         } catch (err) {
             logger.debug(`Ping Error`)
             this.disconnect()
