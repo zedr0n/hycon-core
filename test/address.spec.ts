@@ -75,6 +75,6 @@ describe("Address", () => {
         const address1 = new Address(str)
         const address2 = new Address(str)
         expect(address1.equals(address2)).toBeTruthy()
-        expect(address2.equals(address)).toBeTruthy()
+        expect(address2.equals(address1)).toBeTruthy()
     })
 })
