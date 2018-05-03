@@ -49,8 +49,11 @@ export class SocketParser {
     }
 
     public destroy(): void {
-        this.socket.unref()
-        this.socket.destroy()
+        if (this.socket) {
+            this.socket.unref()
+            this.socket.destroy()
+            this.socket = null
+        }
     }
 
     private receive(src: Buffer): void {

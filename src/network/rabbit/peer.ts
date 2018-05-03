@@ -25,6 +25,11 @@ export abstract class BasePeer {
         this.socketBuffer.send(0, buffer)
     }
 
+    public disconnect() {
+        // disconnect
+        this.socketBuffer.destroy()
+    }
+
     protected async onPacket(route: number, packet: Buffer): Promise<void> {
         // logger.info(` route ${route}, ${packet.length} bytes`)
         try {

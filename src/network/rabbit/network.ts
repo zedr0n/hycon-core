@@ -53,7 +53,7 @@ export class RabbitNetwork implements INetwork {
 
         this.server.on("error", (error) => logger.error(`${error}`))
         setInterval(() => logger.debug(`Peers Count=${this.peers.length}`), 5000)
-        setInterval(() => this.findPeers(), 1000)
+        setInterval(() => { this.polling() }, 2000)
 
         // upnp
         this.upnpServer = new UpnpServer(this.port)
@@ -146,6 +146,14 @@ export class RabbitNetwork implements INetwork {
         return peer
     }
 
+    private async polling() {
+        this.findPeers()
+
+        for (const peer of this.peers) {
+            peer.polling()
+        }
+
+    }
     private findPeers() {
         if (this.peers.length < this.targetPeerCount) {
             // do {

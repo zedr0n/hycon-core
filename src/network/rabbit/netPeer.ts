@@ -1,5 +1,7 @@
 import { getLogger } from "log4js"
+import * as Long from "long"
 import { Socket } from "net"
+import { setInterval } from "timers"
 import { AnyBlock, Block } from "../../common/block"
 import { AnyBlockHeader, BlockHeader } from "../../common/blockHeader"
 import { ITxPool } from "../../common/itxPool"
@@ -10,20 +12,19 @@ import { Hash } from "../../util/hash"
 import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"
 import { BasePeer } from "./peer"
-import { setInterval } from "timers";
 
 const logger = getLogger("NetPeer")
 
 interface IResponse { message: proto.INetwork, relay: boolean }
 export class RabbitPeer extends BasePeer implements IPeer {
-    getTip(): { hash: Hash; height: number; } {
-        throw new Error("Method not implemented.");
-    }
+
     private concensus: IConsensus
     private txPool: ITxPool
     private network: INetwork
 
     private myStatus: proto.Status = new proto.Status()
+
+    private connected: boolean = false
 
     constructor(socket: Socket, network: INetwork, concensus: IConsensus, txPool: ITxPool) {
         super(socket)
@@ -39,6 +40,10 @@ export class RabbitPeer extends BasePeer implements IPeer {
 
     }
 
+    public getTip(): { hash: Hash; height: number; } {
+        throw new Error("Method not implemented.")
+    }
+
     public async status(): Promise<proto.IStatus> {
         const { reply, packet } = await this.sendRequest({ status: this.myStatus })
         if (reply.statusReturn === undefined) {
@@ -52,8 +57,12 @@ export class RabbitPeer extends BasePeer implements IPeer {
         const nonce = Math.round(Math.random() * Math.pow(2, 31))
         const { reply, packet } = await this.sendRequest({ ping: { nonce } })
         if (reply.pingReturn === undefined) {
-            this.protocolError()
             throw new Error("Invalid response")
+        }
+
+        const src = new Long(nonce)
+        if (!src.equals(reply.pingReturn.nonce)) {
+            throw new Error("Invalid ping value")
         }
         return reply.pingReturn.nonce as number
     }
@@ -149,6 +158,26 @@ export class RabbitPeer extends BasePeer implements IPeer {
         return headers
     }
 
+    public async onConnected() {
+        logger.debug(`onConnected`)
+        const peerStatus = await this.status()
+        logger.debug(`My Status=${JSON.stringify(this.myStatus)}  Peer Status=${JSON.stringify(peerStatus)}`)
+        this.connected = true
+    }
+
+    public async polling() {
+        try {
+            if (!this.connected) {
+                return
+            }
+            const result: number = await this.ping()
+            logger.debug(`Ping=${result}`)
+        } catch (err) {
+            logger.debug(`Ping Error`)
+            this.disconnect()
+        }
+    }
+
     // this is called in BasePeer's onPacket
     protected async respond(id: number, request: proto.Network, packet: Buffer): Promise<void> {
         // logger.info(`Must respond to ${request.request}`)
@@ -201,7 +230,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
 
     private async respondStatus(reply: boolean, request: proto.IStatus): Promise<IResponse> {
         const message: proto.INetwork = {
-            statusReturn: { status: this.myStatus, success: true }
+            statusReturn: { status: this.myStatus, success: true },
         }
         const relay = false
         return { message, relay }
@@ -292,14 +321,4 @@ export class RabbitPeer extends BasePeer implements IPeer {
         return { message, relay: false }
     }
 
-    private async polling() {
-        let result: number = await this.ping()
-        logger.debug(`Ping=${result}`)
-    }
-
-    public async onConnected() {
-        setInterval(() => { this.polling() }, 5000)
-        var peerStatus = await this.status()
-        logger.debug(`My Status=${JSON.stringify(this.myStatus)}  Peer Status=${JSON.stringify(peerStatus)}`)
-    }
 }
