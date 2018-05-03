@@ -1,6 +1,7 @@
 *.ts-e
 *.sw?
 build
+coverage
 logs
 node_modules
 package-lock.json

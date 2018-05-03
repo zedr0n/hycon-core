@@ -4,6 +4,7 @@
         "module": "commonjs",
         "noImplicitAny": true,
         "removeComments": true,
+        "allowJs":true,
         "preserveConstEnums": true,
         "outDir": "build",
         "sourceMap": true,
@@ -13,10 +14,10 @@
         ]
     },
     "include": [
-        "src/**/*"
+        "src/**/*",
+        "test/*"
     ],
     "exclude": [
-        "node_modules",
-        "**/*.spec.ts"
+        "node_modules"
     ]
 }
