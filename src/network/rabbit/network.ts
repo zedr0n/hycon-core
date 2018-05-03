@@ -10,6 +10,8 @@ import { IPeer } from "../ipeer"
 import { UpnpClient, UpnpServer } from "../upnp"
 import { RabbitPeer } from "./netPeer"
 import { SocketParser } from "./socketBuffer"
+// tslint:disable-next-line:no-var-requires
+const delay = require("delay")
 const logger = getLogger("Network")
 // tslint:disable-next-line:no-var-requires
 const randomInt = require("random-int")
@@ -54,6 +56,7 @@ export class RabbitNetwork implements INetwork {
         this.server.on("error", (error) => logger.error(`${error}`))
         setInterval(() => logger.debug(`Peers Count=${this.peers.length}`), 5000)
         setInterval(() => { this.polling() }, 2000)
+        setInterval(() => { this.findPeers() }, 4000)
 
         // upnp
         this.upnpServer = new UpnpServer(this.port, this.hycon)
@@ -149,24 +152,19 @@ export class RabbitNetwork implements INetwork {
     }
 
     private async polling() {
-        this.findPeers()
-
         for (const peer of this.peers) {
             peer.polling()
         }
 
     }
-    private findPeers() {
-        if (this.peers.length < this.targetPeerCount) {
-            // do {
-            //  get random entry from peerlist
-            //  try{
-            //    await this.addClient
-            //    break
-            //  } catch(e) {}
-            //
-            // } while()
+    private async findPeers() {
+        const necessaryPeers = this.targetPeerCount - this.peers.length
+        if (necessaryPeers <= 0) {
+            return
         }
+        // logger.debug(`Connect to Bootnodes For More Peers=${necessaryPeers}`)
+        await delay(2000)
+        // logger.debug(`Done`)
     }
 
 }
