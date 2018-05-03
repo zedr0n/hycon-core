@@ -59,110 +59,6 @@ export class Database {
         await this.blockFile.fileInit(this.filePath, this.fileNumber)
     }
 
-    public async getTxTime(hash: Hash): Promise<{ tx: (SignedTx | GenesisSignedTx), timeStamp: number }> {
-        try {
-            const dbTx = DBTx.decode(await this.database.get("t" + hash))
-            const block = await this.getBlock(dbTx.blockHash)
-            const stx = block.txs[dbTx.txNumber]
-            return Promise.resolve({ tx: stx, timeStamp: block.header.timeStamp })
-        } catch (error) {
-            if (!error.notFound) { logger.error(`Fail to get TxTime : ${error}`) }
-            return Promise.reject(error)
-        }
-    }
-
-    public async getTxsOfAddress(address: Uint8Array, n: number): Promise<{ dbTxs: DBTx[], map: Map<string, { tx: (SignedTx | GenesisSignedTx), timeStamp: number }> }> {
-        try {
-            const dbTxs = await this.txSearch(address, (dbTx, dbTxs) => {
-                async function insertOrdered(dbTx: DBTx) {
-                    if (dbTxs.length === 0) {
-                        dbTxs.push(dbTx)
-                        return dbTxs
-                    }
-                    let min = -1
-                    let max = dbTxs.length
-                    // tslint:disable:no-bitwise
-                    let i = (min + max) >> 1
-                    while (max - min > 1) {
-                        if (dbTx.blockHeight === dbTxs[i].blockHeight) {
-                            min = max = i
-                            break
-                        } else if (dbTx.blockHeight > dbTxs[i].blockHeight) {
-                            max = i
-                        } else if (dbTx.blockHeight < dbTxs[i].blockHeight) {
-                            min = i
-                        }
-                        i = (min + max) >> 1
-                    }
-                    dbTxs.splice(i + 1, 0, dbTx)
-                    return dbTxs
-                }
-                if (dbTxs.length === 0) {
-                    dbTxs.push(dbTx)
-                } else {
-                    insertOrdered(dbTx)
-                }
-            })
-            if (dbTxs.dbTxs.length > n) {
-                dbTxs.dbTxs.splice(n, dbTxs.dbTxs.length - n)
-            }
-            return Promise.resolve(dbTxs)
-        } catch (error) {
-            logger.error(`Fail to get Txs Of Address : ${error}`)
-            return Promise.reject(error)
-        }
-    }
-
-    public async txSearch(address: Uint8Array, add: (dbTx: DBTx, dbTxs: DBTx[]) => void, errorHandler?: (e: any) => void): Promise<{ dbTxs: DBTx[], map: Map<string, { tx: (SignedTx | GenesisSignedTx), timeStamp: number }> }> {
-        try {
-            const txs: DBTx[] = await this.slowSearch<DBTx>(DBTx.decode, "t", "u", add, errorHandler)
-            const mapHash = new Map<string, { tx: (SignedTx | GenesisSignedTx), timeStamp: number }>()
-            const dbTxs = []
-            txs.reverse()
-            for (const dbTx of txs) {
-                const txTime = await this.getTxTime(dbTx.hash)
-                if (uint8ArrayEqual(txTime.tx.to, address)) {
-                    mapHash.set(dbTx.hash.toString(), { tx: txTime.tx, timeStamp: txTime.timeStamp })
-                    dbTxs.push(dbTx)
-                } else {
-                    if ((txTime.tx instanceof SignedTx) && (uint8ArrayEqual(txTime.tx.from, address))) {
-                        mapHash.set(dbTx.hash.toString(), { tx: txTime.tx, timeStamp: txTime.timeStamp })
-                        dbTxs.push(dbTx)
-                    }
-                }
-            }
-            return { dbTxs, map: mapHash }
-        } catch (error) {
-            logger.error(`Fail to tx Search : ${error}`)
-            return Promise.reject(error)
-        }
-    }
-
-    public async slowSearch<T>(decode: (data: any) => T, from: string, to: string, add: (data: T, datas: T[]) => void, errorHandler?: (e: any) => void): Promise<T[]> {
-        const results: T[] = []
-        return new Promise<T[]>((resolve, reject) => {
-            try {
-                this.database.createReadStream({ gt: from, lt: to })
-                    .on("data", (data: any) => {
-                        try {
-                            const result = decode(data.value)
-                            add(result, results)
-                        } catch (e) {
-                            if (errorHandler) {
-                                errorHandler(e)
-                            }
-                        }
-                    })
-                    .on("end", () => {
-                        resolve(results)
-                    })
-            } catch (error) {
-                logger.error(`Fail to slowSearch : ${error}`)
-                return Promise.reject(error)
-            }
-        })
-    }
-
     public async putBlock(block: AnyBlock): Promise<{ current: DBBlock, currentHash: Hash, previous: DBBlock }> {
         // Async problem, block could be inserted twice
         return await this.blockLock.critical<{ current: DBBlock, currentHash: Hash, previous: DBBlock }>(async () => {
@@ -248,7 +144,6 @@ export class Database {
             return Promise.reject(e)
         }
     }
-
     public async getHeadersRange(fromHeight: number, count?: number): Promise<AnyBlockHeader[]> {
         try {
             const dbBlockArray = await this.getDBBlocksRange(fromHeight, count)
@@ -259,42 +154,6 @@ export class Database {
             return Promise.resolve(headerArray)
         } catch (e) {
             logger.error(`getHeadersRange failed\n${e}`)
-            return Promise.reject(e)
-        }
-    }
-
-    public async getDBBlocksRange(fromHeight: number, count?: number): Promise<DBBlock[]> {
-        let decodingDBEntry = false
-        try {
-            const dbBlockArray: DBBlock[] = []
-            this.database.createReadStream({ gt: "b", lt: "c" })
-                .on("data", (data: any) => {
-                    decodingDBEntry = true
-                    const dbBlock = DBBlock.decode(data.value)
-                    if (dbBlock.height >= fromHeight) {
-                        let isInserted = false
-                        for (const b of dbBlockArray) {
-                            if (b.height >= dbBlock.height) {
-                                dbBlockArray.splice(dbBlockArray.indexOf(b), 0, dbBlock)
-                                isInserted = true
-                                break
-                            }
-                        }
-                        if (!isInserted) {
-                            dbBlockArray.push(dbBlock)
-                        }
-                    }
-                })
-                .on("end", () => {
-                    if (dbBlockArray.length > count) { dbBlockArray.slice(0, count) }
-                    return Promise.resolve(dbBlockArray)
-                })
-        } catch (e) {
-            logger.error(`getBlocksRange failed\n${e}`)
-            if (decodingDBEntry) {
-                // TODO: Schedule rerequest or file lookup
-                logger.debug(`Could not decode block in getDBBlocksRange`)
-            }
             return Promise.reject(e)
         }
     }
@@ -369,7 +228,43 @@ export class Database {
         }
     }
 
-    public async getDBBlock(hash: Hash): Promise<DBBlock | undefined> {
+    public async getDBBlocksRange(fromHeight: number, count?: number): Promise<DBBlock[]> {
+        let decodingDBEntry = false
+        try {
+            const dbBlockArray: DBBlock[] = []
+            this.database.createReadStream({ gt: "b", lt: "c" })
+                .on("data", (data: any) => {
+                    decodingDBEntry = true
+                    const dbBlock = DBBlock.decode(data.value)
+                    if (dbBlock.height >= fromHeight) {
+                        let isInserted = false
+                        for (const b of dbBlockArray) {
+                            if (b.height >= dbBlock.height) {
+                                dbBlockArray.splice(dbBlockArray.indexOf(b), 0, dbBlock)
+                                isInserted = true
+                                break
+                            }
+                        }
+                        if (!isInserted) {
+                            dbBlockArray.push(dbBlock)
+                        }
+                    }
+                })
+                .on("end", () => {
+                    if (dbBlockArray.length > count) { dbBlockArray.slice(0, count) }
+                    return Promise.resolve(dbBlockArray)
+                })
+        } catch (e) {
+            logger.error(`getBlocksRange failed\n${e}`)
+            if (decodingDBEntry) {
+                // TODO: Schedule rerequest or file lookup
+                logger.debug(`Could not decode block in getDBBlocksRange`)
+            }
+            return Promise.reject(e)
+        }
+    }
+
+    private async getDBBlock(hash: Hash): Promise<DBBlock | undefined> {
         let decodingDBEntry = false
         try {
             const key = "b" + hash
