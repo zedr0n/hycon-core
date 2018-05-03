@@ -3,8 +3,9 @@ import { Block } from "../common/block"
 import { AnyBlockHeader } from "../common/blockHeader"
 import { SignedTx } from "../common/txSigned"
 import * as proto from "../serialization/proto"
-import { Hash } from "../util/hash"
 import { IStatus } from "../serialization/proto"
+import { IPeer } from "../serialization/proto"
+import { Hash } from "../util/hash"
 
 type PingResponse = any // TODO: define type
 
@@ -19,4 +20,5 @@ export interface IPeer {
     getBlocksByRange(fromHeight: number, count: number): Promise<Block[]>
     getHeadersByRange(fromHeight: number, count: number): Promise<AnyBlockHeader[]>
     getTip(): { hash: Hash, height: number }
+    getPeers(count: number): Promise<IPeer[]>
 }

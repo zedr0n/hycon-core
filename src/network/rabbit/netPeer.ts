@@ -67,6 +67,15 @@ export class RabbitPeer extends BasePeer implements IPeer {
         return reply.pingReturn.nonce as number
     }
 
+    public async getPeers(count: number): Promise<proto.IPeer[]> {
+        const { reply, packet } = await this.sendRequest({ getPeers: { count } })
+        if (reply.getPeersReturn === undefined) {
+            this.protocolError()
+            throw new Error("Invalid response")
+        }
+        return reply.getPeersReturn.peers
+    }
+
     public async putTxs(txs: SignedTx[]): Promise<boolean> {
         const { reply, packet } = await this.sendRequest({ putTx: { txs } })
         if (reply.putTxReturn === undefined) {
@@ -170,6 +179,10 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 return
             }
             const result: number = await this.ping()
+
+            // test code
+            // const result2: proto.IPeer[] = await this.getPeers(5)
+            // logger.debug(`getPeers=${JSON.stringify(result2)}`)
             // logger.debug(`Ping=${result}`)
         } catch (err) {
             logger.debug(`Ping Error`)
@@ -188,6 +201,9 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 break
             case "ping":
                 response = await this.respondPing(reply, request[request.request])
+                break
+            case "getPeers":
+                response = await this.respondGetPeers(reply, request[request.request])
                 break
             case "putTx":
                 response = await this.respondPutTx(reply, request[request.request])
@@ -237,6 +253,13 @@ export class RabbitPeer extends BasePeer implements IPeer {
 
     private async respondPing(reply: boolean, request: proto.IPing): Promise<IResponse> {
         const message: proto.INetwork = { pingReturn: { nonce: request.nonce } }
+        const relay = false
+        return { message, relay }
+    }
+
+    private async respondGetPeers(reply: boolean, request: proto.IGetPeers): Promise<IResponse> {
+        const peers: proto.IPeer[] = []
+        const message: proto.INetwork = { getPeersReturn: { success: true, peers } }
         const relay = false
         return { message, relay }
     }
