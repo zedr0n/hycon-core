@@ -1,26 +1,21 @@
-// import GoogleMap from "google-map-react"
 import * as jwt from "jsonwebtoken"
 import { getLogger } from "log4js"
 import * as Long from "long"
-import { Address } from "../../src/common/address"
-import { GenesisBlock } from "../../src/common/blockGenesis"
-import { BlockHeader } from "../../src/common/blockHeader"
-import { GenesisBlockHeader } from "../../src/common/genesisHeader"
-import { Tx } from "../../src/common/tx"
-import { SignedTx } from "../../src/common/txSigned"
-import { Account } from "../../src/consensus/database/account"
-import { Database } from "../../src/consensus/database/database"
-import { DBBlock } from "../../src/consensus/database/dbblock"
-import { DBTx } from "../../src/consensus/database/dbTx"
-import { WorldState } from "../../src/consensus/database/worldState"
-// import { PeerList } from "../../src/network/peerList"
-import { Hash } from "../../src/util/hash"
-import { Wallet } from "../../src/wallet/wallet"
+import { Address } from "../../common/address"
+import { GenesisBlock } from "../../common/blockGenesis"
+import { BlockHeader } from "../../common/blockHeader"
+import { GenesisBlockHeader } from "../../common/genesisHeader"
+import { Tx } from "../../common/tx"
+import { SignedTx } from "../../common/txSigned"
+import { Account } from "../../consensus/database/account"
+import { Database } from "../../consensus/database/database"
+import { DBBlock } from "../../consensus/database/dbblock"
+import { DBTx } from "../../consensus/database/dbTx"
+import { WorldState } from "../../consensus/database/worldState"
+import { Hash } from "../../util/hash"
+import { Wallet } from "../../wallet/wallet"
 import { IBlock, IHyconWallet, ILocationDetails, IPeer, IResponseError, IRest, ITxProp, IUser, IWalletAddress } from "../client/rest"
 const logger = getLogger("RestServer")
-// const googleMapsClient = require("@google/maps").createClient({
-    // key: "AIzaSyAp-2W8_T6dZjq71yOhxW1kRkbY6E1iyuk",
-// })
 
 // tslint:disable:object-literal-sort-keys
 // tslint:disable:ban-types
@@ -29,11 +24,9 @@ export class RestServer implements IRest {
 
     private db: Database
     private accountDB: WorldState
-    private peerList: PeerList
-    constructor(db: Database, accountDB: WorldState, peerList: PeerList) {
+    constructor(db: Database, accountDB: WorldState) {
         this.db = db
         this.accountDB = accountDB
-        this.peerList = peerList
     }
 
     public setIsHyconWallet(isHyconWallet: boolean): void { }

@@ -6,8 +6,8 @@ import * as jwt from "jsonwebtoken"
 import { getLogger } from "log4js"
 import { matchPath } from "react-router"
 import { matchRoutes, renderRoutes } from "react-router-config"
-import { SignedTx } from "../../src/common/txSigned"
-import * as Hycon from "../../src/server"
+import { SignedTx } from "../../common/txSigned"
+import * as Hycon from "../../server"
 import { App, routes } from "../client/app"
 import { indexRender } from "./index"
 import { RestServer } from "./restServer"
@@ -36,7 +36,7 @@ export class HttpServer {
         this.app.use(express.static("blockexplorer/clientDist"))
         this.app.use(express.static("node_modules"))
         this.routeRest()
-        this.rest = new RestServer(hyconServer.db, hyconServer.accountDB, hyconServer.peerList)
+        this.rest = new RestServer(hyconServer.db, hyconServer.accountDB)
         this.app.use((req, res, next) => {
             res.status(404)
             res.json({
