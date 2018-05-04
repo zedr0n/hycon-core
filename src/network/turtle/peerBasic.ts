@@ -5,6 +5,8 @@ import { IPeer } from "../ipeer"
 import { Packet } from "./packet"
 import { SocketBuffer } from "./socketBuffer"
 import { TurtleNetwork } from "./turtleNetwork"
+// tslint:disable-next-line:no-var-requires
+const uuidv4 = require("uuid/v4")
 
 const logger = getLogger("Network")
 
@@ -29,16 +31,7 @@ export abstract class PeerBasic {
     public port: number
     public state: PeerState = PeerState.Connected
 
-    protected statusQueue: any[] = []
-    protected pingQueue: any[] = []
-    protected putTxQueue: any[] = []
-    protected getTxsQueue: any[] = []
-    protected putBlockQueue: any[] = []
-    protected getBlocksByHashQueue: any[] = []
-    protected getHeadersByHashQueue: any[] = []
-    protected getBlocksByRangeQueue: any[] = []
-    protected getHeadersByRangeQueue: any[] = []
-
+    protected jobs: Map<string, any> = new Map<string, any>()
     protected connectedCallback: () => void = undefined
 
     constructor(socket: Socket, mode: PeerMode) {
@@ -81,7 +74,7 @@ export abstract class PeerBasic {
         this.connect()
     }
 
-    public polling() {
+    public async polling() {
         if (this.peerMode === PeerMode.AcceptedSession) {
             return
         }
@@ -117,10 +110,17 @@ export abstract class PeerBasic {
         logger.error(`${error}`)
     }
 
-    public sendBuffer(encodeReq: Uint8Array) {
+    public sendBuffer(encodeReq: Uint8Array, guid?: string): Packet {
+        //if (guid) {
+        //logger.debug(`SendBuffer Guid=${guid.toString()}`)
+        //}
         const newPacket = new Packet()
+        if (guid) {
+            newPacket.setGuid(guid)
+        }
         newPacket.pushBuffer(new Buffer(encodeReq))
         this.sendPacket(newPacket)
+        return newPacket
     }
     public sendPacket(newPacket: Packet) {
         const encoded = newPacket.pack()
@@ -134,6 +134,11 @@ export abstract class PeerBasic {
                 e.sendBuffer(newPacket)
             }
         })
+    }
+
+    protected makeGuid(): string {
+        const guid = Buffer.from(uuidv4()).toString()
+        return guid
     }
 
 }

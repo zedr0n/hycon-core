@@ -1,20 +1,38 @@
+
 import { Buffer } from "buffer"
 import { getLogger } from "log4js"
+const assert = require("assert")
 const logger = getLogger("Packet")
 
 export enum State {
     Head = 1,
     Body = 2,
 }
-export const HeaderSize = 8
+export const HeaderSize = 64
 
 export class Packet {
 
-    public head = new Buffer(8)
+    // 4 bytes: magic key
+    // 4 bytes: length
+    // 36 bytes: guid
+    // 20 bytes: reserved
+    public head = new Buffer(HeaderSize)
     public body = new Buffer(0)
 
     constructor() {
         Buffer.from([0x47, 0x4c, 0x53, 0x00]).copy(this.head, 0, 0, 4)
+    }
+
+    public setGuid(src2: string) {
+        const src = Buffer.from(src2)
+        assert(36 === src.length)
+        src.copy(this.head, 8, 0, 36)
+    }
+
+    public getGuid(): string {
+        const ret = new Buffer(36)
+        this.head.copy(ret, 0, 8, 8 + 36)
+        return ret.toString()
     }
 
     public pushInt(v: number) {
@@ -49,11 +67,12 @@ export class Packet {
         const tmp = new Buffer(4)
         tmp.writeInt32LE(size, 0)
         tmp.copy(this.head, 4, 0, 4)
-
+        assert(this.head.length === HeaderSize)
         return Buffer.concat([this.head, this.body])
     }
 
     public unpack() {
+        assert(this.head.length === HeaderSize)
         let length = 0
         length = this.head.readInt32LE(4)
         this.body = new Buffer(length)

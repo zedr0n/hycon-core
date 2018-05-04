@@ -5,6 +5,8 @@ import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"
 import { PeerApp } from "./peerApp"
 import { TurtleNetwork } from "./turtleNetwork"
+// tslint:disable-next-line:no-var-requires
+const uuidv5 = require("uuid/v5")
 
 const logger = getLogger("Network")
 logger.level = "debug"

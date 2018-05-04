@@ -110,7 +110,7 @@ export class PeerApp extends PeerNet {
         const peers: proto.Peer[] = []
         this.sendGetPeersReturn(true, peers)
     }
-    public async onReceiveMessage(packet: Packet, res: proto.Network) {
+    public async onReceiveMessage(packet: Packet, res: proto.Network, guid: string) {
         if (res.putTx) {
             await this.onReceivePutTx(packet, res)
         } else if (res.putBlock) {
@@ -128,7 +128,13 @@ export class PeerApp extends PeerNet {
         } else if (res.getPeers) {
             await this.onReceiveGetPeers(packet, res)
         } else {
-            super.onReceiveMessage(packet, res)
+            super.onReceiveMessage(packet, res, guid)
         }
+    }
+
+    public async polling() {
+        await super.polling()
+        const result: number = await this.ping()
+        logger.debug(`Ping=${result}`)
     }
 }
