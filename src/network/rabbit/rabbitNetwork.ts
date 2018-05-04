@@ -1,6 +1,6 @@
 import { getLogger } from "log4js"
-import { createConnection, createServer, Socket } from "net"
 import * as net from "net"
+import { createConnection, createServer, Socket } from "net"
 import { IConsensus } from "../../consensus/iconsensus"
 import * as proto from "../../serialization/proto"
 import { Server } from "../../server"
@@ -8,9 +8,9 @@ import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"
 import { NatUpnp } from "../nat"
 import { UpnpClient, UpnpServer } from "../upnp"
+import { PeerList } from "./peerList"
 import { RabbitPeer } from "./rabbitPeer"
 import { SocketParser } from "./socketParser"
-import { PeerList } from "./peerList"
 // tslint:disable-next-line:no-var-requires
 const delay = require("delay")
 const logger = getLogger("Network")
@@ -18,6 +18,7 @@ const logger = getLogger("Network")
 const randomInt = require("random-int")
 export class RabbitNetwork implements INetwork {
     public readonly port: number
+    public isBootnode: boolean
     private hycon: Server
     private server: net.Server
     private peers: RabbitPeer[]
@@ -33,7 +34,7 @@ export class RabbitNetwork implements INetwork {
         this.peers = []
         this.targetPeerCount = 3
         this.hycon = hycon
-        this.peerList = new PeerList('./PeerList.db')
+        this.peerList = new PeerList("./PeerList.db")
         logger.debug(`TcpNetwork Port=${port}`)
     }
 

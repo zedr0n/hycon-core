@@ -88,7 +88,7 @@ export class NatUpnp {
             this.publicIp = ""
         }
 
-        if (!isNaN(this.publicPort) && this.publicIp !== "") {
+        if (!isNaN(this.publicPort) && this.publicIp !== "" && !this.network.isBootnode) {
             const index = Math.floor(Math.random() * NatUpnp.bootNode.length)
             const bootNode: IPeer = await this.network.addClient(NatUpnp.bootNode[index].ip, NatUpnp.bootNode[index].port)
             bootNode.setStatus(this.publicIp, this.publicPort)

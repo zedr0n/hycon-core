@@ -32,7 +32,7 @@ const optionDefinitions = [
     { name: "networkid", alias: "n", type: Number },
     { name: "mine", alias: "m", type: Boolean },
     { name: "visDAG", alias: "d", type: Boolean },
-    { name: "wallet", alias: "W", type: Boolean }
+    { name: "wallet", alias: "W", type: Boolean },
 ]
 
 const logger = getLogger("Server")
@@ -145,6 +145,9 @@ export class Server {
         }
         if (options.mine) {
             MinerServer.useCpuMiner = true
+        }
+        if (options.bootNode) {
+            this.network.isBootnode = true
         }
     }
 
