@@ -1,6 +1,6 @@
 
 import { getLogger } from "log4js"
-import { zeroPad } from "../util/miningUtil"
+import { zeroPad } from "../util/commonUtil"
 import { MinerServer } from "./minerSever"
 
 // tslint:disable-next-line:no-var-requires

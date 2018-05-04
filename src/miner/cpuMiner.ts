@@ -1,7 +1,7 @@
 import { getLogger } from "log4js"
 import Long = require("long")
+import { zeroPad } from "../util/commonUtil"
 import { Hash } from "../util/hash"
-import { zeroPad } from "../util/miningUtil"
 import { MinerServer } from "./minerSever"
 const logger = getLogger("CpuMiner")
 

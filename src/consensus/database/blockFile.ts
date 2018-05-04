@@ -2,12 +2,10 @@
 import * as fs from "fs-extra"
 import { getLogger } from "log4js"
 import { Block } from "../../common/block"
+import { zeroPad } from "../../util/commonUtil"
 import { FileUtil } from "../../util/fileUtil"
-const logger = getLogger("BlockFile")
 
-export function zeroPad(input: string, length: number) {
-    return (Array(length + 1).join("0") + input).slice(-length)
-}
+const logger = getLogger("BlockFile")
 
 export class BlockFile {
     public n: number

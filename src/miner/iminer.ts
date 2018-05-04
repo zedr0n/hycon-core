@@ -1,5 +1,5 @@
-type Tx = any // TODO: define type
-type Block = any // TODO: define type
+import { Block } from "../common/block"
+
 type BlockMinedCallback = (block: Block) => void
 export interface IMiner {
     newCandidateBlock(candidateBlock: Block): void

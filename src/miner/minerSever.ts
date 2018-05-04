@@ -2,11 +2,11 @@ import { getLogger } from "log4js"
 import Long = require("long")
 import { Block } from "../common/block"
 import { Server } from "../server"
+import { zeroPad } from "../util/commonUtil"
+import * as util from "../util/difficulty"
 import { Hash } from "../util/hash"
-import * as util from "../util/miningUtil"
-import { zeroPad } from "../util/miningUtil"
 import { CpuMiner } from "./cpuMiner"
-import { IMiner } from "./miner"
+import { IMiner } from "./iminer"
 import { StratumServer } from "./stratumServer"
 
 const logger = getLogger("Miner")
@@ -138,7 +138,6 @@ export class MinerServer implements IMiner {
                 logger.debug(`HASH Result : ${Buffer.from(result.buffer).toString("hex")}`)
                 resolve(false)
             }
-
         })
     }
 
