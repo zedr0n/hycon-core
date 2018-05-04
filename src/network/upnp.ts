@@ -49,7 +49,6 @@ export class UpnpClient {
     public static threshold: number = 5 * 1000
     public localPeer: Map<string, string>
     public appNetwork: INetwork
-    public count: number = 0
     private server: Server
 
     constructor(appNetwork: INetwork, server: Server) {
@@ -105,11 +104,8 @@ export class UpnpClient {
                     // logger.debug(`DETECT IP Local=${isLocal} Product=${product} IP=${localIP} Port=${localPort}`)
                     if (!this.localPeer.has(`${localIP}:${localPort}`)) {
                         this.appNetwork.addClient(localIP, parseInt(localPort, 10))
-                        this.count++
                     }
-                    // logger.debug(`addClient() been called: ${this.count.toString()} times`)
                     this.localPeer.set(`${localIP}:${localPort}`, date)
-
                 }
             } else {
                 logger.error("Invalid format: headers.LOCATION")

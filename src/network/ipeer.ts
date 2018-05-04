@@ -10,7 +10,7 @@ import { Hash } from "../util/hash"
 type PingResponse = any // TODO: define type
 
 export interface IPeer {
-    setStatus(ip:string, port:number): void
+    setStatus(ip: string, port: number): void
     status(): Promise<IStatus>
     ping(): Promise<number>
     putTxs(txs: SignedTx[]): Promise<boolean>
