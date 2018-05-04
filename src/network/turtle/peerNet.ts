@@ -22,9 +22,7 @@ const logger = getLogger("NetPeer")
 logger.level = "debug"
 
 export abstract class PeerNet extends PeerBasic implements IPeer {
-    getTip(): { hash: Hash; height: number; } {
-        throw new Error("Method not implemented.");
-    }
+
     private static MaxTryCount = 20
     private static PollingStep = 100  // milli seconds
 
@@ -336,6 +334,13 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
             logger.debug(`getHeadersByRangeReturn Response Success=${res.getHeadersByRangeReturn.success}`)
         }
 
+    }
+
+    public getPeers(count: number): Promise<proto.IPeer[]> {
+        throw new Error("Method not implemented.");
+    }
+    public getTip(): { hash: Hash; height: number; } {
+        throw new Error("Method not implemented.")
     }
 
 }
