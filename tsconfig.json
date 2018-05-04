@@ -4,18 +4,18 @@
         "module": "commonjs",
         "noImplicitAny": true,
         "removeComments": true,
-        "allowJs":true,
         "preserveConstEnums": true,
         "outDir": "build",
         "sourceMap": true,
         "typeRoots": [
             "./node_modules/@types",
             "./types"
-        ]
+        ],
+        "jsx": "react"
     },
     "include": [
-        "src/**/*",
-        "test/*"
+        "src/**/*.tsx?",
+        "test/*.tsx?"
     ],
     "exclude": [
         "node_modules"
