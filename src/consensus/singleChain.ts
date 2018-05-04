@@ -1,12 +1,12 @@
 import * as bigInt from "big-integer"
 import { getLogger } from "log4js"
 import { Address } from "../common/address"
-import { AppTxPool } from "../common/appTxPool"
 import { AsyncLock } from "../common/asyncLock"
 import { AnyBlock, Block } from "../common/block"
 import { GenesisBlock } from "../common/blockGenesis"
 import { AnyBlockHeader, BlockHeader } from "../common/blockHeader"
 import { PublicKey } from "../common/publicKey"
+import { TxPool } from "../common/txPool"
 import { SignedTx } from "../common/txSigned"
 import { Server } from "../server"
 import * as utils from "../util/difficulty"
@@ -85,7 +85,7 @@ export class SingleChain implements IConsensus {
             // Update headerTopTip first, then update blockTopTip
             this.updateTopTip(this.headerTips, current, previous)
             const { prevTip, isTopTip } = this.updateTopTip(this.blockTips, current, previous)
-            const txs = this.server.txPool.updateTx(blockTxs, this.txUnit)
+            const txs = this.server.txPool.updateTxs(blockTxs, this.txUnit)
 
             this.newBlock(block)
             if (isTopTip) { this.createCandidateBlock(txs) }
@@ -195,7 +195,7 @@ export class SingleChain implements IConsensus {
         return { hash: new Hash(block.header), height: block.height }
     }
 
-    public validateTx(tx: SignedTx): Promise<boolean> {
+    public isTxValid(tx: SignedTx): Promise<boolean> {
         // TODO : Check existence in DB.
         return Promise.resolve(true)
     }
@@ -350,7 +350,7 @@ export class SingleChain implements IConsensus {
                 }
                 for (const b of mainChain) {
                     const blk = await this.getBlockByHash(new Hash(b.header))
-                    if (blk instanceof Block) { this.server.txPool.updateTx(blk.txs, 0) }
+                    if (blk instanceof Block) { this.server.txPool.updateTxs(blk.txs, 0) }
                 }
                 this.forkHeight = -1
             }

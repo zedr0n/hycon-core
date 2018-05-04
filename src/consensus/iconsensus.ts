@@ -25,7 +25,6 @@ export interface IConsensus {
     getBlockStatus(hash: Hash): Promise<BlockStatus>
     getHeaderTip(): { hash: Hash, height: number }
     getBlocksTip(): { hash: Hash, height: number }
-    validateTx(tx: SignedTx): Promise<boolean>// TODO: Rename to isTxValid
     testMakeBlock(txs: SignedTx[]): Promise<Block>
     isTxValid(tx: SignedTx): Promise<boolean>
 }

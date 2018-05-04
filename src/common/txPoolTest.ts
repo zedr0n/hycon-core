@@ -29,10 +29,12 @@ function randomTxs(n: number, maxFee: number = 3): SignedTx[] {
 async function test() {
     for (let i = 0; i < 2; i++) {
         const txs = randomTxs(5, 1)
+        console.log(`Txs ->`)
         console.log(txs)
         const count = await txPool.putTxs(txs)
+        console.log(`After putTx ->`)
         console.log(txPoolA.txs)
-        const tx = randomTxs(1, 1)[0]
+        const tx: any = randomTxs(1, 1)[0]
         console.log(`Removing... {fee: ${tx.fee}, g: ${tx.g}}`)
         txPool.updateTxs(randomTxs(1, 1), 0)
         console.log(txPoolA.txs)

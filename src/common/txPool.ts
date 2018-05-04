@@ -77,7 +77,7 @@ export class TxPool implements ITxPool {
             }
             try {
                 if (await this.server.consensus.isTxValid(newTxs[i])) {
-                    this.txs.push(newTxs[i])
+                    this.txs.push(newTxs[i++])
                 }
             } catch (e) {
                 logger.debug(`Failed to add Tx: ${e}`)
@@ -102,9 +102,10 @@ export class TxPool implements ITxPool {
                     k = 0
                 } else if (txs[i].fee < this.txs[j + k].fee) {
                     logger.error("TxPool seems to be out of order")
+                    return
                 } else {
                     if (this.txs[j + k].equals(txs[i])) {
-                        this.txs.slice(j + k, 1)
+                        this.txs.splice(j + k, 1)
                     } else {
                         k++
                     }
