@@ -1,4 +1,3 @@
-import { SSL_OP_CIPHER_SERVER_PREFERENCE } from "constants"
 import { getLogger } from "log4js"
 import * as Long from "long"
 import { Socket } from "net"
