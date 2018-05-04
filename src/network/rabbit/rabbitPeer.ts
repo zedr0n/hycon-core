@@ -1,3 +1,4 @@
+import { SSL_OP_CIPHER_SERVER_PREFERENCE } from "constants"
 import { getLogger } from "log4js"
 import * as Long from "long"
 import { Socket } from "net"
@@ -266,7 +267,18 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     private async respondGetPeers(reply: boolean, request: proto.IGetPeers): Promise<IResponse> {
+        let peerList: string[]
         const peers: proto.IPeer[] = []
+        if (this.isBootnode) {
+            peerList = await this.peerDB.getRandomPeers(request.count)
+            for (const peer of peerList) {
+                const peerParsed: any = JSON.parse(peer)
+                const p = new proto.Peer()
+                p.ip = peerParsed.ip
+                p.port = parseInt(peerParsed.port, 10)
+                peers.push(p)
+            }
+        }
         const message: proto.INetwork = { getPeersReturn: { success: true, peers } }
         const relay = false
         return { message, relay }

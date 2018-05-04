@@ -1,12 +1,12 @@
-
 import { getLogger } from "log4js"
-import * as net from "net"
 import { createConnection, createServer, Socket } from "net"
+import * as net from "net"
 import { IConsensus } from "../../consensus/iconsensus"
 import * as proto from "../../serialization/proto"
 import { Server } from "../../server"
 import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"
+import { NatUpnp } from "../nat"
 import { UpnpClient, UpnpServer } from "../upnp"
 import { RabbitPeer } from "./rabbitPeer"
 import { SocketParser } from "./socketParser"
@@ -26,6 +26,7 @@ export class RabbitNetwork implements INetwork {
     private peerList: PeerList
     private upnpServer: UpnpServer
     private upnpClient: UpnpClient
+    private natUpnp: NatUpnp
 
     constructor(hycon: Server, port: number = 8148) {
         this.port = port
@@ -43,7 +44,7 @@ export class RabbitNetwork implements INetwork {
             }
         }
     }
-    public async start(): Promise<boolean> {
+    public async start(): Promise<boolean > {
         logger.debug(`Tcp Network Started`)
         this.server = createServer((socket) => this.newConnection(socket))
         await new Promise<boolean>((resolve, reject) => {
@@ -62,6 +63,8 @@ export class RabbitNetwork implements INetwork {
         // upnp
         this.upnpServer = new UpnpServer(this.port, this.hycon)
         this.upnpClient = new UpnpClient(this, this.hycon)
+        // nat
+        this.natUpnp = new NatUpnp(this.port, this)
 
         // add peer
         if (this.hycon) {
@@ -80,7 +83,7 @@ export class RabbitNetwork implements INetwork {
         return true
     }
 
-    public async addClient(host: string, port: number): Promise<IPeer> {
+    public async addClient(host: string, port: number): Promise < IPeer > {
         logger.log(`AddClient IP=${host} PORT=${port}`)
         return new Promise<IPeer>((resolved, reject) => {
             const key = Buffer.from(`${host}:${port}`).toString()

@@ -13,11 +13,12 @@
     "debugNetwork": "./node_modules/.bin/ts-node --inspect=9231 --inspect-brk src/network/turtle/main.ts",
     "startNetwork": "./node_modules/.bin/ts-node src/network/turtle/main.ts --port=8148",
     "startRabbit": "./node_modules/.bin/ts-node src/network/rabbit/main.ts --port=8148",
-    "testNetwork1": "./node_modules/.bin/ts-node src/main.ts --port=8151",
-    "testNetwork2": "./node_modules/.bin/ts-node src/main.ts --port=8152",
-    "testNetwork3": "./node_modules/.bin/ts-node src/main.ts --port=8153",
+    "testNetwork1": "./node_modules/.bin/ts-node src/main.ts --port=8151 --networkid=3 --str_port=9081 --writing",
+    "testNetwork2": "./node_modules/.bin/ts-node src/main.ts --port=8152 --networkid=3 --str_port=9082 --writing",
+    "testNetwork3": "./node_modules/.bin/ts-node src/main.ts --port=8153 --networkid=3 --str_port=9083 --writing",
     "clear": "rm -rf deleteme* ./wallet",
-    "wallet": "./node_modules/.bin/ts-node src/main.ts --wallet"
+    "wallet": "./node_modules/.bin/ts-node src/main.ts --wallet",
+    "reorg": "rm -rf deleteme* && ./node_modules/.bin/ts-node src/consensus/reorg_test.ts"
   },
   "author": "",
   "license": "ISC",

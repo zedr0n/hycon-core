@@ -3,7 +3,6 @@ import * as natUpnp from "nat-upnp"
 import * as proto from "../serialization/proto"
 import { INetwork } from "./inetwork"
 import { IPeer } from "./ipeer"
-
 const client = natUpnp.createClient()
 const logger = getLogger("Nat")
 logger.level = "debug"
@@ -94,6 +93,10 @@ export class NatUpnp {
             const bootNode: IPeer = await this.network.addClient(NatUpnp.bootNode[index].ip, NatUpnp.bootNode[index].port)
             bootNode.setStatus(this.publicIp, this.publicPort)
             await bootNode.status()
+            const peerList: proto.IPeer[] = await bootNode.getPeers(5)
+            for (const peer of peerList) {
+                await this.network.addClient(peer.ip, peer.port)
+            }
         }
     }
 }

@@ -17,12 +17,12 @@ export class PeerDb {
         this.db = levelup(rocksdb("./peerdb"))
 
         // setInterval(() => {
-        //     this.maintainKyes()
+        //     this.maintainKeys()
         // }, 5*60*1000)
 
         // test
         setInterval(() => {
-            this.maintainKyes()
+            this.maintainKeys()
         }, 5 * 1000)
 
         // setInterval(()=>{
@@ -114,7 +114,7 @@ export class PeerDb {
         }
     }
 
-    public async maintainKyes() {
+    public async maintainKeys() {
         // await this.clearAll()
         // this.registerPeer('192.168.1.100', 8080)
         // this.registerPeer('192.168.1.100', 8081)
