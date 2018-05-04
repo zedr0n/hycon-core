@@ -1,10 +1,14 @@
 import commandLineArgs = require("command-line-args")
 import { randomBytes } from "crypto"
 import { getLogger } from "log4js"
+import { IResponseError } from "../rest/client/rest"
+import { Address } from "./common/address"
 import { AppTxPool } from "./common/appTxPool"
 import { Block } from "./common/block"
 import { ITxPool } from "./common/itxPool"
 import { SignedTx } from "./common/txSigned"
+import { Database } from "./consensus/database/database"
+import { WorldState } from "./consensus/database/worldState"
 import { IConsensus } from "./consensus/iconsensus"
 import { SingleChain } from "./consensus/singleChain"
 import { IMiner } from "./miner/miner"
@@ -33,7 +37,11 @@ const optionDefinitions = [
 const logger = getLogger("Server")
 
 export class Server {
+    public static subsid = 0
     public useRabbit = true
+    // public peerList: PeerList
+    public subscription: Map<number, any> | undefined
+    public txQueue: TxList
     public readonly consensus: IConsensus = undefined // the core
     public readonly network: INetwork = undefined // hycon network
     public readonly miner: IMiner = undefined // miner
@@ -41,6 +49,8 @@ export class Server {
     public readonly txPool: ITxPool = undefined // tx pool
     public readonly rest: RestManager = undefined // api server for hycon
     public options: any // json options
+    public db: Database
+    public accountDB: WorldState
     public test: TestServer
 
     constructor() {
@@ -63,6 +73,63 @@ export class Server {
         this.readOptions()
         this.network.start()
         this.miner.start()
+    }
+
+    // tslint:disable:object-literal-sort-keys
+    public async createSubscription(sub: { address: string, url: string, from: boolean, to: boolean }): Promise<{ id: number } | IResponseError> {
+        try {
+            const addressOfWallet = new Address(sub.address)
+            const account = await this.accountDB.getAccount(this.db.tips[0].header.stateRoot, addressOfWallet)
+            if (account === undefined) {
+                return Promise.resolve({
+                    status: 404,
+                    timestamp: Date.now(),
+                    error: "NOT_FOUND",
+                    message: "the resource cannot be found / currently unavailable",
+                })
+            }
+
+            this.subscription = new Map()
+            this.subscription.set(Server.subsid, [sub.address, sub.url, sub.from, sub.to])
+
+            return Promise.resolve({
+                id: Server.subsid++,
+            })
+        } catch (e) {
+            return Promise.resolve({
+                status: 400,
+                timestamp: Date.now(),
+                error: "INVALID_PARAMETER",
+                message: e.toString(),
+            })
+        }
+    }
+
+    public async deleteSubscription(address: string, id: number): Promise<number | IResponseError> {
+        try {
+            const addressOfWallet = new Address(address)
+            const account = await this.accountDB.getAccount(this.db.tips[0].header.stateRoot, addressOfWallet)
+            if (account === undefined) {
+                return Promise.resolve({
+                    status: 404,
+                    timestamp: Date.now(),
+                    error: "NOT_FOUND",
+                    message: "the resource cannot be found / currently unavailable",
+                })
+            }
+
+            this.subscription = new Map()
+            this.subscription.delete(id)
+
+            return Promise.resolve(204)
+        } catch (e) {
+            return Promise.resolve({
+                status: 400,
+                timestamp: Date.now(),
+                error: "INVALID_PARAMETER",
+                message: e.toString(),
+            })
+        }
     }
     private readOptions() {
         const options = commandLineArgs(optionDefinitions)

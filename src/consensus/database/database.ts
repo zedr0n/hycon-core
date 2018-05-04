@@ -6,12 +6,25 @@ import { AsyncLock } from "../../common/asyncLock"
 import { AnyBlock, Block } from "../../common/block"
 import { GenesisBlock } from "../../common/blockGenesis"
 import { AnyBlockHeader, BlockHeader } from "../../common/blockHeader"
+import { GenesisSignedTx } from "../../common/txGenesisSigned"
+import { SignedTx } from "../../common/txSigned"
+import { DBTx } from "../../consensus/database/dbTx"
 import { Hash } from "../../util/hash"
 import { BlockStatus } from "../sync"
 import { BlockFile } from "./blockFile"
 import { DBBlock } from "./dbblock"
 
 const logger = getLogger("Database")
+
+function uint8ArrayEqual(first: Uint8Array, second: Uint8Array): boolean {
+    if (first.length !== second.length) { return false }
+    for (let i = 0; i < second.length; i++) {
+        if (first[i] !== second[i]) {
+            return false
+        }
+    }
+    return true
+}
 export class DecodeError extends Error {
     public hash: Hash
 }
@@ -19,6 +32,7 @@ export class DecodeError extends Error {
 // tslint:disable:max-line-length
 // tslint:disable-next-line:max-classes-per-file
 export class Database {
+    public tips: DBBlock[] = []
     private database: levelup.LevelUp
     private blockFile: BlockFile
     private headerLock: AsyncLock
@@ -43,6 +57,110 @@ export class Database {
         this.fileNumber = +fileNumber
         this.filePosition = +filePosition
         await this.blockFile.fileInit(this.filePath, this.fileNumber)
+    }
+
+    public async getTxTime(hash: Hash): Promise<{ tx: (SignedTx | GenesisSignedTx), timeStamp: number }> {
+        try {
+            const dbTx = DBTx.decode(await this.database.get("t" + hash))
+            const block = await this.getBlock(dbTx.blockHash)
+            const stx = block.txs[dbTx.txNumber]
+            return Promise.resolve({ tx: stx, timeStamp: block.header.timeStamp })
+        } catch (error) {
+            if (!error.notFound) { logger.error(`Fail to get TxTime : ${error}`) }
+            return Promise.reject(error)
+        }
+    }
+
+    public async getTxsOfAddress(address: Uint8Array, n: number): Promise<{ dbTxs: DBTx[], map: Map<string, { tx: (SignedTx | GenesisSignedTx), timeStamp: number }> }> {
+        try {
+            const dbTxs = await this.txSearch(address, (dbTx, dbTxs) => {
+                async function insertOrdered(dbTx: DBTx) {
+                    if (dbTxs.length === 0) {
+                        dbTxs.push(dbTx)
+                        return dbTxs
+                    }
+                    let min = -1
+                    let max = dbTxs.length
+                    // tslint:disable:no-bitwise
+                    let i = (min + max) >> 1
+                    while (max - min > 1) {
+                        if (dbTx.blockHeight === dbTxs[i].blockHeight) {
+                            min = max = i
+                            break
+                        } else if (dbTx.blockHeight > dbTxs[i].blockHeight) {
+                            max = i
+                        } else if (dbTx.blockHeight < dbTxs[i].blockHeight) {
+                            min = i
+                        }
+                        i = (min + max) >> 1
+                    }
+                    dbTxs.splice(i + 1, 0, dbTx)
+                    return dbTxs
+                }
+                if (dbTxs.length === 0) {
+                    dbTxs.push(dbTx)
+                } else {
+                    insertOrdered(dbTx)
+                }
+            })
+            if (dbTxs.dbTxs.length > n) {
+                dbTxs.dbTxs.splice(n, dbTxs.dbTxs.length - n)
+            }
+            return Promise.resolve(dbTxs)
+        } catch (error) {
+            logger.error(`Fail to get Txs Of Address : ${error}`)
+            return Promise.reject(error)
+        }
+    }
+
+    public async txSearch(address: Uint8Array, add: (dbTx: DBTx, dbTxs: DBTx[]) => void, errorHandler?: (e: any) => void): Promise<{ dbTxs: DBTx[], map: Map<string, { tx: (SignedTx | GenesisSignedTx), timeStamp: number }> }> {
+        try {
+            const txs: DBTx[] = await this.slowSearch<DBTx>(DBTx.decode, "t", "u", add, errorHandler)
+            const mapHash = new Map<string, { tx: (SignedTx | GenesisSignedTx), timeStamp: number }>()
+            const dbTxs = []
+            txs.reverse()
+            for (const dbTx of txs) {
+                const txTime = await this.getTxTime(dbTx.hash)
+                if (uint8ArrayEqual(txTime.tx.to, address)) {
+                    mapHash.set(dbTx.hash.toString(), { tx: txTime.tx, timeStamp: txTime.timeStamp })
+                    dbTxs.push(dbTx)
+                } else {
+                    if ((txTime.tx instanceof SignedTx) && (uint8ArrayEqual(txTime.tx.from, address))) {
+                        mapHash.set(dbTx.hash.toString(), { tx: txTime.tx, timeStamp: txTime.timeStamp })
+                        dbTxs.push(dbTx)
+                    }
+                }
+            }
+            return { dbTxs, map: mapHash }
+        } catch (error) {
+            logger.error(`Fail to tx Search : ${error}`)
+            return Promise.reject(error)
+        }
+    }
+
+    public async slowSearch<T>(decode: (data: any) => T, from: string, to: string, add: (data: T, datas: T[]) => void, errorHandler?: (e: any) => void): Promise<T[]> {
+        const results: T[] = []
+        return new Promise<T[]>((resolve, reject) => {
+            try {
+                this.database.createReadStream({ gt: from, lt: to })
+                    .on("data", (data: any) => {
+                        try {
+                            const result = decode(data.value)
+                            add(result, results)
+                        } catch (e) {
+                            if (errorHandler) {
+                                errorHandler(e)
+                            }
+                        }
+                    })
+                    .on("end", () => {
+                        resolve(results)
+                    })
+            } catch (error) {
+                logger.error(`Fail to slowSearch : ${error}`)
+                return Promise.reject(error)
+            }
+        })
     }
 
     public async putBlock(block: AnyBlock): Promise<{ current: DBBlock, currentHash: Hash, previous: DBBlock }> {
@@ -214,7 +332,7 @@ export class Database {
         }
     }
 
-    private async getDBBlock(hash: Hash): Promise<DBBlock | undefined> {
+    public async getDBBlock(hash: Hash): Promise<DBBlock | undefined> {
         let decodingDBEntry = false
         try {
             const key = "b" + hash

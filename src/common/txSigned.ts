@@ -84,4 +84,13 @@ export class SignedTx implements proto.ITx {
     public encode(): Uint8Array {
         return proto.Tx.encode(this).finish()
     }
+
+    public verify(): boolean {
+        try {
+            const pubkey = new PublicKey(this)
+            return pubkey.verify(this)
+        } catch (e) {
+            return false
+        }
+    }
 }
