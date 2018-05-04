@@ -63,7 +63,9 @@ export class SocketParser {
             this.parse(src)
         } catch (e) {
             // tslint:disable-next-line:max-line-length
-            logger.fatal(`Disconnecting from ${this.socket.remoteAddress}:${this.socket.remotePort} due to internal parser error: ${e}`)
+            if (this.socket) {
+                logger.fatal(`Disconnecting from ${this.socket.remoteAddress}:${this.socket.remotePort} due to internal parser error: ${e}`)
+            }
             this.destroy()
         }
     }
