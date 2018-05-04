@@ -15,9 +15,18 @@ export class PeerDb {
     constructor() {
         this.db = levelup(rocksdb('./peerdb'))
 
+        // setInterval(() => {
+        //     this.maintainKyes()
+        // }, 5*60*1000)
+
+        //test
         setInterval(() => {
             this.maintainKyes()
-        }, 5*60*1000)
+        }, 5*1000)
+
+        // setInterval(()=>{
+        //     this.run()
+        // },2000)
 
 
     }
@@ -78,18 +87,30 @@ export class PeerDb {
     }
 
     public async getRandomPeers(n:number): Promise<string[]>{
-        if(n<this.keys.length){
-            let randomlist:number[] = []
+        try{
             let peerList:string[] = []
-            while(randomlist.length <= n){
-                let randomKey = Math.floor(Math.random()*this.keys.length)
-                if(!randomlist.find((ele)=>ele==randomKey)){
-                    randomlist.push(randomKey)
-                    let peer = await this.get(this.keys[randomKey])
+            if(n<this.keys.length){
+                let randomlist:number[] = []   
+                while(randomlist.length < n){
+                    let randomKey = Math.floor(Math.random()*this.keys.length)
+                    if(!randomlist.find((ele)=>ele==randomKey)){
+                        randomlist.push(randomKey)
+                        let peer = await this.get(this.keys[randomKey])
+                        peerList.push(peer.toString())
+                    }
+                }
+                return Promise.resolve(peerList)
+            }
+            else{
+                for(let i=0;i<this.keys.length;i++){
+                    let peer = await this.get(this.keys[i])
                     peerList.push(peer.toString())
                 }
+                return Promise.resolve(peerList)
             }
-            return resolve(peerList)
+        }
+        catch(e){
+            return reject(e)
         }
     }
 
@@ -100,10 +121,19 @@ export class PeerDb {
         // this.registerPeer('192.168.1.100', 8082)
         // this.registerPeer('192.168.1.100', 8083)
         // this.registerPeer('192.168.1.100', 8083)
+        // this.registerPeer('192.168.1.100', 8085)
         this.keys = await this.listAll()
        // let res = await this.get('GHtUT9ysVsYddA9zmadCjYYGovveEkbj1yAmEK57NExp')
         //logger.debug(res.toString())
-        // console.log(this.keys)
+        console.log(this.keys)
+    }
+
+    public async run(){
+        let peerList = await this.getRandomPeers(3)
+        for(let i=0;i<peerList.length;i++){
+            let peer = JSON.parse(peerList[i])
+            console.log(peer.ip, peer.port)
+        }   
     }
 }
 

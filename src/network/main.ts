@@ -3,4 +3,3 @@ import { NatUpnp } from "./nat"
 
 import {PeerDb} from "./peerDb"
 const peerDB = new PeerDb()
-
