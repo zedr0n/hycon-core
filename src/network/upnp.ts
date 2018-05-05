@@ -20,9 +20,10 @@ export class UpnpServer {
     constructor(port: number, server: Server) {
         UpnpServer.port = port
         this.server = server
-        if (server.options.networkid) {
-            UpnpServer.networkid = server.options.networkid
-        }
+        if (server)
+            if (server.options.networkid) {
+                UpnpServer.networkid = server.options.networkid
+            }
         setTimeout(() => {
             this.run()
         }, 100)
