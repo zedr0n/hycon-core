@@ -1,8 +1,8 @@
 import { SIGPIPE } from "constants"
 import { randomBytes } from "crypto"
 import { getLogger } from "log4js"
-import * as net from "net"
 import { createConnection, createServer, Socket } from "net"
+import * as net from "net"
 import { IConsensus } from "../../consensus/iconsensus"
 import * as proto from "../../serialization/proto"
 import { Server } from "../../server"
@@ -12,6 +12,7 @@ import { IPeer } from "../ipeer"
 import { NatUpnp } from "../nat"
 import { PeerDb } from "../peerDb"
 import { UpnpClient, UpnpServer } from "../upnp"
+import { PeerList } from "./peerList"
 import { RabbitPeer } from "./rabbitPeer"
 import { SocketParser } from "./socketParser"
 // tslint:disable-next-line:no-var-requires
@@ -64,7 +65,7 @@ export class RabbitNetwork implements INetwork {
             }
         }
     }
-    public async start(): Promise<boolean > {
+    public async start(): Promise<boolean> {
         logger.debug(`Tcp Network Started`)
         this.server = createServer((socket) => this.accept(socket))
         await new Promise<boolean>((resolve, reject) => {
@@ -118,7 +119,7 @@ export class RabbitNetwork implements INetwork {
         return iPeer
     }
 
-    public async connect(host: string, port: number): Promise < RabbitPeer > {
+    public async connect(host: string, port: number): Promise<RabbitPeer> {
         return new Promise<RabbitPeer>((resolved, reject) => {
             const key = RabbitNetwork.string2key(host, port)
             if (this.peerTable.has(key)) {
@@ -192,7 +193,7 @@ export class RabbitNetwork implements INetwork {
             const index = Math.floor(Math.random() * len)
             try {
                 const rabbitPeer: RabbitPeer = await this.connect(RabbitNetwork.seeds[index].host, RabbitNetwork.seeds[index].port)
-                const peers: proto.IPeer[]  = await rabbitPeer.getPeers(necessaryPeers)
+                const peers: proto.IPeer[] = await rabbitPeer.getPeers(necessaryPeers)
                 for (const peer of peers) {
                     await this.connect(peer.host, peer.port)
                 }
