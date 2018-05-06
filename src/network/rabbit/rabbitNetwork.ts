@@ -10,6 +10,7 @@ import { IPeer } from "../ipeer"
 import { UpnpClient, UpnpServer } from "../upnp"
 import { RabbitPeer } from "./rabbitPeer"
 import { SocketParser } from "./socketParser"
+import { PeerList } from "./peerList"
 // tslint:disable-next-line:no-var-requires
 const delay = require("delay")
 const logger = getLogger("Network")
@@ -21,9 +22,8 @@ export class RabbitNetwork implements INetwork {
     private server: net.Server
     private peers: RabbitPeer[]
     private targetPeerCount: number
-
     private peerTable: Map<string, RabbitPeer> = new Map()
-
+    private peerList: PeerList
     private upnpServer: UpnpServer
     private upnpClient: UpnpClient
 
@@ -32,6 +32,7 @@ export class RabbitNetwork implements INetwork {
         this.peers = []
         this.targetPeerCount = 3
         this.hycon = hycon
+        this.peerList = new PeerList('./PeerList.db')
         logger.debug(`TcpNetwork Port=${port}`)
     }
 
