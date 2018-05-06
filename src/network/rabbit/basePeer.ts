@@ -2,7 +2,7 @@ import { getLogger } from "log4js"
 import { Socket } from "net"
 import { resolve } from "url"
 import * as proto from "../../serialization/proto"
-import { SocketParser } from "./socketBuffer"
+import { SocketParser } from "./socketParser"
 
 const logger = getLogger("Network")
 

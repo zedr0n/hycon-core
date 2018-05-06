@@ -8,8 +8,8 @@ import { Server } from "../../server"
 import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"
 import { UpnpClient, UpnpServer } from "../upnp"
-import { RabbitPeer } from "./netPeer"
-import { SocketParser } from "./socketBuffer"
+import { RabbitPeer } from "./rabbitPeer"
+import { SocketParser } from "./socketParser"
 // tslint:disable-next-line:no-var-requires
 const delay = require("delay")
 const logger = getLogger("Network")

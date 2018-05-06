@@ -23,7 +23,7 @@ import { IMiner } from "./miner/iminer"
 import { MinerServer } from "./miner/minerSever"
 import { StratumServer } from "./miner/stratumServer"
 import { INetwork } from "./network/inetwork"
-import { RabbitNetwork } from "./network/rabbit/network" // for speed
+import { RabbitNetwork } from "./network/rabbit/rabbitNetwork" // for speed
 import { RestManager } from "./rest/restManager"
 import { TestServer } from "./testServer"
 import { Hash } from "./util/hash"

@@ -4,8 +4,8 @@ import { Block } from "../../serialization/proto"
 import { Ping } from "../../serialization/proto"
 import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"
-import { RabbitPeer } from "./netPeer"
-import { RabbitNetwork } from "./network"
+import { RabbitPeer } from "./rabbitPeer"
+import { RabbitNetwork } from "./rabbitNetwork"
 
 const logger = getLogger("Network")
 logger.level = "debug"
