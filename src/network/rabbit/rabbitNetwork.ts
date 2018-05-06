@@ -145,8 +145,7 @@ export class RabbitNetwork implements INetwork {
         let peer: any = null
         if (this.hycon) {
             peer = new RabbitPeer(socket, this, this.hycon.consensus, this.hycon.txPool)
-        }
-        else {
+        } else {
             peer = new RabbitPeer(socket, this, undefined, undefined)
         }
         socket.on("close", (error) => { this.removePeer(peer) })
