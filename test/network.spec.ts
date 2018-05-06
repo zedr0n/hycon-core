@@ -2,11 +2,9 @@ import { getLogger } from "log4js"
 import { setInterval } from "timers"
 import { INetwork } from "../src/network/inetwork"
 import { IPeer } from "../src/network/ipeer"
-import { RabbitNetwork } from "../src/network/rabbit/rabbitNetwork"
 import { RabbitPeer } from "../src/network/rabbit/rabbitPeer"
-import { Block } from "../src/serialization/proto"
-import { Ping } from "../src/serialization/proto"
-import { testAsync } from "./async"
+import { RabbitNetwork } from "../src/network/rabbit/rabbitNetwork"
+const delay = require('delay')
 describe("Network", () => {
     let tcp: RabbitNetwork
     let client: any
