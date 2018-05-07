@@ -16,6 +16,7 @@ export class NatUpnp {
     private static async _mapPort(privatePort: number, publicPort: number, ttl: number = 10) {
         return await new Promise((resolve, reject) => {
             client.portMapping({
+                description: "Hycon",
                 private: privatePort,
                 public: publicPort,
                 ttl,
@@ -35,11 +36,11 @@ export class NatUpnp {
             } catch (e) {
                 logger.info(`Failed to map port ${privatePort} --> ${publicPort}, Attempt ${i} of ${maxAttempts}`)
                 // tslint:disable-next-line:no-bitwise
-                publicPort = (2 << 15) + (2 << 14) + Math.random() * ((2 << 14) - 1)
+                publicPort = (1 << 15) + (1 << 14) + Math.floor(Math.random() * ((1 << 14) - 1))
             }
         }
-        logger.info(`UPNP Port mapping failed`)
-        throw new Error("UPNP Port mapping failed")
+        logger.info(`Upnp Port mapping failed`)
+        throw new Error("Upnp Port mapping failed")
     }
     private static async _externalIp(): Promise<any> {
         return await new Promise((resolve, reject) => {
@@ -79,24 +80,30 @@ export class NatUpnp {
             this.publicPort = await NatUpnp.mapPort(this.privatePort)
         } catch (e) {
             this.publicPort = NaN
-            logger.error(`Upnp Error: ${e}, please confirm your router supports UPNP and that UPNP is enabled.`)
+            logger.warn(`Upnp Warning: ${e}, please confirm your router supports UPNP and that UPNP is enabled or you just not behind the NAT.`)
         }
         try {
             this.publicIp = await NatUpnp._externalIp()
             logger.info(`External Ip=${this.publicIp}`)
         } catch (e) {
             this.publicIp = ""
+            logger.warn("Get external IP failed")
         }
 
-        if (!isNaN(this.publicPort) && this.publicIp !== "" && !this.network.isBootnode) {
+        if (!isNaN(this.publicPort) && this.publicIp !== "" && this.network.isBootnode) {
             const index = Math.floor(Math.random() * NatUpnp.bootNode.length)
-            const bootNode: IPeer = await this.network.addClient(NatUpnp.bootNode[index].ip, NatUpnp.bootNode[index].port)
-            bootNode.setStatus(this.publicIp, this.publicPort)
-            await bootNode.status()
-            const peerList: proto.IPeer[] = await bootNode.getPeers(5)
-            for (const peer of peerList) {
-                await this.network.addClient(peer.ip, peer.port)
+            try {
+                const bootNode: IPeer = await this.network.connect(NatUpnp.bootNode[index].ip, NatUpnp.bootNode[index].port)
+                bootNode.setStatus(this.publicIp, this.publicPort)
+                await bootNode.status()
+                const peerList: proto.IPeer[] = await bootNode.getPeers(5)
+                for (const peer of peerList) {
+                    await this.network.connect(peer.ip, peer.port)
+                }
+            } catch (e) {
+                logger.debug(e)
             }
+
         }
     }
 }

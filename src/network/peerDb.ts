@@ -1,17 +1,22 @@
 import * as base58 from "base-58"
 import { getLogger } from "log4js"
+import * as proto from "../serialization/proto"
 import { Hash } from "../util/hash"
 
 // tslint:disable-next-line:no-var-requires
-const levelup = require("levelup") // javascript binding
+import levelup = require("levelup") // javascript binding
 // tslint:disable-next-line:no-var-requires
 const rocksdb = require("rocksdb")  // c++ binding
 const logger = getLogger("PeerDb")
 logger.level = "debug"
 
 export class PeerDb {
-    public db: any // database
-    public keys: string[]
+    public static calculateKey(peer: proto.IPeer): Buffer {
+        const hash: any = Hash.hash(peer.host + peer.port.toString()) // TS typechecking is incorrect
+        return Buffer.from(hash).slice(0, 4)
+    }
+    public db: levelup.LevelUp // database
+    public public keys: Buffer[]
 
     constructor() {
         this.db = levelup(rocksdb("./peerdb"))
@@ -21,9 +26,10 @@ export class PeerDb {
         // }, 5*60*1000)
 
         // test
-        setInterval(() => {
+        const db: any = this.db // TODO: Fix levelup type declarartion
+        db.on("open", () => {
             this.maintainKeys()
-        }, 5 * 1000)
+        })
 
         // setInterval(()=>{
         //     this.run()
@@ -31,29 +37,33 @@ export class PeerDb {
 
     }
 
-    public async put(key: string, data: any) {
-        return new Promise((resolve, reject) => {
-            this.db.put(key, JSON.stringify(data), (err: any) => {
-                if (err) {
-                    reject(err)
-                }
-                resolve()
-            })
-        })
+    public async put(peer: proto.IPeer): Promise<void> {
+        try {
+            const key = PeerDb.calculateKey(peer)
+            const buf: any = proto.Peer.encode(peer).finish()// TS typechecking is incorrect
+            const value = Buffer.from(buf)
+            await this.db.put(key, value)
+            if (this.keys.findIndex((key2: Buffer) => key.equals(key2)) === -1) {
+                this.keys.push(key)
+            }
+            return
+        } catch (e) {
+            logger.info(`Failed to put peer ${peer.host}:${peer.port} into PeerDB: ${e}`)
+        }
     }
 
-    public async get(key: string): Promise<any> {
-        return new Promise((resolve, reject) => {
-            this.db.get(key, (err: any, value: any) => {
-                if (err) {
-                    reject(err)
-                }
-                resolve(value)
-            })
-        })
+    public async get(key: Buffer): Promise<proto.Peer> {
+        try {
+            const result = await this.db.get(key)
+            const peer = proto.Peer.decode(result)
+            return peer
+        } catch (e) {
+            logger.info(`Could not get key '${key}': ${e}`)
+            throw e
+        }
     }
 
-    public async listAll(): Promise<any> {
+    public async listAll(): Promise< any > {
         return new Promise((resolve, reject) => {
             const keys: string[] = []
             this.db.createKeyStream()
@@ -64,7 +74,7 @@ export class PeerDb {
                     logger.debug(`list all`)
                     resolve(keys)
                 })
-        })
+        }), 
     }
 
     public async clearAll() {
@@ -81,14 +91,14 @@ export class PeerDb {
     }
 
     // hash, ip, port, timeStamp
-    public async registerPeer(ip: string, port: number): Promise<any> {
-        const key = base58.encode(Hash.hash(ip + port.toString()))
+    public async registerPeer(ip: string, port: number): Promise < any > {
+        const key = Hash.hash(ip + port.toString())
         const date = Date.now()
         logger.debug(`Register Peer ${key}: {${ip},${port},${date}}`)
-        return await this.put(key, { ip, port, timeStamp: date })
+        return await this.put(key, { ip, port, timeStamp: date }), 
     }
 
-    public async getRandomPeers(n: number): Promise<string[]> {
+    public async getRandomPeers(n: number): Promise<string[] > {
         try {
             const peerList: string[] = []
             if (n < this.keys.length) {
@@ -107,11 +117,11 @@ export class PeerDb {
                     const peer = await this.get(key)
                     peerList.push(peer.toString())
                 }
-                return Promise.resolve(peerList)
-            }
+                return Promise.resolve(peerList), 
+            },
         } catch (e) {
             return Promise.reject(e)
-        }
+        },
     }
 
     public async maintainKeys() {

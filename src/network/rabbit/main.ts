@@ -29,7 +29,7 @@ async function testNetwork() {
     logger.debug(`Network`)
     const tcp: RabbitNetwork = new RabbitNetwork(undefined, 8148)
     tcp.start()
-    const sampleClient = await tcp.addClient("localhost", 8148)
+    const sampleClient = await tcp.connect("localhost", 8148)
     setTimeout(() => {
         pollingNewone(sampleClient)
     }, 2000)

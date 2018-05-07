@@ -63,7 +63,7 @@ export class TurtleNetwork implements INetwork {
                 const port = args[1]
                 logger.info(`IP=${ip}  PORT=${port}`)
                 // serverOption.peer.push({ ip, port })
-                this.addClient(ip, port)
+                this.connect(ip, port)
             }
         }
 
@@ -89,7 +89,7 @@ export class TurtleNetwork implements INetwork {
         this.peers.push(newone)
     }
 
-    public async addClient(ip: string, port: number): Promise<IPeer> {
+    public async connect(ip: string, port: number): Promise<IPeer> {
         const k = Buffer.from(`${ip}:${port}`).toString()
         if (k in this.clientTable) {
             logger.debug(`${k} Already Exists`)

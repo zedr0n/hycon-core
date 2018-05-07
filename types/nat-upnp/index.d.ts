@@ -12,6 +12,7 @@ declare module "nat-upnp" {
         private: number
         public: number
         ttl: number
+        description: string
     }  
 
 }

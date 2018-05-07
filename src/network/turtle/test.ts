@@ -28,8 +28,8 @@ function testNetwork() {
     logger.debug(`Network`)
     const tcp: TurtleNetwork = new TurtleNetwork(undefined, undefined)
     tcp.start()
-    sampleClient = tcp.addClient("localhost", 8148)
-    tcp.addClient("localhost", 8148)
+    sampleClient = tcp.connect("localhost", 8148)
+    tcp.connect("localhost", 8148)
     sampleClient.setConnectedCallback(() => {
         logger.debug(`OnConnected`)
         setTimeout(() => {

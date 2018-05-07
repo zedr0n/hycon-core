@@ -7603,15 +7603,7 @@ $root.Peer = (function() {
      * @interface IPeer
      * @property {string|null} [host] Peer host
      * @property {number|null} [port] Peer port
-     * @property {string|null} [name] Peer name
-     * @property {string|null} [location] Peer location
-     * @property {boolean|null} [isMiner] Peer isMiner
-     * @property {string|null} [ip] Peer ip
-     * @property {number|null} [nodes] Peer nodes
-     * @property {IBlock|null} [lastBlock] Peer lastBlock
-     * @property {number|null} [pendingTransaction] Peer pendingTransaction
-     * @property {number|null} [nodeLatency] Peer nodeLatency
-     * @property {number|null} [peersNumber] Peer peersNumber
+     * @property {number|Long|null} [lastSeen] Peer lastSeen
      */
 
     /**
@@ -7646,76 +7638,12 @@ $root.Peer = (function() {
     Peer.prototype.port = 0;
 
     /**
-     * Peer name.
-     * @member {string} name
+     * Peer lastSeen.
+     * @member {number|Long} lastSeen
      * @memberof Peer
      * @instance
      */
-    Peer.prototype.name = "";
-
-    /**
-     * Peer location.
-     * @member {string} location
-     * @memberof Peer
-     * @instance
-     */
-    Peer.prototype.location = "";
-
-    /**
-     * Peer isMiner.
-     * @member {boolean} isMiner
-     * @memberof Peer
-     * @instance
-     */
-    Peer.prototype.isMiner = false;
-
-    /**
-     * Peer ip.
-     * @member {string} ip
-     * @memberof Peer
-     * @instance
-     */
-    Peer.prototype.ip = "";
-
-    /**
-     * Peer nodes.
-     * @member {number} nodes
-     * @memberof Peer
-     * @instance
-     */
-    Peer.prototype.nodes = 0;
-
-    /**
-     * Peer lastBlock.
-     * @member {IBlock|null|undefined} lastBlock
-     * @memberof Peer
-     * @instance
-     */
-    Peer.prototype.lastBlock = null;
-
-    /**
-     * Peer pendingTransaction.
-     * @member {number} pendingTransaction
-     * @memberof Peer
-     * @instance
-     */
-    Peer.prototype.pendingTransaction = 0;
-
-    /**
-     * Peer nodeLatency.
-     * @member {number} nodeLatency
-     * @memberof Peer
-     * @instance
-     */
-    Peer.prototype.nodeLatency = 0;
-
-    /**
-     * Peer peersNumber.
-     * @member {number} peersNumber
-     * @memberof Peer
-     * @instance
-     */
-    Peer.prototype.peersNumber = 0;
+    Peer.prototype.lastSeen = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
 
     /**
      * Creates a new Peer instance using the specified properties.
@@ -7745,24 +7673,8 @@ $root.Peer = (function() {
             writer.uint32(/* id 1, wireType 2 =*/10).string(message.host);
         if (message.port != null && message.hasOwnProperty("port"))
             writer.uint32(/* id 2, wireType 0 =*/16).int32(message.port);
-        if (message.name != null && message.hasOwnProperty("name"))
-            writer.uint32(/* id 3, wireType 2 =*/26).string(message.name);
-        if (message.location != null && message.hasOwnProperty("location"))
-            writer.uint32(/* id 4, wireType 2 =*/34).string(message.location);
-        if (message.isMiner != null && message.hasOwnProperty("isMiner"))
-            writer.uint32(/* id 5, wireType 0 =*/40).bool(message.isMiner);
-        if (message.ip != null && message.hasOwnProperty("ip"))
-            writer.uint32(/* id 6, wireType 2 =*/50).string(message.ip);
-        if (message.nodes != null && message.hasOwnProperty("nodes"))
-            writer.uint32(/* id 7, wireType 0 =*/56).int32(message.nodes);
-        if (message.lastBlock != null && message.hasOwnProperty("lastBlock"))
-            $root.Block.encode(message.lastBlock, writer.uint32(/* id 8, wireType 2 =*/66).fork()).ldelim();
-        if (message.pendingTransaction != null && message.hasOwnProperty("pendingTransaction"))
-            writer.uint32(/* id 9, wireType 0 =*/72).int32(message.pendingTransaction);
-        if (message.nodeLatency != null && message.hasOwnProperty("nodeLatency"))
-            writer.uint32(/* id 10, wireType 0 =*/80).int32(message.nodeLatency);
-        if (message.peersNumber != null && message.hasOwnProperty("peersNumber"))
-            writer.uint32(/* id 11, wireType 0 =*/88).int32(message.peersNumber);
+        if (message.lastSeen != null && message.hasOwnProperty("lastSeen"))
+            writer.uint32(/* id 3, wireType 0 =*/24).int64(message.lastSeen);
         return writer;
     };
 
@@ -7804,31 +7716,7 @@ $root.Peer = (function() {
                 message.port = reader.int32();
                 break;
             case 3:
-                message.name = reader.string();
-                break;
-            case 4:
-                message.location = reader.string();
-                break;
-            case 5:
-                message.isMiner = reader.bool();
-                break;
-            case 6:
-                message.ip = reader.string();
-                break;
-            case 7:
-                message.nodes = reader.int32();
-                break;
-            case 8:
-                message.lastBlock = $root.Block.decode(reader, reader.uint32());
-                break;
-            case 9:
-                message.pendingTransaction = reader.int32();
-                break;
-            case 10:
-                message.nodeLatency = reader.int32();
-                break;
-            case 11:
-                message.peersNumber = reader.int32();
+                message.lastSeen = reader.int64();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -7871,35 +7759,9 @@ $root.Peer = (function() {
         if (message.port != null && message.hasOwnProperty("port"))
             if (!$util.isInteger(message.port))
                 return "port: integer expected";
-        if (message.name != null && message.hasOwnProperty("name"))
-            if (!$util.isString(message.name))
-                return "name: string expected";
-        if (message.location != null && message.hasOwnProperty("location"))
-            if (!$util.isString(message.location))
-                return "location: string expected";
-        if (message.isMiner != null && message.hasOwnProperty("isMiner"))
-            if (typeof message.isMiner !== "boolean")
-                return "isMiner: boolean expected";
-        if (message.ip != null && message.hasOwnProperty("ip"))
-            if (!$util.isString(message.ip))
-                return "ip: string expected";
-        if (message.nodes != null && message.hasOwnProperty("nodes"))
-            if (!$util.isInteger(message.nodes))
-                return "nodes: integer expected";
-        if (message.lastBlock != null && message.hasOwnProperty("lastBlock")) {
-            var error = $root.Block.verify(message.lastBlock);
-            if (error)
-                return "lastBlock." + error;
-        }
-        if (message.pendingTransaction != null && message.hasOwnProperty("pendingTransaction"))
-            if (!$util.isInteger(message.pendingTransaction))
-                return "pendingTransaction: integer expected";
-        if (message.nodeLatency != null && message.hasOwnProperty("nodeLatency"))
-            if (!$util.isInteger(message.nodeLatency))
-                return "nodeLatency: integer expected";
-        if (message.peersNumber != null && message.hasOwnProperty("peersNumber"))
-            if (!$util.isInteger(message.peersNumber))
-                return "peersNumber: integer expected";
+        if (message.lastSeen != null && message.hasOwnProperty("lastSeen"))
+            if (!$util.isInteger(message.lastSeen) && !(message.lastSeen && $util.isInteger(message.lastSeen.low) && $util.isInteger(message.lastSeen.high)))
+                return "lastSeen: integer|Long expected";
         return null;
     };
 
@@ -7919,27 +7781,15 @@ $root.Peer = (function() {
             message.host = String(object.host);
         if (object.port != null)
             message.port = object.port | 0;
-        if (object.name != null)
-            message.name = String(object.name);
-        if (object.location != null)
-            message.location = String(object.location);
-        if (object.isMiner != null)
-            message.isMiner = Boolean(object.isMiner);
-        if (object.ip != null)
-            message.ip = String(object.ip);
-        if (object.nodes != null)
-            message.nodes = object.nodes | 0;
-        if (object.lastBlock != null) {
-            if (typeof object.lastBlock !== "object")
-                throw TypeError(".Peer.lastBlock: object expected");
-            message.lastBlock = $root.Block.fromObject(object.lastBlock);
-        }
-        if (object.pendingTransaction != null)
-            message.pendingTransaction = object.pendingTransaction | 0;
-        if (object.nodeLatency != null)
-            message.nodeLatency = object.nodeLatency | 0;
-        if (object.peersNumber != null)
-            message.peersNumber = object.peersNumber | 0;
+        if (object.lastSeen != null)
+            if ($util.Long)
+                (message.lastSeen = $util.Long.fromValue(object.lastSeen)).unsigned = false;
+            else if (typeof object.lastSeen === "string")
+                message.lastSeen = parseInt(object.lastSeen, 10);
+            else if (typeof object.lastSeen === "number")
+                message.lastSeen = object.lastSeen;
+            else if (typeof object.lastSeen === "object")
+                message.lastSeen = new $util.LongBits(object.lastSeen.low >>> 0, object.lastSeen.high >>> 0).toNumber();
         return message;
     };
 
@@ -7959,38 +7809,21 @@ $root.Peer = (function() {
         if (options.defaults) {
             object.host = "";
             object.port = 0;
-            object.name = "";
-            object.location = "";
-            object.isMiner = false;
-            object.ip = "";
-            object.nodes = 0;
-            object.lastBlock = null;
-            object.pendingTransaction = 0;
-            object.nodeLatency = 0;
-            object.peersNumber = 0;
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, false);
+                object.lastSeen = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.lastSeen = options.longs === String ? "0" : 0;
         }
         if (message.host != null && message.hasOwnProperty("host"))
             object.host = message.host;
         if (message.port != null && message.hasOwnProperty("port"))
             object.port = message.port;
-        if (message.name != null && message.hasOwnProperty("name"))
-            object.name = message.name;
-        if (message.location != null && message.hasOwnProperty("location"))
-            object.location = message.location;
-        if (message.isMiner != null && message.hasOwnProperty("isMiner"))
-            object.isMiner = message.isMiner;
-        if (message.ip != null && message.hasOwnProperty("ip"))
-            object.ip = message.ip;
-        if (message.nodes != null && message.hasOwnProperty("nodes"))
-            object.nodes = message.nodes;
-        if (message.lastBlock != null && message.hasOwnProperty("lastBlock"))
-            object.lastBlock = $root.Block.toObject(message.lastBlock, options);
-        if (message.pendingTransaction != null && message.hasOwnProperty("pendingTransaction"))
-            object.pendingTransaction = message.pendingTransaction;
-        if (message.nodeLatency != null && message.hasOwnProperty("nodeLatency"))
-            object.nodeLatency = message.nodeLatency;
-        if (message.peersNumber != null && message.hasOwnProperty("peersNumber"))
-            object.peersNumber = message.peersNumber;
+        if (message.lastSeen != null && message.hasOwnProperty("lastSeen"))
+            if (typeof message.lastSeen === "number")
+                object.lastSeen = options.longs === String ? String(message.lastSeen) : message.lastSeen;
+            else
+                object.lastSeen = options.longs === String ? $util.Long.prototype.toString.call(message.lastSeen) : options.longs === Number ? new $util.LongBits(message.lastSeen.low >>> 0, message.lastSeen.high >>> 0).toNumber() : message.lastSeen;
         return object;
     };
 

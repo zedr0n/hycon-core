@@ -22,7 +22,6 @@ export class RabbitPeer extends BasePeer implements IPeer {
     private txPool: ITxPool
     private network: INetwork
     private myStatus: proto.Status = new proto.Status()
-    private connected: boolean = false
 
     private isBootnode: boolean = false
     private peerDB: PeerDb
@@ -45,6 +44,10 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public setStatus(ip: string, port: number): void {
         this.myStatus.ip = ip
         this.myStatus.port = port
+    }
+
+    public getTip(): { hash: Hash; height: number; } {
+        throw new Error("Method not implemented.")
     }
 
     public async status(): Promise<proto.IStatus> {
@@ -167,19 +170,6 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public async onConnected() {
         const peerStatus = await this.status()
         logger.debug(`My Status=${JSON.stringify(this.myStatus)}  Peer Status=${JSON.stringify(peerStatus)}`)
-        this.connected = true
-    }
-
-    public async polling() {
-        try {
-            if (!this.connected) {
-                return
-            }
-            const result: number = await this.ping()
-        } catch (err) {
-            logger.debug(`Ping Error`)
-            this.disconnect()
-        }
     }
 
     // this is called in BasePeer's onPacket

@@ -32,7 +32,6 @@ export class UpnpServer {
 
     public run() {
         const myLocation = UpnpServer.product + UpnpServer.networkid + "://" + ip.address() + ":" + UpnpServer.port
-        logger.debug(`Upnp Server`)
         const SSDPServer = require("node-ssdp").Server
         const server = new SSDPServer({
             location: myLocation,
@@ -75,7 +74,7 @@ export class UpnpClient {
     }
 
     public run() {
-        logger.debug(`Upnp Client`)
+        logger.debug(`Upnp Client Start Looking up`)
         const Client = require("node-ssdp").Client
         const client = new Client()
 
@@ -102,15 +101,15 @@ export class UpnpClient {
                     // logger.debug("LOCAL ADDRESS:", localIP)
                     // logger.debug("IS LOCAL:", isLocal)
                     // logger.debug("DATE:", date)
-                    // logger.debug(`DETECT IP Local=${isLocal} Product=${product} IP=${localIP} Port=${localPort}`)
+                    logger.info(`DETECT IP Local=${isLocal} Product=${product} IP=${localIP} Port=${localPort}`)
                     if (!this.localPeer.has(`${localIP}:${localPort}`)) {
-                        this.appNetwork.addClient(localIP, parseInt(localPort, 10))
+                        this.appNetwork.connect(localIP, parseInt(localPort, 10))
                     }
                     this.localPeer.set(`${localIP}:${localPort}`, date)
                 }
             } else {
                 logger.error("Invalid format: headers.LOCATION")
-                throw Error("Invalid format: headers.LOCATION")
+                // throw Error("Invalid format: headers.LOCATION")
             }
 
         })

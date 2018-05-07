@@ -3030,32 +3030,8 @@ export interface IPeer {
     /** Peer port */
     port?: number;
 
-    /** Peer name */
-    name?: string;
-
-    /** Peer location */
-    location?: string;
-
-    /** Peer isMiner */
-    isMiner?: boolean;
-
-    /** Peer ip */
-    ip?: string;
-
-    /** Peer nodes */
-    nodes?: number;
-
-    /** Peer lastBlock */
-    lastBlock?: IBlock;
-
-    /** Peer pendingTransaction */
-    pendingTransaction?: number;
-
-    /** Peer nodeLatency */
-    nodeLatency?: number;
-
-    /** Peer peersNumber */
-    peersNumber?: number;
+    /** Peer lastSeen */
+    lastSeen?: number|Long;
 }
 
 /** Represents a Peer. */
@@ -3073,32 +3049,8 @@ export class Peer implements IPeer {
     /** Peer port. */
     public port: number;
 
-    /** Peer name. */
-    public name: string;
-
-    /** Peer location. */
-    public location: string;
-
-    /** Peer isMiner. */
-    public isMiner: boolean;
-
-    /** Peer ip. */
-    public ip: string;
-
-    /** Peer nodes. */
-    public nodes: number;
-
-    /** Peer lastBlock. */
-    public lastBlock?: IBlock;
-
-    /** Peer pendingTransaction. */
-    public pendingTransaction: number;
-
-    /** Peer nodeLatency. */
-    public nodeLatency: number;
-
-    /** Peer peersNumber. */
-    public peersNumber: number;
+    /** Peer lastSeen. */
+    public lastSeen: (number|Long);
 
     /**
      * Creates a new Peer instance using the specified properties.
