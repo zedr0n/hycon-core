@@ -19,6 +19,7 @@ import { RabbitNetwork } from "./network/rabbit/rabbitNetwork" // for speed
 import { RestManager } from "./rest/restManager"
 import { TestServer } from "./testServer"
 import { Hash } from "./util/hash"
+import { Wallet } from "./wallet/wallet"
 import { WalletManager } from "./wallet/walletManager"
 
 const optionDefinitions = [
@@ -143,6 +144,30 @@ export class Server {
         if (options.mine) {
             MinerServer.useCpuMiner = true
         }
+    }
+
+    // TODO : remove Wallet
+    // tslint:disable-next-line:member-ordering
+    public async makeSignedTx(): Promise<void> {
+        const wallets: Wallet[] = []
+        for (let i = 0; i < 10; i++) {
+            wallets.push(Wallet.randomWallet())
+        }
+        const amt = 100
+        const fee = 10
+        let nonce = 0
+
+        const idxX = Math.floor(Math.random() * 10)
+        const toWallet = wallets[idxX]
+        const toAddr = toWallet.pubKey.address()
+
+        let idxY = idxX + 1
+        if (idxY === 100) { idxY = idxY - 2 }
+
+        const fromWallet = wallets[idxY]
+
+        const tx = fromWallet.send(toAddr, amt, nonce++, fee)
+        const count = await this.txPool.putTxs([tx])
     }
 
     // TODO : Block, hash, SignedTx, randomBytes import, and testMakeBlock(db, consensus) remove
