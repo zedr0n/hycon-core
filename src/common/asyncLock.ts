@@ -40,7 +40,7 @@ export class AsyncLock {
         }
     }
 
-    public async criticle<T>(f: () => Promise<T>): Promise<T> {
+    public async critical<T>(f: () => Promise<T>): Promise<T> {
         await this.getLock()
         try {
             const result = await f()
@@ -53,6 +53,7 @@ export class AsyncLock {
     }
 }
 
+// TODO: remove extraneous test function
 async function lockTest() {
     const lock = new AsyncLock()
     let counter = 0
@@ -60,7 +61,7 @@ async function lockTest() {
     const x = Date.now()
     const promises = []
     for (let i = 0; i < n; i++) {
-        const promise = await lock.criticle<number>(async () => {
+        const promise = await lock.critical<number>(async () => {
             counter = await new Promise<number>((resolved, reject) => {
                 // reject("asd")
                 resolved(counter + 1)

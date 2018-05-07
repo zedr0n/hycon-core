@@ -12,6 +12,10 @@ import { BlockStatus } from "../consensus/sync"
 import { Hash } from "../util/hash"
 
 export class AppConsensus implements IConsensus {
+    public server: Server = undefined
+    constructor(server: Server) {
+        this.server = server
+    }
     public init(): Promise<void> {
         throw new Error("Method not implemented.")
     }
@@ -33,10 +37,7 @@ export class AppConsensus implements IConsensus {
     public testMakeBlock(txs: SignedTx[]): Promise<Block> {
         throw new Error("Method not implemented.")
     }
-    public server: Server = undefined
-    constructor(server: Server) {
-        this.server = server
-    }
+
     public putBlock(block: any): Promise<boolean> {
         throw new Error("Method not implemented.")
     }

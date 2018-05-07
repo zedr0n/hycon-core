@@ -80,7 +80,7 @@ export class WorldState {
         const mapAccount: Map<string, DBState> = new Map<string, DBState>()
         const mapIndex: Map<string, number> = new Map<string, number>()
         let fees = 0
-        return await this.accountLock.criticle<IStateTransition>(async () => {
+        return await this.accountLock.critical<IStateTransition>(async () => {
             for (const tx of block.txs) {
                 if (tx.from.equals(tx.to)) {
                     return Promise.reject(`Invalid Transaction : from address == to address`)
@@ -184,7 +184,7 @@ export class WorldState {
         const mapDBChildren: Map<string, DBState> = new Map<string, DBState>()
         const dbChildren: DBState[] = []
 
-        return this.accountLock.criticle(async () => {
+        return this.accountLock.critical(async () => {
             for (const pending of pendings) {
                 if (pending.node !== undefined) {
                     for (const ref of pending.node.nodeRefs) {

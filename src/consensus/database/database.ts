@@ -165,7 +165,7 @@ export class Database {
 
     public async putBlock(block: AnyBlock): Promise<{ current: DBBlock, currentHash: Hash, previous: DBBlock }> {
         // Async problem, block could be inserted twice
-        return await this.blockLock.criticle<{ current: DBBlock, currentHash: Hash, previous: DBBlock }>(async () => {
+        return await this.blockLock.critical<{ current: DBBlock, currentHash: Hash, previous: DBBlock }>(async () => {
             const { current, currentHash, previous } = await this.putHeader(block.header)
             // Put block info into blockFile and update header in DB using fileResult.
             const encodeBlock = block.encode()
@@ -188,7 +188,7 @@ export class Database {
     // tslint:disable-next-line:max-line-length
     public async putHeader(header: AnyBlockHeader): Promise<{ current: DBBlock, currentHash: Hash, previous: DBBlock }> {
 
-        return await this.headerLock.criticle<{ current: DBBlock, currentHash: Hash, previous: DBBlock }>(async () => {
+        return await this.headerLock.critical<{ current: DBBlock, currentHash: Hash, previous: DBBlock }>(async () => {
             const currentHash = new Hash(header)
             const currentBlock = await this.getDBBlock(currentHash)
             if (currentBlock) {
