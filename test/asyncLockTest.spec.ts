@@ -32,7 +32,7 @@ describe("Aync Lock Test Suite", () => {
     beforeEach(() => {
         lock = new AsyncLock()
     })
-    it("getLock(): should return true if the lock hasn't been engaged", testAsync(async () => {
+    it("Should run the lockTest Function to check for correct ordering of events", testAsync(async () => {
         const prom = await lockTest(lock)
         expect(prom).toBeTruthy()
     }))
