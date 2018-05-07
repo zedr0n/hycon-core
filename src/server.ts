@@ -1,18 +1,10 @@
 import commandLineArgs = require("command-line-args")
 import { randomBytes } from "crypto"
 import { getLogger } from "log4js"
-<<<<<<< HEAD
-import { IResponseError } from "../rest/client/rest"
 import { Address } from "./common/address"
-import { AppTxPool } from "./common/appTxPool"
-import { Block } from "./common/block"
-import { ITxPool } from "./common/itxPool"
-import { TxList } from "./common/txList"
-=======
 import { Block } from "./common/block"
 import { ITxPool } from "./common/itxPool"
 import { TxPool } from "./common/txPool"
->>>>>>> Tidy up
 import { SignedTx } from "./common/txSigned"
 import { AppConsensus } from "./consensus/appConsensus"
 import { Database } from "./consensus/database/database"
