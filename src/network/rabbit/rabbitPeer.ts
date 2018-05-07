@@ -12,20 +12,12 @@ import { Hash } from "../../util/hash"
 import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"
 import { PeerDb } from "../peerDb"
-<<<<<<< HEAD:src/network/rabbit/rabbitPeer.ts
 import { BasePeer } from "./basePeer"
-=======
-import { BasePeer } from "./peer"
->>>>>>> apply for tslint:src/network/rabbit/netPeer.ts
 
 const logger = getLogger("NetPeer")
 
 interface IResponse { message: proto.INetwork, relay: boolean }
 export class RabbitPeer extends BasePeer implements IPeer {
-<<<<<<< HEAD:src/network/rabbit/rabbitPeer.ts
-=======
-
->>>>>>> apply for tslint:src/network/rabbit/netPeer.ts
     private concensus: IConsensus
     private txPool: ITxPool
     private network: INetwork
@@ -50,13 +42,6 @@ export class RabbitPeer extends BasePeer implements IPeer {
 
     }
 
-<<<<<<< HEAD:src/network/rabbit/rabbitPeer.ts
-=======
-    public getTip(): { hash: Hash; height: number; } {
-        throw new Error("Method not implemented.")
-    }
-
->>>>>>> apply for tslint:src/network/rabbit/netPeer.ts
     public setStatus(ip: string, port: number): void {
         this.myStatus.ip = ip
         this.myStatus.port = port
