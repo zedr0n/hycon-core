@@ -1,5 +1,3 @@
-import { resolve } from "dns"
-
 type lockCallBack = () => void
 export class AsyncLock {
     private locked: boolean
@@ -52,36 +50,3 @@ export class AsyncLock {
         }
     }
 }
-
-// TODO: remove extraneous test function
-async function lockTest() {
-    const lock = new AsyncLock()
-    let counter = 0
-    const n = 50000
-    const x = Date.now()
-    const promises = []
-    for (let i = 0; i < n; i++) {
-        const promise = await lock.critical<number>(async () => {
-            counter = await new Promise<number>((resolved, reject) => {
-                // reject("asd")
-                resolved(counter + 1)
-            })
-            // tslint:disable-next-line:no-console
-            console.log(counter)
-            return counter
-        })
-        promises.push(promise)
-    }
-    try {
-        await Promise.all(promises)
-    } catch (e) {
-        // tslint:disable-next-line:no-console
-        console.log(`Error: ${n}: ${e}`)
-    }
-    const y = Date.now()
-    const time = y - x
-    // tslint:disable-next-line:no-console
-    console.log(time)
-}
-
-// lockTest()
