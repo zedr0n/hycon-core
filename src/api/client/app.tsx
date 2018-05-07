@@ -56,7 +56,4 @@ export class App extends React.Component<any, any> {
     public walletDetail: (
         { match }: RouteComponentProps<{ name: string }>,
     ) => JSX.Element
-
-    public render() {
-    }
 }
