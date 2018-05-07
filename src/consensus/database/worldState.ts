@@ -254,62 +254,6 @@ export class WorldState {
         })
     }
 
-    public async decreaseRefCount(hash: Hash, pending: DBState[], mapAccount: Map<string, DBState>): Promise<DBState[]> {
-        let state = mapAccount.get(hash.toString())
-        if (state === undefined) {
-            state = await this.getDBState(hash)
-            pending.push(state)
-            mapAccount.set(hash.toString(), state)
-        }
-        state.refCount--
-
-        if (state.node !== undefined && state.refCount <= 0) {
-            for (const node of state.node.nodeRefs) {
-                pending = await this.decreaseRefCount(node.child, pending, mapAccount)
-            }
-        }
-        return Promise.resolve(pending)
-    }
-
-    public async pruneStateRoot(stateRoot: Hash): Promise<undefined> {
-        let pending: DBState[] = []
-        const mapAccount: Map<string, DBState> = new Map<string, DBState>()
-        pending = await this.decreaseRefCount(stateRoot, pending, mapAccount)
-
-        const batch: levelup.Batch[] = []
-        for (const pend of pending) {
-            if (pend.refCount <= 0) {
-                batch.push({ type: "del", key: pend.hash().toBuffer() })
-            } else {
-                batch.push({ type: "put", key: pend.hash().toBuffer(), value: pend.encode() })
-            }
-        }
-        return this.accountDB.batch(batch)
-    }
-
-    public async print(hash: Hash, n: number = 0, prefix: Uint8Array = new Uint8Array([])) {
-        try {
-            let indent = ""
-            for (let i = 0; i < n; i++) {
-                indent += "\t"
-            }
-            const object = await this.getDBState(hash)
-            if (object.node !== undefined) {
-                logger.info(`${indent}StateNode '${hash}' '${prefix}'  : count(${object.refCount})`)
-                const i = 0
-                for (const node of object.node.nodeRefs) {
-                    await this.print(node.child, n + 1, concat(prefix, node.address))
-                }
-            } else if (object.account !== undefined) {
-                logger.info(`${indent}(${prefix.length})${prefix} --> ${object.account.balance} --> (${hash.toString()}) : count(${object.refCount})`)
-            } else {
-                logger.info(`${indent}Could not find '${hash.toString()}'`)
-            }
-        } catch (e) {
-            return Promise.reject("Print Error : " + e)
-        }
-    }
-
     private async putAccount(batch: DBState[], mapAccount: Map<string, DBState>, changes: IChange[], objectHash?: Hash, offset: number = 0, prefix: Uint8Array = new Uint8Array(0), objectAddress?: Uint8Array): Promise<Hash> {
         try {
             let object: StateNode | Account | undefined

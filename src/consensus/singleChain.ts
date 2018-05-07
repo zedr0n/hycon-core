@@ -53,6 +53,7 @@ export class SingleChain implements IConsensus {
                 await this.putBlock(genesis)
                 graph.initGraph(genesis.header)
             } else {
+                // TODO : Check txDB status.( Init from file ?)
                 if (!(new Hash(genesisInDB).equals(genesisHash))) {
                     logger.error(`Genesis in DB and file are not matched.`)
                     return Promise.reject(`Genesis in DB and file are not matched.`)
@@ -62,9 +63,6 @@ export class SingleChain implements IConsensus {
                 this.headerTips = tops
             }
             this.server.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock(txs))
-            setInterval(() => {
-                this.reorganization()
-            }, 120000)
             logger.debug(`Initialization of singlechain is over.`)
         } catch (e) {
             logger.error(`Initialization fail in singleChain : ${e}`)
@@ -74,6 +72,7 @@ export class SingleChain implements IConsensus {
 
     public async putBlock(block: AnyBlock): Promise<boolean> {
         try {
+            // TODO : Check reorganization condition.
             logger.info(`Put Block : ${new Hash(block.header)}`)
             let blockTxs: SignedTx[] = []
             // Have to check db existence before verify(In header verify, calculate cryptonight)????
@@ -365,9 +364,7 @@ export class SingleChain implements IConsensus {
                         const hash = new Hash(b.header)
                         const blk = await this.getBlockByHash(hash)
                         if (blk instanceof Block) { await this.server.txPool.putTxs(blk.txs) }
-                        await this.db.delBlock(hash)
-                        await this.worldState.pruneStateRoot(b.header.stateRoot)
-                        if (blk instanceof Block) { graph.removeFromGraph(blk.header) }
+                        // if (blk instanceof Block) { graph.removeFromGraph(blk.header) }
                     }
                 }
                 for (const b of mainChain) {
