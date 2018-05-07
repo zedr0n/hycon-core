@@ -3,11 +3,13 @@ import { AnyBlock, Block } from "../common/block"
 import { GenesisBlock } from "../common/blockGenesis"
 import { AnyBlockHeader, BlockHeader } from "../common/blockHeader"
 import { GenesisBlockHeader } from "../common/genesisHeader"
+import { GenesisSignedTx } from "../common/txGenesisSigned"
 import { SignedTx } from "../common/txSigned"
 import { Account } from "../consensus/database/account"
 import { BlockStatus } from "../consensus/sync"
 import { Hash } from "../util/hash"
 type Difficulty = any // TODO: define type
+export type AnySignedTx = (GenesisSignedTx | SignedTx)
 
 export type NewBlockCallback = (block: AnyBlock) => void
 export interface IConsensus {
@@ -21,7 +23,7 @@ export interface IConsensus {
     getBlocksRange(fromHeight: number, count?: number): Promise<AnyBlock[]>
     getHeadersRange(fromHeight: number, count?: number): Promise<AnyBlockHeader[]>
     getAccount(address: Address): Promise<Account>
-    getLastTxs(address: Address, count?: number): Promise<SignedTx[]>
+    getLastTxs(address: Address, count?: number): Promise<AnySignedTx[]>
     getBlockStatus(hash: Hash): Promise<BlockStatus>
     getHeaderTip(): { hash: Hash, height: number }
     getBlocksTip(): { hash: Hash, height: number }

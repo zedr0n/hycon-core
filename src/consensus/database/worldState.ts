@@ -10,6 +10,7 @@ import { GenesisSignedTx } from "../../common/txGenesisSigned"
 import { Server } from "../../server"
 import { Hash } from "../../util/hash"
 import { Wallet } from "../../wallet/wallet"
+import { verifyTx } from "../singleChain"
 import { Account } from "./account"
 import { DBState } from "./dbState"
 import { NodeRef } from "./nodeRef"
@@ -69,7 +70,7 @@ export class WorldState {
             genesis.txs.sort((a, b) => a.to[0] - b.to[0])
 
             for (const tx of genesis.txs) {
-                if (!this.verifyTx(tx)) { continue }
+                if (!verifyTx(tx)) { continue }
                 const toAccount = new Account({ balance: +tx.amount, nonce: 0 })
                 const toAccountHash = this.put(batch, mapAccount, toAccount)
                 const nodeRef = new NodeRef({ address: tx.to, child: toAccountHash })
@@ -411,15 +412,5 @@ export class WorldState {
             state.refCount++
         }
         return hash
-    }
-
-    private verifyTx(tx: GenesisSignedTx): boolean {
-        try {
-            const pubKey = new PublicKey(tx)
-            if (!pubKey.verify(tx)) { return false }
-            return true
-        } catch (e) {
-            return false
-        }
     }
 }

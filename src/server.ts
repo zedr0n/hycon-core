@@ -62,7 +62,7 @@ export class Server {
         logger.info(`Verbose=${this.options.verbose}`)
         logger.info(`Port=${this.options.port}`)
 
-        this.consensus = new SingleChain(this, "./deleteme.db", "./deleteme.ws", "./deleteme.file")
+        this.consensus = new SingleChain(this, "./deleteme.db", "./deleteme.ws", "./deleteme.file", "./deleteme.tx")
         this.network = new RabbitNetwork(this, this.options.port)
 
         this.wallet = new WalletManager(this)

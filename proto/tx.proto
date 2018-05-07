@@ -19,3 +19,9 @@ message TxDB {
   int32 blockHeight = 3;
   int32 txNumber = 4;
 }
+
+message TxList {
+  Tx tx = 1;
+  bytes previousFrom = 2;
+  bytes previousTo = 3;
+}

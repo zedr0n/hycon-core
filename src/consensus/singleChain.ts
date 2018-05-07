@@ -6,6 +6,7 @@ import { AnyBlock, Block } from "../common/block"
 import { GenesisBlock } from "../common/blockGenesis"
 import { AnyBlockHeader, BlockHeader } from "../common/blockHeader"
 import { PublicKey } from "../common/publicKey"
+import { GenesisSignedTx } from "../common/txGenesisSigned"
 import { TxPool } from "../common/txPool"
 import { SignedTx } from "../common/txSigned"
 import { Server } from "../server"
@@ -15,8 +16,9 @@ import { Hash } from "../util/hash"
 import { Account } from "./database/account"
 import { Database } from "./database/database"
 import { DBBlock } from "./database/dbblock"
+import { TxDatabase } from "./database/txDatabase"
 import { IStateTransition, WorldState } from "./database/worldState"
-import { IConsensus, NewBlockCallback } from "./iconsensus"
+import { AnySignedTx, IConsensus, NewBlockCallback } from "./iconsensus"
 import { BlockStatus } from "./sync"
 
 const logger = getLogger("SingleChain Concensus")
@@ -30,8 +32,8 @@ export class SingleChain implements IConsensus {
     private txUnit: number = 1000
     private forkHeight: number
     private graph = new Graph() // For debug
-
-    constructor(server: Server, dbPath: string, wsPath: string, filePath: string) {
+    private txdb?: TxDatabase
+    constructor(server: Server, dbPath: string, wsPath: string, filePath: string, txPath?: string) {
         this.server = server
         this.newBlockCallbacks = []
         this.db = new Database(dbPath, filePath)
@@ -39,6 +41,7 @@ export class SingleChain implements IConsensus {
         this.blockTips = []
         this.headerTips = []
         this.forkHeight = -1
+        if (txPath) { this.txdb = new TxDatabase(txPath) }
     }
 
     public async init(): Promise<void> {
@@ -87,6 +90,7 @@ export class SingleChain implements IConsensus {
                 this.graph.addToGraph(block.header, this.graph.color.outgoing)
             }
             const { current, currentHash, previous } = await this.db.putBlock(block)
+            if (this.txdb) { this.txdb.putTxs(block.txs) }
 
             // Update headerTopTip first, then update blockTopTip
             this.updateTopTip(this.headerTips, current, previous)
@@ -201,8 +205,17 @@ export class SingleChain implements IConsensus {
         }
     }
 
-    public getLastTxs(address: Address, count?: number): Promise<any[]> {
-        throw new Error("Method not implemented.")
+    public getLastTxs(address: Address, count?: number): Promise<AnySignedTx[]> {
+        try {
+            if (this.txdb) {
+                throw new Error(`Not implemented`)
+                // return this.txdb.getLastTxs(address, count)
+            } else {
+                return Promise.reject(`The database to get txs does not exist.`)
+            }
+        } catch (e) {
+            return Promise.reject(`Fail to get Last txs : ${e}`)
+        }
     }
 
     public getBlockStatus(hash: Hash): Promise<BlockStatus> {
@@ -317,7 +330,7 @@ export class SingleChain implements IConsensus {
     }
 
     private async verifyPreBlock(block: Block): Promise<{ isVerified: boolean, stateTransition?: IStateTransition }> {
-        const txVerify = block.txs.every((tx) => this.verifyTx(tx))
+        const txVerify = block.txs.every((tx) => verifyTx(tx))
         if (!txVerify) { return Promise.resolve({ isVerified: false }) }
 
         const merkleRootVerify = block.calculateMerkleRoot().equals(block.header.merkleRoot)
@@ -329,11 +342,6 @@ export class SingleChain implements IConsensus {
         }
 
         return Promise.resolve({ isVerified: true, stateTransition: newState })
-    }
-
-    private verifyTx(tx: SignedTx): boolean {
-        const pubkey = new PublicKey(tx)
-        return pubkey.verify(tx)
     }
 
     private async reorganization(): Promise<void> {
@@ -379,4 +387,12 @@ export class SingleChain implements IConsensus {
             return Promise.reject(`Fail to reorganization : ${e}`)
         }
     }
+}
+
+export function verifyTx(tx: SignedTx | GenesisSignedTx): boolean {
+    try {
+        const pubKey = new PublicKey(tx)
+        if (!pubKey.verify(tx)) { return false }
+        return true
+    } catch (e) { return false }
 }
