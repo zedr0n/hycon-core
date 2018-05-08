@@ -1,4 +1,5 @@
 import { SIGPIPE } from "constants"
+import { randomBytes } from "crypto"
 import { getLogger } from "log4js"
 import * as net from "net"
 import { createConnection, createServer, Socket } from "net"
@@ -24,6 +25,7 @@ export class RabbitNetwork implements INetwork {
         { host: "hycon.io", port: 8080 },
         { host: "hycon.io", port: 8080 },
     ]
+    public static failLimit: number
     public static socket2Ipeer(socket: Socket): proto.IPeer {
         return proto.Peer.create({
             failCount: 0,
@@ -36,6 +38,7 @@ export class RabbitNetwork implements INetwork {
         const hash: any = Hash.hash(host + port.toString()) // TS typechecking is incorrect
         return Buffer.from(hash).slice(0, 4)
     }
+
     public readonly port: number
     private hycon: Server
     private server: net.Server
@@ -86,10 +89,33 @@ export class RabbitNetwork implements INetwork {
     }
 
     public getRandomPeer(): IPeer {
-        return
+        const index = Math.floor(Math.random() * this.peerTable.size)
+        let cntr = 0
+        for (const value of this.peerTable.values()) {
+            if (cntr++ === index) {
+                return value
+            }
+        }
     }
     public getRandomPeers(count: number = 1): IPeer[] {
-        return
+        const randomList: number[] = []
+        const iPeer: IPeer[] = []
+        while (randomList.length < count) {
+            const index = Math.floor(Math.random() * this.peerTable.size)
+            if (randomList.indexOf(index) === -1) {
+                randomList.push(index)
+            }
+        }
+
+        let cntr = 0
+        let index2 = 0
+        for (const value of this.peerTable.values()) {
+            if (cntr++ === randomList[index2]) {
+                iPeer.push(value)
+                index2 += 1
+            }
+        }
+        return iPeer
     }
 
     public async connect(host: string, port: number): Promise < RabbitPeer > {
@@ -141,6 +167,16 @@ export class RabbitNetwork implements INetwork {
         })
         socket.on("error", (error) => {
             logger.error(`Connection error ${socket.remoteAddress}:${socket.remotePort} : ${error}`)
+            const index2 = this.peerDB.peers.indexOf(ipeer)
+            if (index2 > -1) {
+                const count = this.peerDB.peers[index2].failCount += 1
+                this.peerDB.put(this.peerDB.peers[index2])
+                if (count > RabbitNetwork.failLimit) {
+                    this.peerTable.delete(key)
+                    this.peerDB.remove(key)
+                    this.peerDB.peers.splice(index2, 1)
+                }
+            }
         })
 
         peer.onConnected()
@@ -158,7 +194,7 @@ export class RabbitNetwork implements INetwork {
                 const rabbitPeer: RabbitPeer = await this.connect(RabbitNetwork.seeds[index].host, RabbitNetwork.seeds[index].port)
                 const peers: proto.IPeer[]  = await rabbitPeer.getPeers(necessaryPeers)
                 for (const peer of peers) {
-                    this.connect(peer.host, peer.port)
+                    await this.connect(peer.host, peer.port)
                 }
             } catch (e) {
                 logger.info(`occurred error when connect seeds: ${e}`)
