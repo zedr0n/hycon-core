@@ -31,4 +31,5 @@ export interface IConsensus {
     isTxValid(tx: SignedTx): Promise<boolean>
     getTx(hash: Hash): Promise<TxList | undefined>
     getHash(height: number): Promise<Hash>
+    getNonce(address: Address): Promise<number>
 }

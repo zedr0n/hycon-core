@@ -1,4 +1,3 @@
-import { resolve } from "dns"
 import levelup = require("levelup")
 import { getLogger } from "log4js"
 import rocksdb = require("rocksdb")
@@ -139,7 +138,7 @@ export class Database {
     }
 
     public async getBlockTip(): Promise<DBBlock | undefined> {
-        return await this.getTip("__blockTip")
+        return this.getTip("__blockTip")
     }
 
     public async setHeaderTip(hash: Hash) {
@@ -147,7 +146,7 @@ export class Database {
     }
 
     public async getHeaderTip(): Promise<DBBlock | undefined> {
-        return await this.getTip("__headerTip")
+        return this.getTip("__headerTip")
     }
 
     public async getBlock(hash: Hash): Promise<AnyBlock> {

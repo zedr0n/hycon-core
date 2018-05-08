@@ -7,6 +7,7 @@ import { Block } from "../../common/block"
 import { GenesisBlock } from "../../common/blockGenesis"
 import { PublicKey } from "../../common/publicKey"
 import { GenesisSignedTx } from "../../common/txGenesisSigned"
+import { SignedTx } from "../../common/txSigned"
 import { Server } from "../../server"
 import { Hash } from "../../util/hash"
 import { Wallet } from "../../wallet/wallet"
@@ -17,7 +18,6 @@ import { NodeRef } from "./nodeRef"
 import { StateNode } from "./stateNode"
 // tslint:disable-next-line:no-var-requires
 const assert = require("assert")
-
 const logger = getLogger("WorldState")
 
 // tslint:disable:max-line-length
@@ -62,8 +62,53 @@ export class WorldState {
         this.accountLock = new AsyncLock()
     }
 
+    public async print(hash: Hash, n: number = 0, prefix: Uint8Array = new Uint8Array([])) {
+        try {
+            let indent = ""
+            for (let i = 0; i < n; i++) {
+                indent += "\t"
+            }
+            const object = await this.getDBState(hash)
+            if (object.node !== undefined) {
+                logger.info(`${indent}StateNode '${hash}' '${prefix}'  : count(${object.refCount})`)
+                const i = 0
+                for (const node of object.node.nodeRefs) {
+                    await this.print(node.child, n + 1, concat(prefix, node.address))
+                }
+            } else if (object.account !== undefined) {
+                logger.info(`${indent}(${prefix.length})${prefix} --> ${object.account.balance} --> (${hash.toString()}) : count(${object.refCount})`)
+            } else {
+                logger.info(`${indent}Could not find '${hash.toString()}'`)
+            }
+        } catch (e) {
+            return Promise.reject("Print Error : " + e)
+        }
+    }
+
+    public async createTestAddresses(previousState: Hash): Promise<IStateTransition> {
+        const batch: DBState[] = []
+        const changes: IChange[] = []
+        const mapAccount: Map<string, DBState> = new Map<string, DBState>()
+
+        if (Server.globalOptions.wallet) {
+            logger.debug(`Create Wallets`)
+            await Wallet.walletInit()
+            const maxCount = 100
+            for (let i = 0; i < maxCount; i++) {
+                const testWallet = Wallet.generate()
+                const address = testWallet.pubKey.address()
+                await testWallet.save(`test${i}`, "")
+                changes.push({ address, account: new Account({ balance: 12345000, nonce: 0 }) })
+            }
+        }
+
+        const currentStateRoot = await this.putAccount(batch, mapAccount, changes, previousState)
+        return Promise.resolve({ currentStateRoot, batch, mapAccount })
+    }
+
     public async first(genesis: GenesisBlock): Promise<IStateTransition> {
         try {
+            // TODO: Support more complex genesis blocks
             const batch: DBState[] = []
             const mapAccount: Map<string, DBState> = new Map<string, DBState>()
             const stateNode = new StateNode()
@@ -76,27 +121,6 @@ export class WorldState {
                 const nodeRef = new NodeRef({ address: tx.to, child: toAccountHash })
                 stateNode.nodeRefs.push(nodeRef)
             }
-
-            // Just for test, so remove this and change aysn to sync function
-            if (Server.globalOptions.wallet) {
-                logger.debug(`Create Wallets`)
-                await Wallet.walletInit()
-                const maxCount = 100
-                for (let i = 0; i < maxCount; i++) {
-                    const testWallet = Wallet.generate()
-                    const name = `test${i}`
-                    await testWallet.save(name, "")
-                    const testAccount1 = new Account({ balance: 12345000, nonce: 0 })
-                    const toHash = this.put(batch, mapAccount, testAccount1)
-                    const toAddress = await Wallet.getAddress(name)
-                    const nodeRef1 = new NodeRef({ address: new Address(toAddress), child: toHash })
-                    stateNode.nodeRefs.push(nodeRef1)
-                }
-                // sort
-                stateNode.nodeRefs.sort((a, b) => {
-                    return a.address[0] - b.address[0]
-                })
-            }
             const currentStateRoot = this.put(batch, mapAccount, stateNode)
             return { currentStateRoot, batch, mapAccount }
         } catch (e) {
@@ -104,16 +128,21 @@ export class WorldState {
         }
     }
 
-    public async next(block: Block, previousState: Hash): Promise<IStateTransition> {
+    public async next(txs: SignedTx[], previousState: Hash, minerAddress?: Address): Promise<{ stateTransition: IStateTransition, validTxs: SignedTx[], invalidTxs: SignedTx[] }> {
         const batch: DBState[] = []
         const changes: IChange[] = []
         const mapAccount: Map<string, DBState> = new Map<string, DBState>()
         const mapIndex: Map<string, number> = new Map<string, number>()
         let fees = 0
-        return await this.accountLock.critical<IStateTransition>(async () => {
-            for (const tx of block.txs) {
+        const validTxs: SignedTx[] = []
+        const invalidTxs: SignedTx[] = []
+        return await this.accountLock.critical<{ stateTransition: IStateTransition, validTxs: SignedTx[], invalidTxs: SignedTx[] }>(async () => {
+            for (const tx of txs) {
                 if (tx.from.equals(tx.to)) {
-                    return Promise.reject(`Invalid Transaction : from address == to address`)
+                    // TODO: Remove this if function and test
+                    invalidTxs.push(tx)
+                    logger.debug(`Tx ${tx.unsignedHash()} Removed: from address ${tx.from.toString()}) == to address (${tx.to.toString()}`)
+                    continue
                 }
                 let fromAccount: Account | undefined
                 const fromIndex = mapIndex.get(tx.from.toString())
@@ -123,9 +152,12 @@ export class WorldState {
                     fromAccount = changes[fromIndex].account
                 }
                 if (fromAccount === undefined) {
-                    logger.error(`Invalid fromAccount`)
+                    invalidTxs.push(tx)
+                    logger.error(`Tx ${tx.unsignedHash()} Rejected: ${tx.from.toString()} has not been seen before, so it has insufficient balance.`)
                     continue
                 }
+
+                // TODO: Handle coin burn
                 let toAccount: Account | undefined
                 const toIndex = mapIndex.get(tx.to.toString())
                 if (toIndex === undefined) {
@@ -137,55 +169,57 @@ export class WorldState {
                     toAccount = new Account({ balance: 0, nonce: 0 })
                 }
 
-                // if (tx.nonce === (fromAccount.nonce + 1)) {
-                const amount = +tx.amount
-                const fee = +tx.fee
-                fees += fee
-                if (fromAccount.balance >= (amount + fee)) {
-                    const fromState = new Account(fromAccount)
-                    const toState = new Account(toAccount)
-                    fromState.balance -= (amount + fee)
-                    toState.balance += amount
-                    fromState.nonce++
-                    if (fromIndex === undefined) {
-                        mapIndex.set(tx.from.toString(), changes.push({ address: tx.from, account: fromState }) - 1)
-                    } else {
-                        changes[fromIndex].account = fromState
-                    }
-                    if (toIndex === undefined) {
-                        mapIndex.set(tx.to.toString(), changes.push({ address: tx.to, account: toState }) - 1)
-                    } else {
-                        changes[toIndex].account = toState
-                    }
-                } else {
-                    return Promise.reject(`The balance of the account is insufficient.`)
+                if (tx.nonce !== (fromAccount.nonce + 1)) {
+                    invalidTxs.push(tx)
+                    logger.info(`Tx ${tx.unsignedHash()} Rejected: The balance of the account is insufficient.`)
+                    continue
                 }
-                // }
-                // else if (tx.nonce > (fromAccount.nonce + 1)) {
-                //     return Promise.reject(`block.txs[i].tx.nonce >= (fromAccount.nonce + 2)`)
-                // } else {
-                //     return Promise.reject(`block.txs[i].tx.nonce <= fromAccount.nonce`)
-                // }
+
+                if (fromAccount.balance < (tx.amount + tx.fee)) {
+                    invalidTxs.push(tx)
+                    logger.info(`Tx ${tx.unsignedHash()} Rejected: The balance of the account is insufficient.`)
+                    continue
+                }
+
+                validTxs.push(tx)
+
+                fees += tx.fee
+                fromAccount.balance -= (tx.amount + tx.fee)
+                toAccount.balance += tx.amount
+                fromAccount.nonce++
+                if (fromIndex === undefined) {
+                    mapIndex.set(tx.from.toString(), changes.push({ address: tx.from, account: fromAccount }) - 1)
+                } else {
+                    changes[fromIndex].account = fromAccount
+                }
+                if (toIndex === undefined) {
+                    mapIndex.set(tx.to.toString(), changes.push({ address: tx.to, account: toAccount }) - 1)
+                } else {
+                    changes[toIndex].account = toAccount
+                }
+
             }
 
-            // Reward to miner
-            let coinBaseAccount: Account | undefined
-            const coinBaseIndex = mapIndex.get(block.miner.toString())
-            if (coinBaseIndex === undefined) {
-                coinBaseAccount = await this.getAccount(previousState, block.miner)
-            } else {
-                coinBaseAccount = changes[coinBaseIndex].account
-            }
-            if (coinBaseAccount === undefined) { coinBaseAccount = new Account({ balance: 0, nonce: 0 }) }
-            const coinBaseState = new Account(coinBaseAccount)
-            coinBaseState.balance += fees
-            if (coinBaseIndex === undefined) {
-                mapIndex.set(block.miner.toString(), changes.push({ address: block.miner, account: coinBaseState }) - 1)
-            } else {
-                changes[coinBaseIndex].account = coinBaseState
+            if (minerAddress !== undefined) {
+                let minerAccount: Account | undefined
+                const minerIndex = mapIndex.get(minerAddress.toString())
+                if (minerIndex === undefined) {
+                    minerAccount = await this.getAccount(previousState, minerAddress)
+                } else {
+                    minerAccount = changes[minerIndex].account
+                }
+                if (minerAccount === undefined) { minerAccount = new Account({ balance: 0, nonce: 0 }) }
+
+                minerAccount.balance += fees
+
+                if (minerIndex === undefined) {
+                    mapIndex.set(minerAddress.toString(), changes.push({ address: minerAddress, account: minerAccount }) - 1)
+                } else {
+                    changes[minerIndex].account = minerAccount
+                }
             }
             const currentStateRoot = await this.putAccount(batch, mapAccount, changes, previousState)
-            return Promise.resolve({ currentStateRoot, batch, mapAccount })
+            return { stateTransition: { currentStateRoot, batch, mapAccount }, validTxs, invalidTxs }
         })
     }
 

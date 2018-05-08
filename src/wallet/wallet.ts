@@ -228,8 +228,8 @@ export class Wallet {
             mnemonic: string,
             language: string,
             hint: string,
-         }):
-    Promise<string> {
+        }):
+        Promise<string> {
         try {
             if (await fs.pathExists(`./wallet/rootKey/${recoveryParamets.name}`)) {
                 return Promise.reject("Duplicate wallet name...")
@@ -364,7 +364,7 @@ export class Wallet {
 
     }
 
-    public send(to: Address, amount: number, nonce: number, fee ?: number): SignedTx {
+    public send(to: Address, amount: number, nonce: number, fee?: number): SignedTx {
         const from = this.pubKey.address()
         const tx = new Tx({ from, to, amount, fee, nonce })
         const stx = this.privKey.sign(tx)

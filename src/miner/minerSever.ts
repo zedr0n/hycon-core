@@ -26,7 +26,7 @@ export class MinerServer implements IMiner {
     public static readonly LEN_HEX_RESULT: number = 64
 
     // variable
-    public static useCpuMiner: boolean = false
+    public static useCpuMiner: boolean = true
     private server: Server
     private stratumServer: StratumServer
     private cpuMiner: CpuMiner
