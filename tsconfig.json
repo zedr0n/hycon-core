@@ -6,6 +6,7 @@
         "removeComments": true,
         "preserveConstEnums": true,
         "outDir": "build",
+        "allowJs": true,
         "sourceMap": true,
         "typeRoots": [
             "./node_modules/@types",
@@ -14,10 +15,11 @@
         "jsx": "react"
     },
     "include": [
-        "src/**/*.tsx?",
-        "test/*.tsx?"
+        "src/**/*",
+        "test/*"
     ],
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "src/api"
     ]
 }

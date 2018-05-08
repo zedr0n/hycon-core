@@ -1,12 +1,12 @@
 import commandLineArgs = require("command-line-args")
 import { randomBytes } from "crypto"
 import { getLogger } from "log4js"
+import { IResponseError } from "./api/client/rest"
 import { Address } from "./common/address"
 import { Block } from "./common/block"
 import { ITxPool } from "./common/itxPool"
 import { TxPool } from "./common/txPool"
 import { SignedTx } from "./common/txSigned"
-import { AppConsensus } from "./consensus/appConsensus"
 import { Database } from "./consensus/database/database"
 import { WorldState } from "./consensus/database/worldState"
 import { IConsensus } from "./consensus/iconsensus"
@@ -21,7 +21,6 @@ import { TestServer } from "./testServer"
 import { Hash } from "./util/hash"
 import { Wallet } from "./wallet/wallet"
 import { WalletManager } from "./wallet/walletManager"
-
 const optionDefinitions = [
     { name: "ui", alias: "u", type: Boolean },
     { name: "writing", alias: "w", type: Boolean },
@@ -42,7 +41,7 @@ export class Server {
     public useRabbit = true
     // public peerList: PeerList
     public subscription: Map<number, any> | undefined
-    public txQueue: TxList
+    public txQueue: TxPool
     public readonly consensus: IConsensus = undefined // the core
     public readonly network: INetwork = undefined // hycon network
     public readonly miner: IMiner = undefined // miner
