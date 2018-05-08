@@ -43,7 +43,6 @@ export class Server {
     public useRabbit = true
     // public peerList: PeerList
     public subscription: Map<number, any> | undefined
-    public txQueue: TxPool
     public readonly consensus: IConsensus = undefined // the core
     public readonly network: INetwork = undefined // hycon network
     public readonly miner: IMiner = undefined // miner

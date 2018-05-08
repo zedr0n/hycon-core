@@ -26,6 +26,7 @@ import { BlockStatus } from "./sync"
 
 const logger = getLogger("SingleChain Concensus")
 export class SingleChain implements IConsensus {
+
     private server: Server
     private newBlockCallbacks: NewBlockCallback[]
     private db: Database
