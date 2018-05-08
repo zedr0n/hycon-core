@@ -32,12 +32,14 @@ const optionDefinitions = [
     { name: "networkid", alias: "n", type: Number },
     { name: "mine", alias: "m", type: Boolean },
     { name: "visDAG", alias: "d", type: Boolean },
+    { name: "wallet", alias: "W", type: Boolean }
 ]
 
 const logger = getLogger("Server")
 
 export class Server {
     public static subsid = 0
+    public static globalOptions
     public useRabbit = true
     // public peerList: PeerList
     public subscription: Map<number, any> | undefined
@@ -55,6 +57,7 @@ export class Server {
 
     constructor() {
         this.options = commandLineArgs(optionDefinitions)
+        Server.globalOptions = this.options
         logger.info(`Options=${JSON.stringify(this.options)}`)
         logger.info(`Verbose=${this.options.verbose}`)
         logger.info(`Port=${this.options.port}`)

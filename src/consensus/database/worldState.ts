@@ -7,6 +7,7 @@ import { Block } from "../../common/block"
 import { GenesisBlock } from "../../common/blockGenesis"
 import { PublicKey } from "../../common/publicKey"
 import { GenesisSignedTx } from "../../common/txGenesisSigned"
+import { Server } from "../../server"
 import { Hash } from "../../util/hash"
 import { Wallet } from "../../wallet/wallet"
 import { Account } from "./account"
@@ -76,25 +77,27 @@ export class WorldState {
             }
 
             // Just for test, so remove this and change aysn to sync function
-            await Wallet.walletInit()
-            const testWallet = Wallet.generate()
-            await testWallet.save("test1", "password")
-            const testWallet2 = Wallet.generate()
-            await testWallet2.save("test2", "password")
-            const testAccount1 = new Account({ balance: 12345000, nonce: 0 })
-            const toHash = this.put(batch, mapAccount, testAccount1)
-            const toAddress = await Wallet.getAddress("test1")
-            const nodeRef1 = new NodeRef({ address: new Address(toAddress), child: toHash })
-            stateNode.nodeRefs.push(nodeRef1)
-            const testAccount2 = new Account({ balance: 54321000, nonce: 0 })
-            const toHash2 = this.put(batch, mapAccount, testAccount2)
-            const toAddress2 = await Wallet.getAddress("test2")
-            const nodeRef2 = new NodeRef({ address: new Address(toAddress2), child: toHash2 })
-            stateNode.nodeRefs.push(nodeRef2)
-            stateNode.nodeRefs.sort((a, b) => {
-                return a.address[0] - b.address[0]
-            })
-
+            if (Server.globalOptions.wallet) {
+                logger.debug(`Create Wallets`)
+                await Wallet.walletInit()
+                const testWallet = Wallet.generate()
+                await testWallet.save("test1", "")
+                const testWallet2 = Wallet.generate()
+                await testWallet2.save("test2", "")
+                const testAccount1 = new Account({ balance: 12345000, nonce: 0 })
+                const toHash = this.put(batch, mapAccount, testAccount1)
+                const toAddress = await Wallet.getAddress("test1")
+                const nodeRef1 = new NodeRef({ address: new Address(toAddress), child: toHash })
+                stateNode.nodeRefs.push(nodeRef1)
+                const testAccount2 = new Account({ balance: 54321000, nonce: 0 })
+                const toHash2 = this.put(batch, mapAccount, testAccount2)
+                const toAddress2 = await Wallet.getAddress("test2")
+                const nodeRef2 = new NodeRef({ address: new Address(toAddress2), child: toHash2 })
+                stateNode.nodeRefs.push(nodeRef2)
+                stateNode.nodeRefs.sort((a, b) => {
+                    return a.address[0] - b.address[0]
+                })
+            }
             const currentStateRoot = this.put(batch, mapAccount, stateNode)
             return { currentStateRoot, batch, mapAccount }
         } catch (e) {
@@ -293,8 +296,6 @@ export class WorldState {
                 indent += "\t"
             }
             const object = await this.getDBState(hash)
-            assert(object)
-            assert(object.refCount)
             if (object.node !== undefined) {
                 logger.info(`${indent}StateNode '${hash}' '${prefix}'  : count(${object.refCount})`)
                 const i = 0
@@ -443,9 +444,7 @@ export class WorldState {
         try {
             const data = await this.accountDB.get(hash.toBuffer())
             decodeingDBState = true
-            assert(data)
             const dbState = DBState.decode(data)
-            assert(dbState)
             return Promise.resolve(dbState)
         } catch (e) {
             if (e.notFound) {

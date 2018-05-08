@@ -42,6 +42,7 @@ export class DBState implements proto.IDBState {
                 this.node = new StateNode(state.node)
             }
         }
+        this.refCount = state.refCount
     }
 
     public hash(): Hash {
