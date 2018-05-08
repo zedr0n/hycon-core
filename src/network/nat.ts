@@ -90,7 +90,7 @@ export class NatUpnp {
             logger.warn("Get external IP failed")
         }
 
-        if (!isNaN(this.publicPort) && this.publicIp !== "" && this.network.isBootnode) {
+        if (!isNaN(this.publicPort) && this.publicIp !== "") {
             const index = Math.floor(Math.random() * NatUpnp.bootNode.length)
             try {
                 const bootNode: IPeer = await this.network.connect(NatUpnp.bootNode[index].ip, NatUpnp.bootNode[index].port)
@@ -103,7 +103,6 @@ export class NatUpnp {
             } catch (e) {
                 logger.debug(e)
             }
-
         }
     }
 }
