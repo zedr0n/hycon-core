@@ -1,8 +1,11 @@
 import { randomBytes } from "crypto"
 import { BlockHeader } from "../common/blockHeader"
 import { GenesisBlockHeader } from "../common/genesisHeader"
-import * as g from "./graph"
+import { Graph } from "./graph"
 import { Hash } from "./hash"
+
+// tslint:disable-next-line:no-var-requires
+const delay = require("delay")
 
 function dummyHeader(hash: Hash) {
     return new BlockHeader({
@@ -15,31 +18,54 @@ function dummyHeader(hash: Hash) {
     })
 }
 
+const g = new Graph()
+const nChain1 = 5
+const nChain2 = 4
 const genesis = dummyHeader(new Hash("0xff"))
-let prevHash = new Hash(genesis)
+const genesisHash = new Hash(genesis)
 
-g.initGraph(genesis)
+async function test() {
+    g.initGraph(genesis)
+    const second = dummyHeader(genesisHash)
+    g.addToGraph(second, g.color.outgoing)
 
-let header = dummyHeader(prevHash)
-g.addToGraph(header, g.gcolor.Outgoing)
-prevHash = new Hash(header)
-const bifur = new Hash(header)
+    const commonHash = new Hash(second)
 
-let delHeader: BlockHeader
-for (let i = 0; i < 5; i++) {
-    header = dummyHeader(prevHash)
-    g.addToGraph(header, g.gcolor.Outgoing)
-    prevHash = new Hash(header)
+    const chain1: BlockHeader[] = []
+    let prevHash = commonHash
+    for (let i = 0; i < nChain1; i++) {
+        const header = dummyHeader(prevHash)
+        chain1.push(header)
+        prevHash = new Hash(header)
 
-    if (i === 4) { delHeader = header }
+        g.addToGraph(header, g.color.outgoing)
+        g.renderGraph()
+        await delay(1000)
+    }
+
+    const chain2: BlockHeader[] = []
+    prevHash = commonHash
+    for (let i = 0; i < nChain2; i++) {
+        const header = dummyHeader(prevHash)
+        chain2.push(header)
+        prevHash = new Hash(header)
+
+        g.addToGraph(header, g.color.incoming)
+        g.renderGraph()
+        await delay(1000)
+    }
+
+    for (let i = nChain1 - 1; i >= 0; i--) {
+        g.removeFromGraph(chain1[i])
+        g.renderGraph()
+        await delay(1000)
+    }
+
+    for (let i = nChain2 - 1; i >= 0; i--) {
+        g.removeFromGraph(chain2[i])
+        g.renderGraph()
+        await delay(1000)
+    }
 }
 
-prevHash = bifur
-for (let i = 0; i < 3; i++) {
-    header = dummyHeader(prevHash)
-    g.addToGraph(header, g.gcolor.Incoming)
-    prevHash = new Hash(header)
-}
-
-g.removeFromGraph(delHeader)
-g.renderGraph()
+test()

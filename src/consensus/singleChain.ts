@@ -10,7 +10,7 @@ import { TxPool } from "../common/txPool"
 import { SignedTx } from "../common/txSigned"
 import { Server } from "../server"
 import * as utils from "../util/difficulty"
-import * as graph from "../util/graph"
+import { Graph } from "../util/graph"
 import { Hash } from "../util/hash"
 import { Account } from "./database/account"
 import { Database } from "./database/database"
@@ -29,6 +29,8 @@ export class SingleChain implements IConsensus {
     private headerTips: DBBlock[]
     private txUnit: number = 1000
     private forkHeight: number
+    private graph = new Graph() // For debug
+
     constructor(server: Server, dbPath: string, wsPath: string, filePath: string) {
         this.server = server
         this.newBlockCallbacks = []
@@ -51,7 +53,7 @@ export class SingleChain implements IConsensus {
                 genesis.header.stateRoot = transition.currentStateRoot
                 await this.worldState.print(transition.currentStateRoot)
                 await this.putBlock(genesis)
-                graph.initGraph(genesis.header)
+                this.graph.initGraph(genesis.header)
             } else {
                 // TODO : Check txDB status.( Init from file ?)
                 if (!(new Hash(genesisInDB).equals(genesisHash))) {
@@ -82,7 +84,7 @@ export class SingleChain implements IConsensus {
                 if (!verifyResult.isVerified) { return false }
                 const transitionResult = verifyResult.stateTransition
                 await this.worldState.putPending(transitionResult.batch, transitionResult.mapAccount)
-                graph.addToGraph(block.header, graph.gcolor.Outgoing)
+                this.graph.addToGraph(block.header, this.graph.color.outgoing)
             }
             const { current, currentHash, previous } = await this.db.putBlock(block)
 
@@ -364,7 +366,7 @@ export class SingleChain implements IConsensus {
                         const hash = new Hash(b.header)
                         const blk = await this.getBlockByHash(hash)
                         if (blk instanceof Block) { await this.server.txPool.putTxs(blk.txs) }
-                        // if (blk instanceof Block) { graph.removeFromGraph(blk.header) }
+                        if (blk instanceof Block) { this.graph.removeFromGraph(blk.header) }
                     }
                 }
                 for (const b of mainChain) {
