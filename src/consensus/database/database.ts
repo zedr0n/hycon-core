@@ -98,6 +98,16 @@ export class Database {
         })
     }
 
+    public async setHeightHash(height: number, hash: Hash): Promise<void> {
+        await this.database.put(height, hash.toString())
+    }
+
+    public async getHash(height: number): Promise<Hash> {
+        const hashData = await this.database.get(height)
+        const hash = Hash.decode(hashData.toString())
+        return Promise.resolve(hash)
+    }
+
     public async setBlockStatus(hash: Hash, status?: BlockStatus): Promise<void> {
         if (status === undefined) {
             const block = await this.getDBBlock(hash)

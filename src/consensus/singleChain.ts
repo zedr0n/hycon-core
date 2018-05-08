@@ -81,8 +81,8 @@ export class SingleChain implements IConsensus {
                 }
             }
             this.server.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock(txs))
-            logger.debug(`Initialization of singlechain is over.`)
             this.server.miner.addCallbackNewBlock((block: Block) => this.putBlock(block))
+            logger.debug(`Initialization of singlechain is over.`)
         } catch (e) {
             logger.error(`Initialization fail in singleChain : ${e}`)
             process.exit(1)
@@ -123,6 +123,7 @@ export class SingleChain implements IConsensus {
             this.updateTopTip(this.headerTips, current, previous)
             const { prevTip, isTopTip } = this.updateTopTip(this.blockTips, current, previous)
             const bStatus: BlockStatus = (isTopTip) ? BlockStatus.MainChain : BlockStatus.Block
+            if (isTopTip) { await this.db.setHeightHash(current.height, blockHash) }
             await this.db.setBlockStatus(blockHash, bStatus)
             const txs = this.server.txPool.updateTxs(blockTxs, this.txUnit)
 
@@ -432,6 +433,7 @@ export class SingleChain implements IConsensus {
                     const hash = new Hash(b.header)
                     const blk = await this.getBlockByHash(hash)
                     await this.db.setBlockStatus(hash, BlockStatus.MainChain)
+                    await this.db.setHeightHash(b.height, hash)
                     if (blk instanceof Block) { this.server.txPool.updateTxs(blk.txs, 0) }
                 }
                 this.forkHeight = -1
