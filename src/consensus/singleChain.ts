@@ -73,6 +73,7 @@ export class SingleChain implements IConsensus {
             this.server.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock(txs))
             logger.debug(`Initialization of singlechain is over.`)
             this.server.miner.addCallbackNewBlock((block: Block) => this.putBlock(block))
+            this.server.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock(txs))
         } catch (e) {
             logger.error(`Initialization fail in singleChain : ${e}`)
             process.exit(1)
