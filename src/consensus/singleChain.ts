@@ -45,9 +45,10 @@ export class SingleChain implements IConsensus {
             const genesisHash = new Hash(genesis.header)
             const genesisInDB = await this.db.getBlockHeader(genesisHash)
             if (genesisInDB === undefined) {
-                const transition = this.worldState.first(genesis)
+                const transition = await this.worldState.first(genesis)
                 await this.worldState.putPending(transition.batch, transition.mapAccount)
                 genesis.header.stateRoot = transition.currentStateRoot
+                await this.worldState.print(transition.currentStateRoot)
                 await this.putBlock(genesis)
             } else {
                 if (!(new Hash(genesisInDB).equals(genesisHash))) {

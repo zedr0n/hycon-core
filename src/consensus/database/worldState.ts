@@ -8,10 +8,13 @@ import { GenesisBlock } from "../../common/blockGenesis"
 import { PublicKey } from "../../common/publicKey"
 import { GenesisSignedTx } from "../../common/txGenesisSigned"
 import { Hash } from "../../util/hash"
+import { Wallet } from "../../wallet/wallet"
 import { Account } from "./account"
 import { DBState } from "./dbState"
 import { NodeRef } from "./nodeRef"
 import { StateNode } from "./stateNode"
+// tslint:disable-next-line:no-var-requires
+const assert = require("assert")
 
 const logger = getLogger("WorldState")
 
@@ -57,21 +60,46 @@ export class WorldState {
         this.accountLock = new AsyncLock()
     }
 
-    public first(genesis: GenesisBlock): IStateTransition {
-        const batch: DBState[] = []
-        const mapAccount: Map<string, DBState> = new Map<string, DBState>()
-        const stateNode = new StateNode()
-        genesis.txs.sort((a, b) => a.to[0] - b.to[0])
+    public async first(genesis: GenesisBlock): Promise<IStateTransition> {
+        try {
+            const batch: DBState[] = []
+            const mapAccount: Map<string, DBState> = new Map<string, DBState>()
+            const stateNode = new StateNode()
+            genesis.txs.sort((a, b) => a.to[0] - b.to[0])
 
-        for (const tx of genesis.txs) {
-            if (!this.verifyTx(tx)) { continue }
-            const toAccount = new Account({ balance: +tx.amount, nonce: 0 })
-            const toHash = this.put(batch, mapAccount, toAccount)
-            const nodeRef = new NodeRef({ address: tx.to, child: toHash })
-            stateNode.nodeRefs.push(nodeRef)
+            for (const tx of genesis.txs) {
+                if (!this.verifyTx(tx)) { continue }
+                const toAccount = new Account({ balance: +tx.amount, nonce: 0 })
+                const toAccountHash = this.put(batch, mapAccount, toAccount)
+                const nodeRef = new NodeRef({ address: tx.to, child: toAccountHash })
+                stateNode.nodeRefs.push(nodeRef)
+            }
+
+            // Just for test, so remove this and change aysn to sync function
+            await Wallet.walletInit()
+            const testWallet = Wallet.generate()
+            await testWallet.save("test1", "password")
+            const testWallet2 = Wallet.generate()
+            await testWallet2.save("test2", "password")
+            const testAccount1 = new Account({ balance: 12345000, nonce: 0 })
+            const toHash = this.put(batch, mapAccount, testAccount1)
+            const toAddress = await Wallet.getAddress("test1")
+            const nodeRef1 = new NodeRef({ address: new Address(toAddress), child: toHash })
+            stateNode.nodeRefs.push(nodeRef1)
+            const testAccount2 = new Account({ balance: 54321000, nonce: 0 })
+            const toHash2 = this.put(batch, mapAccount, testAccount2)
+            const toAddress2 = await Wallet.getAddress("test2")
+            const nodeRef2 = new NodeRef({ address: new Address(toAddress2), child: toHash2 })
+            stateNode.nodeRefs.push(nodeRef2)
+            stateNode.nodeRefs.sort((a, b) => {
+                return a.address[0] - b.address[0]
+            })
+
+            const currentStateRoot = this.put(batch, mapAccount, stateNode)
+            return { currentStateRoot, batch, mapAccount }
+        } catch (e) {
+            logger.error(`Fail to init : ${e}`)
         }
-        const currentStateRoot = this.put(batch, mapAccount, stateNode)
-        return { currentStateRoot, batch, mapAccount }
     }
 
     public async next(block: Block, previousState: Hash): Promise<IStateTransition> {
@@ -258,6 +286,31 @@ export class WorldState {
         return this.accountDB.batch(batch)
     }
 
+    public async print(hash: Hash, n: number = 0, prefix: Uint8Array = new Uint8Array([])) {
+        try {
+            let indent = ""
+            for (let i = 0; i < n; i++) {
+                indent += "\t"
+            }
+            const object = await this.getDBState(hash)
+            assert(object)
+            assert(object.refCount)
+            if (object.node !== undefined) {
+                logger.info(`${indent}StateNode '${hash}' '${prefix}'  : count(${object.refCount})`)
+                const i = 0
+                for (const node of object.node.nodeRefs) {
+                    await this.print(node.child, n + 1, concat(prefix, node.address))
+                }
+            } else if (object.account !== undefined) {
+                logger.info(`${indent}(${prefix.length})${prefix} --> ${object.account.balance} --> (${hash.toString()}) : count(${object.refCount})`)
+            } else {
+                logger.info(`${indent}Could not find '${hash.toString()}'`)
+            }
+        } catch (e) {
+            return Promise.reject("Print Error : " + e)
+        }
+    }
+
     private async putAccount(batch: DBState[], mapAccount: Map<string, DBState>, changes: IChange[], objectHash?: Hash, offset: number = 0, prefix: Uint8Array = new Uint8Array(0), objectAddress?: Uint8Array): Promise<Hash> {
         try {
             let object: StateNode | Account | undefined
@@ -390,7 +443,9 @@ export class WorldState {
         try {
             const data = await this.accountDB.get(hash.toBuffer())
             decodeingDBState = true
+            assert(data)
             const dbState = DBState.decode(data)
+            assert(dbState)
             return Promise.resolve(dbState)
         } catch (e) {
             if (e.notFound) {
