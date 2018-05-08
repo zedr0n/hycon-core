@@ -58,6 +58,7 @@ export class SingleChain implements IConsensus {
                 this.blockTips = tops
                 this.headerTips = tops
             }
+            this.server.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock(txs))
             setInterval(() => {
                 this.reorganization()
             }, 120000)
