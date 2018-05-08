@@ -3032,6 +3032,9 @@ export interface IPeer {
 
     /** Peer lastSeen */
     lastSeen?: number|Long;
+
+    /** Peer failCount */
+    failCount?: number;
 }
 
 /** Represents a Peer. */
@@ -3051,6 +3054,9 @@ export class Peer implements IPeer {
 
     /** Peer lastSeen. */
     public lastSeen: (number|Long);
+
+    /** Peer failCount. */
+    public failCount: number;
 
     /**
      * Creates a new Peer instance using the specified properties.

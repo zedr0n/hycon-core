@@ -7604,6 +7604,7 @@ $root.Peer = (function() {
      * @property {string|null} [host] Peer host
      * @property {number|null} [port] Peer port
      * @property {number|Long|null} [lastSeen] Peer lastSeen
+     * @property {number|null} [failCount] Peer failCount
      */
 
     /**
@@ -7646,6 +7647,14 @@ $root.Peer = (function() {
     Peer.prototype.lastSeen = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
 
     /**
+     * Peer failCount.
+     * @member {number} failCount
+     * @memberof Peer
+     * @instance
+     */
+    Peer.prototype.failCount = 0;
+
+    /**
      * Creates a new Peer instance using the specified properties.
      * @function create
      * @memberof Peer
@@ -7675,6 +7684,8 @@ $root.Peer = (function() {
             writer.uint32(/* id 2, wireType 0 =*/16).int32(message.port);
         if (message.lastSeen != null && message.hasOwnProperty("lastSeen"))
             writer.uint32(/* id 3, wireType 0 =*/24).int64(message.lastSeen);
+        if (message.failCount != null && message.hasOwnProperty("failCount"))
+            writer.uint32(/* id 4, wireType 0 =*/32).int32(message.failCount);
         return writer;
     };
 
@@ -7717,6 +7728,9 @@ $root.Peer = (function() {
                 break;
             case 3:
                 message.lastSeen = reader.int64();
+                break;
+            case 4:
+                message.failCount = reader.int32();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -7762,6 +7776,9 @@ $root.Peer = (function() {
         if (message.lastSeen != null && message.hasOwnProperty("lastSeen"))
             if (!$util.isInteger(message.lastSeen) && !(message.lastSeen && $util.isInteger(message.lastSeen.low) && $util.isInteger(message.lastSeen.high)))
                 return "lastSeen: integer|Long expected";
+        if (message.failCount != null && message.hasOwnProperty("failCount"))
+            if (!$util.isInteger(message.failCount))
+                return "failCount: integer expected";
         return null;
     };
 
@@ -7790,6 +7807,8 @@ $root.Peer = (function() {
                 message.lastSeen = object.lastSeen;
             else if (typeof object.lastSeen === "object")
                 message.lastSeen = new $util.LongBits(object.lastSeen.low >>> 0, object.lastSeen.high >>> 0).toNumber();
+        if (object.failCount != null)
+            message.failCount = object.failCount | 0;
         return message;
     };
 
@@ -7814,6 +7833,7 @@ $root.Peer = (function() {
                 object.lastSeen = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.lastSeen = options.longs === String ? "0" : 0;
+            object.failCount = 0;
         }
         if (message.host != null && message.hasOwnProperty("host"))
             object.host = message.host;
@@ -7824,6 +7844,8 @@ $root.Peer = (function() {
                 object.lastSeen = options.longs === String ? String(message.lastSeen) : message.lastSeen;
             else
                 object.lastSeen = options.longs === String ? $util.Long.prototype.toString.call(message.lastSeen) : options.longs === Number ? new $util.LongBits(message.lastSeen.low >>> 0, message.lastSeen.high >>> 0).toNumber() : message.lastSeen;
+        if (message.failCount != null && message.hasOwnProperty("failCount"))
+            object.failCount = message.failCount;
         return object;
     };
 

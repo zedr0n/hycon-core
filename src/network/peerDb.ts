@@ -74,14 +74,14 @@ export class PeerDb {
                     logger.debug(`list all`)
                     resolve(keys)
                 })
-        }), 
+        }),
     }
 
     public async clearAll() {
         return new Promise((resolve, reject) => {
             this.db.createKeyStream()
             .on("data", (key: any) => {
-                this.db.del(key)
+                this.db.del(key)''
             })
             .on("end", () => {
                 logger.debug("clear db")
@@ -95,7 +95,7 @@ export class PeerDb {
         const key = Hash.hash(ip + port.toString())
         const date = Date.now()
         logger.debug(`Register Peer ${key}: {${ip},${port},${date}}`)
-        return await this.put(key, { ip, port, timeStamp: date }), 
+        return await this.put(key, { ip, port, timeStamp: date }),
     }
 
     public async getRandomPeers(n: number): Promise<string[] > {
@@ -117,7 +117,7 @@ export class PeerDb {
                     const peer = await this.get(key)
                     peerList.push(peer.toString())
                 }
-                return Promise.resolve(peerList), 
+                return Promise.resolve(peerList),
             },
         } catch (e) {
             return Promise.reject(e)
