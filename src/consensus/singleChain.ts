@@ -68,8 +68,18 @@ export class SingleChain implements IConsensus {
                     return Promise.reject(`Genesis in DB and file are not matched.`)
                 }
                 const tops = await this.db.getTop()
+                // TODO : Seperate set blockTip and headerTip set logic.
                 this.blockTips = tops
                 this.headerTips = tops
+
+                if (this.txdb) {
+                    const blockTip = await this.db.getBlock(new Hash(this.blockTips[0].header))
+                    const isTxSetted = await this.txdb.txDBStatus(blockTip.txs)
+                    if (!isTxSetted) {
+                        const blocks = await this.db.getBlocksRange(0)
+                        await this.txdb.init(blocks)
+                    }
+                }
             }
             this.server.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock(txs))
             logger.debug(`Initialization of singlechain is over.`)
@@ -107,6 +117,8 @@ export class SingleChain implements IConsensus {
             const bStatus: BlockStatus = (isTopTip) ? BlockStatus.MainChain : BlockStatus.Block
             await this.db.setBlockStatus(new Hash(block.header), bStatus)
             const txs = this.server.txPool.updateTxs(blockTxs, this.txUnit)
+
+            utils.processBlock(block.header.difficulty)
 
             this.newBlock(block)
             if (isTopTip) { this.createCandidateBlock(txs) }

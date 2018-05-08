@@ -84,7 +84,6 @@ export class MinerServer implements IMiner {
 
                 this.block.header.nonce = Long.fromString(nonce, true, 16)
 
-                // TODO Server.trackIncomingBlock()
                 if (this.listCallBackNewBlock !== undefined) {
                     this.listCallBackNewBlock(this.block)
                 }

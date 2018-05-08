@@ -4,6 +4,7 @@ import levelup = require("levelup")
 import { getLogger } from "log4js"
 import rocksdb = require("rocksdb")
 import { Address } from "../../common/address"
+import { AnyBlock } from "../../common/block"
 import { GenesisSignedTx } from "../../common/txGenesisSigned"
 import { SignedTx } from "../../common/txSigned"
 import * as proto from "../../serialization/proto"
@@ -20,6 +21,17 @@ export class TxDatabase {
         this.database = levelup(rocks)
         logger.info(`Now, you can use txDB.`)
         // TODO : Init txDB info from file.
+    }
+    public async init(blocks: AnyBlock[]) {
+
+    }
+
+    public async txDBStatus(txs: AnySignedTx[]): Promise<boolean> {
+        for (const tx of txs) {
+            const dbTx = await this.getTx(new Hash(tx))
+            if (dbTx === undefined) { return Promise.resolve(false) }
+        }
+        return Promise.resolve(true)
     }
 
     public async putTxs(txs: AnySignedTx[]): Promise<void> {

@@ -1,4 +1,3 @@
-import blake2b = require("blake2b")
 import * as Long from "long"
 import * as proto from "../serialization/proto"
 import { Hash } from "../util/hash"

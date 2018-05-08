@@ -39,7 +39,7 @@ function calcEMA(): number {
     return emas[emas.length - 1]
 }
 
-export function processBlock(diff: number, timestamp: number): void {
+export function processBlock(diff: number, timestamp: number = Date.now()): void {
     updateDifficulty(diff)
     updateTimes(timestamp)
 }
