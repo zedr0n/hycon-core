@@ -80,20 +80,18 @@ export class WorldState {
             if (Server.globalOptions.wallet) {
                 logger.debug(`Create Wallets`)
                 await Wallet.walletInit()
-                const testWallet = Wallet.generate()
-                await testWallet.save("test1", "")
-                const testWallet2 = Wallet.generate()
-                await testWallet2.save("test2", "")
-                const testAccount1 = new Account({ balance: 12345000, nonce: 0 })
-                const toHash = this.put(batch, mapAccount, testAccount1)
-                const toAddress = await Wallet.getAddress("test1")
-                const nodeRef1 = new NodeRef({ address: new Address(toAddress), child: toHash })
-                stateNode.nodeRefs.push(nodeRef1)
-                const testAccount2 = new Account({ balance: 54321000, nonce: 0 })
-                const toHash2 = this.put(batch, mapAccount, testAccount2)
-                const toAddress2 = await Wallet.getAddress("test2")
-                const nodeRef2 = new NodeRef({ address: new Address(toAddress2), child: toHash2 })
-                stateNode.nodeRefs.push(nodeRef2)
+                const maxCount = 100
+                for (let i = 0; i < maxCount; i++) {
+                    const testWallet = Wallet.generate()
+                    const name = `test${i}`
+                    await testWallet.save(name, "")
+                    const testAccount1 = new Account({ balance: 12345000, nonce: 0 })
+                    const toHash = this.put(batch, mapAccount, testAccount1)
+                    const toAddress = await Wallet.getAddress(name)
+                    const nodeRef1 = new NodeRef({ address: new Address(toAddress), child: toHash })
+                    stateNode.nodeRefs.push(nodeRef1)
+                }
+                // sort
                 stateNode.nodeRefs.sort((a, b) => {
                     return a.address[0] - b.address[0]
                 })
