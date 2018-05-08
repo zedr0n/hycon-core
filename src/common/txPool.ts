@@ -15,11 +15,11 @@ export class TxPool implements ITxPool {
     private callbacks: ITxCallback[]
     private minFee: number
 
-    constructor(server: Server) {
+    constructor(server: Server, minFee?: number) {
         this.server = server
         this.txs = []
         this.callbacks = []
-        this.minFee = 0
+        this.minFee = minFee === undefined ? 0 : minFee
     }
 
     public async putTxs(newTxs: SignedTx[]): Promise<number> {
@@ -43,44 +43,32 @@ export class TxPool implements ITxPool {
         let count = 0
         let i = 0
         let j = 0
-        while (i < newTxs.length && j < this.txs.length) {
-            if (newTxs[i].fee < this.minFee) {
-                return { count, lowestIndex }
-            }
-            try {
-                if (newTxs[i].fee === this.txs[j].fee) {
-                    if (this.txs[j].equals(newTxs[i])) {
-                        i++
-                    } else {
-                        j++
-                    }
-                } else if (newTxs[i].fee > this.txs[j].fee) {
-                    if (await this.server.consensus.isTxValid(newTxs[i])) {
-                        this.txs.splice(j, 0, newTxs[i])
-                        if (count === 0) {
-                            lowestIndex = j
-                        }
-                        i++
-                        j++
-                        count++
-                    }
-                } else {
-                    j++
-                }
-            } catch (e) {
-                logger.debug(`Failed to add Tx: ${e}`)
-            }
-        }
+        let k = 0
         while (i < newTxs.length) {
             if (newTxs[i].fee < this.minFee) {
                 return { count, lowestIndex }
             }
-            try {
-                if (await this.server.consensus.isTxValid(newTxs[i])) {
-                    this.txs.push(newTxs[i])
+
+            if (j + k >= this.txs.length || newTxs[i].fee > this.txs[j + k].fee) {
+                this.txs.splice(j + k, 0, newTxs[i])
+                if (count === 0) {
+                    lowestIndex = j + k
                 }
-            } catch (e) {
-                logger.debug(`Failed to add Tx: ${e}`)
+                count++
+                k = 0
+                i++
+            } else if (newTxs[i].fee < this.txs[j].fee) {
+                j++
+            } else if (newTxs[i].fee === this.txs[j + k].fee) {
+                if (this.txs[j + k].equals(newTxs[i])) {
+                    i++
+                    k = 0
+                } else {
+                    k++
+                }
+            } else {
+                logger.error(`TxPool insert error, it seems the data is not sorted correctly, skipping Tx and attempting to continue.`)
+                i++
             }
         }
         return { count, lowestIndex }
@@ -91,30 +79,28 @@ export class TxPool implements ITxPool {
         let i = 0
         let j = 0
         let k = 0
-        while (i < txs.length && (j + k) < this.txs.length) {
+        while (i < txs.length && j < this.txs.length) {
             if (txs[i].fee < this.txs[j].fee) {
                 j++
-            } else if (txs[i].fee > this.txs[j].fee) {
+            } else if (j + k >= this.txs.length || txs[i].fee > this.txs[j + k].fee) {
                 i++
+                k = 0
             } else {
-                if (txs[i].fee > this.txs[j + k].fee) {
-                    i++
-                    k = 0
-                } else if (txs[i].fee < this.txs[j + k].fee) {
-                    logger.error("TxPool seems to be out of order")
-                } else {
+                if (txs[i].fee === this.txs[j + k].fee) {
                     if (this.txs[j + k].equals(txs[i])) {
-                        this.txs.slice(j + k, 1)
+                        this.txs.splice(j + k, 1)
                     } else {
                         k++
                     }
+                } else {
+                    logger.error(`TxPool insert error, it seems the data is not sorted correctly, skipping Tx and attempting to continue.`)
                 }
             }
         }
     }
 
     private callback(lowestIndex: number): void {
-        lowestIndex += 1
+        const n = lowestIndex + 1
         for (const callback of this.callbacks) {
             if (callback.n >= lowestIndex) {
                 setImmediate(callback.callback, this.txs.slice(0, callback.n))
