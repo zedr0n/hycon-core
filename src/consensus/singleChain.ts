@@ -31,8 +31,8 @@ export class SingleChain implements IConsensus {
     private newBlockCallbacks: NewBlockCallback[]
     private db: Database
     private worldState: WorldState
-    private blockTips: DBBlock[]
-    private headerTips: DBBlock[]
+    private blockTip: DBBlock
+    private headerTip: DBBlock
     private txUnit: number = 1000
     private forkHeight: number
     private graph = new Graph() // For debug
@@ -42,8 +42,6 @@ export class SingleChain implements IConsensus {
         this.newBlockCallbacks = []
         this.db = new Database(dbPath, filePath)
         this.worldState = new WorldState(wsPath)
-        this.blockTips = []
-        this.headerTips = []
         this.forkHeight = -1
         if (txPath) { this.txdb = new TxDatabase(txPath) }
     }
@@ -68,11 +66,11 @@ export class SingleChain implements IConsensus {
                 }
                 const tops = await this.db.getTop()
                 // TODO : Seperate set blockTip and headerTip set logic.
-                this.blockTips = tops
-                this.headerTips = tops
+                this.blockTip = tops[0]
+                this.headerTip = tops[0]
 
                 if (this.txdb) {
-                    const blockTip = await this.db.getBlock(new Hash(this.blockTips[0].header))
+                    const blockTip = await this.db.getBlock(new Hash(this.blockTip.header))
                     const isTxSetted = await this.txdb.txDBStatus(blockTip.txs)
                     if (!isTxSetted) {
                         const blocks = await this.db.getBlocksRange(0)
@@ -120,8 +118,8 @@ export class SingleChain implements IConsensus {
             if (this.txdb) { await this.txdb.putTxs(blockHash, block.txs) }
 
             // Update headerTopTip first, then update blockTopTip
-            this.updateTopTip(this.headerTips, current, previous)
-            const { prevTip, isTopTip } = this.updateTopTip(this.blockTips, current, previous)
+            this.updateTopTip(this.headerTip, current, previous)
+            const { prevTip, isTopTip } = this.updateTopTip(this.blockTip, current, previous)
             const bStatus: BlockStatus = (isTopTip) ? BlockStatus.MainChain : BlockStatus.Block
             if (isTopTip) { await this.db.setHeightHash(current.height, blockHash) }
             await this.db.setBlockStatus(blockHash, bStatus)
@@ -161,7 +159,7 @@ export class SingleChain implements IConsensus {
             const { current, previous } = await this.db.putHeader(blockHash, header)
             await this.db.setBlockStatus(blockHash, BlockStatus.Header)
 
-            this.updateTopTip(this.headerTips, current, previous)
+            this.updateTopTip(this.headerTip, current, previous)
             return Promise.resolve(true)
         } catch (e) {
             return Promise.reject(e)
@@ -240,8 +238,8 @@ export class SingleChain implements IConsensus {
 
     public async getAccount(address: Address): Promise<Account> {
         try {
-            if (this.blockTips.length > 0) {
-                const account = await this.worldState.getAccount(this.blockTips[0].header.stateRoot, address)
+            if (this.blockTip !== undefined) {
+                const account = await this.worldState.getAccount(this.blockTip.header.stateRoot, address)
                 return Promise.resolve(account)
             } else {
                 logger.error(`There is not any tips`)
@@ -269,11 +267,11 @@ export class SingleChain implements IConsensus {
         return this.db.getBlockStatus(hash)
     }
     public getHeaderTip(): { hash: Hash; height: number } {
-        const block = this.headerTips[0]
+        const block = this.headerTip
         return { hash: new Hash(block.header), height: block.height }
     }
     public getBlocksTip(): { hash: Hash; height: number } {
-        const block = this.blockTips[0]
+        const block = this.blockTip
         return { hash: new Hash(block.header), height: block.height }
     }
 
@@ -293,20 +291,20 @@ export class SingleChain implements IConsensus {
     }
 
     // tslint:disable-next-line:max-line-length
-    private updateTopTip(tips: DBBlock[], block: DBBlock, previous?: DBBlock): { prevTip: Hash | undefined, isTopTip: boolean } {
+    private updateTopTip(tip: DBBlock, block: DBBlock, previous?: DBBlock): { prevTip: Hash | undefined, isTopTip: boolean } {
         try {
             let prevTip
             let isTopTip = false
             if (block.header instanceof BlockHeader) {
                 if (previous) {
                     const previousHash = block.header.previousHash[0].toString()
-                    const tipHash = new Hash(tips[0].header)
-                    if (tipHash.toString() === previousHash || tips[0].height < block.height) {
+                    const tipHash = new Hash(tip.header)
+                    if (tipHash.toString() === previousHash || tip.height < block.height) {
                         prevTip = tipHash
-                        tips.splice(0, 1)
-                        tips.unshift(block)
+                        tip = block
                         isTopTip = true
                     } else {
+                        // TODO : Change reorg logic.
                         if (this.forkHeight === -1) {
                             this.forkHeight = block.height
                         } else {
@@ -317,7 +315,7 @@ export class SingleChain implements IConsensus {
                     throw new Error(`Previous block undefined in updateTopTip`)
                 }
             } else {
-                tips.push(block)
+                tip = block
                 isTopTip = true
             }
             return { prevTip, isTopTip }
@@ -327,14 +325,13 @@ export class SingleChain implements IConsensus {
     }
     private async createCandidateBlock(txs: SignedTx[]): Promise<Block> {
         try {
-            const previousHash: Hash[] = []
-            for (const tip of this.headerTips) { previousHash.push(new Hash(tip.header)) }
+            // TODO : PreviousHash is using headertip???? maybe blockTip.
             const difficulty = utils.getTargetDifficulty()
             const header = new BlockHeader({
                 difficulty,
                 merkleRoot: new Hash(),
                 nonce: -1,
-                previousHash,
+                previousHash: [new Hash(this.blockTip.header)],
                 stateRoot: new Hash(),
                 timeStamp: Date.now(),
             })
@@ -399,7 +396,7 @@ export class SingleChain implements IConsensus {
         try {
             logger.debug(`Reorganization Started`)
             if (this.forkHeight === -1) { return Promise.resolve(undefined) }
-            const tip = this.blockTips[0]
+            const tip = this.blockTip
             const result = await this.db.getDBBlockMapByHeights(this.forkHeight, tip.height)
             const bmap = result.blockMap
             const hmap = result.hashMap
