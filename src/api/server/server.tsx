@@ -150,7 +150,7 @@ export class HttpServer {
                     amount: req.body.amount,
                     fee: req.body.fee,
                 }, (tx: SignedTx) => {
-                    this.hyconServer.txQueue.queue(tx)
+                    this.hyconServer.txQueue.putTxs([tx])
                 }),
             )
         })
@@ -165,7 +165,7 @@ export class HttpServer {
                     nonce: req.body.nonce,
                     recovery: req.body.recovery,
                 }, (tx: SignedTx) => {
-                    this.hyconServer.txQueue.queue(tx)
+                    this.hyconServer.txQueue.putTxs([tx])
                 }),
             )
         })
