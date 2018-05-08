@@ -12,10 +12,10 @@ export class DBTx implements proto.ITxDB {
         return new DBTx(tx)
     }
 
-    public hash!: Hash
-    public blockHash!: Hash
-    public blockHeight!: number
-    public txNumber!: number
+    public hash: Hash
+    public blockHash: Hash
+    public blockHeight: number
+    public txNumber: number
 
     constructor()
     // tslint:disable-next-line:unified-signatures
