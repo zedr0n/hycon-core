@@ -117,7 +117,7 @@ export class SingleChain implements IConsensus {
                 this.graph.addToGraph(block.header, this.graph.color.outgoing)
             }
             const { current, previous } = await this.db.putBlock(blockHash, block)
-            if (this.txdb) { await this.txdb.putTxs(block.txs) }
+            if (this.txdb) { await this.txdb.putTxs(blockHash, block.txs) }
 
             // Update headerTopTip first, then update blockTopTip
             this.updateTopTip(this.headerTips, current, previous)

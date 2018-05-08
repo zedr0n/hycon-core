@@ -14,6 +14,7 @@ export class TxList implements proto.ITxList {
     public tx: AnySignedTx
     public previousFrom?: Hash
     public previousTo?: Hash
+    public blockHash: Hash
 
     constructor(tx?: AnySignedTx | proto.ITxList) {
         if (tx) {

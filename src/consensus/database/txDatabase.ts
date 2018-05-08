@@ -23,7 +23,7 @@ export class TxDatabase {
         // TODO : Init txDB info from file.
     }
     public async init(blocks: AnyBlock[]) {
-
+        // TODO : Init logic in txDB
     }
 
     public async txDBStatus(txs: AnySignedTx[]): Promise<boolean> {
@@ -34,12 +34,13 @@ export class TxDatabase {
         return Promise.resolve(true)
     }
 
-    public async putTxs(txs: AnySignedTx[]): Promise<void> {
+    public async putTxs(blockHash: Hash, txs: AnySignedTx[]): Promise<void> {
         const batch: levelup.Batch[] = []
         const mapLastTx: Map<string, TxList> = new Map<string, TxList>()
         for (const tx of txs) {
             if (!verifyTx(tx)) { continue }
             const txList = new TxList(tx)
+            txList.blockHash = blockHash
             const txHash = new Hash(tx)
 
             const toAddress = tx.to.toString()
@@ -84,6 +85,7 @@ export class TxDatabase {
                 }
             }
         }
+        // TODO : Return with blockHash?
         return Promise.resolve(txs)
     }
 

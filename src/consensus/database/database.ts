@@ -81,7 +81,6 @@ export class Database {
         })
     }
 
-    // tslint:disable-next-line:max-line-length
     public async putHeader(hash: Hash, header: AnyBlockHeader): Promise<{ current: DBBlock, previous: DBBlock }> {
 
         return await this.headerLock.critical<{ current: DBBlock, previous: DBBlock }>(async () => {
@@ -176,6 +175,7 @@ export class Database {
         const blockMap = new Map<number, DBBlock[]>()
         const hashMap = new Map<string, DBBlock>()
         for (let i = fromHeight; i <= toHeight; i++) { blockMap.set(i, []) }
+        // TODO : Change logic using height-hash logic.
         return new Promise<{ blockMap: Map<number, DBBlock[]>, hashMap: Map<string, DBBlock> }>((resolved, reject) => {
             this.database.createReadStream({ gt: "b", lt: "c" })
                 .on("data", (data: any) => {
@@ -195,6 +195,7 @@ export class Database {
     public async getTop(): Promise<DBBlock[]> {
         let tops: DBBlock[] = []
         return new Promise<DBBlock[]>((resolved, reject) => {
+            // TODO : Change logic using tip save in DB.
             this.database.createReadStream({ gt: "b", lt: "c" })
                 .on("data", async (data: any) => {
                     const block = DBBlock.decode(data.value)
@@ -212,6 +213,7 @@ export class Database {
     public async getDBBlocksRange(fromHeight: number, count?: number): Promise<DBBlock[]> {
         try {
             const dbBlockArray: DBBlock[] = []
+            // TODO : Change logic using height-hash logic.
             this.database.createReadStream({ gt: "b", lt: "c" })
                 .on("data", (data: any) => {
                     const dbBlock = DBBlock.decode(data.value)

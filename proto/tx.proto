@@ -24,4 +24,5 @@ message TxList {
   Tx tx = 1;
   bytes previousFrom = 2;
   bytes previousTo = 3;
+  bytes blockHash = 4;
 }
