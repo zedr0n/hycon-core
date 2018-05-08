@@ -36,15 +36,6 @@ export class PeerDb {
             const key = PeerDb.peer2key(peer)
             const value = PeerDb.peer2value(peer)
             await this.db.put(key, value)
-            const index = this.peers.findIndex((peer2: proto.IPeer) => {
-                const value2 = PeerDb.peer2value(peer2)
-                return value2.equals(value)
-            })
-            if (index === -1) {
-                this.peers.push(peer)
-            } else {
-                this.peers[index] = peer
-            }
             return
         }  catch (e) {
             logger.info(`Failed to put peer ${peer.host}:${peer.port} into PeerDB: ${e}`)

@@ -875,8 +875,6 @@ $root.Status = (function() {
      * @property {number|Long|null} [version] Status version
      * @property {string|null} [networkid] Status networkid
      * @property {Uint8Array|null} [hash] Status hash
-     * @property {string|null} [ip] Status ip
-     * @property {number|null} [port] Status port
      */
 
     /**
@@ -919,22 +917,6 @@ $root.Status = (function() {
     Status.prototype.hash = $util.newBuffer([]);
 
     /**
-     * Status ip.
-     * @member {string} ip
-     * @memberof Status
-     * @instance
-     */
-    Status.prototype.ip = "";
-
-    /**
-     * Status port.
-     * @member {number} port
-     * @memberof Status
-     * @instance
-     */
-    Status.prototype.port = 0;
-
-    /**
      * Creates a new Status instance using the specified properties.
      * @function create
      * @memberof Status
@@ -964,10 +946,6 @@ $root.Status = (function() {
             writer.uint32(/* id 2, wireType 2 =*/18).string(message.networkid);
         if (message.hash != null && message.hasOwnProperty("hash"))
             writer.uint32(/* id 3, wireType 2 =*/26).bytes(message.hash);
-        if (message.ip != null && message.hasOwnProperty("ip"))
-            writer.uint32(/* id 4, wireType 2 =*/34).string(message.ip);
-        if (message.port != null && message.hasOwnProperty("port"))
-            writer.uint32(/* id 5, wireType 0 =*/40).int32(message.port);
         return writer;
     };
 
@@ -1010,12 +988,6 @@ $root.Status = (function() {
                 break;
             case 3:
                 message.hash = reader.bytes();
-                break;
-            case 4:
-                message.ip = reader.string();
-                break;
-            case 5:
-                message.port = reader.int32();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -1061,12 +1033,6 @@ $root.Status = (function() {
         if (message.hash != null && message.hasOwnProperty("hash"))
             if (!(message.hash && typeof message.hash.length === "number" || $util.isString(message.hash)))
                 return "hash: buffer expected";
-        if (message.ip != null && message.hasOwnProperty("ip"))
-            if (!$util.isString(message.ip))
-                return "ip: string expected";
-        if (message.port != null && message.hasOwnProperty("port"))
-            if (!$util.isInteger(message.port))
-                return "port: integer expected";
         return null;
     };
 
@@ -1098,10 +1064,6 @@ $root.Status = (function() {
                 $util.base64.decode(object.hash, message.hash = $util.newBuffer($util.base64.length(object.hash)), 0);
             else if (object.hash.length)
                 message.hash = object.hash;
-        if (object.ip != null)
-            message.ip = String(object.ip);
-        if (object.port != null)
-            message.port = object.port | 0;
         return message;
     };
 
@@ -1126,8 +1088,6 @@ $root.Status = (function() {
                 object.version = options.longs === String ? "0" : 0;
             object.networkid = "";
             object.hash = options.bytes === String ? "" : [];
-            object.ip = "";
-            object.port = 0;
         }
         if (message.version != null && message.hasOwnProperty("version"))
             if (typeof message.version === "number")
@@ -1138,10 +1098,6 @@ $root.Status = (function() {
             object.networkid = message.networkid;
         if (message.hash != null && message.hasOwnProperty("hash"))
             object.hash = options.bytes === String ? $util.base64.encode(message.hash, 0, message.hash.length) : options.bytes === Array ? Array.prototype.slice.call(message.hash) : message.hash;
-        if (message.ip != null && message.hasOwnProperty("ip"))
-            object.ip = message.ip;
-        if (message.port != null && message.hasOwnProperty("port"))
-            object.port = message.port;
         return object;
     };
 

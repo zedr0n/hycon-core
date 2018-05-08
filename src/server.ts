@@ -151,9 +151,6 @@ export class Server {
         if (options.mine) {
             MinerServer.useCpuMiner = true
         }
-        if (options.bootNode) {
-            this.network.isBootnode = true
-        }
     }
 
     // TODO : remove Wallet

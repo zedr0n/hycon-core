@@ -22,11 +22,9 @@ export class RabbitPeer extends BasePeer implements IPeer {
     private txPool: ITxPool
     private network: INetwork
     private myStatus: proto.Status = new proto.Status()
-
-    private isBootnode: boolean = false
     private peerDB: PeerDb
 
-    constructor(socket: Socket, network: INetwork, concensus: IConsensus, txPool: ITxPool, isBootnode?: boolean) {
+    constructor(socket: Socket, network: INetwork, concensus: IConsensus, txPool: ITxPool, peerDB: PeerDb) {
         super(socket)
         // tslint:disable-next-line:max-line-length
         logger.info(`New Netpeer Local=${socket.localAddress}:${socket.localPort} --> Remote=${socket.remoteAddress}:${socket.remotePort}`)
@@ -36,14 +34,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
         // set status
         this.myStatus.version = 0
         this.myStatus.networkid = "hycon"
-
-        this.isBootnode = isBootnode
-
-    }
-
-    public setStatus(ip: string, port: number): void {
-        this.myStatus.ip = ip
-        this.myStatus.port = port
+        this.peerDB = peerDB
     }
 
     public getTip(): { hash: Hash; height: number; } {
@@ -223,10 +214,6 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     private async respondStatus(reply: boolean, request: proto.IStatus): Promise<IResponse> {
-        if (this.isBootnode) {
-            this.peerDB = new PeerDb()
-            await this.peerDB.registerPeer(request.ip, request.port)
-        }
         const message: proto.INetwork = {
             statusReturn: { status: this.myStatus, success: true },
         }
@@ -241,21 +228,15 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     private async respondGetPeers(reply: boolean, request: proto.IGetPeers): Promise<IResponse> {
-        let peerList: string[]
-        const peers: proto.IPeer[] = []
-        if (this.isBootnode) {
-            peerList = await this.peerDB.getRandomPeers(request.count)
-            for (const peer of peerList) {
-                const peerParsed: any = JSON.parse(peer)
-                const p = new proto.Peer()
-                p.ip = peerParsed.ip
-                p.port = parseInt(peerParsed.port, 10)
-                peers.push(p)
-            }
+        try {
+            const num = request.count
+            const peers: proto.IPeer[] = await this.peerDB.getRecentActivePeers(num)
+            const message: proto.INetwork = { getPeersReturn: { success: true, peers } }
+            const relay = false
+            return { message, relay }
+        } catch (e) {
+            logger.info(`Could not get recent active Peers: ${e}`)
         }
-        const message: proto.INetwork = { getPeersReturn: { success: true, peers } }
-        const relay = false
-        return { message, relay }
     }
 
     private async respondPutTx(reply: boolean, request: proto.IPutTx): Promise<IResponse> {

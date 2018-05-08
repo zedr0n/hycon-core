@@ -11,7 +11,6 @@ import { IPeer } from "../ipeer"
 import { NatUpnp } from "../nat"
 import { PeerDb } from "../peerDb"
 import { UpnpClient, UpnpServer } from "../upnp"
-import { PeerList } from "./peerList"
 import { RabbitPeer } from "./rabbitPeer"
 import { SocketParser } from "./socketParser"
 // tslint:disable-next-line:no-var-requires
@@ -20,6 +19,11 @@ const logger = getLogger("Network")
 // tslint:disable-next-line:no-var-requires
 const randomInt = require("random-int")
 export class RabbitNetwork implements INetwork {
+    public static seeds: any[] = [
+        { host: "hycon.io", port: 8080 },
+        { host: "hycon.io", port: 8080 },
+        { host: "hycon.io", port: 8080 },
+    ]
     public static socket2Ipeer(socket: Socket): proto.IPeer {
         return proto.Peer.create({
             failCount: 0,
@@ -44,7 +48,7 @@ export class RabbitNetwork implements INetwork {
 
     constructor(hycon: Server, port: number = 8148) {
         this.port = port
-        this.targetPeerCount = 3
+        this.targetPeerCount = 5
         this.hycon = hycon
         this.peerTable = new Map<Buffer, RabbitPeer>()
         logger.debug(`TcpNetwork Port=${port}`)
@@ -69,27 +73,27 @@ export class RabbitNetwork implements INetwork {
         })
 
         this.server.on("error", (error) => logger.error(`${error}`))
-        setInterval(() => logger.debug(`Peers Count=${this.peerTable.size}`), 5000)
-        setInterval(() => { this.findPeers() }, 4000)
-
         // upnp
         this.upnpServer = new UpnpServer(this.port, this.hycon)
         this.upnpClient = new UpnpClient(this, this.hycon)
         // nat
         this.natUpnp = new NatUpnp(this.port, this)
 
+        setInterval(() => logger.debug(`Peers Count=${this.peerTable.size}`), 5000)
+        setInterval(() => { this.findPeers() }, 4000)
+
         return true
     }
 
     public getRandomPeer(): IPeer {
-
+        return
     }
     public getRandomPeers(count: number = 1): IPeer[] {
-
+        return
     }
 
-    public async connect(host: string, port: number): Promise < IPeer > {
-        return new Promise<IPeer>((resolved, reject) => {
+    public async connect(host: string, port: number): Promise < RabbitPeer > {
+        return new Promise<RabbitPeer>((resolved, reject) => {
             const key = RabbitNetwork.string2key(host, port)
             if (this.peerTable.has(key)) {
                 reject(`${host}:${port} Already Exists`)
@@ -118,12 +122,22 @@ export class RabbitNetwork implements INetwork {
     }
 
     private newConnection(key: Buffer, socket: Socket, ipeer: proto.IPeer): RabbitPeer {
-        const peer = new RabbitPeer(socket, this, this.hycon.consensus, this.hycon.txPool)
+        const peer = new RabbitPeer(socket, this, this.hycon.consensus, this.hycon.txPool, this.peerDB)
         this.peerTable.set(key, peer)
         this.peerDB.put(ipeer)
+        const index = this.peerDB.peers.indexOf(ipeer)
+        if (index > -1) {
+            this.peerDB.peers.push(ipeer)
+        } else {
+            this.peerDB.peers[index] = ipeer
+        }
         socket.on("close", (error) => {
             this.peerTable.delete(key)
             this.peerDB.remove(key)
+            const index1 = this.peerDB.peers.indexOf(ipeer)
+            if (index > -1) {
+                this.peerDB.peers.splice(index1, 1)
+            }
         })
         socket.on("error", (error) => {
             logger.error(`Connection error ${socket.remoteAddress}:${socket.remotePort} : ${error}`)
@@ -137,8 +151,21 @@ export class RabbitNetwork implements INetwork {
         const necessaryPeers = this.targetPeerCount - this.peerTable.size
         if (necessaryPeers <= 0) {
             return
+        } else {
+            const len = RabbitNetwork.seeds.length
+            const index = Math.floor(Math.random() * len)
+            try {
+                const rabbitPeer: RabbitPeer = await this.connect(RabbitNetwork.seeds[index].host, RabbitNetwork.seeds[index].port)
+                const peers: proto.IPeer[]  = await rabbitPeer.getPeers(necessaryPeers)
+                for (const peer of peers) {
+                    this.connect(peer.host, peer.port)
+                }
+            } catch (e) {
+                logger.info(`occurred error when connect seeds: ${e}`)
+            }
+
         }
-        // logger.debug(`Connect to Bootnodes For More Peers=${necessaryPeers}`)
+        // logger.debug(`Connect to seeds For More Peers=${necessaryPeers}`)
         await delay(2000)
         // logger.debug(`Done`)
     }
