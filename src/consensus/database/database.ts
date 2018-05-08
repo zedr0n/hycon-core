@@ -1,4 +1,4 @@
-import { resolve } from "dns"
+mport { resolve } from "dns"
 import levelup = require("levelup")
 import { getLogger } from "log4js"
 import rocksdb = require("rocksdb")
@@ -101,6 +101,22 @@ export class Database {
         })
     }
 
+    public async setBlockStatus(hash: Hash, status?: BlockStatus): Promise<void> {
+        if (status === undefined) {
+            const block = await this.getDBBlock(hash)
+            if (block === undefined) { status = BlockStatus.Nothing } else {
+                status = (block.fileNumber === undefined) ? BlockStatus.Header : BlockStatus.MainChain
+            }
+        }
+        await this.database.put("s" + hash, status)
+    }
+
+    public async getBlockStatus(hash: Hash): Promise<BlockStatus> {
+        const key = "s" + hash
+        const status = await this.database.get(key)
+        return Promise.resolve(Number(status))
+    }
+
     public async getBlock(hash: Hash): Promise<AnyBlock> {
         try {
             const dbBlock = await this.getDBBlock(hash)
@@ -155,19 +171,6 @@ export class Database {
         } catch (e) {
             logger.error(`getHeadersRange failed\n${e}`)
             return Promise.reject(e)
-        }
-    }
-
-    public async getBlockStatus(hash: Hash): Promise<BlockStatus> {
-        const block = await this.getDBBlock(hash)
-        if (block === undefined) {
-            return Promise.resolve(BlockStatus.Nothing)
-        } else {
-            if (block.fileNumber === undefined) {
-                return Promise.resolve(BlockStatus.Header)
-            } else {
-                return Promise.resolve(BlockStatus.Block)
-            }
         }
     }
 

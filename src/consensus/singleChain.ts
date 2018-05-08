@@ -104,6 +104,8 @@ export class SingleChain implements IConsensus {
             // Update headerTopTip first, then update blockTopTip
             this.updateTopTip(this.headerTips, current, previous)
             const { prevTip, isTopTip } = this.updateTopTip(this.blockTips, current, previous)
+            const bStatus: BlockStatus = (isTopTip) ? BlockStatus.MainChain : BlockStatus.Block
+            await this.db.setBlockStatus(new Hash(block.header), bStatus)
             const txs = this.server.txPool.updateTxs(blockTxs, this.txUnit)
 
             this.newBlock(block)
@@ -121,6 +123,7 @@ export class SingleChain implements IConsensus {
                 if (!await this.verifyHeader(header)) { return Promise.resolve(false) }
             }
             const { current, currentHash, previous } = await this.db.putHeader(header)
+            await this.db.setBlockStatus(new Hash(header), BlockStatus.Header)
 
             this.updateTopTip(this.headerTips, current, previous)
             return Promise.resolve(true)
@@ -321,7 +324,10 @@ export class SingleChain implements IConsensus {
         if (!isValidHeader) { return Promise.resolve({ isVerified: false }) }
 
         const verifyResult = await this.verifyPreBlock(block)
-        if (!verifyResult.isVerified) { return Promise.resolve({ isVerified: false }) }
+        if (!verifyResult.isVerified) {
+            await this.db.setBlockStatus(new Hash(block.header), BlockStatus.Rejected)
+            return Promise.resolve({ isVerified: false })
+        }
 
         return Promise.resolve(verifyResult)
     }
@@ -351,6 +357,7 @@ export class SingleChain implements IConsensus {
         if ((cryptoHash[0] < target[0]) || ((cryptoHash[0] === target[0]) && (cryptoHash[1] < target[1]))) {
             return Promise.resolve(true)
         }
+        await this.db.setBlockStatus(new Hash(header), BlockStatus.Rejected)
         return Promise.resolve(false)
     }
 
@@ -383,12 +390,15 @@ export class SingleChain implements IConsensus {
                     for (const b of bmap.get(i)) {
                         const hash = new Hash(b.header)
                         const blk = await this.getBlockByHash(hash)
+                        await this.db.setBlockStatus(hash, BlockStatus.Block)
                         if (blk instanceof Block) { await this.server.txPool.putTxs(blk.txs) }
                         if (blk instanceof Block) { this.graph.removeFromGraph(blk.header) }
                     }
                 }
                 for (const b of mainChain) {
-                    const blk = await this.getBlockByHash(new Hash(b.header))
+                    const hash = new Hash(b.header)
+                    const blk = await this.getBlockByHash(hash)
+                    await this.db.setBlockStatus(hash, BlockStatus.MainChain)
                     if (blk instanceof Block) { this.server.txPool.updateTxs(blk.txs, 0) }
                 }
                 this.forkHeight = -1

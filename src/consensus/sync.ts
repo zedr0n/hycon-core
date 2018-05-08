@@ -5,9 +5,11 @@ import { Hash } from "../util/hash"
 import { IConsensus } from "./iconsensus"
 
 export enum BlockStatus {
-    Nothing,
-    Header,
-    Block,
+    Rejected = -1,
+    Nothing = 0,
+    Header = 1,
+    Block = 2,
+    MainChain = 3,
 }
 const count = 10
 
