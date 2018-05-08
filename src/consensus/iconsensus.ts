@@ -8,7 +8,6 @@ import { SignedTx } from "../common/txSigned"
 import { Account } from "../consensus/database/account"
 import { BlockStatus } from "../consensus/sync"
 import { Hash } from "../util/hash"
-type Difficulty = any // TODO: define type
 export type AnySignedTx = (GenesisSignedTx | SignedTx)
 
 export type NewBlockCallback = (block: AnyBlock) => void

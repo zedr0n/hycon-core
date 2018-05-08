@@ -1,4 +1,4 @@
-mport { resolve } from "dns"
+import { resolve } from "dns"
 import levelup = require("levelup")
 import { getLogger } from "log4js"
 import rocksdb = require("rocksdb")
@@ -59,10 +59,10 @@ export class Database {
         await this.blockFile.fileInit(this.filePath, this.fileNumber)
     }
 
-    public async putBlock(block: AnyBlock): Promise<{ current: DBBlock, currentHash: Hash, previous: DBBlock }> {
+    public async putBlock(hash: Hash, block: AnyBlock): Promise<{ current: DBBlock, previous: DBBlock }> {
         // Async problem, block could be inserted twice
-        return await this.blockLock.critical<{ current: DBBlock, currentHash: Hash, previous: DBBlock }>(async () => {
-            const { current, currentHash, previous } = await this.putHeader(block.header)
+        return await this.blockLock.critical<{ current: DBBlock, previous: DBBlock }>(async () => {
+            const { current, previous } = await this.putHeader(hash, block.header)
             // Put block info into blockFile and update header in DB using fileResult.
             const encodeBlock = block.encode()
             const fileResult = await this.blockFile.put(encodeBlock)
@@ -76,28 +76,26 @@ export class Database {
             } else {
                 await this.database.put("filePosition", this.filePosition)
             }
-            await this.database.put("b" + currentHash, current.encode())
-            return { current, currentHash, previous }
+            await this.database.put("b" + hash, current.encode())
+            return { current, previous }
         })
     }
 
     // tslint:disable-next-line:max-line-length
-    public async putHeader(header: AnyBlockHeader): Promise<{ current: DBBlock, currentHash: Hash, previous: DBBlock }> {
+    public async putHeader(hash: Hash, header: AnyBlockHeader): Promise<{ current: DBBlock, previous: DBBlock }> {
 
-        return await this.headerLock.critical<{ current: DBBlock, currentHash: Hash, previous: DBBlock }>(async () => {
-            const currentHash = new Hash(header)
-            const currentBlock = await this.getDBBlock(currentHash)
+        return await this.headerLock.critical<{ current: DBBlock, previous: DBBlock }>(async () => {
+            const currentBlock = await this.getDBBlock(hash)
             if (currentBlock) {
                 let previousBlock: DBBlock | undefined
                 if (header instanceof BlockHeader) {
                     previousBlock = await this.getDBBlock(header.previousHash[0])
                 }
-                return Promise.resolve({ current: currentBlock, currentHash, previous: previousBlock })
+                return Promise.resolve({ current: currentBlock, previous: previousBlock })
             }
             const { current, previous } = await this.makeDBBlock(header).catch((err) => Promise.reject(err))
-            await this.database.put("b" + currentHash, current.encode())
-            return Promise.resolve({ current, currentHash, previous })
-
+            await this.database.put("b" + hash, current.encode())
+            return Promise.resolve({ current, previous })
         })
     }
 
@@ -198,8 +196,9 @@ export class Database {
         let tops: DBBlock[] = []
         return new Promise<DBBlock[]>((resolved, reject) => {
             this.database.createReadStream({ gt: "b", lt: "c" })
-                .on("data", (data: any) => {
+                .on("data", async (data: any) => {
                     const block = DBBlock.decode(data.value)
+                    const status = await this.getBlockStatus(new Hash(block.header))
                     if (tops.length === 0 || tops[0].height < block.height) {
                         tops = [block]
                     } else if (tops[0].height === block.height && tops[0].header.timeStamp > block.header.timeStamp) {
@@ -211,12 +210,10 @@ export class Database {
     }
 
     public async getDBBlocksRange(fromHeight: number, count?: number): Promise<DBBlock[]> {
-        let decodingDBEntry = false
         try {
             const dbBlockArray: DBBlock[] = []
             this.database.createReadStream({ gt: "b", lt: "c" })
                 .on("data", (data: any) => {
-                    decodingDBEntry = true
                     const dbBlock = DBBlock.decode(data.value)
                     if (dbBlock.height >= fromHeight) {
                         let isInserted = false
@@ -238,10 +235,6 @@ export class Database {
                 })
         } catch (e) {
             logger.error(`getBlocksRange failed\n${e}`)
-            if (decodingDBEntry) {
-                // TODO: Schedule rerequest or file lookup
-                logger.debug(`Could not decode block in getDBBlocksRange`)
-            }
             return Promise.reject(e)
         }
     }

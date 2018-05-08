@@ -13,7 +13,6 @@ message Account {
     int32 nonce = 2;
 }
 
-//TODO: Switch to map<bytes, bytes> (Broken in protobuf.js?)
 message StateNode {
     repeated NodeRef nodeRefs = 1;
 }

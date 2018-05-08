@@ -16,7 +16,6 @@ import { Server } from "../server"
 import * as utils from "../util/difficulty"
 import { Graph } from "../util/graph"
 import { Hash } from "../util/hash"
-import * as graph from "../util/visGraph"
 import { Account } from "./database/account"
 import { Database } from "./database/database"
 import { DBBlock } from "./database/dbblock"
@@ -84,7 +83,7 @@ export class SingleChain implements IConsensus {
             this.server.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock(txs))
             logger.debug(`Initialization of singlechain is over.`)
             this.server.miner.addCallbackNewBlock((block: Block) => this.putBlock(block))
-            this.server.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock(txs))
+            ¬L
         } catch (e) {
             logger.error(`Initialization fail in singleChain : ${e}`)
             process.exit(1)
@@ -93,35 +92,48 @@ export class SingleChain implements IConsensus {
 
     public async putBlock(block: AnyBlock): Promise<boolean> {
         try {
-            // TODO : Check reorganization condition.
+            const blockHash = new Hash(block.header)
+            const blockStatus = await this.getBlockStatus(blockHash)
+            if (blockStatus === BlockStatus.Rejected) {
+                logger.warn(`Already rejected Block : ${blockHash}`)
+                return false
+            } else if (blockStatus === BlockStatus.MainChain || blockStatus === BlockStatus.Block) {
+                logger.warn(`Already exsited Header : ${blockHash}`)
+                return false
+            }
+
             logger.info(`Block header : `, block.header)
-            logger.info(`Put Block : ${new Hash(block.header)}`)
+            logger.info(`Put Block : ${blockHash}`)
             let blockTxs: SignedTx[] = []
-            // Have to check db existence before verify(In header verify, calculate cryptonight)????
             if (block instanceof Block) {
                 blockTxs = block.txs
                 const verifyResult = await this.verifyBlock(block)
-                if (!verifyResult.isVerified) { return false }
+                if (!verifyResult.isVerified) {
+                    logger.error(`Invalid Block Rejected : ${blockHash}`)
+                    await this.db.setBlockStatus(blockHash, BlockStatus.Rejected)
+                    return false
+                }
                 const transitionResult = verifyResult.stateTransition
                 await this.worldState.putPending(transitionResult.batch, transitionResult.mapAccount)
                 this.graph.addToGraph(block.header, this.graph.color.outgoing)
             }
-            const { current, currentHash, previous } = await this.db.putBlock(block)
-            logger.info(`Current putBlock Hash : ${currentHash}`)
+            const { current, previous } = await this.db.putBlock(blockHash, block)
             if (this.txdb) { await this.txdb.putTxs(block.txs) }
-            const putResult = await this.db.getBlockHeader(currentHash)
 
             // Update headerTopTip first, then update blockTopTip
             this.updateTopTip(this.headerTips, current, previous)
             const { prevTip, isTopTip } = this.updateTopTip(this.blockTips, current, previous)
             const bStatus: BlockStatus = (isTopTip) ? BlockStatus.MainChain : BlockStatus.Block
-            await this.db.setBlockStatus(new Hash(block.header), bStatus)
+            await this.db.setBlockStatus(blockHash, bStatus)
             const txs = this.server.txPool.updateTxs(blockTxs, this.txUnit)
 
             utils.processBlock(block.header.difficulty)
 
             this.newBlock(block)
-            if (isTopTip) { this.createCandidateBlock(txs) }
+            if (isTopTip) {
+                await this.reorganization()
+                this.createCandidateBlock(txs)
+            }
             return true
         } catch (e) {
             logger.error(e)
@@ -130,12 +142,24 @@ export class SingleChain implements IConsensus {
     }
     public async putHeader(header: AnyBlockHeader): Promise<boolean> {
         try {
-            // Have to check db existence before verify(In header verify, calculate cryptonight)????
-            if (header instanceof BlockHeader) {
-                if (!await this.verifyHeader(header)) { return Promise.resolve(false) }
+            const blockHash = new Hash(header)
+            const blockStatus = await this.getBlockStatus(new Hash(header))
+            if (blockStatus === BlockStatus.Rejected) {
+                logger.warn(`Already rejected Block : ${blockHash}`)
+                return false
+            } else if (blockStatus === BlockStatus.MainChain || blockStatus === BlockStatus.Block || blockStatus === BlockStatus.Header) {
+                logger.warn(`Already exsited Header : ${blockHash}`)
+                return false
             }
-            const { current, currentHash, previous } = await this.db.putHeader(header)
-            await this.db.setBlockStatus(new Hash(header), BlockStatus.Header)
+            if (header instanceof BlockHeader) {
+                if (!await this.verifyHeader(header)) {
+                    logger.error(`Invalid Header Rejected : ${blockHash}`)
+                    await this.db.setBlockStatus(blockHash, BlockStatus.Rejected)
+                    return Promise.resolve(false)
+                }
+            }
+            const { current, previous } = await this.db.putHeader(blockHash, header)
+            await this.db.setBlockStatus(blockHash, BlockStatus.Header)
 
             this.updateTopTip(this.headerTips, current, previous)
             return Promise.resolve(true)
@@ -337,7 +361,6 @@ export class SingleChain implements IConsensus {
 
         const verifyResult = await this.verifyPreBlock(block)
         if (!verifyResult.isVerified) {
-            await this.db.setBlockStatus(new Hash(block.header), BlockStatus.Rejected)
             return Promise.resolve({ isVerified: false })
         }
 
@@ -369,7 +392,6 @@ export class SingleChain implements IConsensus {
         if ((cryptoHash[0] < target[0]) || ((cryptoHash[0] === target[0]) && (cryptoHash[1] < target[1]))) {
             return Promise.resolve(true)
         }
-        await this.db.setBlockStatus(new Hash(header), BlockStatus.Rejected)
         return Promise.resolve(false)
     }
 
