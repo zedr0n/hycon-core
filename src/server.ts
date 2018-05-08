@@ -82,62 +82,6 @@ export class Server {
         this.miner.start()
     }
 
-    // tslint:disable:object-literal-sort-keys
-    public async createSubscription(sub: { address: string, url: string, from: boolean, to: boolean }): Promise<{ id: number } | IResponseError> {
-        try {
-            const addressOfWallet = new Address(sub.address)
-            const account = await this.accountDB.getAccount(this.db.tips[0].header.stateRoot, addressOfWallet)
-            if (account === undefined) {
-                return Promise.resolve({
-                    status: 404,
-                    timestamp: Date.now(),
-                    error: "NOT_FOUND",
-                    message: "the resource cannot be found / currently unavailable",
-                })
-            }
-
-            this.subscription = new Map()
-            this.subscription.set(Server.subsid, [sub.address, sub.url, sub.from, sub.to])
-
-            return Promise.resolve({
-                id: Server.subsid++,
-            })
-        } catch (e) {
-            return Promise.resolve({
-                status: 400,
-                timestamp: Date.now(),
-                error: "INVALID_PARAMETER",
-                message: e.toString(),
-            })
-        }
-    }
-
-    public async deleteSubscription(address: string, id: number): Promise<number | IResponseError> {
-        try {
-            const addressOfWallet = new Address(address)
-            const account = await this.accountDB.getAccount(this.db.tips[0].header.stateRoot, addressOfWallet)
-            if (account === undefined) {
-                return Promise.resolve({
-                    status: 404,
-                    timestamp: Date.now(),
-                    error: "NOT_FOUND",
-                    message: "the resource cannot be found / currently unavailable",
-                })
-            }
-
-            this.subscription = new Map()
-            this.subscription.delete(id)
-
-            return Promise.resolve(204)
-        } catch (e) {
-            return Promise.resolve({
-                status: 400,
-                timestamp: Date.now(),
-                error: "INVALID_PARAMETER",
-                message: e.toString(),
-            })
-        }
-    }
     private readOptions() {
         const options = commandLineArgs(optionDefinitions)
         logger.info(`Options=${JSON.stringify(options)}`)
@@ -154,26 +98,24 @@ export class Server {
 
     // TODO : remove Wallet
     // tslint:disable-next-line:member-ordering
-    public async makeSignedTx(): Promise<void> {
+    public async testTx(): Promise<void> {
         const wallets: Wallet[] = []
+        await Wallet.walletInit()
         for (let i = 0; i < 10; i++) {
-            wallets.push(Wallet.randomWallet())
+            wallets.push(Wallet.generateKey())
         }
-        const amt = 100
-        const fee = 10
-        let nonce = 0
-
         const idxX = Math.floor(Math.random() * 10)
-        const toWallet = wallets[idxX]
-        const toAddr = toWallet.pubKey.address()
-
         let idxY = idxX + 1
         if (idxY === 100) { idxY = idxY - 2 }
 
+        const toWallet = wallets[idxX]
+        const toAddr = toWallet.pubKey.address()
         const fromWallet = wallets[idxY]
-
-        const tx = fromWallet.send(toAddr, amt, nonce++, fee)
-        const count = await this.txPool.putTxs([tx])
+        logger.debug(`>>>>>toWallet, fromWallet: ${toWallet.pubKey.address().toString()}, ${fromWallet.pubKey.address().toString()}`)
+        let nonce = 0
+        const tx = fromWallet.send(toAddr, 100, nonce++, 10)
+        logger.debug(`>>>>>tx: ${tx.amount}, ${tx.fee}, ${tx.to}, ${tx.from}`)
+        await this.txPool.putTxs([tx])
     }
 
     // TODO : Block, hash, SignedTx, randomBytes import, and testMakeBlock(db, consensus) remove
