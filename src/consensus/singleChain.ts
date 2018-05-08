@@ -1,5 +1,6 @@
 import * as bigInt from "big-integer"
 import { getLogger } from "log4js"
+import Long = require("long")
 import { Address } from "../common/address"
 import { AsyncLock } from "../common/asyncLock"
 import { AnyBlock, Block } from "../common/block"
@@ -9,6 +10,8 @@ import { PublicKey } from "../common/publicKey"
 import { GenesisSignedTx } from "../common/txGenesisSigned"
 import { TxPool } from "../common/txPool"
 import { SignedTx } from "../common/txSigned"
+import { CpuMiner } from "../miner/cpuMiner"
+import { MinerServer } from "../miner/minerSever"
 import { Server } from "../server"
 import * as utils from "../util/difficulty"
 import { Graph } from "../util/graph"
@@ -54,7 +57,6 @@ export class SingleChain implements IConsensus {
                 const transition = await this.worldState.first(genesis)
                 await this.worldState.putPending(transition.batch, transition.mapAccount)
                 genesis.header.stateRoot = transition.currentStateRoot
-                await this.worldState.print(transition.currentStateRoot)
                 await this.putBlock(genesis)
                 this.graph.initGraph(genesis.header)
             } else {
@@ -69,6 +71,7 @@ export class SingleChain implements IConsensus {
             }
             this.server.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock(txs))
             logger.debug(`Initialization of singlechain is over.`)
+            this.server.miner.addCallbackNewBlock((block: Block) => this.putBlock(block))
         } catch (e) {
             logger.error(`Initialization fail in singleChain : ${e}`)
             process.exit(1)
@@ -78,6 +81,7 @@ export class SingleChain implements IConsensus {
     public async putBlock(block: AnyBlock): Promise<boolean> {
         try {
             // TODO : Check reorganization condition.
+            logger.info(`Block header : `, block.header)
             logger.info(`Put Block : ${new Hash(block.header)}`)
             let blockTxs: SignedTx[] = []
             // Have to check db existence before verify(In header verify, calculate cryptonight)????
@@ -90,7 +94,9 @@ export class SingleChain implements IConsensus {
                 this.graph.addToGraph(block.header, this.graph.color.outgoing)
             }
             const { current, currentHash, previous } = await this.db.putBlock(block)
-            if (this.txdb) { this.txdb.putTxs(block.txs) }
+            logger.info(`Current putBlock Hash : ${currentHash}`)
+            if (this.txdb) { await this.txdb.putTxs(block.txs) }
+            const putResult = await this.db.getBlockHeader(currentHash)
 
             // Update headerTopTip first, then update blockTopTip
             this.updateTopTip(this.headerTips, current, previous)
@@ -102,14 +108,14 @@ export class SingleChain implements IConsensus {
             return true
         } catch (e) {
             logger.error(e)
+            return false
         }
-        return false
     }
     public async putHeader(header: AnyBlockHeader): Promise<boolean> {
         try {
             // Have to check db existence before verify(In header verify, calculate cryptonight)????
             if (header instanceof BlockHeader) {
-                if (!this.verifyHeader(header)) { return Promise.resolve(false) }
+                if (!await this.verifyHeader(header)) { return Promise.resolve(false) }
             }
             const { current, currentHash, previous } = await this.db.putHeader(header)
 
@@ -208,8 +214,7 @@ export class SingleChain implements IConsensus {
     public getLastTxs(address: Address, count?: number): Promise<AnySignedTx[]> {
         try {
             if (this.txdb) {
-                throw new Error(`Not implemented`)
-                // return this.txdb.getLastTxs(address, count)
+                return this.txdb.getLastTxs(address, count)
             } else {
                 return Promise.reject(`The database to get txs does not exist.`)
             }
@@ -247,32 +252,36 @@ export class SingleChain implements IConsensus {
 
     // tslint:disable-next-line:max-line-length
     private updateTopTip(tips: DBBlock[], block: DBBlock, previous?: DBBlock): { prevTip: Hash | undefined, isTopTip: boolean } {
-        let prevTip
-        let isTopTip = false
-        if (block.header instanceof BlockHeader) {
-            if (previous) {
-                const previousHash = block.header.previousHash[0].toString()
-                const tipHash = new Hash(tips[0].header)
-                if (tipHash.toString() === previousHash || tips[0].height < block.height) {
-                    prevTip = tipHash
-                    tips.splice(0, 1)
-                    tips.unshift(block)
-                    isTopTip = true
-                } else {
-                    if (this.forkHeight === -1) {
-                        this.forkHeight = block.height
+        try {
+            let prevTip
+            let isTopTip = false
+            if (block.header instanceof BlockHeader) {
+                if (previous) {
+                    const previousHash = block.header.previousHash[0].toString()
+                    const tipHash = new Hash(tips[0].header)
+                    if (tipHash.toString() === previousHash || tips[0].height < block.height) {
+                        prevTip = tipHash
+                        tips.splice(0, 1)
+                        tips.unshift(block)
+                        isTopTip = true
                     } else {
-                        if (this.forkHeight > block.height) { this.forkHeight = block.height }
+                        if (this.forkHeight === -1) {
+                            this.forkHeight = block.height
+                        } else {
+                            if (this.forkHeight > block.height) { this.forkHeight = block.height }
+                        }
                     }
+                } else {
+                    throw new Error(`Previous block undefined in updateTopTip`)
                 }
             } else {
-                throw new Error(`Previous block undefined in updateTopTip`)
+                tips.push(block)
+                isTopTip = true
             }
-        } else {
-            tips.push(block)
-            isTopTip = true
+            return { prevTip, isTopTip }
+        } catch (e) {
+            logger.error(`Fail to updateTOpTIp`)
         }
-        return { prevTip, isTopTip }
     }
     private async createCandidateBlock(txs: SignedTx[]): Promise<Block> {
         try {
@@ -296,7 +305,7 @@ export class SingleChain implements IConsensus {
             newBlock.header.stateRoot = newState.currentStateRoot
 
             if (!await this.verifyPreBlock(newBlock)) { throw new Error("Not verified.") }
-            // TODO : Send to miner new Block
+            this.server.miner.newCandidateBlock(newBlock)
             return Promise.resolve(newBlock)
         } catch (e) {
             logger.error(`Fail to createCandidateBlock : ${e}`)
@@ -304,24 +313,9 @@ export class SingleChain implements IConsensus {
         }
     }
 
-    private async verifyHeader(header: BlockHeader): Promise<boolean> {
-        try {
-            // const cryptonightHash = await Miner.hash(header.preHash(), header.nonce)
-            // const diff = utils.unforcedInt(header.difficulty)
-            // const hexDifficulty = utils.difficulty(diff)
-            // const cryptoHex = Buffer.from(cryptonightHash).toString("hex")
-            // if (bigInt(cryptoHex) >= bigInt(hexDifficulty)) {
-            //     return Promise.resolve(false)
-            // }
-
-            return Promise.resolve(true)
-        } catch (e) {
-            return Promise.reject(e)
-        }
-    }
-
     private async verifyBlock(block: Block): Promise<{ isVerified: boolean, stateTransition?: IStateTransition }> {
-        if (!await this.verifyHeader(block.header)) { return Promise.resolve({ isVerified: false }) }
+        const isValidHeader = await this.verifyHeader(block.header)
+        if (!isValidHeader) { return Promise.resolve({ isVerified: false }) }
 
         const verifyResult = await this.verifyPreBlock(block)
         if (!verifyResult.isVerified) { return Promise.resolve({ isVerified: false }) }
@@ -342,6 +336,19 @@ export class SingleChain implements IConsensus {
         }
 
         return Promise.resolve({ isVerified: true, stateTransition: newState })
+    }
+
+    private async verifyHeader(header: BlockHeader): Promise<boolean> {
+        const preHash = header.preHash()
+        const cryptoHash = await CpuMiner.hash(preHash, header.nonce.toString(16))
+        const difficulty = header.difficulty
+        const bufTarget = Buffer.from(utils.difficulty(utils.unforcedInt(difficulty)), "hex")
+        const target = new Uint8Array(bufTarget).subarray(0, MinerServer.LEN_TARGET)
+
+        if ((cryptoHash[0] < target[0]) || ((cryptoHash[0] === target[0]) && (cryptoHash[1] < target[1]))) {
+            return Promise.resolve(true)
+        }
+        return Promise.resolve(false)
     }
 
     private async reorganization(): Promise<void> {

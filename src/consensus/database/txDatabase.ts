@@ -9,11 +9,10 @@ import { SignedTx } from "../../common/txSigned"
 import * as proto from "../../serialization/proto"
 import { Hash } from "../../util/hash"
 import { AnySignedTx } from "../iconsensus"
-import { verifyTx } from "../singleChain"
+import { SingleChain, verifyTx } from "../singleChain"
 import { TxList } from "./txList"
 const logger = getLogger("TxDB")
 
-// tslint:disable:no-bitwise
 export class TxDatabase {
     private database: levelup.LevelUp
     constructor(path: string) {
@@ -24,7 +23,6 @@ export class TxDatabase {
     }
 
     public async putTxs(txs: AnySignedTx[]): Promise<void> {
-        logger.info(`In putTxs : `, txs)
         const batch: levelup.Batch[] = []
         const mapLastTx: Map<string, TxList> = new Map<string, TxList>()
         for (const tx of txs) {
@@ -34,14 +32,13 @@ export class TxDatabase {
 
             const toAddress = tx.to.toString()
             let tLastTx = mapLastTx.get(toAddress)
-            if (tLastTx === undefined) { tLastTx = await this.getLastTx(tx.to) }
+            if (tLastTx === undefined) { tLastTx = await this.getTx(tx.to) }
             if (tLastTx !== undefined) { txList.previousTo = new Hash(tLastTx.tx) }
 
             if (tx instanceof SignedTx) {
-                logger.info(`This is signedTx`)
                 const fromAddress = tx.from.toString()
                 let fLastTx = mapLastTx.get(fromAddress)
-                if (fLastTx === undefined) { fLastTx = await this.getLastTx(tx.from) }
+                if (fLastTx === undefined) { fLastTx = await this.getTx(tx.from) }
                 if (fLastTx !== undefined) { txList.previousFrom = new Hash(fLastTx.tx) }
                 mapLastTx.set(fromAddress, txList)
             }
@@ -49,65 +46,46 @@ export class TxDatabase {
             batch.push({ type: "put", key: txHash.toString(), value: txList.encode() })
         }
         for (const key of mapLastTx.keys()) {
-            batch.push({ type: "put", key, value: mapLastTx.get(key) })
+            const txList = mapLastTx.get(key)
+            const encodeData = txList.encode()
+            const decodeData = TxList.decode(encodeData)
+            batch.push({ type: "put", key, value: txList.encode() })
         }
-        logger.info(`Setted batch array in putTxs : `, batch)
         await this.database.batch(batch)
     }
 
-    private async getLastTx(address: Address): Promise<TxList | undefined> {
+    public async getLastTxs(address: Address, count?: number): Promise<AnySignedTx[]> {
+        const txs: AnySignedTx[] = []
+        let txList = await this.getTx(address)
+        while (true) {
+            txs.push(txList.tx)
+            if (txs.length === count) { break }
+            if (txList.tx.to.equals(address)) {
+                if (txList.previousTo !== undefined) {
+                    txList = await this.getTx(txList.previousTo)
+                } else { break }
+            } else if (txList.tx instanceof SignedTx) {
+                if (txList.tx.from.equals(address)) {
+                    if (txList.previousFrom !== undefined) {
+                        txList = await this.getTx(txList.previousFrom)
+                    } else { break }
+                }
+            }
+        }
+        return Promise.resolve(txs)
+    }
+
+    private async getTx(key: Address | Hash): Promise<TxList | undefined> {
         let decodingDBEntry = false
         try {
-            const value = await this.database.get(address.toString())
+            const value = await this.database.get(key.toString())
             decodingDBEntry = true
             const txList = TxList.decode(value)
             return Promise.resolve(txList)
         } catch (e) {
             if (e.notFound) { return Promise.resolve(undefined) }
             if (decodingDBEntry) { logger.error(`Fail to decode TxList`) }
-            return Promise.reject(`Fail to getLastTx`)
+            return Promise.reject(`Fail to getLastTx of ${key} : ${e}`)
         }
     }
-
-    // public async getLastTxs(address: Address, count?: number): Promise<AnySignedTx[]> {
-
-    // }
-
-    // private async getAllTxs(): Promise<DBTx[]> {
-    //     const results: DBTx[] = []
-    //     return new Promise<DBTx[]>((resolve, reject) => {
-    //         try {
-    //             this.database.createReadStream({ gt: "t", lt: "u" })
-    //                 .on("data", (data: any) => {
-    //                     const result = DBTx.decode(data.value)
-    //                     if (results.length === 0) { results.push(result) }
-    //                     let min = -1
-    //                     let max = results.length
-    //                     let i = (min + max) >> 1
-    //                     while (max - min > 1) {
-    //                         if (result.blockHeight === results[i].blockHeight) {
-    //                             min = max = i
-    //                             break
-    //                         } else if (result.blockHeight > results[i].blockHeight) {
-    //                             max = i
-    //                         } else if (result.blockHeight < results[i].blockHeight) {
-    //                             min = i
-    //                         }
-    //                         i = (min + max) >> 1
-    //                     }
-    //                     results.splice(i + 1, 0, result)
-    //                 })
-    //                 .on("end", () => {
-    //                     resolve(results)
-    //                 })
-    //         } catch (error) {
-    //             logger.error(`Fail to slowSearch : ${error}`)
-    //             return Promise.reject(error)
-    //         }
-    //     })
-    // }
-
-    // private async getTxByDBTx(dbtx: DBTx): Promise<AnySignedTx> {
-
-    // }
 }

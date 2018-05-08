@@ -207,27 +207,6 @@ export class Database {
         })
     }
 
-    public async delBlock(hash: Hash): Promise<undefined> {
-        try {
-            const key = "b" + hash
-            const dbBlock = await this.getDBBlock(hash)
-            if (dbBlock.fileNumber !== undefined && dbBlock.offset !== undefined && dbBlock.length !== undefined) {
-                const block = await this.dbBlockToBlock(dbBlock)
-                const blockFile = new BlockFile()
-                await blockFile.fileInit(this.filePath, dbBlock.fileNumber)
-                await blockFile.delBlock(dbBlock.offset, dbBlock.length)
-                await this.delDBBlock(hash)
-                return Promise.resolve(undefined)
-            } else {
-                logger.error("DBBlock does not have blockFile info... ")
-                return Promise.reject("DBBlock does not have blockFile info... ")
-            }
-        } catch (e) {
-            logger.error(`Fail to delete block : ${e}`)
-            return Promise.reject(e)
-        }
-    }
-
     public async getDBBlocksRange(fromHeight: number, count?: number): Promise<DBBlock[]> {
         let decodingDBEntry = false
         try {
@@ -331,17 +310,6 @@ export class Database {
         this.blockFile = new BlockFile()
         await this.blockFile.fileInit(this.filePath, this.fileNumber)
         return await this.database.put("fileNumber", this.fileNumber)
-    }
-
-    private async delDBBlock(hash: Hash): Promise<undefined> {
-        try {
-            const key = "b" + hash
-            await this.database.del(key)
-            return Promise.resolve(undefined)
-        } catch (e) {
-            logger.error(`Fail to delete DBBlock : ${e}`)
-            return Promise.reject(e)
-        }
     }
 
     private async dbBlockToBlock(dbBlock: DBBlock): Promise<AnyBlock> {

@@ -17,7 +17,7 @@ export class Block implements proto.IBlock {
         const block = proto.Block.decode(data)
         let genesis
         if (block && block.header) {
-            if (block.header.difficulty === 0 && block.header.previousHash === undefined) {
+            if (block.header.difficulty === 0 && (block.header.previousHash.length === 0 || block.header.previousHash === undefined)) {
                 genesis = new GenesisBlock(block)
                 return genesis
             }

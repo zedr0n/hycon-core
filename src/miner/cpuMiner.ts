@@ -39,17 +39,18 @@ export class CpuMiner {
             } else {
                 this.nonce = Long.UZERO
 
-                while (this.nonce.compare(this.lastNonce)) {
+                while (this.nonce !== undefined && this.nonce.compare(this.lastNonce)) {
                     const result = await CpuMiner.hash(this.prehash, this.nonce.toString(16))
-
-                    if ( (result[0] < this.target[0]) || ( (result[0] === this.target[0]) && (result[1] < this.target[1]) ) ) {
+                    if (this.target === undefined) {
+                        logger.info(`Already mined block`)
+                        break
+                    }
+                    if ((result[0] < this.target[0]) || ((result[0] === this.target[0]) && (result[1] < this.target[1]))) {
                         logger.debug(`>>>>>>>>Submit - nonce : ${zeroPad(this.nonce.toString(16), MinerServer.LEN_HEX_NONCE)} / hash : ${Buffer.from(result.buffer).toString("hex")}`)
                         this.minerServer.submitNonce(this.nonce.toString(16))
                     }
-
                     this.nonce = this.nonce.add(Long.UONE)
                 }
-
                 this.isMining = false
             }
         }
@@ -69,7 +70,7 @@ export class CpuMiner {
             bufBlock.set(bufNonce.reverse(), prehash.length)
 
             // run hash
-            const ret = Hash.hashCryptonight(bufBlock)
+            const ret = await Hash.hashCryptonight(bufBlock)
             return Promise.resolve(ret)
 
         } catch (e) {

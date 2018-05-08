@@ -114,10 +114,10 @@ export class MinerServer implements IMiner {
         }
         this.stratumServer.stop()
     }
-    public addCallbackNewBlock(callback: (block: any) => void, priority?: number): void {
+    public addCallbackNewBlock(callback: (block: Block) => void, priority?: number): void {
         this.listCallBackNewBlock = callback
     }
-    public removeCallbackNewBlock(callback: (block: any) => void): void {
+    public removeCallbackNewBlock(callback: (block: Block) => void): void {
         this.listCallBackNewBlock = undefined
     }
 

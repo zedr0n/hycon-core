@@ -26,13 +26,13 @@ export class TxList implements proto.ITxList {
     public set(txList: proto.ITxList): void {
         if (txList.tx === undefined) { throw new Error("tx is missing in TxList") }
 
-        if (txList.previousFrom !== undefined && txList.previousFrom !== null) {
+        if (txList.previousFrom !== undefined && txList.previousFrom.length > 0) {
             if (this.previousFrom) {
                 this.previousFrom.set(txList.previousFrom)
             } else { this.previousFrom = new Hash(txList.previousFrom) }
         }
 
-        if (txList.previousTo !== undefined && txList.previousTo !== null) {
+        if (txList.previousTo !== undefined && txList.previousFrom.length > 0) {
             if (this.previousTo) {
                 this.previousTo.set(txList.previousTo)
             } else { this.previousTo = new Hash(txList.previousTo) }
