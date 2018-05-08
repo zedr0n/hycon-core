@@ -333,26 +333,30 @@ export class Wallet {
 
     public async save(name: string, password: string): Promise<undefined> {
         try {
-            const encryptedPrivateKey = Wallet.encryptAES(password, this.privKey.privKey.toString("hex"))
-            await fs.writeFile(`./wallet/rootKey/${name}`, encryptedPrivateKey)
-            try {
-                await fs.ensureFile("./wallet/public")
-                const originalData = await Wallet.getAllPubliclist()
-                const dataArray: string[] = []
+            const walletExist = await fs.existsSync(`./wallet/rootKey/${name}`)
+            if (!walletExist) {
+                const encryptedPrivateKey = Wallet.encryptAES(password, this.privKey.privKey.toString("hex"))
+                await fs.writeFile(`./wallet/rootKey/${name}`, encryptedPrivateKey)
+                try {
+                    await fs.ensureFile("./wallet/public")
+                    const originalData = await Wallet.getAllPubliclist()
+                    const dataArray: string[] = []
 
-                originalData.push({ name, address: this.pubKey.address().toString() })
-                originalData.sort((a, b) => a.name.charCodeAt(0) - b.name.charCodeAt(0))
+                    originalData.push({ name, address: this.pubKey.address().toString() })
+                    originalData.sort((a, b) => a.name.charCodeAt(0) - b.name.charCodeAt(0))
 
-                for (const data of originalData) {
-                    dataArray.push(`${data.name}:${data.address}`)
+                    for (const data of originalData) {
+                        dataArray.push(`${data.name}:${data.address}`)
+                    }
+                    await fs.writeFile("./wallet/public", dataArray)
+                } catch (e) {
+                    logger.error(`Address file not exsited : ${e}`)
+                    return Promise.reject(e)
                 }
-                await fs.writeFile("./wallet/public", dataArray)
-            } catch (e) {
-                logger.error(`Address file not exsited : ${e}`)
-                return Promise.reject(e)
-            }
-            return Promise.resolve(undefined)
-
+                return Promise.resolve(undefined)
+           } else {
+               return Promise.reject(`Wallet is already exist : name=${name}`)
+           }
         } catch (e) {
             logger.error(`Fail to save wallet ${e}`)
             return Promise.reject(e)
