@@ -344,7 +344,7 @@ export class Wallet {
                 originalData.sort((a, b) => a.name.charCodeAt(0) - b.name.charCodeAt(0))
 
                 for (const data of originalData) {
-                    dataArray.push(`${data.name}:${data.address},`)
+                    dataArray.push(`${data.name}:${data.address}`)
                 }
                 await fs.writeFile("./wallet/public", dataArray)
             } catch (e) {
