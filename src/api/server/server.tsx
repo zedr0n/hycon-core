@@ -21,7 +21,7 @@ export class HttpServer {
     constructor(hyconServer: Hycon.Server, port: number = 8080) {
         this.app = express()
         this.config()
-        this.app.all("/*", (req, res, next) => {
+        this.app.all("/*", (req: express.Request, res: express.Response, next: express.NextFunction) => {
             res.header("Access-Control-Allow-Origin", "*")
             res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE")
             res.header("Access-Control-Allow-Headers", "Content-type, Accept, X-Access-Token, X-Key")
@@ -31,12 +31,12 @@ export class HttpServer {
                 next()
             }
         })
-        this.app.use((req, res, next) => this.reactRoute(req, res, next))
+        this.app.use((req: express.Request, res: express.Response, next: express.NextFunction) => this.reactRoute(req, res, next))
         this.app.use(express.static("blockexplorer/clientDist"))
         this.app.use(express.static("node_modules"))
         this.routeRest()
         this.rest = new RestServer(hyconServer.db, hyconServer.accountDB)
-        this.app.use((req, res, next) => {
+        this.app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
             res.status(404)
             res.json({
                 status: 404,
