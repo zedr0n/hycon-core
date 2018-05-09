@@ -27,7 +27,6 @@ import { BlockStatus } from "./sync"
 
 const logger = getLogger("SingleChain Concensus")
 export class SingleChain implements IConsensus {
-
     private server: Server
     private newBlockCallbacks: NewBlockCallback[]
     private db: Database
@@ -289,6 +288,9 @@ export class SingleChain implements IConsensus {
             logger.error(`User not use txDatabase for RestAPI`)
             return Promise.resolve(undefined)
         }
+    }
+    public async getHash(height: number): Promise<Hash> {
+        return await this.db.getHashByHeight(height)
     }
 
     public async testMakeBlock(txs: SignedTx[]): Promise<Block> {
