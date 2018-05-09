@@ -208,6 +208,14 @@ export class RestServer implements IRest {
     public async getTx(hash: string): Promise<ITxProp | IResponseError> {
         try {
             const hyconBlockTx = await this.consensus.getTx(new Hash(Hash.decode(hash)))
+            if (hyconBlockTx === undefined) {
+                return Promise.resolve({
+                    status: 404,
+                    timestamp: Date.now(),
+                    error: "NOT_FOUND",
+                    message: "the transaction cannot be found",
+                })
+            }
             let tx: ITxProp
             if (hyconBlockTx.tx instanceof SignedTx) {
                 tx = {
