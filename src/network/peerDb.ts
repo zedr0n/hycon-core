@@ -58,6 +58,8 @@ export class PeerDb {
         try {
             this.db.createReadStream()
             .on("data", (data: any) => {
+                // tslint:disable-next-line:no-console
+                console.log(data.value)
                 const peer: proto.IPeer = proto.Peer.decode(data.value)
                 peers.push(peer)
             })
@@ -85,8 +87,8 @@ export class PeerDb {
     public async clearAll(): Promise < void > {
         try {
             this.db.createKeyStream()
-            .on("data", (key: Buffer) => {
-                this.db.del(key)
+            .on("data", async (key: Buffer) => {
+                await this.db.del(key)
             })
             .on("end", () => {
                 logger.info("clear db")

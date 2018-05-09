@@ -8,7 +8,5 @@ package-lock.json
 deleteme*/
 .DS_Store
 peerdb
-
-
 PeerList.db
 wallet/

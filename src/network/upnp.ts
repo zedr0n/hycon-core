@@ -65,7 +65,7 @@ export class UpnpClient {
             client.search("ssdp:all")
         }, 2 * 1000)
 
-        client.on("response", (headers: any, code: any, rdebug: any) => {
+        client.on("response", async (headers: any, code: any, rdebug: any) => {
             const ipaddress = rdebug.address
             const regex = /(\S+):\/\/([\.\d]+):(\d+)/g
             const match = regex.exec(headers.LOCATION)
@@ -84,7 +84,7 @@ export class UpnpClient {
                     // logger.debug("DATE:", date)
                     logger.info(`DETECT IP Local=${isLocal} Product=${product} IP=${localIP} Port=${localPort}`)
                     try {
-                        this.rabbitNetwork.connect(localIP, Number(localPort))
+                        await this.rabbitNetwork.connect(localIP, Number(localPort))
                     } catch (e) {
                         logger.warn(`${e}`)
                     }
