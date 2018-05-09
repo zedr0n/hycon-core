@@ -65,10 +65,9 @@ export class SingleChain implements IConsensus {
                     logger.error(`Genesis in DB and file are not matched.`)
                     return Promise.reject(`Genesis in DB and file are not matched.`)
                 }
-                const tops = await this.db.getTop()
-                // TODO : Seperate set blockTip and headerTip set logic.
-                this.blockTip = tops[0]
-                this.headerTip = tops[0]
+
+                this.blockTip = await this.db.getBlockTip()
+                this.headerTip = await this.db.getHeaderTip()
 
                 if (this.txdb) {
                     // TODO : TxDB Init
@@ -116,7 +115,10 @@ export class SingleChain implements IConsensus {
             const { newTip, prevTip, isTopTip } = this.updateTopTip(this.blockTip, current, previous)
             this.blockTip = newTip
             const bStatus: BlockStatus = (isTopTip) ? BlockStatus.MainChain : BlockStatus.Block
-            if (isTopTip) { await this.db.setHashByHeight(current.height, blockHash) }
+            if (isTopTip) {
+                await this.db.setHashByHeight(current.height, blockHash)
+                await this.db.setBlockTip(blockHash)
+            }
             await this.db.setBlockStatus(blockHash, bStatus)
 
             utils.processBlock(block.header.difficulty)
@@ -153,7 +155,9 @@ export class SingleChain implements IConsensus {
             const { current, previous } = await this.db.putHeader(blockHash, header)
             await this.db.setBlockStatus(blockHash, BlockStatus.Header)
 
-            this.updateTopTip(this.headerTip, current, previous)
+            if (this.updateTopTip(this.headerTip, current, previous).isTopTip) {
+                await this.db.setHeaderTip(blockHash)
+            }
             return Promise.resolve(true)
         } catch (e) {
             return Promise.reject(e)
@@ -319,7 +323,6 @@ export class SingleChain implements IConsensus {
     }
     private async createCandidateBlock(txs: SignedTx[]): Promise<Block> {
         try {
-            // TODO : PreviousHash is using headertip???? maybe blockTip.
             const difficulty = utils.getTargetDifficulty()
             const header = new BlockHeader({
                 difficulty,

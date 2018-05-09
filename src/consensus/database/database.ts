@@ -136,6 +136,28 @@ export class Database {
         }
     }
 
+    public async setBlockTip(hash: Hash) {
+        await this.database.put("__blockTip", hash)
+    }
+
+    public async getBlockTip(): Promise<DBBlock | undefined> {
+        let hash: Hash
+        await this.database.get("__blockTip", (err, val) => { hash = val })
+        const block = await this.getDBBlock(hash)
+        return Promise.resolve(block)
+    }
+
+    public async setHeaderTip(hash: Hash) {
+        await this.database.put("__headerTip", hash)
+    }
+
+    public async getHeaderTip(): Promise<DBBlock | undefined> {
+        let hash: Hash
+        await this.database.get("__headerTip", (err, val) => { hash = val })
+        const block = await this.getDBBlock(hash)
+        return Promise.resolve(block)
+    }
+
     public async getBlock(hash: Hash): Promise<AnyBlock> {
         try {
             const dbBlock = await this.getDBBlock(hash)
@@ -211,24 +233,6 @@ export class Database {
                     const result = { blockMap, hashMap }
                     resolved(result)
                 })
-        })
-    }
-
-    public async getTop(): Promise<DBBlock[]> {
-        let tops: DBBlock[] = []
-        return new Promise<DBBlock[]>((resolved, reject) => {
-            // TODO : Change logic using tip save in DB.
-            this.database.createReadStream({ gt: "b", lt: "c" })
-                .on("data", async (data: any) => {
-                    const block = DBBlock.decode(data.value)
-                    const status = await this.getBlockStatus(new Hash(block.header))
-                    if (tops.length === 0 || tops[0].height < block.height) {
-                        tops = [block]
-                    } else if (tops[0].height === block.height && tops[0].header.timeStamp > block.header.timeStamp) {
-                        tops = [block]
-                    }
-                })
-                .on("end", () => { resolved(tops) })
         })
     }
 
