@@ -98,14 +98,20 @@ export class Database {
         })
     }
 
-    public async setHeightHash(height: number, hash: Hash): Promise<void> {
+    public async setHashByHeight(height: number, hash: Hash): Promise<void> {
         await this.database.put(height, hash.toString())
     }
 
-    public async getHash(height: number): Promise<Hash> {
-        const hashData = await this.database.get(height)
-        const hash = Hash.decode(hashData.toString())
-        return Promise.resolve(hash)
+    public async getHashByHeight(height: number): Promise<Hash> {
+        try {
+            const hashData = await this.database.get(height)
+            const hash = Hash.decode(hashData.toString())
+            return Promise.resolve(hash)
+        } catch (e) {
+            if (e.notFound) { return Promise.resolve(undefined) }
+            logger.error(`Fail to getHashByHeight : ${e}`)
+            return Promise.reject(e)
+        }
     }
 
     public async setBlockStatus(hash: Hash, status?: BlockStatus): Promise<void> {
@@ -119,9 +125,15 @@ export class Database {
     }
 
     public async getBlockStatus(hash: Hash): Promise<BlockStatus> {
-        const key = "s" + hash
-        const status = await this.database.get(key)
-        return Promise.resolve(Number(status))
+        try {
+            const key = "s" + hash
+            const status = await this.database.get(key)
+            return Promise.resolve(Number(status))
+        } catch (e) {
+            if (e.notFound) { return Promise.resolve(0) }
+            logger.error(`Fail to getBlockStatus : ${e}`)
+            return Promise.reject(e)
+        }
     }
 
     public async getBlock(hash: Hash): Promise<AnyBlock> {

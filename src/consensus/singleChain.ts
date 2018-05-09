@@ -20,6 +20,7 @@ import { Account } from "./database/account"
 import { Database } from "./database/database"
 import { DBBlock } from "./database/dbblock"
 import { TxDatabase } from "./database/txDatabase"
+import { TxList } from "./database/txList"
 import { IStateTransition, WorldState } from "./database/worldState"
 import { AnySignedTx, IConsensus, NewBlockCallback } from "./iconsensus"
 import { BlockStatus } from "./sync"
@@ -70,12 +71,7 @@ export class SingleChain implements IConsensus {
                 this.headerTip = tops[0]
 
                 if (this.txdb) {
-                    const blockTip = await this.db.getBlock(new Hash(this.blockTip.header))
-                    const isTxSetted = await this.txdb.txDBStatus(blockTip.txs)
-                    if (!isTxSetted) {
-                        const blocks = await this.db.getBlocksRange(0)
-                        await this.txdb.init(blocks)
-                    }
+                    // TODO : TxDB Init
                 }
             }
             this.server.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock(txs))
@@ -90,6 +86,7 @@ export class SingleChain implements IConsensus {
     public async putBlock(block: AnyBlock): Promise<boolean> {
         try {
             const blockHash = new Hash(block.header)
+            logger.info(`Put Block : ${blockHash}`)
             const blockStatus = await this.getBlockStatus(blockHash)
             if (blockStatus === BlockStatus.Rejected) {
                 logger.warn(`Already rejected Block : ${blockHash}`)
@@ -98,9 +95,6 @@ export class SingleChain implements IConsensus {
                 logger.warn(`Already exsited Header : ${blockHash}`)
                 return false
             }
-
-            logger.info(`Block header : `, block.header)
-            logger.info(`Put Block : ${blockHash}`)
             let blockTxs: SignedTx[] = []
             if (block instanceof Block) {
                 blockTxs = block.txs
@@ -118,20 +112,20 @@ export class SingleChain implements IConsensus {
             if (this.txdb) { await this.txdb.putTxs(blockHash, block.txs) }
 
             // Update headerTopTip first, then update blockTopTip
-            this.updateTopTip(this.headerTip, current, previous)
-            const { prevTip, isTopTip } = this.updateTopTip(this.blockTip, current, previous)
+            this.headerTip = this.updateTopTip(this.headerTip, current, previous).newTip
+            const { newTip, prevTip, isTopTip } = this.updateTopTip(this.blockTip, current, previous)
+            this.blockTip = newTip
             const bStatus: BlockStatus = (isTopTip) ? BlockStatus.MainChain : BlockStatus.Block
-            if (isTopTip) { await this.db.setHeightHash(current.height, blockHash) }
+            if (isTopTip) { await this.db.setHashByHeight(current.height, blockHash) }
             await this.db.setBlockStatus(blockHash, bStatus)
-            const txs = this.server.txPool.updateTxs(blockTxs, this.txUnit)
 
             utils.processBlock(block.header.difficulty)
 
             this.newBlock(block)
-            if (isTopTip) {
-                await this.reorganization()
-                this.createCandidateBlock(txs)
-            }
+            // TODO : Tidy up code.
+            if (isTopTip) { await this.reorganization() }
+            const txs = this.server.txPool.updateTxs(blockTxs, this.txUnit)
+            if (isTopTip) { this.createCandidateBlock(txs) }
             return true
         } catch (e) {
             logger.error(e)
@@ -251,10 +245,10 @@ export class SingleChain implements IConsensus {
         }
     }
 
-    public getLastTxs(address: Address, count?: number): Promise<AnySignedTx[]> {
+    public async getLastTxs(address: Address, count?: number): Promise<TxList[]> {
         try {
             if (this.txdb) {
-                return this.txdb.getLastTxs(address, count)
+                return await this.txdb.getLastTxs(address, count)
             } else {
                 return Promise.reject(`The database to get txs does not exist.`)
             }
@@ -291,7 +285,7 @@ export class SingleChain implements IConsensus {
     }
 
     // tslint:disable-next-line:max-line-length
-    private updateTopTip(tip: DBBlock, block: DBBlock, previous?: DBBlock): { prevTip: Hash | undefined, isTopTip: boolean } {
+    private updateTopTip(tip: DBBlock, block: DBBlock, previous?: DBBlock): { newTip: DBBlock, prevTip: Hash | undefined, isTopTip: boolean } {
         try {
             let prevTip
             let isTopTip = false
@@ -318,7 +312,7 @@ export class SingleChain implements IConsensus {
                 tip = block
                 isTopTip = true
             }
-            return { prevTip, isTopTip }
+            return { newTip: tip, prevTip, isTopTip }
         } catch (e) {
             logger.error(`Fail to updateTOpTIp`)
         }
@@ -423,14 +417,14 @@ export class SingleChain implements IConsensus {
                         const blk = await this.getBlockByHash(hash)
                         await this.db.setBlockStatus(hash, BlockStatus.Block)
                         if (blk instanceof Block) { await this.server.txPool.putTxs(blk.txs) }
-                        if (blk instanceof Block) { this.graph.removeFromGraph(blk.header) }
+                        // if (blk instanceof Block) { this.graph.removeFromGraph(blk.header) }
                     }
                 }
                 for (const b of mainChain) {
                     const hash = new Hash(b.header)
                     const blk = await this.getBlockByHash(hash)
                     await this.db.setBlockStatus(hash, BlockStatus.MainChain)
-                    await this.db.setHeightHash(b.height, hash)
+                    await this.db.setHashByHeight(b.height, hash)
                     if (blk instanceof Block) { this.server.txPool.updateTxs(blk.txs, 0) }
                 }
                 this.forkHeight = -1
