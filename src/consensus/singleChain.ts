@@ -118,6 +118,10 @@ export class SingleChain implements IConsensus {
             if (isTopTip) {
                 await this.db.setHashByHeight(current.height, blockHash)
                 await this.db.setBlockTip(blockHash)
+                if (this.headerTip.height <= current.height) {
+                    await this.db.setHeaderTip(blockHash)
+                }
+                const bTip = await this.db.getBlockTip()
             }
             await this.db.setBlockStatus(blockHash, bStatus)
 
@@ -318,7 +322,8 @@ export class SingleChain implements IConsensus {
             }
             return { newTip: tip, prevTip, isTopTip }
         } catch (e) {
-            logger.error(`Fail to updateTOpTIp`)
+            logger.error(`Fail to updateTopTip : ${e}`)
+            throw new Error(e)
         }
     }
     private async createCandidateBlock(txs: SignedTx[]): Promise<Block> {

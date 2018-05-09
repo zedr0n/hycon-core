@@ -137,26 +137,22 @@ export class Database {
     }
 
     public async setBlockTip(hash: Hash) {
-        await this.database.put("__blockTip", hash)
+        await this.database.put("__blockTip", hash.toString())
     }
 
     public async getBlockTip(): Promise<DBBlock | undefined> {
-        let hash: Hash
-        await this.database.get("__blockTip", (err, val) => { hash = val })
-        const block = await this.getDBBlock(hash)
-        return Promise.resolve(block)
+        return await this.getTip("__blockTip")
     }
 
     public async setHeaderTip(hash: Hash) {
-        await this.database.put("__headerTip", hash)
+        await this.database.put("__headerTip", hash.toString())
     }
 
     public async getHeaderTip(): Promise<DBBlock | undefined> {
-        let hash: Hash
-        await this.database.get("__headerTip", (err, val) => { hash = val })
-        const block = await this.getDBBlock(hash)
-        return Promise.resolve(block)
+        return await this.getTip("__headerTip")
     }
+
+
 
     public async getBlock(hash: Hash): Promise<AnyBlock> {
         try {
@@ -341,5 +337,18 @@ export class Database {
                     resolved(data)
                 })
         })
+    }
+
+    private async getTip(key: string): Promise<DBBlock | undefined> {
+        try {
+            const hashData = await this.database.get(key)
+            const hash = Hash.decode(hashData.toString())
+            const block = await this.getDBBlock(hash)
+            return Promise.resolve(block)
+        } catch (e) {
+            if (e.notFound) { return undefined }
+            logger.error(`Fail to getTip : ${e}`)
+            return Promise.reject(e)
+        }
     }
 }
