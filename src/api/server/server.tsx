@@ -18,8 +18,8 @@ const apiVersion = "v1"
 export class HttpServer {
     public app: express.Application
     public rest: RestServer
-    public hyconServer: Hycon.Server
-    constructor(hyconServer: Hycon.Server, port: number = 8080) {
+    public hyconServer: Hycon.Server | RestManager
+    constructor(hyconServer: Hycon.Server | RestManager, port: number = 8080) {
         this.app = express()
         this.config()
         this.app.all("/*", (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -48,7 +48,7 @@ export class HttpServer {
         })
         this.app.listen(port)
         this.hyconServer = hyconServer
-        logger.info(">>>>>>> Started HTTP Server(Hycon Explorer)")
+        logger.info(">>>>>>> Started RESTful API")
     }
 
     public reactRoute(

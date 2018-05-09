@@ -106,8 +106,7 @@ export class Server {
         if (options.api) {
             logger.info("Test API")
             logger.info(`API Port ${this.options.api_port}`)
-            const rest = new Server()
-            this.httpServer = new HttpServer(rest, options.api_port)
+            this.httpServer = new HttpServer(this.rest, options.api_port)
         }
     }
 
