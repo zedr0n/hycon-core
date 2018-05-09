@@ -40,6 +40,7 @@ function calcEMA(): number {
 }
 
 export function processBlock(diff: number, timestamp: number = Date.now()): void {
+    if (diff <= 0) { diff = lastDifficulty }
     updateDifficulty(diff)
     updateTimes(timestamp)
 }
