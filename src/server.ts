@@ -122,7 +122,7 @@ export class Server {
 
     // TODO : Block, hash, SignedTx, randomBytes import, and testMakeBlock(db, consensus) remove
     // tslint:disable-next-line:member-ordering
-    public async testReorg() {
+    public async testConsensus() {
         const stxArray: SignedTx[] = []
         for (let i = 0; i < 10; i++) {
             stxArray.push(new SignedTx({
@@ -136,19 +136,36 @@ export class Server {
             }))
         }
         setTimeout(async () => {
-            await this.consensus.testMakeBlock(stxArray.slice(0, 3)).then(async (value: Block) => {
-                await this.consensus.testMakeBlock(stxArray.slice(3, 7)).then(async (value2: Block) => {
-                    await this.consensus.putBlock(value2)
-                })
-                await this.consensus.putBlock(value).then(async () => {
-                    setTimeout(() => {
-                        logger.debug(`Start 3`)
-                        this.consensus.testMakeBlock(stxArray.slice(0, 2)).then(async (value3: Block) => {
-                            await this.consensus.putBlock(value3)
-                        })
-                    }, 100)
-                })
-            })
+            logger.info(`Make block1`)
+            const block1 = await this.consensus.testMakeBlock(stxArray.slice(0, 3))
+            logger.info(`Make block2`)
+            const block2 = await this.consensus.testMakeBlock(stxArray.slice(3, 7))
+            logger.info(`Save block1`)
+
+            await this.consensus.putBlock(block1)
+            const status1 = await this.consensus.getBlockStatus(new Hash(block1.header))
+            const bTip1 = this.consensus.getBlocksTip()
+            const hTip1 = this.consensus.getHeaderTip()
+            logger.info(`Block1 Status : ${status1}\n`)
+            logger.info(`Block1Tip : ${bTip1.hash}(${bTip1.height}) / Header1Tip : ${hTip1.hash}(${hTip1.height})`)
+
+            logger.info(`Save block2`)
+            await this.consensus.putBlock(block2)
+            const status2 = await this.consensus.getBlockStatus(new Hash(block2.header))
+            const bTip2 = this.consensus.getBlocksTip()
+            const hTip2 = this.consensus.getHeaderTip()
+            logger.info(`Block2 Status : ${status2}\n`)
+            logger.info(`Block2Tip : ${bTip2.hash}(${bTip2.height}) / Header2Tip : ${hTip2.hash}(${hTip2.height})`)
+
+            logger.info(`Make block3`)
+            const block3 = await this.consensus.testMakeBlock(stxArray.slice(0, 2))
+            logger.info(`Save block3`)
+            await this.consensus.putBlock(block3)
+            const status3 = await this.consensus.getBlockStatus(new Hash(block3.header))
+            const bTip3 = this.consensus.getBlocksTip()
+            const hTip3 = this.consensus.getHeaderTip()
+            logger.info(`Block3 Status : ${status3}\n`)
+            logger.info(`Block3Tip : ${bTip3.hash}(${bTip3.height}) / Header3Tip : ${hTip3.hash}(${hTip3.height})`)
         }, 1000)
     }
 }
