@@ -218,49 +218,26 @@ export class Database {
     public async getDBBlockMapByHeights(fromHeight: number, toHeight: number): Promise<{ blockMap: Map<number, DBBlock[]>, hashMap: Map<string, DBBlock> }> {
         const blockMap = new Map<number, DBBlock[]>()
         const hashMap = new Map<string, DBBlock>()
-        for (let i = fromHeight; i <= toHeight; i++) { blockMap.set(i, []) }
-        // TODO : Change logic using height-hash logic.
-        return new Promise<{ blockMap: Map<number, DBBlock[]>, hashMap: Map<string, DBBlock> }>((resolved, reject) => {
-            this.database.createReadStream({ gt: "b", lt: "c" })
-                .on("data", (data: any) => {
-                    const block = DBBlock.decode(data.value)
-                    if (block.height >= fromHeight && block.height <= toHeight) {
-                        hashMap.set(new Hash(block.header).toString(), block)
-                        blockMap.get(block.height).push(block)
-                    }
-                })
-                .on("end", () => {
-                    const result = { blockMap, hashMap }
-                    resolved(result)
-                })
-        })
+        for (let i = fromHeight; i <= toHeight; i++) {
+            const hash = await this.getHashByHeight(i)
+            const dbBlock = DBBlock.decode(hash)
+            hashMap.set(hash.toString(), dbBlock)
+            blockMap.set(i, [dbBlock])
+        }
+        const result = { blockMap, hashMap }
+        return Promise.resolve(result)
     }
 
     public async getDBBlocksRange(fromHeight: number, count?: number): Promise<DBBlock[]> {
         try {
             const dbBlockArray: DBBlock[] = []
-            // TODO : Change logic using height-hash logic.
-            this.database.createReadStream({ gt: "b", lt: "c" })
-                .on("data", (data: any) => {
-                    const dbBlock = DBBlock.decode(data.value)
-                    if (dbBlock.height >= fromHeight) {
-                        let isInserted = false
-                        for (const b of dbBlockArray) {
-                            if (b.height >= dbBlock.height) {
-                                dbBlockArray.splice(dbBlockArray.indexOf(b), 0, dbBlock)
-                                isInserted = true
-                                break
-                            }
-                        }
-                        if (!isInserted) {
-                            dbBlockArray.push(dbBlock)
-                        }
-                    }
-                })
-                .on("end", () => {
-                    if (dbBlockArray.length > count) { dbBlockArray.slice(0, count) }
-                    return Promise.resolve(dbBlockArray)
-                })
+            let height = fromHeight
+            for (let i = 0; i < count; i++) {
+                const dbBlock = DBBlock.decode(await this.getHashByHeight(height))
+                dbBlockArray.push(dbBlock)
+                height++
+            }
+            return Promise.resolve(dbBlockArray)
         } catch (e) {
             logger.error(`getBlocksRange failed\n${e}`)
             return Promise.reject(e)
