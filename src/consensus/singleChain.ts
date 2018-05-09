@@ -34,7 +34,6 @@ export class SingleChain implements IConsensus {
     private blockTip: DBBlock
     private headerTip: DBBlock
     private txUnit: number = 1000
-    private forkHeight: number
     private graph = new Graph() // For debug
     private txdb?: TxDatabase
     constructor(server: Server, dbPath: string, wsPath: string, filePath: string, txPath?: string) {
@@ -42,7 +41,6 @@ export class SingleChain implements IConsensus {
         this.newBlockCallbacks = []
         this.db = new Database(dbPath, filePath)
         this.worldState = new WorldState(wsPath)
-        this.forkHeight = -1
         if (txPath) { this.txdb = new TxDatabase(txPath) }
     }
 
@@ -318,11 +316,6 @@ export class SingleChain implements IConsensus {
                         isTopTip = true
                     } else {
                         // TODO : Change reorg logic.
-                        if (this.forkHeight === -1) {
-                            this.forkHeight = block.height
-                        } else {
-                            if (this.forkHeight > block.height) { this.forkHeight = block.height }
-                        }
                     }
                 } else {
                     throw new Error(`Previous block undefined in updateTopTip`)
@@ -408,47 +401,7 @@ export class SingleChain implements IConsensus {
     private async reorganization(): Promise<void> {
         try {
             logger.debug(`Reorganization logic have to implemented.`)
-            if (this.forkHeight === -1) { return Promise.resolve(undefined) }
-            const tip = this.blockTip
-            const result = await this.db.getDBBlockMapByHeights(this.forkHeight, tip.height)
-            const bmap = result.blockMap
-            const hmap = result.hashMap
-
             // TODO : Have to change reorg logic.
-            // if (bmap.get(tip.height).length !== 1) {
-            // } else {
-            //     const mainChain: DBBlock[] = []
-            //     let block = tip
-            //     for (let i = tip.height; i >= this.forkHeight; i--) {
-            //         mainChain.push(block)
-            //         const blocks = bmap.get(i)
-            //         for (let index = 0; index < blocks.length; index++) {
-            //             if (new Hash(blocks[index].header).equals(new Hash(block.header))) {
-            //                 blocks.splice(index, 1)
-            //                 break
-            //             }
-            //         }
-            //         if (block.header instanceof BlockHeader) { block = hmap.get(block.header.previousHash[0].toString()) }
-            //     }
-
-            //     for (let i = tip.height - 1; i >= this.forkHeight; i--) {
-            //         for (const b of bmap.get(i)) {
-            //             const hash = new Hash(b.header)
-            //             const blk = await this.getBlockByHash(hash)
-            //             await this.db.setBlockStatus(hash, BlockStatus.Block)
-            //             if (blk instanceof Block) { await this.server.txPool.putTxs(blk.txs) }
-            //             // if (blk instanceof Block) { this.graph.removeFromGraph(blk.header) }
-            //         }
-            //     }
-            //     for (const b of mainChain) {
-            //         const hash = new Hash(b.header)
-            //         const blk = await this.getBlockByHash(hash)
-            //         await this.db.setBlockStatus(hash, BlockStatus.MainChain)
-            //         await this.db.setHashByHeight(b.height, hash)
-            //         if (blk instanceof Block) { this.server.txPool.updateTxs(blk.txs, 0) }
-            //     }
-            //     this.forkHeight = -1
-            // }
         } catch (e) {
             return Promise.reject(`Fail to reorganization : ${e}`)
         }
