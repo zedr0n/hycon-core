@@ -102,7 +102,7 @@ export class TxPool implements ITxPool {
     private callback(lowestIndex: number): void {
         const n = lowestIndex + 1
         for (const callback of this.callbacks) {
-            if (callback.n >= lowestIndex) {
+            if (callback.n >= n) {
                 setImmediate(callback.callback, this.txs.slice(0, callback.n))
             }
         }
