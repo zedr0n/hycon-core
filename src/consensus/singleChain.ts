@@ -354,7 +354,10 @@ export class SingleChain implements IConsensus {
 
         const merkleRootVerify = block.calculateMerkleRoot().equals(block.header.merkleRoot)
         if (!merkleRootVerify) { return Promise.resolve({ isVerified: false }) }
+
         const previousHeader = await this.db.getBlockHeader(block.header.previousHash[0])
+        if (previousHeader === undefined) { return Promise.resolve({ isVerified: false }) }
+
         const newState = await this.worldState.next(block, previousHeader.stateRoot)
         if (!newState.currentStateRoot.equals(block.header.stateRoot)) {
             return Promise.resolve({ isVerified: false })
