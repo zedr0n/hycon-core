@@ -18,7 +18,7 @@ function updateDifficulty(newDifficulty: number): void {
     lastDifficulty = newDifficulty
     const float = unforcedInt(newDifficulty)
     logger.debug(`Diff: ${float}`)
-    plotDiff(float)
+    // plotDiff(float)
 }
 
 function updateTimes(timestamp: number): void {
