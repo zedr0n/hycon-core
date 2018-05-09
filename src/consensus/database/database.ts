@@ -212,7 +212,9 @@ export class Database {
             const dbBlockArray: DBBlock[] = []
             let height = fromHeight
             for (let i = 0; i < count; i++) {
-                const dbBlock = DBBlock.decode(await this.getHashByHeight(height))
+                const hash = await this.getHashByHeight(height)
+                if (hash === undefined) { break }
+                const dbBlock = DBBlock.decode(hash)
                 dbBlockArray.push(dbBlock)
                 height++
             }
