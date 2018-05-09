@@ -8,7 +8,6 @@ import { GenesisBlock } from "../../common/blockGenesis"
 import { AnyBlockHeader, BlockHeader } from "../../common/blockHeader"
 import { GenesisSignedTx } from "../../common/txGenesisSigned"
 import { SignedTx } from "../../common/txSigned"
-import { DBTx } from "../../consensus/database/dbTx"
 import { Hash } from "../../util/hash"
 import { BlockStatus } from "../sync"
 import { BlockFile } from "./blockFile"
@@ -32,7 +31,6 @@ export class DecodeError extends Error {
 // tslint:disable:max-line-length
 // tslint:disable-next-line:max-classes-per-file
 export class Database {
-    public tips: DBBlock[] = []
     private database: levelup.LevelUp
     private blockFile: BlockFile
     private headerLock: AsyncLock
@@ -151,8 +149,6 @@ export class Database {
     public async getHeaderTip(): Promise<DBBlock | undefined> {
         return await this.getTip("__headerTip")
     }
-
-
 
     public async getBlock(hash: Hash): Promise<AnyBlock> {
         try {
@@ -327,15 +323,14 @@ export class Database {
 
     private async getOrInitKey(key: string, value: any = 0): Promise<any> {
         return new Promise<any>((resolved, reject) => {
-            this.database.get(key)
-                .catch(async (e) => {
-                    if (e.notFound) {
-                        await this.database.put(key, value)
-                        resolved(value)
-                    } else { reject(`Could not intitialize '${key}' due to error: '${e}'`) }
-                }).then((data) => {
-                    resolved(data)
-                })
+            this.database.get(key).catch(async (e) => {
+                if (e.notFound) {
+                    await this.database.put(key, value)
+                    resolved(value)
+                } else { reject(`Could not intitialize '${key}' due to error: '${e}'`) }
+            }).then((data) => {
+                resolved(data)
+            })
         })
     }
 
