@@ -12,7 +12,6 @@ import { IPeer } from "../ipeer"
 import { NatUpnp } from "../nat"
 import { PeerDb } from "../peerDb"
 import { UpnpClient, UpnpServer } from "../upnp"
-import { PeerList } from "./peerList"
 import { RabbitPeer } from "./rabbitPeer"
 import { SocketParser } from "./socketParser"
 // tslint:disable-next-line:no-var-requires
@@ -30,7 +29,7 @@ export class RabbitNetwork implements INetwork {
     public static socket2Ipeer(socket: Socket): proto.IPeer {
         return proto.Peer.create({
             failCount: 0,
-            host: socket.remoteAddress,
+            host: RabbitNetwork.ipv6Toipv4(socket.remoteAddress),
             lastSeen: Date.now(),
             port: socket.remotePort,
         })
@@ -39,7 +38,12 @@ export class RabbitNetwork implements INetwork {
         const hash: any = Hash.hash(host + port.toString()) // TS typechecking is incorrect
         return Buffer.from(hash).slice(0, 4)
     }
-
+    public static ipv6Toipv4(ipv6: string): string {
+        const ip: string[] = ipv6.split(":")
+        if (ip.length === 4) {
+            return ip[3]
+        } else {return ip[0]}
+    }
     public readonly port: number
     private hycon: Server
     private server: net.Server
@@ -66,7 +70,8 @@ export class RabbitNetwork implements INetwork {
             }
         }
     }
-    public async start(): Promise<boolean> {
+    public async start(): Promise<boolean > {
+        await this.connectPeersInDB()
         logger.debug(`Tcp Network Started`)
         this.server = createServer((socket) => this.accept(socket))
         await new Promise<boolean>((resolve, reject) => {
@@ -169,7 +174,7 @@ export class RabbitNetwork implements INetwork {
             }
         })
         socket.on("error", async (error) => {
-            logger.error(`Connection error ${socket.remoteAddress}:${socket.remotePort} : ${error}`)
+            logger.error(`Connection error ${RabbitNetwork.ipv6Toipv4(socket.remoteAddress)}:${socket.remotePort} : ${error}`)
             const index2 = this.peerDB.peers.indexOf(ipeer)
             if (index2 > -1) {
                 const count = this.peerDB.peers[index2].failCount += 1
@@ -207,6 +212,21 @@ export class RabbitNetwork implements INetwork {
         // logger.debug(`Connect to seeds For More Peers=${necessaryPeers}`)
         await delay(2000)
         // logger.debug(`Done`)
+    }
+
+    private async connectPeersInDB() {
+        try {
+            if (this.peerDB.peers.length !== 0) {
+                for (const peer of this.peerDB.peers) {
+                    const rabbitPeer = await this.connect(peer.host, peer.port)
+                    const key = RabbitNetwork.string2key(peer.host, peer.port)
+                    this.peerTable.set(key, rabbitPeer)
+                }
+            }
+        } catch (e) {
+            logger.error(e)
+        }
+
     }
 
 }

@@ -26,8 +26,8 @@ export class PeerDb {
         this.db = levelup(rocksdb("./peerdb"))
         this.peers = []
         const db: any = this.db // TODO: Fix levelup type declarartion
-        db.on("open", () => {
-            this.maintainKeys()
+        db.on("open", async () => {
+            await this.maintainKeys()
         })
     }
 
@@ -64,7 +64,10 @@ export class PeerDb {
                 peers.push(peer)
             })
             .on("end", () => {
-                logger.debug(`list all`)
+                logger.info(`reload peers from peer db`)
+                for ( const peer of peers) {
+                    logger.info(`${peer.host}:${peer.port}\n`)
+                }
             })
             return Promise.resolve(peers)
 
