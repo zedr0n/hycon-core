@@ -86,6 +86,7 @@ export class MinerServer implements IMiner {
 
                 if (this.listCallBackNewBlock !== undefined) {
                     this.listCallBackNewBlock(this.block)
+                    logger.debug(`Block Hash: ${new Hash(this.block.header).toHex()}`)
                 }
 
                 resolve(true)

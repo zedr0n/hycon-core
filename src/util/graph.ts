@@ -27,27 +27,28 @@ export class Graph {
     }
     public initGraph(header: GenesisBlockHeader) {
         const blockHash = new Hash(header)
-        const id = blockHash.toString().slice(0, 6)
+        const id = blockHash.toHex().slice(0, 6)
         this.addNode(id, this.color.genesis)
         this.renderGraph()
     }
 
     public addToGraph(header: BlockHeader, color: string) {
         const blockHash = new Hash(header)
-        const id = blockHash.toString().slice(0, 6)
+        const id = blockHash.toHex().slice(0, 6)
         this.addNode(id, color)
         for (const prevHash of header.previousHash) {
-            const pid = prevHash.toString().slice(0, 6)
+            const pid = prevHash.toHex().slice(0, 6)
             this.addEdge(id, pid)
         }
+        this.renderGraph()
     }
 
     public removeFromGraph(header: BlockHeader) {
         const blockHash = new Hash(header)
-        const id = blockHash.toString().slice(0, 6)
+        const id = blockHash.toHex().slice(0, 6)
         this.removeNode(id)
         for (const prevHash of header.previousHash) {
-            const pid = prevHash.toString().slice(0, 6)
+            const pid = prevHash.toHex().slice(0, 6)
             this.removeEdge(id, pid)
         }
     }

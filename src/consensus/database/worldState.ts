@@ -137,34 +137,35 @@ export class WorldState {
                     toAccount = new Account({ balance: 0, nonce: 0 })
                 }
 
-                if (tx.nonce === (fromAccount.nonce + 1)) {
-                    const amount = +tx.amount
-                    const fee = +tx.fee
-                    fees += fee
-                    if (fromAccount.balance >= (amount + fee)) {
-                        const fromState = new Account(fromAccount)
-                        const toState = new Account(toAccount)
-                        fromState.balance -= (amount + fee)
-                        toState.balance += amount
-                        fromState.nonce++
-                        if (fromIndex === undefined) {
-                            mapIndex.set(tx.from.toString(), changes.push({ address: tx.from, account: fromState }) - 1)
-                        } else {
-                            changes[fromIndex].account = fromState
-                        }
-                        if (toIndex === undefined) {
-                            mapIndex.set(tx.to.toString(), changes.push({ address: tx.to, account: toState }) - 1)
-                        } else {
-                            changes[toIndex].account = toState
-                        }
+                // if (tx.nonce === (fromAccount.nonce + 1)) {
+                const amount = +tx.amount
+                const fee = +tx.fee
+                fees += fee
+                if (fromAccount.balance >= (amount + fee)) {
+                    const fromState = new Account(fromAccount)
+                    const toState = new Account(toAccount)
+                    fromState.balance -= (amount + fee)
+                    toState.balance += amount
+                    fromState.nonce++
+                    if (fromIndex === undefined) {
+                        mapIndex.set(tx.from.toString(), changes.push({ address: tx.from, account: fromState }) - 1)
                     } else {
-                        return Promise.reject(`The balance of the account is insufficient.`)
+                        changes[fromIndex].account = fromState
                     }
-                } else if (tx.nonce > (fromAccount.nonce + 1)) {
-                    return Promise.reject(`block.txs[i].tx.nonce >= (fromAccount.nonce + 2)`)
+                    if (toIndex === undefined) {
+                        mapIndex.set(tx.to.toString(), changes.push({ address: tx.to, account: toState }) - 1)
+                    } else {
+                        changes[toIndex].account = toState
+                    }
                 } else {
-                    return Promise.reject(`block.txs[i].tx.nonce <= fromAccount.nonce`)
+                    return Promise.reject(`The balance of the account is insufficient.`)
                 }
+                // }
+                // else if (tx.nonce > (fromAccount.nonce + 1)) {
+                //     return Promise.reject(`block.txs[i].tx.nonce >= (fromAccount.nonce + 2)`)
+                // } else {
+                //     return Promise.reject(`block.txs[i].tx.nonce <= fromAccount.nonce`)
+                // }
             }
 
             // Reward to miner
