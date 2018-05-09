@@ -6,6 +6,7 @@ import * as React from "react"
 import { matchPath } from "react-router"
 import { matchRoutes, renderRoutes } from "react-router-config"
 import { SignedTx } from "../../common/txSigned"
+import { IConsensus } from "../../consensus/iconsensus"
 import { RestManager } from "../../rest/restManager"
 import * as Hycon from "../../server"
 import { App, routes } from "../client/app"
@@ -18,8 +19,9 @@ const apiVersion = "v1"
 export class HttpServer {
     public app: express.Application
     public rest: RestServer
-    public hyconServer: Hycon.Server | RestManager
-    constructor(hyconServer: Hycon.Server | RestManager, port: number = 8080) {
+    public hyconServer: RestManager
+    private consensus: IConsensus
+    constructor(hyconServer: RestManager, port: number = 8080) {
         this.app = express()
         this.config()
         this.app.all("/*", (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -36,7 +38,7 @@ export class HttpServer {
         this.app.use(express.static("blockexplorer/clientDist"))
         this.app.use(express.static("node_modules"))
         this.routeRest()
-        this.rest = new RestServer(hyconServer.db, hyconServer.accountDB)
+        this.rest = new RestServer(this.consensus)
         this.app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
             res.status(404)
             res.json({

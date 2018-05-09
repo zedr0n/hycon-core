@@ -1,8 +1,10 @@
+import { address } from "ip"
 import { IResponseError } from "../api/client/rest"
 import { Address } from "../common/address"
 import { TxPool } from "../common/txPool"
 import { Database } from "../consensus/database/database"
 import { WorldState } from "../consensus/database/worldState"
+import { IConsensus } from "../consensus/iconsensus"
 import { Server } from "../server"
 export class RestManager {
     public useRabbit = true
@@ -11,6 +13,8 @@ export class RestManager {
     public subscription: Map<number, any> | undefined
 
     public txQueue: TxPool
+
+    public consensus: IConsensus
     private server: Server
     constructor(server: Server) {
         this.server = server
@@ -22,7 +26,7 @@ export class RestManager {
     public async createSubscription(sub: { address: string, url: string, from: boolean, to: boolean }): Promise<{ id: number } | IResponseError> {
         try {
             const addressOfWallet = new Address(sub.address)
-            const account = await this.accountDB.getAccount(this.db.tips[0].header.stateRoot, addressOfWallet)
+            const account = await this.consensus.getAccount(addressOfWallet)
             if (account === undefined) {
                 return Promise.resolve({
                     status: 404,
@@ -48,10 +52,10 @@ export class RestManager {
         }
     }
 
-    public async deleteSubscription(address: string, id: number): Promise<number | IResponseError> {
+    public async deleteSubscription(walletAddr: string, id: number): Promise<number | IResponseError> {
         try {
-            const addressOfWallet = new Address(address)
-            const account = await this.accountDB.getAccount(this.db.tips[0].header.stateRoot, addressOfWallet)
+            const addressOfWallet = new Address(walletAddr)
+            const account = await this.consensus.getAccount(addressOfWallet)
             if (account === undefined) {
                 return Promise.resolve({
                     status: 404,

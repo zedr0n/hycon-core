@@ -22,7 +22,6 @@ export interface ITxProp {
     signature?: string
 
     // Below txView tx property
-    timeStamp: number
     receivedTime?: number
     lockTime?: number
     includedInBlocks?: number

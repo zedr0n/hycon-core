@@ -286,6 +286,9 @@ export class SingleChain implements IConsensus {
         return Promise.resolve(await this.createCandidateBlock(txs))
     }
 
+    public async getTx(hash: Hash): Promise<TxList | undefined> {
+        return Promise.resolve(await this.getTx(hash))
+    }
     private newBlock(block: AnyBlock): void {
         for (const callback of this.newBlockCallbacks) {
             callback(block)

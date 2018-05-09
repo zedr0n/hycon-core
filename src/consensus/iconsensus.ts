@@ -29,4 +29,5 @@ export interface IConsensus {
     getBlocksTip(): { hash: Hash, height: number }
     testMakeBlock(txs: SignedTx[]): Promise<Block>
     isTxValid(tx: SignedTx): Promise<boolean>
+    getTx(hash: Hash): Promise<TxList | undefined>
 }

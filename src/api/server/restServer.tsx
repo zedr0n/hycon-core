@@ -10,8 +10,10 @@ import { SignedTx } from "../../common/txSigned"
 import { Account } from "../../consensus/database/account"
 import { Database } from "../../consensus/database/database"
 import { DBBlock } from "../../consensus/database/dbblock"
-import { DBTx } from "../../consensus/database/dbTx"
+// import { DBTx } from "../../consensus/database/dbTx"
+import { TxDatabase } from "../../consensus/database/txDatabase"
 import { WorldState } from "../../consensus/database/worldState"
+import { IConsensus } from "../../consensus/iconsensus"
 import { Hash } from "../../util/hash"
 import { Wallet } from "../../wallet/wallet"
 import { IBlock, IHyconWallet, ILocationDetails, IPeer, IResponseError, IRest, ITxProp, IUser, IWalletAddress } from "../client/rest"
@@ -21,12 +23,10 @@ const logger = getLogger("RestServer")
 // tslint:disable:ban-types
 // tslint:disable:no-bitwise
 export class RestServer implements IRest {
+    private consensus: IConsensus
 
-    private db: Database
-    private accountDB: WorldState
-    constructor(db: Database, accountDB: WorldState) {
-        this.db = db
-        this.accountDB = accountDB
+    constructor(consensus: IConsensus) {
+        this.consensus = consensus
     }
 
     public setIsHyconWallet(isHyconWallet: boolean): void { }
@@ -74,7 +74,7 @@ export class RestServer implements IRest {
     public async getWalletBalance(address: string): Promise<{ balance: number } | IResponseError> {
         try {
             const addressOfWallet = new Address(address)
-            const account = await this.accountDB.getAccount(this.db.tips[0].header.stateRoot, addressOfWallet)
+            const account = await this.consensus.getAccount(addressOfWallet)
             if (account === undefined) {
                 return Promise.resolve({
                     status: 404,
@@ -102,7 +102,7 @@ export class RestServer implements IRest {
             const mapHashTx: Map<Hash, SignedTx> = new Map<Hash, SignedTx>()
             await Wallet.walletInit()
             const addressOfWallet = new Address(address)
-            const account = await this.accountDB.getAccount(this.db.tips[0].header.stateRoot, addressOfWallet)
+            const account = await this.consensus.getAccount(addressOfWallet)
             if (account === undefined) {
                 return Promise.resolve({
                     status: 404,
@@ -113,37 +113,27 @@ export class RestServer implements IRest {
             }
 
             const n = 10
-            // TODO: Conditional for nonce can go here after it's implemented for wallet
-            const dbTxs = await this.db.getTxsOfAddress(addressOfWallet, n)
-            const txList: ITxProp[] = []
-            for (const dbTx of dbTxs.dbTxs) {
-                const tx = dbTxs.map.get(dbTx.hash.toString())
+            const txList = await this.consensus.getLastTxs(addressOfWallet, n)
+            const webTxs: ITxProp[] = []
+            for (const tx of txList) {
                 let webTx: ITxProp
                 if (tx !== undefined) {
-                    if (tx.tx instanceof SignedTx) {
+                    if (tx instanceof SignedTx && tx.nonce >= nonce) {
                         webTx = {
-                            hash: dbTx.hash.toString(),
-                            amount: Number(tx.tx.amount),
-                            fee: Number(tx.tx.fee),
-                            from: tx.tx.from.toString(),
+                            hash: tx.tx.unsignedHash().toString(),
+                            amount: tx.tx.amount,
+                            fee: tx.fee,
+                            from: tx.from.toString(),
                             to: tx.tx.to.toString(),
                             signature: tx.tx.signature.toString(),
-                            timeStamp: tx.timeStamp,
-                        }
-                    } else {
-                        webTx = {
-                            hash: dbTx.hash.toString(),
-                            amount: Number(tx.tx.amount),
-                            to: tx.tx.to.toString(),
-                            signature: tx.tx.signature.toString(),
-                            timeStamp: tx.timeStamp,
                         }
                     }
-                    txList.push(webTx)
+                    // unsigned Txs are unlisted
+                    webTxs.push(webTx)
                 }
             }
             return Promise.resolve({
-                txs: txList,
+                txs: webTxs,
             })
         } catch (e) {
             return Promise.resolve({
@@ -217,7 +207,7 @@ export class RestServer implements IRest {
 
     public async getTx(hash: string): Promise<ITxProp | IResponseError> {
         try {
-            const hyconBlockTx = await this.db.getTxTime(new Hash(Hash.decode(hash)))
+            const hyconBlockTx = await this.consensus.getTx(new Hash(Hash.decode(hash)))
             let tx: ITxProp
             if (hyconBlockTx.tx instanceof SignedTx) {
                 tx = {
@@ -226,14 +216,12 @@ export class RestServer implements IRest {
                     fee: Number(hyconBlockTx.tx.fee),
                     from: hyconBlockTx.tx.from.toString(),
                     to: hyconBlockTx.tx.to.toString(),
-                    timeStamp: hyconBlockTx.timeStamp,
                 }
             } else {
                 tx = {
                     hash,
                     amount: Number(hyconBlockTx.tx.amount),
                     to: hyconBlockTx.tx.to.toString(),
-                    timeStamp: hyconBlockTx.timeStamp,
                 }
             }
             return tx
@@ -251,39 +239,30 @@ export class RestServer implements IRest {
         try {
             const addressOfWallet = new Address(address)
             const n = 10
-            const account = await this.accountDB.getAccount(this.db.tips[0].header.stateRoot, addressOfWallet)
-            const dbTxs = await this.db.getTxsOfAddress(addressOfWallet, n)
-            const txList: ITxProp[] = []
-            for (const dbTx of dbTxs.dbTxs) {
-                const tx = dbTxs.map.get(dbTx.hash.toString())
+            const account = await this.consensus.getAccount(addressOfWallet)
+            const txList = await this.consensus.getLastTxs(addressOfWallet, n)
+            const webTxs: ITxProp[] = []
+            for (const tx of txList) {
                 let webTx: ITxProp
                 if (tx !== undefined) {
-                    if (tx.tx instanceof SignedTx) {
+                    if (tx instanceof SignedTx) {
                         webTx = {
-                            hash: dbTx.hash.toString(),
-                            amount: Number(tx.tx.amount),
-                            fee: Number(tx.tx.fee),
-                            from: tx.tx.from.toString(),
+                            hash: tx.tx.unsignedHash().toString(),
+                            amount: tx.tx.amount,
+                            fee: tx.fee,
+                            from: tx.from.toString(),
                             to: tx.tx.to.toString(),
                             signature: tx.tx.signature.toString(),
-                            timeStamp: tx.timeStamp,
-                        }
-                    } else {
-                        webTx = {
-                            hash: dbTx.hash.toString(),
-                            amount: Number(tx.tx.amount),
-                            to: tx.tx.to.toString(),
-                            signature: tx.tx.signature.toString(),
-                            timeStamp: tx.timeStamp,
                         }
                     }
-                    txList.push(webTx)
+                    // unsigned Txs are unlisted
+                    webTxs.push(webTx)
                 }
             }
             return Promise.resolve<IWalletAddress>({
                 hash: address,
                 balance: account ? account.balance : 0,
-                txs: txList,
+                txs: webTxs,
             })
 
         } catch (e) {
