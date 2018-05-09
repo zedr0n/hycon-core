@@ -112,7 +112,12 @@ export class SingleChain implements IConsensus {
             let blockTxs: SignedTx[] = []
             if (block instanceof Block) {
                 blockTxs = block.txs
-                const verifyResult = await this.verifyBlock(block)
+                const previousHeader = await this.db.getBlockHeader(block.header.previousHash[0])
+                if (previousHeader === undefined) {
+                    logger.info(`Previous Header not Found`)
+                    return false
+                }
+                const verifyResult = await this.verifyBlock(block, previousHeader)
                 if (!verifyResult.isVerified) {
                     logger.error(`Invalid Block Rejected : ${blockHash}`)
                     await this.db.setBlockStatus(blockHash, BlockStatus.Rejected)
@@ -329,11 +334,11 @@ export class SingleChain implements IConsensus {
     private async createCandidateBlock(txs: SignedTx[]): Promise<Block> {
         try {
             const previousHash = new Hash(this.blockTip.header)
-            // TODO : get Miner address
-            const miner: Address = undefined
+            // TODO : get Miner address -> If miner is undefined, occur error
+            const miner: Address = new Address(0)
             const previousHeader = await this.db.getBlockHeader(previousHash)
             txs.sort((txA, txB) => txA.nonce - txB.nonce)
-            const worldStateResult = await this.worldState.next(txs, previousHeader.stateRoot)
+            const worldStateResult = await this.worldState.next(txs, previousHeader.stateRoot, miner)
             const header = new BlockHeader({
                 difficulty: utils.getTargetDifficulty(),
                 merkleRoot: new Hash(),
@@ -345,7 +350,7 @@ export class SingleChain implements IConsensus {
             const newBlock = new Block({ header, txs: worldStateResult.validTxs, miner })
             newBlock.updateMerkleRoot()
 
-            if (!await this.verifyPreBlock(newBlock)) { throw new Error("Not verified.") }
+            if (!await this.verifyPreBlock(newBlock, previousHeader)) { throw new Error("Not verified.") }
             this.server.miner.newCandidateBlock(newBlock)
             return Promise.resolve(newBlock)
         } catch (e) {
@@ -354,11 +359,14 @@ export class SingleChain implements IConsensus {
         }
     }
 
-    private async verifyBlock(block: Block): Promise<{ isVerified: boolean, stateTransition?: IStateTransition }> {
+    private async verifyBlock(block: Block, previousHeader: AnyBlockHeader): Promise<{ isVerified: boolean, stateTransition?: IStateTransition }> {
         const isValidHeader = await this.verifyHeader(block.header)
-        if (!isValidHeader) { return Promise.resolve({ isVerified: false }) }
+        if (!isValidHeader) {
+            logger.warn(`Invalid header`)
+            return Promise.resolve({ isVerified: false })
+        }
 
-        const verifyResult = await this.verifyPreBlock(block)
+        const verifyResult = await this.verifyPreBlock(block, previousHeader)
         if (!verifyResult.isVerified) {
             return Promise.resolve({ isVerified: false })
         }
@@ -366,25 +374,27 @@ export class SingleChain implements IConsensus {
         return Promise.resolve(verifyResult)
     }
 
-    private async verifyPreBlock(block: Block): Promise<{ isVerified: boolean, stateTransition?: IStateTransition }> {
+    private async verifyPreBlock(block: Block, previousHeader: AnyBlockHeader): Promise<{ isVerified: boolean, stateTransition?: IStateTransition }> {
         const txVerify = block.txs.every((tx) => verifyTx(tx))
         if (!txVerify) { return Promise.resolve({ isVerified: false }) }
 
         const merkleRootVerify = block.calculateMerkleRoot().equals(block.header.merkleRoot)
-        if (!merkleRootVerify) { return Promise.resolve({ isVerified: false }) }
-        const previousHeader = await this.db.getBlockHeader(block.header.previousHash[0])
+        if (!merkleRootVerify) {
+            logger.warn(`Invalid merkleRoot`)
+            return Promise.resolve({ isVerified: false })
+        }
         const { stateTransition, validTxs, invalidTxs } = await this.worldState.next(block.txs, previousHeader.stateRoot, block.miner)
         if (!stateTransition.currentStateRoot.equals(block.header.stateRoot)) {
-            logger.info(`State root is incorrect`)
+            logger.warn(`State root is incorrect`)
             return { isVerified: false }
         }
         if (invalidTxs.length > 0) {
-            logger.info(`Block contains invalid Txs`)
+            logger.warn(`Block contains invalid Txs`)
             return { isVerified: false }
         }
 
         if (validTxs.length !== block.txs.length) {
-            logger.info(`Not all txs were valid`)
+            logger.warn(`Not all txs were valid`)
             return { isVerified: false }
         }
 
@@ -401,55 +411,12 @@ export class SingleChain implements IConsensus {
         if ((cryptoHash[0] < target[0]) || ((cryptoHash[0] === target[0]) && (cryptoHash[1] < target[1]))) {
             return Promise.resolve(true)
         }
+        logger.warn(`Fail to verifyHeader with difficulty nonce.`)
         return Promise.resolve(false)
     }
 
     private async reorganization(): Promise<void> {
-        try {
-            logger.debug(`Reorganization Started`)
-            if (this.forkHeight === -1) { return Promise.resolve(undefined) }
-            const tip = this.blockTip
-            const result = await this.db.getDBBlockMapByHeights(this.forkHeight, tip.height)
-            const bmap = result.blockMap
-            const hmap = result.hashMap
-
-            if (bmap.get(tip.height).length !== 1) {
-            } else {
-                const mainChain: DBBlock[] = []
-                let block = tip
-                for (let i = tip.height; i >= this.forkHeight; i--) {
-                    mainChain.push(block)
-                    const blocks = bmap.get(i)
-                    for (let index = 0; index < blocks.length; index++) {
-                        if (new Hash(blocks[index].header).equals(new Hash(block.header))) {
-                            blocks.splice(index, 1)
-                            break
-                        }
-                    }
-                    if (block.header instanceof BlockHeader) { block = hmap.get(block.header.previousHash[0].toString()) }
-                }
-
-                for (let i = tip.height - 1; i >= this.forkHeight; i--) {
-                    for (const b of bmap.get(i)) {
-                        const hash = new Hash(b.header)
-                        const blk = await this.getBlockByHash(hash)
-                        await this.db.setBlockStatus(hash, BlockStatus.Block)
-                        if (blk instanceof Block) { await this.server.txPool.putTxs(blk.txs) }
-                        // if (blk instanceof Block) { this.graph.removeFromGraph(blk.header) }
-                    }
-                }
-                for (const b of mainChain) {
-                    const hash = new Hash(b.header)
-                    const blk = await this.getBlockByHash(hash)
-                    await this.db.setBlockStatus(hash, BlockStatus.MainChain)
-                    await this.db.setHashByHeight(b.height, hash)
-                    if (blk instanceof Block) { this.server.txPool.updateTxs(blk.txs, 0) }
-                }
-                this.forkHeight = -1
-            }
-        } catch (e) {
-            return Promise.reject(`Fail to reorganization : ${e}`)
-        }
+        logger.info(`Reorg logic should be implemented`)
     }
 }
 
