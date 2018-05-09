@@ -210,29 +210,31 @@ export class SingleChain implements IConsensus {
     }
 
     public async getHeadersRange(fromHeight: number, count?: number): Promise<AnyBlockHeader[]> {
-        try {
-            if (this.forkHeight < fromHeight) { return Promise.resolve([]) }
-            const dbBlocks = await this.db.getDBBlocksRange(fromHeight, count)
-            if (this.forkHeight === -1) {
-                const headers = []
-                for (const dbBlock of dbBlocks) {
-                    headers.push(dbBlock.header)
-                }
-                return Promise.resolve(headers)
-            } else {
-                const toHeight = this.forkHeight - 1
-                const headers = []
-                for (const dbBlock of dbBlocks) {
-                    if (dbBlocks[dbBlocks.length - 1].height <= toHeight) {
-                        headers.push(dbBlock.header)
-                    }
-                }
-                return Promise.resolve(headers)
-            }
-        } catch (e) {
-            logger.error(`Fail to getHeadersRange : ${e}`)
-            Promise.reject(e)
-        }
+        // TODO : Change logic.
+        // try {
+        //     if (this.forkHeight < fromHeight) { return Promise.resolve([]) }
+        //     const dbBlocks = await this.db.getDBBlocksRange(fromHeight, count)
+        //     if (this.forkHeight === -1) {
+        //         const headers = []
+        //         for (const dbBlock of dbBlocks) {
+        //             headers.push(dbBlock.header)
+        //         }
+        //         return Promise.resolve(headers)
+        //     } else {
+        //         const toHeight = this.forkHeight - 1
+        //         const headers = []
+        //         for (const dbBlock of dbBlocks) {
+        //             if (dbBlocks[dbBlocks.length - 1].height <= toHeight) {
+        //                 headers.push(dbBlock.header)
+        //             }
+        //         }
+        //         return Promise.resolve(headers)
+        //     }
+        // } catch (e) {
+        //     logger.error(`Fail to getHeadersRange : ${e}`)
+        //     Promise.reject(e)
+        // }
+        throw new Error(`Logic should be edited.`)
     }
 
     public async getAccount(address: Address): Promise<Account> {
