@@ -70,9 +70,9 @@ export class Server {
         this.rest = new RestManager(this)
     }
     public async run() {
+        this.readOptions()
         await this.consensus.init()
         logger.info("Starting server...")
-        this.readOptions()
         await this.network.start()
         for (const peer of this.options.peer) {
             const [ip, port] = peer.split(":")
