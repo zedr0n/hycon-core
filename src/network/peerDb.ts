@@ -64,9 +64,9 @@ export class PeerDb {
                 peers.push(peer)
             })
             .on("end", () => {
-                logger.info(`reload peers from peer db`)
+                logger.info(`reload peers:${peers.length} from peer db`)
                 for ( const peer of peers) {
-                    logger.info(`${peer.host}:${peer.port}\n`)
+                    logger.info(`${peer.host}:${peer.port}`)
                 }
             })
             return Promise.resolve(peers)

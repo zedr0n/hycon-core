@@ -1,5 +1,11 @@
-import { NatUpnp } from "./nat"
 // const natUpnp = new NatUpnp(8150)
-
+import * as proto from "../serialization/proto"
+import { NatUpnp } from "./nat"
 import {PeerDb} from "./peerDb"
-const peerDB = new PeerDb()
+import {RabbitNetwork} from "./rabbit/rabbitNetwork"
+// const peerDB = new PeerDb()
+const buffer1 = PeerDb.peer2key(proto.Peer.create({host: "192.168.0.1", port: 8080, lastSeen: Date.now(), failCount: 0}))
+const buffer2 = RabbitNetwork.string2key("192.168.0.1", 8080)
+
+// tslint:disable-next-line:no-console
+console.log(buffer1.equals(buffer2))

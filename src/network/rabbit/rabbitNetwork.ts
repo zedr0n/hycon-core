@@ -1,5 +1,3 @@
-import { SIGPIPE } from "constants"
-import { randomBytes } from "crypto"
 import { getLogger } from "log4js"
 import { createConnection, createServer, Socket } from "net"
 import * as net from "net"
@@ -42,7 +40,7 @@ export class RabbitNetwork implements INetwork {
         const ip: string[] = ipv6.split(":")
         if (ip.length === 4) {
             return ip[3]
-        } else {return ip[0]}
+        } else { return ip[0] }
     }
     public readonly port: number
     private hycon: Server
@@ -55,6 +53,7 @@ export class RabbitNetwork implements INetwork {
     private natUpnp: NatUpnp
 
     constructor(hycon: Server, port: number = 8148) {
+        RabbitNetwork.failLimit = 10
         this.port = port
         this.targetPeerCount = 5
         this.hycon = hycon
@@ -70,8 +69,7 @@ export class RabbitNetwork implements INetwork {
             }
         }
     }
-    public async start(): Promise<boolean > {
-        await this.connectPeersInDB()
+    public async start(): Promise<boolean> {
         logger.debug(`Tcp Network Started`)
         this.server = createServer((socket) => this.accept(socket))
         await new Promise<boolean>((resolve, reject) => {
@@ -89,7 +87,11 @@ export class RabbitNetwork implements INetwork {
         // nat
         this.natUpnp = new NatUpnp(this.port, this)
 
-        setInterval(() => logger.debug(`Peers Count=${this.peerTable.size}`), 5000)
+        await this.connectPeersInDB()
+
+        setInterval(() => {
+            logger.debug(`Peers Count=${this.peerTable.size}`)
+        }, 5000)
         setInterval(() => { this.findPeers() }, 4000)
 
         return true
@@ -120,7 +122,7 @@ export class RabbitNetwork implements INetwork {
             if (cntr++ === randomList[index2]) {
                 iPeer.push(value)
                 index2 += 1
-                if (index2 === randomList.length) {break }
+                if (index2 === randomList.length) { break }
             }
         }
         return iPeer
@@ -144,7 +146,7 @@ export class RabbitNetwork implements INetwork {
         })
     }
 
-    private async accept(socket: Socket) {
+    private async accept(socket: Socket): Promise <void > {
         const ipeer = RabbitNetwork.socket2Ipeer(socket)
         const key = PeerDb.peer2key(ipeer)
         if (this.peerTable.has(key)) {
@@ -161,9 +163,9 @@ export class RabbitNetwork implements INetwork {
         await this.peerDB.put(ipeer)
         const index = this.peerDB.peers.indexOf(ipeer)
         if (index > -1) {
-            this.peerDB.peers.push(ipeer)
-        } else {
             this.peerDB.peers[index] = ipeer
+        } else {
+            this.peerDB.peers.push(ipeer)
         }
         socket.on("close", async (error) => {
             this.peerTable.delete(key)
@@ -175,23 +177,14 @@ export class RabbitNetwork implements INetwork {
         })
         socket.on("error", async (error) => {
             logger.error(`Connection error ${RabbitNetwork.ipv6Toipv4(socket.remoteAddress)}:${socket.remotePort} : ${error}`)
-            const index2 = this.peerDB.peers.indexOf(ipeer)
-            if (index2 > -1) {
-                const count = this.peerDB.peers[index2].failCount += 1
-                await this.peerDB.put(this.peerDB.peers[index2])
-                if (count > RabbitNetwork.failLimit) {
-                    this.peerTable.delete(key)
-                    await this.peerDB.remove(key)
-                    this.peerDB.peers.splice(index2, 1)
-                }
-            }
+            await this.removePeers(ipeer, key)
         })
 
         peer.onConnected()
         return peer
     }
 
-    private async findPeers() {
+    private async findPeers(): Promise <void > {
         const necessaryPeers = this.targetPeerCount - this.peerTable.size
         if (necessaryPeers <= 0) {
             return
@@ -202,7 +195,11 @@ export class RabbitNetwork implements INetwork {
                 const rabbitPeer: RabbitPeer = await this.connect(RabbitNetwork.seeds[index].host, RabbitNetwork.seeds[index].port)
                 const peers: proto.IPeer[] = await rabbitPeer.getPeers(necessaryPeers)
                 for (const peer of peers) {
-                    await this.connect(peer.host, peer.port)
+                    try {
+                        await this.connect(peer.host, peer.port)
+                    } catch (e) {
+                        this.removePeers(peer, PeerDb.peer2key(peer))
+                    }
                 }
             } catch (e) {
                 logger.info(`occurred error when connect seeds: ${e}`)
@@ -214,17 +211,48 @@ export class RabbitNetwork implements INetwork {
         // logger.debug(`Done`)
     }
 
-    private async connectPeersInDB() {
-        try {
-            if (this.peerDB.peers.length !== 0) {
-                for (const peer of this.peerDB.peers) {
+    private async connectPeersInDB(): Promise <void > {
+
+        if (this.peerDB.peers.length !== 0) {
+            for (const peer of this.peerDB.peers) {
+                try {
+                    logger.debug(`${peer.host}:${peer.port}`)
                     const rabbitPeer = await this.connect(peer.host, peer.port)
                     const key = RabbitNetwork.string2key(peer.host, peer.port)
                     this.peerTable.set(key, rabbitPeer)
+                } catch (e) {
+                    try {
+                        logger.debug(e)
+                        const key = PeerDb.peer2key(peer)
+                        this.peerTable.delete(key)
+                        await this.peerDB.remove(key)
+                        const index = this.peerDB.peers.indexOf(peer)
+                        this.peerDB.peers.splice(index, 1)
+                    } catch (e) {
+                        logger.debug(e)
+                    }
+
                 }
             }
-        } catch (e) {
-            logger.error(e)
+        }
+
+    }
+
+    private async removePeers(ipeer: proto.IPeer, key: Buffer): Promise <void > {
+        const index = this.peerDB.peers.indexOf(ipeer)
+        if (index > -1) {
+            const count = this.peerDB.peers[index].failCount += 1
+            await this.peerDB.put(this.peerDB.peers[index])
+            if (count > RabbitNetwork.failLimit) {
+                try {
+                    this.peerTable.delete(key)
+                    await this.peerDB.remove(key)
+                    this.peerDB.peers.splice(index, 1)
+                } catch (e) {
+                    logger.debug(e)
+                }
+
+            }
         }
 
     }
