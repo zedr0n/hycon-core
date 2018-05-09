@@ -76,6 +76,7 @@ export class SingleChain implements IConsensus {
             this.server.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock(txs))
             this.server.miner.addCallbackNewBlock((block: Block) => this.putBlock(block))
             logger.debug(`Initialization of singlechain is over.`)
+            await this.server.testConsensus()
         } catch (e) {
             logger.error(`Initialization fail in singleChain : ${e}`)
             process.exit(1)
@@ -97,14 +98,14 @@ export class SingleChain implements IConsensus {
             let blockTxs: SignedTx[] = []
             if (block instanceof Block) {
                 blockTxs = block.txs
-                const verifyResult = await this.verifyBlock(block)
-                if (!verifyResult.isVerified) {
-                    logger.error(`Invalid Block Rejected : ${blockHash}`)
-                    await this.db.setBlockStatus(blockHash, BlockStatus.Rejected)
-                    return false
-                }
-                const transitionResult = verifyResult.stateTransition
-                await this.worldState.putPending(transitionResult.batch, transitionResult.mapAccount)
+                // const verifyResult = await this.verifyBlock(block)
+                // if (!verifyResult.isVerified) {
+                //     logger.error(`Invalid Block Rejected : ${blockHash}`)
+                //     await this.db.setBlockStatus(blockHash, BlockStatus.Rejected)
+                //     return false
+                // }
+                // const transitionResult = verifyResult.stateTransition
+                // await this.worldState.putPending(transitionResult.batch, transitionResult.mapAccount)
                 this.graph.addToGraph(block.header, this.graph.color.outgoing)
             }
             const { current, previous } = await this.db.putBlock(blockHash, block)
@@ -341,11 +342,11 @@ export class SingleChain implements IConsensus {
             const miner = new Address(1)
             const newBlock = new Block({ header, txs, miner })
             newBlock.updateMerkleRoot()
-            const previousHeader = await this.db.getBlockHeader(newBlock.header.previousHash[0])
-            const newState = await this.worldState.next(newBlock, previousHeader.stateRoot)
-            newBlock.header.stateRoot = newState.currentStateRoot
+            // const previousHeader = await this.db.getBlockHeader(newBlock.header.previousHash[0])
+            // const newState = await this.worldState.next(newBlock, previousHeader.stateRoot)
+            // newBlock.header.stateRoot = newState.currentStateRoot
 
-            if (!await this.verifyPreBlock(newBlock)) { throw new Error("Not verified.") }
+            // if (!await this.verifyPreBlock(newBlock)) { throw new Error("Not verified.") }
             this.server.miner.newCandidateBlock(newBlock)
             return Promise.resolve(newBlock)
         } catch (e) {
