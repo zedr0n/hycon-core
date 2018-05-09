@@ -99,7 +99,7 @@ export class StratumServer {
                 case "submit":
                     logger.debug(`Submit id : ${req.id} / nonce : ${req.params.nonce} / result : ${req.params.result}`)
                     const result = await self.completeWork(req.params.nonce)
-                    deferred.resolve(result)
+                    deferred.resolve([result])
                     break
                 default:
                     deferred.reject(LibStratum.errors.METHOD_NOT_FOUND)
