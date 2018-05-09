@@ -93,7 +93,7 @@ export class TxDatabase {
         return Promise.resolve(txs)
     }
 
-    private async getTx(key: Address | Hash): Promise<TxList | undefined> {
+    public async getTx(key: Address | Hash): Promise<TxList | undefined> {
         let decodingDBEntry = false
         try {
             let dbKey = key

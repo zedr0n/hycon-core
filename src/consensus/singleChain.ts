@@ -282,13 +282,19 @@ export class SingleChain implements IConsensus {
         return Promise.resolve(true)
     }
 
+    public async getTx(hash: Hash): Promise<TxList | undefined> {
+        if (this.txdb) {
+            return await this.txdb.getTx(hash)
+        } else {
+            logger.error(`User not use txDatabase for RestAPI`)
+            return Promise.resolve(undefined)
+        }
+    }
+
     public async testMakeBlock(txs: SignedTx[]): Promise<Block> {
         return Promise.resolve(await this.createCandidateBlock(txs))
     }
 
-    public async getTx(hash: Hash): Promise<TxList | undefined> {
-        return Promise.resolve(await this.getTx(hash))
-    }
     private newBlock(block: AnyBlock): void {
         for (const callback of this.newBlockCallbacks) {
             callback(block)
