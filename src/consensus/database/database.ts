@@ -207,14 +207,14 @@ export class Database {
         }
     }
 
-    public async getDBBlockMapByHeights(fromHeight: number, toHeight: number): Promise<{ blockMap: Map<number, DBBlock[]>, hashMap: Map<string, DBBlock> }> {
-        const blockMap = new Map<number, DBBlock[]>()
+    public async getDBBlockMapByHeights(fromHeight: number, toHeight: number): Promise<{ blockMap: Map<number, DBBlock>, hashMap: Map<string, DBBlock> }> {
+        const blockMap = new Map<number, DBBlock>()
         const hashMap = new Map<string, DBBlock>()
         for (let i = fromHeight; i <= toHeight; i++) {
             const hash = await this.getHashByHeight(i)
-            const dbBlock = DBBlock.decode(hash)
+            const dbBlock = await this.getDBBlock(hash)
             hashMap.set(hash.toString(), dbBlock)
-            blockMap.set(i, [dbBlock])
+            blockMap.set(i, dbBlock)
         }
         const result = { blockMap, hashMap }
         return Promise.resolve(result)

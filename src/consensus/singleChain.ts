@@ -404,40 +404,41 @@ export class SingleChain implements IConsensus {
             const bmap = result.blockMap
             const hmap = result.hashMap
 
-            if (bmap.get(tip.height).length !== 1) {
-            } else {
-                const mainChain: DBBlock[] = []
-                let block = tip
-                for (let i = tip.height; i >= this.forkHeight; i--) {
-                    mainChain.push(block)
-                    const blocks = bmap.get(i)
-                    for (let index = 0; index < blocks.length; index++) {
-                        if (new Hash(blocks[index].header).equals(new Hash(block.header))) {
-                            blocks.splice(index, 1)
-                            break
-                        }
-                    }
-                    if (block.header instanceof BlockHeader) { block = hmap.get(block.header.previousHash[0].toString()) }
-                }
+            // TODO : Have to change reorg logic.
+            // if (bmap.get(tip.height).length !== 1) {
+            // } else {
+            //     const mainChain: DBBlock[] = []
+            //     let block = tip
+            //     for (let i = tip.height; i >= this.forkHeight; i--) {
+            //         mainChain.push(block)
+            //         const blocks = bmap.get(i)
+            //         for (let index = 0; index < blocks.length; index++) {
+            //             if (new Hash(blocks[index].header).equals(new Hash(block.header))) {
+            //                 blocks.splice(index, 1)
+            //                 break
+            //             }
+            //         }
+            //         if (block.header instanceof BlockHeader) { block = hmap.get(block.header.previousHash[0].toString()) }
+            //     }
 
-                for (let i = tip.height - 1; i >= this.forkHeight; i--) {
-                    for (const b of bmap.get(i)) {
-                        const hash = new Hash(b.header)
-                        const blk = await this.getBlockByHash(hash)
-                        await this.db.setBlockStatus(hash, BlockStatus.Block)
-                        if (blk instanceof Block) { await this.server.txPool.putTxs(blk.txs) }
-                        // if (blk instanceof Block) { this.graph.removeFromGraph(blk.header) }
-                    }
-                }
-                for (const b of mainChain) {
-                    const hash = new Hash(b.header)
-                    const blk = await this.getBlockByHash(hash)
-                    await this.db.setBlockStatus(hash, BlockStatus.MainChain)
-                    await this.db.setHashByHeight(b.height, hash)
-                    if (blk instanceof Block) { this.server.txPool.updateTxs(blk.txs, 0) }
-                }
-                this.forkHeight = -1
-            }
+            //     for (let i = tip.height - 1; i >= this.forkHeight; i--) {
+            //         for (const b of bmap.get(i)) {
+            //             const hash = new Hash(b.header)
+            //             const blk = await this.getBlockByHash(hash)
+            //             await this.db.setBlockStatus(hash, BlockStatus.Block)
+            //             if (blk instanceof Block) { await this.server.txPool.putTxs(blk.txs) }
+            //             // if (blk instanceof Block) { this.graph.removeFromGraph(blk.header) }
+            //         }
+            //     }
+            //     for (const b of mainChain) {
+            //         const hash = new Hash(b.header)
+            //         const blk = await this.getBlockByHash(hash)
+            //         await this.db.setBlockStatus(hash, BlockStatus.MainChain)
+            //         await this.db.setHashByHeight(b.height, hash)
+            //         if (blk instanceof Block) { this.server.txPool.updateTxs(blk.txs, 0) }
+            //     }
+            //     this.forkHeight = -1
+            // }
         } catch (e) {
             return Promise.reject(`Fail to reorganization : ${e}`)
         }
