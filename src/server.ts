@@ -2,6 +2,7 @@ import commandLineArgs = require("command-line-args")
 import { randomBytes } from "crypto"
 import { getLogger } from "log4js"
 import { IResponseError } from "./api/client/rest"
+import { HttpServer } from "./api/server/server"
 import { Address } from "./common/address"
 import { Block } from "./common/block"
 import { ITxPool } from "./common/itxPool"
@@ -22,7 +23,8 @@ import { Hash } from "./util/hash"
 import { Wallet } from "./wallet/wallet"
 import { WalletManager } from "./wallet/walletManager"
 const optionDefinitions = [
-    { name: "ui", alias: "u", type: Boolean },
+    { name: "api", alias: "a", type: Boolean },
+    { name: "api_port", alias: "A", type: Number },
     { name: "writing", alias: "w", type: Boolean },
     { name: "verbose", alias: "v", type: Boolean, defaultOption: false },
     { name: "plot", alias: "g", type: Boolean },
@@ -54,12 +56,17 @@ export class Server {
     public accountDB: WorldState
     public test: TestServer
 
+    public httpServer: HttpServer
+
     constructor() {
         this.options = commandLineArgs(optionDefinitions)
         Server.globalOptions = this.options
         logger.info(`Options=${JSON.stringify(this.options)}`)
         logger.info(`Verbose=${this.options.verbose}`)
         logger.info(`Port=${this.options.port}`)
+        if (this.options.api_port !== "") {
+            logger.info(`API Port=${this.options.api_port}`)
+        }
 
         this.consensus = new SingleChain(this, "./deleteme.db", "./deleteme.ws", "./deleteme.file")
         this.network = new RabbitNetwork(this, this.options.port)
@@ -95,6 +102,12 @@ export class Server {
         }
         if (options.mine) {
             MinerServer.useCpuMiner = true
+        }
+        if (options.api) {
+            logger.info("Test API")
+            logger.info(`API Port ${this.options.api_port}`)
+            const rest = new Server()
+            this.httpServer = new HttpServer(rest, options.api_port)
         }
     }
 
