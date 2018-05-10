@@ -1,6 +1,6 @@
 import { } from "jasmine"
 import * as net from "net"
-import { MinerServer } from "../src/miner/minerServer"
+import { MinerServer } from "../src/miner/minerSever"
 import { StratumServer } from "../src/miner/StratumServer"
 import { testAsync } from "./async"
 const stratum = require("stratum")
