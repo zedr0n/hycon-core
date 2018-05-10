@@ -179,7 +179,10 @@ export class SingleChain implements IConsensus {
             const { current, previous } = await this.db.putHeader(blockHash, header)
             await this.db.setBlockStatus(blockHash, BlockStatus.Header)
 
-            if (this.updateTopTip(this.headerTip, current, previous).isTopTip) {
+            const { newTip, prevTip, isTopTip } = this.updateTopTip(this.headerTip, current, previous)
+
+            if (isTopTip) {
+                this.headerTip = newTip
                 await this.db.setHeaderTip(blockHash)
             }
             return Promise.resolve(true)
