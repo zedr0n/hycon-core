@@ -1,7 +1,6 @@
 import { getLogger } from "log4js"
 import merkle = require("merkle-lib")
 import * as proto from "../serialization/proto"
-import * as utils from "../util/difficulty"
 import { Hash } from "../util/hash"
 import { Address } from "./address"
 import { GenesisBlock } from "./blockGenesis"
