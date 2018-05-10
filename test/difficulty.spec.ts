@@ -70,14 +70,20 @@ describe("Difficulty", () => {
         expect(compare).toEqual(false)
     })
 
-    it("pack: should properly pack a Uint8Array to 4 bytes", () => {
-        const hashBytes = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0,
+    it("pack: should properly pack a Uint8Array to 4 bytes with no exponent", () => {
+        const hashBytes = new Uint8Array([9, 0, 0, 0, 0, 0, 0, 0,
                                           0, 0, 0, 0, 0, 0, 0, 0,
                                           0, 0, 0, 0, 0, 0, 0, 0,
-                                          0, 0, 0, 0, 0, 0, 0, 9])
+                                          0, 0, 0, 0, 0, 0, 0, 0])
+        const correctHashBytes = new Uint8Array([0, 9, 0, 0])
+
         const packedHashBytes = Difficulty.pack(hashBytes)
-        const correctHashBytes = new Uint8Array([0, 0, 0, 9])
+
         expect(packedHashBytes).toEqual(correctHashBytes)
+    })
+
+    it("pack: should properly pack a Uint8Array to 4 bytes with an exponent", () => {
+
     })
 
     xit("lessThanEq: should return true if the difficulty is equal to the given hash", () => {

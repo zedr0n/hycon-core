@@ -15,30 +15,27 @@ export class Difficulty {
         return new Difficulty(mantissa, exponent)
     }
 
+    // TODO: Move msb logic to lessThan
     public static pack(num: Uint8Array): Uint8Array {
         let msb = 0
-        for (let i = 31; i > 2 ; i--) {
+        for (let i = 31; i >= 0 ; i--) {
             if (num[i] > 0) {
                 msb = i
                 break
             }
         }
 
-        const mantissa = new Uint8Array([0, 0, 0])
+        let mantissa: Uint8Array
         if (msb > 2) {
-            for (let i = 0; i < 2; i++) {
-                mantissa[i] = num[msb - i]
-            }
+            mantissa = num.slice(msb - 2, msb + 1)
         } else {
-            for (let i = 2; i >= 0; i--) {
-                mantissa[i] = num[i]
-            }
+            mantissa = num.slice(0, 3)
         }
 
         const packedBytes = new Uint8Array(4)
-        packedBytes[0] = msb
+        packedBytes[0] = (msb - 1) * 8 + Math.ceil(Math.log2(num[msb] === 0 ? 1 : num[msb]))
         for (let i = 1; i < 4; i++) {
-            packedBytes[i] = mantissa[i]
+            packedBytes[i] = mantissa[i - 1]
         }
 
         return packedBytes
