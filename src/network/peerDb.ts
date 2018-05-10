@@ -11,8 +11,8 @@ logger.level = "debug"
 
 export class PeerDb {
     public static ipeer2key(peer: proto.IPeer): string {
-        const hash: any = Hash.hash(peer.host + peer.port.toString()) // TS typechecking is incorrect
-        return Buffer.from(hash).slice(0, 4).toString()
+        const hash = new Hash(peer.host + peer.port.toString()) // TS typechecking is incorrect
+        return hash.toHex()
     }
     public static ipeer2value(peer: proto.IPeer): Buffer {
         const buf: any = proto.Peer.encode(peer).finish()// TS typechecking is incorrect
