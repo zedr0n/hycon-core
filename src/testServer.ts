@@ -34,7 +34,7 @@ export class TestServer {
     }
 
     public async makeWallet() {
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 100; i++) {
             const name = `test${i}`
             const password = ""
             const w = await Wallet.loadKeys(name, password)
@@ -48,13 +48,20 @@ export class TestServer {
         const fee = 10
         this.nonce = 0
 
-        const n = randomInt(50, 99)
+        //const n = randomInt(0, 90)
+        const n = 5
         const txList: SignedTx[] = []
         for (let i = 0; i < n; i++) {
             // get nonce, increase 1
-            const toWallet = this.wallets[randomInt(0, this.wallets.length - 1)]
+            // const toWallet = this.wallets[randomInt(0, this.wallets.length - 1)]
+            const toWallet = this.wallets[i]
+            assert(0 <= i && i < this.wallets.length)
+            assert(toWallet)
             const toAddr = toWallet.pubKey.address()
-            const fromWallet = this.wallets[randomInt(0, this.wallets.length - 1)]
+            // const fromWallet = this.wallets[randomInt(0, this.wallets.length - 1)]
+            assert(0 <= i + 1 && i + 1 < this.wallets.length)
+            const fromWallet = this.wallets[i + 1]
+            assert(fromWallet)
             const fromAddr = fromWallet.pubKey.address()
             if (!fromAddr.equals(toAddr)) {
                 const nonce = await this.server.consensus.getNonce(fromAddr) + 1
@@ -70,7 +77,7 @@ export class TestServer {
         // const encoded: Uint8Array = proto.Network.encode({ putTx: { txs: [txList] } }).finish()
 
         const added = await this.txPool.putTxs(txList)
-        logger.debug(`Added Tx=${added}`)
+        // logger.debug(`Added Tx=${added}`)
         const encoded: Uint8Array = proto.Network.encode({ putTx: { txs: txList } }).finish()
         this.server.network.broadcast(new Buffer(encoded), null)
     }

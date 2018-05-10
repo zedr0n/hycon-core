@@ -283,7 +283,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
             }
         }
 
-        logger.debug(`PutTx`)
+        // logger.debug(`PutTx`)
         return { message: { putTxReturn: { success } }, relay: success }
     }
 

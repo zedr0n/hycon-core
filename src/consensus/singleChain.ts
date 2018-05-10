@@ -49,7 +49,7 @@ export class SingleChain implements IConsensus {
     }
     public async getNonce(address: Address): Promise<number> {
         const account = await this.worldState.getAccount(this.blockTip.header.stateRoot, address)
-        logger.info(`Found account(${address.toString()}): {balance: ${account.balance}, nonce: ${account.nonce}}`)
+        //  logger.info(`Found account(${address.toString()}): {balance: ${account.balance}, nonce: ${account.nonce}}`)
         return account.nonce
     }
 
