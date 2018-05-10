@@ -20,13 +20,6 @@ export interface ITxProp {
     from?: string
     to?: string
     signature?: string
-
-    // Below txView tx property
-    receivedTime?: number
-    lockTime?: number
-    includedInBlocks?: number
-    confirmation?: number
-    estimated?: number,
 }
 export interface IBlock {
     hash: string
@@ -43,14 +36,6 @@ export interface IWalletAddress {
     balance: number
     txs: ITxProp[]
 }
-export interface IWalletBalance {
-    balance: number
-}
-// export type WalletSubscription = {
-//     id: number,
-//     from: boolean.
-//     to: boolean
-// };
 export interface IPeer {
     name: string
     location: string

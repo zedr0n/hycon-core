@@ -2,23 +2,7 @@ import * as React from "react"
 import { match, RouteComponentProps, RouteProps } from "react-router"
 import { RouteConfig } from "react-router-config"
 import { Link, Route, Switch } from "react-router-dom"
-
-// import { AddressInfo } from "./addressInfo"
-// import { AddWallet } from "./addWallet"
-// import { BlockView } from "./blockView"
-// import { Home } from "./home"
-// import { PeerDetailsView } from "./peerDetails"
-// import { PeersList } from "./peersList"
-// import { PeersView } from "./peersView"
-// import { RecoverWallet } from "./recoverWallet"
 import { IRest } from "./rest"
-// import { Transaction } from "./transaction"
-// import { TxList } from "./txList"
-// import { TxView } from "./txView"
-// import { WalletDetail } from "./walletDetail"
-// import { WalletList } from "./walletList"
-// import { WalletSummary } from "./walletSummary"
-// import { WalletView } from "./walletView"
 
 export const routes: RouteConfig[] = [
     { exact: true, path: "/" },
