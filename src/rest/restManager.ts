@@ -8,13 +8,13 @@ import { IConsensus } from "../consensus/iconsensus"
 import { Server } from "../server"
 export class RestManager {
     public useRabbit = true
-    public db: Database
-    public accountDB: WorldState
     public subscription: Map<number, any> | undefined
 
     public txQueue: TxPool
 
     public consensus: IConsensus
+    private db: Database
+    private accountDB: WorldState
     private server: Server
     constructor(server: Server) {
         this.server = server

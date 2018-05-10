@@ -43,7 +43,6 @@ export class Server {
     public static subsid = 0
     public static globalOptions: any
     public useRabbit = true
-    // public peerList: PeerList
     public subscription: Map<number, any> | undefined
     public readonly consensus: IConsensus = undefined // the core
     public readonly network: INetwork = undefined // hycon network

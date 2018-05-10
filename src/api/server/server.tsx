@@ -35,7 +35,6 @@ export class HttpServer {
             }
         })
         this.app.use((req: express.Request, res: express.Response, next: express.NextFunction) => this.reactRoute(req, res, next))
-        this.app.use(express.static("blockexplorer/clientDist"))
         this.app.use(express.static("node_modules"))
         this.routeRest()
         this.rest = new RestServer(this.consensus)
@@ -88,12 +87,8 @@ export class HttpServer {
             res.json(await this.rest.apiLogin(user))
         })
 
-        // TOKEN format:
-        // Authorization: Bearer <access_token>
         function verifyToken(req: express.Request, res: express.Response, next: express.NextFunction) {
-            // Get auth header value
             const bearerHeader = req.headers.authorization as string
-            // Check if bearer is undef
             if (typeof bearerHeader !== "undefined") {
                 const bearerToken = bearerHeader.split(" ")[1]
 
