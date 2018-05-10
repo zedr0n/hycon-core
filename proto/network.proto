@@ -35,6 +35,15 @@ message Network {
        
         GetPeers getPeers=19;
         GetPeersReturn getPeersReturn=20;
+
+        GetTip getTip=21;
+        GetTipReturn getTipReturn=22;
+
+        PutHeaders putHeaders=23;
+        PutHeadersReturn putHeadersReturn=24;
+
+        GetHash getHash=25;
+        GetHashReturn getHashReturn=26;
     }
 }
 
@@ -145,4 +154,31 @@ message GetPeers {
 message GetPeersReturn {  
     bool success =1;  
     repeated Peer peers = 2;
+}
+
+message GetTip {   
+    int64 dummy=1;
+}
+
+message GetTipReturn {
+    bool success=1;
+    bytes hash=2;
+    int64 height=3;    
+}
+
+message PutHeaders {   
+   repeated BlockHeader headers=1;
+}
+
+message PutHeadersReturn {
+    bool success= 1;
+}
+
+message GetHash {   
+    int64 height=1;
+}
+
+message GetHashReturn {
+    bool success =1;
+    bytes hash=2;    
 }

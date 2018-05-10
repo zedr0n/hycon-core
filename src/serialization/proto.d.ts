@@ -62,6 +62,24 @@ export interface INetwork {
 
     /** Network getPeersReturn */
     getPeersReturn?: IGetPeersReturn;
+
+    /** Network getTip */
+    getTip?: IGetTip;
+
+    /** Network getTipReturn */
+    getTipReturn?: IGetTipReturn;
+
+    /** Network putHeaders */
+    putHeaders?: IPutHeaders;
+
+    /** Network putHeadersReturn */
+    putHeadersReturn?: IPutHeadersReturn;
+
+    /** Network getHash */
+    getHash?: IGetHash;
+
+    /** Network getHashReturn */
+    getHashReturn?: IGetHashReturn;
 }
 
 /** Represents a Network. */
@@ -133,8 +151,26 @@ export class Network implements INetwork {
     /** Network getPeersReturn. */
     public getPeersReturn?: IGetPeersReturn;
 
+    /** Network getTip. */
+    public getTip?: IGetTip;
+
+    /** Network getTipReturn. */
+    public getTipReturn?: IGetTipReturn;
+
+    /** Network putHeaders. */
+    public putHeaders?: IPutHeaders;
+
+    /** Network putHeadersReturn. */
+    public putHeadersReturn?: IPutHeadersReturn;
+
+    /** Network getHash. */
+    public getHash?: IGetHash;
+
+    /** Network getHashReturn. */
+    public getHashReturn?: IGetHashReturn;
+
     /** Network request. */
-    public request?: ("status"|"statusReturn"|"ping"|"pingReturn"|"putTx"|"putTxReturn"|"getTxs"|"getTxsReturn"|"putBlock"|"putBlockReturn"|"getBlocksByHash"|"getBlocksByHashReturn"|"getHeadersByHash"|"getHeadersByHashReturn"|"getBlocksByRange"|"getBlocksByRangeReturn"|"getHeadersByRange"|"getHeadersByRangeReturn"|"getPeers"|"getPeersReturn");
+    public request?: ("status"|"statusReturn"|"ping"|"pingReturn"|"putTx"|"putTxReturn"|"getTxs"|"getTxsReturn"|"putBlock"|"putBlockReturn"|"getBlocksByHash"|"getBlocksByHashReturn"|"getHeadersByHash"|"getHeadersByHashReturn"|"getBlocksByRange"|"getBlocksByRangeReturn"|"getHeadersByRange"|"getHeadersByRangeReturn"|"getPeers"|"getPeersReturn"|"getTip"|"getTipReturn"|"putHeaders"|"putHeadersReturn"|"getHash"|"getHashReturn");
 
     /**
      * Creates a new Network instance using the specified properties.
@@ -2248,6 +2284,564 @@ export class GetPeersReturn implements IGetPeersReturn {
 
     /**
      * Converts this GetPeersReturn to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a GetTip. */
+export interface IGetTip {
+
+    /** GetTip dummy */
+    dummy?: number|Long;
+}
+
+/** Represents a GetTip. */
+export class GetTip implements IGetTip {
+
+    /**
+     * Constructs a new GetTip.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IGetTip);
+
+    /** GetTip dummy. */
+    public dummy: (number|Long);
+
+    /**
+     * Creates a new GetTip instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns GetTip instance
+     */
+    public static create(properties?: IGetTip): GetTip;
+
+    /**
+     * Encodes the specified GetTip message. Does not implicitly {@link GetTip.verify|verify} messages.
+     * @param message GetTip message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: IGetTip, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified GetTip message, length delimited. Does not implicitly {@link GetTip.verify|verify} messages.
+     * @param message GetTip message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: IGetTip, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a GetTip message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns GetTip
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): GetTip;
+
+    /**
+     * Decodes a GetTip message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns GetTip
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): GetTip;
+
+    /**
+     * Verifies a GetTip message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a GetTip message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns GetTip
+     */
+    public static fromObject(object: { [k: string]: any }): GetTip;
+
+    /**
+     * Creates a plain object from a GetTip message. Also converts values to other types if specified.
+     * @param message GetTip
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: GetTip, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this GetTip to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a GetTipReturn. */
+export interface IGetTipReturn {
+
+    /** GetTipReturn success */
+    success?: boolean;
+
+    /** GetTipReturn hash */
+    hash?: Uint8Array;
+
+    /** GetTipReturn height */
+    height?: number|Long;
+}
+
+/** Represents a GetTipReturn. */
+export class GetTipReturn implements IGetTipReturn {
+
+    /**
+     * Constructs a new GetTipReturn.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IGetTipReturn);
+
+    /** GetTipReturn success. */
+    public success: boolean;
+
+    /** GetTipReturn hash. */
+    public hash: Uint8Array;
+
+    /** GetTipReturn height. */
+    public height: (number|Long);
+
+    /**
+     * Creates a new GetTipReturn instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns GetTipReturn instance
+     */
+    public static create(properties?: IGetTipReturn): GetTipReturn;
+
+    /**
+     * Encodes the specified GetTipReturn message. Does not implicitly {@link GetTipReturn.verify|verify} messages.
+     * @param message GetTipReturn message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: IGetTipReturn, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified GetTipReturn message, length delimited. Does not implicitly {@link GetTipReturn.verify|verify} messages.
+     * @param message GetTipReturn message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: IGetTipReturn, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a GetTipReturn message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns GetTipReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): GetTipReturn;
+
+    /**
+     * Decodes a GetTipReturn message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns GetTipReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): GetTipReturn;
+
+    /**
+     * Verifies a GetTipReturn message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a GetTipReturn message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns GetTipReturn
+     */
+    public static fromObject(object: { [k: string]: any }): GetTipReturn;
+
+    /**
+     * Creates a plain object from a GetTipReturn message. Also converts values to other types if specified.
+     * @param message GetTipReturn
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: GetTipReturn, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this GetTipReturn to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a PutHeaders. */
+export interface IPutHeaders {
+
+    /** PutHeaders headers */
+    headers?: IBlockHeader[];
+}
+
+/** Represents a PutHeaders. */
+export class PutHeaders implements IPutHeaders {
+
+    /**
+     * Constructs a new PutHeaders.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IPutHeaders);
+
+    /** PutHeaders headers. */
+    public headers: IBlockHeader[];
+
+    /**
+     * Creates a new PutHeaders instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns PutHeaders instance
+     */
+    public static create(properties?: IPutHeaders): PutHeaders;
+
+    /**
+     * Encodes the specified PutHeaders message. Does not implicitly {@link PutHeaders.verify|verify} messages.
+     * @param message PutHeaders message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: IPutHeaders, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified PutHeaders message, length delimited. Does not implicitly {@link PutHeaders.verify|verify} messages.
+     * @param message PutHeaders message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: IPutHeaders, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a PutHeaders message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns PutHeaders
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): PutHeaders;
+
+    /**
+     * Decodes a PutHeaders message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns PutHeaders
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): PutHeaders;
+
+    /**
+     * Verifies a PutHeaders message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a PutHeaders message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns PutHeaders
+     */
+    public static fromObject(object: { [k: string]: any }): PutHeaders;
+
+    /**
+     * Creates a plain object from a PutHeaders message. Also converts values to other types if specified.
+     * @param message PutHeaders
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: PutHeaders, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this PutHeaders to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a PutHeadersReturn. */
+export interface IPutHeadersReturn {
+
+    /** PutHeadersReturn success */
+    success?: boolean;
+}
+
+/** Represents a PutHeadersReturn. */
+export class PutHeadersReturn implements IPutHeadersReturn {
+
+    /**
+     * Constructs a new PutHeadersReturn.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IPutHeadersReturn);
+
+    /** PutHeadersReturn success. */
+    public success: boolean;
+
+    /**
+     * Creates a new PutHeadersReturn instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns PutHeadersReturn instance
+     */
+    public static create(properties?: IPutHeadersReturn): PutHeadersReturn;
+
+    /**
+     * Encodes the specified PutHeadersReturn message. Does not implicitly {@link PutHeadersReturn.verify|verify} messages.
+     * @param message PutHeadersReturn message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: IPutHeadersReturn, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified PutHeadersReturn message, length delimited. Does not implicitly {@link PutHeadersReturn.verify|verify} messages.
+     * @param message PutHeadersReturn message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: IPutHeadersReturn, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a PutHeadersReturn message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns PutHeadersReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): PutHeadersReturn;
+
+    /**
+     * Decodes a PutHeadersReturn message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns PutHeadersReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): PutHeadersReturn;
+
+    /**
+     * Verifies a PutHeadersReturn message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a PutHeadersReturn message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns PutHeadersReturn
+     */
+    public static fromObject(object: { [k: string]: any }): PutHeadersReturn;
+
+    /**
+     * Creates a plain object from a PutHeadersReturn message. Also converts values to other types if specified.
+     * @param message PutHeadersReturn
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: PutHeadersReturn, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this PutHeadersReturn to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a GetHash. */
+export interface IGetHash {
+
+    /** GetHash height */
+    height?: number|Long;
+}
+
+/** Represents a GetHash. */
+export class GetHash implements IGetHash {
+
+    /**
+     * Constructs a new GetHash.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IGetHash);
+
+    /** GetHash height. */
+    public height: (number|Long);
+
+    /**
+     * Creates a new GetHash instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns GetHash instance
+     */
+    public static create(properties?: IGetHash): GetHash;
+
+    /**
+     * Encodes the specified GetHash message. Does not implicitly {@link GetHash.verify|verify} messages.
+     * @param message GetHash message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: IGetHash, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified GetHash message, length delimited. Does not implicitly {@link GetHash.verify|verify} messages.
+     * @param message GetHash message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: IGetHash, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a GetHash message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns GetHash
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): GetHash;
+
+    /**
+     * Decodes a GetHash message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns GetHash
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): GetHash;
+
+    /**
+     * Verifies a GetHash message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a GetHash message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns GetHash
+     */
+    public static fromObject(object: { [k: string]: any }): GetHash;
+
+    /**
+     * Creates a plain object from a GetHash message. Also converts values to other types if specified.
+     * @param message GetHash
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: GetHash, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this GetHash to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a GetHashReturn. */
+export interface IGetHashReturn {
+
+    /** GetHashReturn success */
+    success?: boolean;
+
+    /** GetHashReturn hash */
+    hash?: Uint8Array;
+}
+
+/** Represents a GetHashReturn. */
+export class GetHashReturn implements IGetHashReturn {
+
+    /**
+     * Constructs a new GetHashReturn.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IGetHashReturn);
+
+    /** GetHashReturn success. */
+    public success: boolean;
+
+    /** GetHashReturn hash. */
+    public hash: Uint8Array;
+
+    /**
+     * Creates a new GetHashReturn instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns GetHashReturn instance
+     */
+    public static create(properties?: IGetHashReturn): GetHashReturn;
+
+    /**
+     * Encodes the specified GetHashReturn message. Does not implicitly {@link GetHashReturn.verify|verify} messages.
+     * @param message GetHashReturn message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: IGetHashReturn, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified GetHashReturn message, length delimited. Does not implicitly {@link GetHashReturn.verify|verify} messages.
+     * @param message GetHashReturn message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: IGetHashReturn, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a GetHashReturn message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns GetHashReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): GetHashReturn;
+
+    /**
+     * Decodes a GetHashReturn message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns GetHashReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): GetHashReturn;
+
+    /**
+     * Verifies a GetHashReturn message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a GetHashReturn message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns GetHashReturn
+     */
+    public static fromObject(object: { [k: string]: any }): GetHashReturn;
+
+    /**
+     * Creates a plain object from a GetHashReturn message. Also converts values to other types if specified.
+     * @param message GetHashReturn
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: GetHashReturn, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this GetHashReturn to JSON.
      * @returns JSON object
      */
     public toJSON(): { [k: string]: any };

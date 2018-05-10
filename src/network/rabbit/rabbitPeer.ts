@@ -37,19 +37,31 @@ export class RabbitPeer extends BasePeer implements IPeer {
         this.peerDB = peerDB
     }
 
-    public getTip(): { hash: Hash; height: number; } {
-        // TODO
-        throw new Error("Method not implemented.")
+    public async getTip(): Promise<{ hash: Hash, height: number }> {
+        const { reply, packet } = await this.sendRequest({ getTip: { dummy: 0 } })
+        if (reply.getTipReturn === undefined) {
+            this.protocolError()
+            throw new Error("Invalid response")
+        }
+        return { hash: new Hash(reply.getTipReturn.hash), height: Number(reply.getTipReturn.height) }
     }
 
-    public putHeaders(header: AnyBlockHeader[]): Promise<boolean> {
-        // TODO
-        throw new Error("Method not implemented.")
+    public async putHeaders(header: AnyBlockHeader[]): Promise<boolean> {
+        const { reply, packet } = await this.sendRequest({ putHeaders: { headers: [] } })
+        if (reply.putHeadersReturn === undefined) {
+            this.protocolError()
+            throw new Error("Invalid response")
+        }
+        return reply.putHeadersReturn.success
     }
 
-    public getHash(height: number): Promise<Hash> {
-        // TODO
-        throw new Error("Method not implemented.")
+    public async getHash(height: number): Promise<Hash> {
+        const { reply, packet } = await this.sendRequest({ getHash: { height } })
+        if (reply.getHashReturn === undefined) {
+            this.protocolError()
+            throw new Error("Invalid response")
+        }
+        return new Hash(reply.getHashReturn.hash)
     }
 
     public async status(): Promise<proto.IStatus> {
@@ -209,6 +221,15 @@ export class RabbitPeer extends BasePeer implements IPeer {
             case "getHeadersByRange":
                 response = await this.respondGetHeadersByRange(reply, request[request.request])
                 break
+            case "getTip":
+                response = await this.respondGetTip(reply, request[request.request])
+                break
+            case "putHeaders":
+                response = await this.respondPutHeaders(reply, request[request.request])
+                break
+            case "getHash":
+                response = await this.respondGetHash(reply, request[request.request])
+                break
         }
         if (reply) { // i'm replying for the request
             if (response.message !== undefined) {
@@ -323,6 +344,24 @@ export class RabbitPeer extends BasePeer implements IPeer {
     private async respondGetHeadersByRange(reply: boolean, request: proto.IGetHeadersByRange): Promise<IResponse> {
         this.concensus.getHeadersRange(Number(request.fromHeight), Number(request.count))
         const message: proto.INetwork = { getHeadersByRangeReturn: { success: false, headers: [] } }
+        return { message, relay: false }
+    }
+
+    private async respondGetTip(reply: boolean, request: proto.IGetTip): Promise<IResponse> {
+        // this.concensus.respondGetTip()
+        const message: proto.INetwork = { getTipReturn: { success: false, hash: new Uint8Array(0), height: 0 } }
+        return { message, relay: false }
+    }
+
+    private async respondPutHeaders(reply: boolean, request: proto.IPutHeaders): Promise<IResponse> {
+        // this.concensus.respondPutHeaders()
+        const message: proto.INetwork = { putHeadersReturn: { success: false } }
+        return { message, relay: false }
+    }
+
+    private async respondGetHash(reply: boolean, request: proto.IGetHash): Promise<IResponse> {
+        // this.concensus.respondGetHash()
+        const message: proto.INetwork = { getHashReturn: { success: false, hash: new Uint8Array(0) } }
         return { message, relay: false }
     }
 }
