@@ -44,7 +44,7 @@ export class TestServer {
         }
     }
     private async makeTx() {
-        const amt = 100
+        const amt = 1
         const fee = 10
         this.nonce = 0
 
@@ -65,7 +65,7 @@ export class TestServer {
             const fromAddr = fromWallet.pubKey.address()
             if (!fromAddr.equals(toAddr)) {
                 const nonce = await this.server.consensus.getNonce(fromAddr) + 1
-                const tx = fromWallet.send(toAddr, amt + randomInt(0, 50), nonce, fee + randomInt(0, 10))
+                const tx = fromWallet.send(toAddr, amt + randomInt(0, 10), nonce, fee + randomInt(0, 10))
                 //  logger.debug(`TX ${i + 1} Amount=${tx.amount} Fee=${tx.fee} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
                 txList.push(tx)
             }
