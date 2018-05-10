@@ -148,7 +148,7 @@ export class RabbitNetwork implements INetwork {
 
     private async accept(socket: Socket): Promise <void > {
         const ipeer = RabbitNetwork.socket2Ipeer(socket)
-        const key = PeerDb.peer2key(ipeer)
+        const key = PeerDb.ipeer2key(ipeer)
         if (this.peerTable.has(key)) {
             socket.destroy()
             socket.unref()
@@ -198,7 +198,7 @@ export class RabbitNetwork implements INetwork {
                     try {
                         await this.connect(peer.host, peer.port)
                     } catch (e) {
-                        this.removePeers(peer, PeerDb.peer2key(peer))
+                        this.removePeers(peer, PeerDb.ipeer2key(peer))
                     }
                 }
             } catch (e) {
@@ -223,7 +223,7 @@ export class RabbitNetwork implements INetwork {
                 } catch (e) {
                     try {
                         logger.debug(e)
-                        const key = PeerDb.peer2key(peer)
+                        const key = PeerDb.ipeer2key(peer)
                         this.peerTable.delete(key)
                         await this.peerDB.remove(key)
                         const index = this.peerDB.peers.indexOf(peer)

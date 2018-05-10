@@ -10,11 +10,11 @@ const logger = getLogger("PeerDb")
 logger.level = "debug"
 
 export class PeerDb {
-    public static peer2key(peer: proto.IPeer): Buffer {
+    public static ipeer2key(peer: proto.IPeer): Buffer {
         const hash: any = Hash.hash(peer.host + peer.port.toString()) // TS typechecking is incorrect
         return Buffer.from(hash).slice(0, 4)
     }
-    public static peer2value(peer: proto.IPeer): Buffer {
+    public static ipeer2value(peer: proto.IPeer): Buffer {
         const buf: any = proto.Peer.encode(peer).finish()// TS typechecking is incorrect
         const value = Buffer.from(buf)
         return value
@@ -33,12 +33,20 @@ export class PeerDb {
 
     public async put(peer: proto.IPeer): Promise<void> {
         try {
-            const key = PeerDb.peer2key(peer)
-            const value = PeerDb.peer2value(peer)
+            const key = PeerDb.ipeer2key(peer)
+            const value = PeerDb.ipeer2value(peer)
             await this.db.put(key, value)
+            const index = this.peers.indexOf(peer)
+            if (index > -1) {
+                this.peers[index] = peer
+            } else {
+                this.peers.push(peer)
+            }
+            logger.info(`Saved to db ${peer.host}:${peer.port}`)
             return
         }  catch (e) {
             logger.info(`Failed to put peer ${peer.host}:${peer.port} into PeerDB: ${e}`)
+            throw e
         }
     }
 
@@ -58,8 +66,6 @@ export class PeerDb {
         try {
             this.db.createReadStream()
             .on("data", (data: any) => {
-                // tslint:disable-next-line:no-console
-                console.log(data.value)
                 const peer: proto.IPeer = proto.Peer.decode(data.value)
                 peers.push(peer)
             })
@@ -78,12 +84,18 @@ export class PeerDb {
 
     }
 
-    public async remove(key: Buffer): Promise<void> {
+    public async remove(peer: proto.IPeer): Promise<void> {
         try {
+            const key = PeerDb.ipeer2key(peer)
             await this.db.del(key)
+            const index = this.peers.indexOf(peer)
+            if (index > -1) {
+                this.peers.splice(index, 1)
+            } else {
+                logger.warn(`cannot found at peers: ${peer.host}:${peer.port}`)
+            }
         } catch (e) {
-            logger.info(`Could not delete the key: ${key} from DB: ${e}`)
-            throw e
+            logger.info(`Could not delete from db: ${peer.host}:${peer.port}`)
         }
     }
 
@@ -128,7 +140,7 @@ export class PeerDb {
         }
     }
 
-    public async maintainKeys() {
+    public async maintainKeys(): Promise <void> {
         try {
             this.peers = await this.listAll()
         } catch (e) {
