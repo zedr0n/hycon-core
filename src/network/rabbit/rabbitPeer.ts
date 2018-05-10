@@ -38,6 +38,17 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     public getTip(): { hash: Hash; height: number; } {
+        // TODO
+        throw new Error("Method not implemented.")
+    }
+
+    public putHeaders(header: AnyBlockHeader[]): Promise<boolean> {
+        // TODO
+        throw new Error("Method not implemented.")
+    }
+
+    public getHash(height: number): Promise<Hash> {
+        // TODO
         throw new Error("Method not implemented.")
     }
 
@@ -314,4 +325,4 @@ export class RabbitPeer extends BasePeer implements IPeer {
         const message: proto.INetwork = { getHeadersByRangeReturn: { success: false, headers: [] } }
         return { message, relay: false }
     }
-} // end of class
+}

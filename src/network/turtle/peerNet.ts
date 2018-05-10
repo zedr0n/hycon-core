@@ -355,10 +355,18 @@ export abstract class PeerNet extends PeerBasic implements IPeer {
     }
 
     public getPeers(count: number): Promise<proto.IPeer[]> {
+        // TODO
         throw new Error("Method not implemented.")
     }
     public getTip(): { hash: Hash; height: number; } {
+        // TODO
         throw new Error("Method not implemented.")
     }
-
+    public putHeaders(header: AnyBlockHeader[]): Promise<boolean> {
+        // TODO
+        throw new Error("Method not implemented.")
+    }
+    public getHash(height: number): Promise<Hash> {
+        throw new Error("Method not implemented.")
+    }
 }
