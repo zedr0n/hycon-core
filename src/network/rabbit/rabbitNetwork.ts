@@ -32,9 +32,9 @@ export class RabbitNetwork implements INetwork {
             port: socket.remotePort,
         })
     }
-    public static string2key(host: string, port: number): Buffer {
+    public static string2key(host: string, port: number): string {
         const hash: any = Hash.hash(host + port.toString()) // TS typechecking is incorrect
-        return Buffer.from(hash).slice(0, 4)
+        return Buffer.from(hash).slice(0, 4).toString()
     }
     public static ipv6Toipv4(ipv6: string): string {
         const ip: string[] = ipv6.split(":")
@@ -47,7 +47,7 @@ export class RabbitNetwork implements INetwork {
     private server: net.Server
     private targetPeerCount: number
     private peerDB: PeerDb
-    private peerTable: Map<Buffer, RabbitPeer>
+    private peerTable: Map<string, RabbitPeer>
     private upnpServer: UpnpServer
     private upnpClient: UpnpClient
     private natUpnp: NatUpnp
@@ -57,7 +57,7 @@ export class RabbitNetwork implements INetwork {
         this.port = port
         this.targetPeerCount = 5
         this.hycon = hycon
-        this.peerTable = new Map<Buffer, RabbitPeer>()
+        this.peerTable = new Map<string, RabbitPeer>()
         this.peerDB = new PeerDb()
         logger.debug(`TcpNetwork Port=${port}`)
     }
@@ -92,7 +92,7 @@ export class RabbitNetwork implements INetwork {
         setInterval(() => {
             logger.debug(`Peers Count=${this.peerTable.size}`)
         }, 5000)
-        setInterval(() => { this.findPeers() }, 4000)
+        // setInterval(() => { this.findPeers() }, 4000)
 
         return true
     }
@@ -147,6 +147,7 @@ export class RabbitNetwork implements INetwork {
     }
 
     private async accept(socket: Socket): Promise <void > {
+        logger.info(`Detect a incoming peer ${RabbitNetwork.ipv6Toipv4(socket.remoteAddress)}:${socket.remotePort}`)
         const ipeer = RabbitNetwork.socket2Ipeer(socket)
         const key = PeerDb.ipeer2key(ipeer)
         if (this.peerTable.has(key)) {
@@ -157,20 +158,20 @@ export class RabbitNetwork implements INetwork {
         }
     }
 
-    private async newConnection(key: Buffer, socket: Socket, ipeer: proto.IPeer): Promise<RabbitPeer> {
+    private async newConnection(key: string, socket: Socket, ipeer: proto.IPeer): Promise<RabbitPeer> {
         const peer = new RabbitPeer(socket, this, this.hycon.consensus, this.hycon.txPool, this.peerDB)
-        socket.on("connect", async () => {
-            try {
-                this.peerTable.set(key, peer)
-                await this.peerDB.put(ipeer)
-            } catch (e) {
-                logger.info(`e`)
-            }
-        })
+        try {
+            this.peerTable.set(key, peer)
+            await this.peerDB.put(ipeer)
+            logger.info(`peer ${ipeer.host}:${ipeer.port} has been saved`)
+        } catch (e) {
+            logger.info(`e`)
+        }
         socket.on("close", async (error) => {
             try {
                 this.peerTable.delete(key)
                 await this.peerDB.remove(ipeer)
+                logger.info(`peer ${ipeer.host}:${ipeer.port} has been removed`)
             } catch (e) {
                 logger.info(`e`)
             }

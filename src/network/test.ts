@@ -8,7 +8,7 @@ const buffer1 = PeerDb.ipeer2key(proto.Peer.create({host: "192.168.0.1", port: 8
 const buffer2 = RabbitNetwork.string2key("192.168.0.1", 8080)
 
 // tslint:disable-next-line:no-console
-console.log(buffer1.equals(buffer2))
+// console.log(buffer1.equals(buffer2))
 
 // tslint:disable-next-line:no-console
 try {throw new Error("cannot found at peers")} catch (e) {console.log(e)}

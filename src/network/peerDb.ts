@@ -10,9 +10,9 @@ const logger = getLogger("PeerDb")
 logger.level = "debug"
 
 export class PeerDb {
-    public static ipeer2key(peer: proto.IPeer): Buffer {
+    public static ipeer2key(peer: proto.IPeer): string {
         const hash: any = Hash.hash(peer.host + peer.port.toString()) // TS typechecking is incorrect
-        return Buffer.from(hash).slice(0, 4)
+        return Buffer.from(hash).slice(0, 4).toString()
     }
     public static ipeer2value(peer: proto.IPeer): Buffer {
         const buf: any = proto.Peer.encode(peer).finish()// TS typechecking is incorrect
@@ -50,7 +50,7 @@ export class PeerDb {
         }
     }
 
-    public async get(key: Buffer): Promise < proto.IPeer > {
+    public async get(key: string): Promise < proto.IPeer > {
         try {
             const result = await this.db.get(key)
             const peer = proto.Peer.decode(result)
@@ -102,7 +102,7 @@ export class PeerDb {
     public async clearAll(): Promise < void > {
         try {
             this.db.createKeyStream()
-            .on("data", async (key: Buffer) => {
+            .on("data", async (key: string) => {
                 await this.db.del(key)
             })
             .on("end", () => {

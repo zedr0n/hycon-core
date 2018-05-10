@@ -13,6 +13,7 @@ import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"
 import { PeerDb } from "../peerDb"
 import { BasePeer } from "./basePeer"
+import { RabbitNetwork } from "./rabbitNetwork"
 
 const logger = getLogger("NetPeer")
 
@@ -27,7 +28,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     constructor(socket: Socket, network: INetwork, concensus: IConsensus, txPool: ITxPool, peerDB: PeerDb) {
         super(socket)
         // tslint:disable-next-line:max-line-length
-        logger.info(`New Netpeer Local=${socket.localAddress}:${socket.localPort} --> Remote=${socket.remoteAddress}:${socket.remotePort}`)
+        logger.info(`New Netpeer Local=${RabbitNetwork.ipv6Toipv4(socket.localAddress)}:${socket.localPort} --> Remote=${RabbitNetwork.ipv6Toipv4(socket.remoteAddress)}:${socket.remotePort}`)
         this.network = network
         this.concensus = concensus
         this.txPool = txPool
