@@ -159,27 +159,25 @@ export class RabbitNetwork implements INetwork {
 
     private async newConnection(key: Buffer, socket: Socket, ipeer: proto.IPeer): Promise<RabbitPeer> {
         const peer = new RabbitPeer(socket, this, this.hycon.consensus, this.hycon.txPool, this.peerDB)
-        this.peerTable.set(key, peer)
-        await this.peerDB.put(ipeer)
-        const index = this.peerDB.peers.indexOf(ipeer)
-        if (index > -1) {
-            this.peerDB.peers[index] = ipeer
-        } else {
-            this.peerDB.peers.push(ipeer)
-        }
+        socket.on("connect", async () => {
+            try {
+                this.peerTable.set(key, peer)
+                await this.peerDB.put(ipeer)
+            } catch (e) {
+                logger.info(`e`)
+            }
+        })
         socket.on("close", async (error) => {
-            this.peerTable.delete(key)
-            await this.peerDB.remove(key)
-            const index1 = this.peerDB.peers.indexOf(ipeer)
-            if (index > -1) {
-                this.peerDB.peers.splice(index1, 1)
+            try {
+                this.peerTable.delete(key)
+                await this.peerDB.remove(ipeer)
+            } catch (e) {
+                logger.info(`e`)
             }
         })
         socket.on("error", async (error) => {
-            logger.error(`Connection error ${RabbitNetwork.ipv6Toipv4(socket.remoteAddress)}:${socket.remotePort} : ${error}`)
-            await this.removePeers(ipeer, key)
+            logger.error(`Connection error ${ipeer.host}:${ipeer.port} : ${error}`)
         })
-
         peer.onConnected()
         return peer
     }
@@ -195,11 +193,7 @@ export class RabbitNetwork implements INetwork {
                 const rabbitPeer: RabbitPeer = await this.connect(RabbitNetwork.seeds[index].host, RabbitNetwork.seeds[index].port)
                 const peers: proto.IPeer[] = await rabbitPeer.getPeers(necessaryPeers)
                 for (const peer of peers) {
-                    try {
-                        await this.connect(peer.host, peer.port)
-                    } catch (e) {
-                        this.removePeers(peer, PeerDb.ipeer2key(peer))
-                    }
+                    await this.connect(peer.host, peer.port)
                 }
             } catch (e) {
                 logger.info(`occurred error when connect seeds: ${e}`)
@@ -212,49 +206,23 @@ export class RabbitNetwork implements INetwork {
     }
 
     private async connectPeersInDB(): Promise <void > {
-
         if (this.peerDB.peers.length !== 0) {
             for (const peer of this.peerDB.peers) {
                 try {
-                    logger.debug(`${peer.host}:${peer.port}`)
                     const rabbitPeer = await this.connect(peer.host, peer.port)
                     const key = RabbitNetwork.string2key(peer.host, peer.port)
                     this.peerTable.set(key, rabbitPeer)
                 } catch (e) {
                     try {
-                        logger.debug(e)
-                        const key = PeerDb.ipeer2key(peer)
-                        this.peerTable.delete(key)
-                        await this.peerDB.remove(key)
-                        const index = this.peerDB.peers.indexOf(peer)
-                        this.peerDB.peers.splice(index, 1)
+                        await this.peerDB.remove(peer)
                     } catch (e) {
                         logger.debug(e)
                     }
-
                 }
             }
+        } else {
+            logger.info(`no peers in db`)
         }
 
     }
-
-    private async removePeers(ipeer: proto.IPeer, key: Buffer): Promise <void > {
-        const index = this.peerDB.peers.indexOf(ipeer)
-        if (index > -1) {
-            const count = this.peerDB.peers[index].failCount += 1
-            await this.peerDB.put(this.peerDB.peers[index])
-            if (count > RabbitNetwork.failLimit) {
-                try {
-                    this.peerTable.delete(key)
-                    await this.peerDB.remove(key)
-                    this.peerDB.peers.splice(index, 1)
-                } catch (e) {
-                    logger.debug(e)
-                }
-
-            }
-        }
-
-    }
-
 }
