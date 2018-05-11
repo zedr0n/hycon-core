@@ -45,6 +45,9 @@ export abstract class BasePeer {
                 case "getBlocksByRange":
                 case "getHeadersByRange":
                 case "getPeers":
+                case "getTip":
+                case "putHeaders":
+                case "getHash":
                     this.respond(route, res, packet)
                     break
                 case "statusReturn":
@@ -57,6 +60,9 @@ export abstract class BasePeer {
                 case "getBlocksByRangeReturn":
                 case "getHeadersByRangeReturn":
                 case "getPeersReturn":
+                case "getTipReturn":
+                case "putHeadersReturn":
+                case "getHashReturn":
                     this.route(route, res, packet)
                     break
                 default:
