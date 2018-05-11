@@ -37,7 +37,7 @@ export class HttpServer {
         this.app.use((req: express.Request, res: express.Response, next: express.NextFunction) => this.reactRoute(req, res, next))
         this.app.use(express.static("node_modules"))
         this.routeRest()
-        this.rest = new RestServer(this.consensus)
+        this.rest = new RestServer(hyconServer.consensus)
         this.app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
             res.status(404)
             res.json({

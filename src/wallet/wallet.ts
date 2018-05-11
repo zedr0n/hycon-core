@@ -32,6 +32,7 @@ export class Wallet {
         } catch (e) {
             try {
                 await fs.mkdir("./wallet")
+                await fs.mkdir("./wallet/rootKey")
             } catch (error) {
                 logger.error(`Make Directory fail : ${error}`)
                 return Promise.reject(error)
@@ -354,9 +355,9 @@ export class Wallet {
                     return Promise.reject(e)
                 }
                 return Promise.resolve(undefined)
-           } else {
-               return Promise.reject(`Wallet is already exist : name=${name}`)
-           }
+            } else {
+                return Promise.reject(`Wallet is already exist : name=${name}`)
+            }
         } catch (e) {
             logger.error(`Fail to save wallet ${e}`)
             return Promise.reject(e)

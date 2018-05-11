@@ -12,3 +12,4 @@ PeerList.db
 wallet/
 *.png
 hycon-*
+src/keys

@@ -17,7 +17,9 @@ export class RestManager {
     private accountDB: WorldState
     private server: Server
     constructor(server: Server) {
+        console.log(server.consensus)
         this.server = server
+        this.consensus = server.consensus
         this.db = server.db
         this.accountDB = server.accountDB
     }

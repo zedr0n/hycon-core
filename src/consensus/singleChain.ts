@@ -427,11 +427,9 @@ export class SingleChain implements IConsensus {
                 this.createCandidateBlock(txs)
             } else {
                 await this.db.setBlockStatus(newBlockHash, BlockStatus.Block)
-                this.graph.addToGraph(block.header, BlockStatus.Block)
             }
         } else {
             await this.db.setBlockStatus(newBlockHash, BlockStatus.Header)
-            this.graph.addToGraph(block.header, BlockStatus.Header)
         }
     }
 
@@ -465,7 +463,6 @@ export class SingleChain implements IConsensus {
                 throw new Error("Error trying to reorganize past the genesis block")
             }
             await this.db.setBlockStatus(popHash, BlockStatus.Block)
-            this.graph.addToGraph(block.header, BlockStatus.Block)
             this.server.txPool.putTxs(popBlock.txs)
             popHash = popBlock.header.previousHash[0]
             popHeight -= 1
@@ -480,7 +477,6 @@ export class SingleChain implements IConsensus {
         while (newBlockHashes.length > 0) {
             hash = newBlockHashes.pop()
             await this.db.setBlockStatus(hash, BlockStatus.MainChain)
-            this.graph.addToGraph(block.header, BlockStatus.MainChain)
             await this.db.setHashAtHeight(pushHeight, hash)
             pushHeight += 1
             block = newBlocks.pop()
