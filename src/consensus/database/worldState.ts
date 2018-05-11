@@ -137,6 +137,7 @@ export class WorldState {
         const validTxs: SignedTx[] = []
         const invalidTxs: SignedTx[] = []
         return await this.accountLock.critical<{ stateTransition: IStateTransition, validTxs: SignedTx[], invalidTxs: SignedTx[] }>(async () => {
+            logger.info(`Next txs : ${txs.length}`)
             for (const tx of txs) {
                 if (tx.from.equals(tx.to)) {
                     // TODO: Remove this if function and test
@@ -156,7 +157,7 @@ export class WorldState {
                     logger.error(`Tx ${tx.unsignedHash()} Rejected: ${tx.from.toString()} has not been seen before, so it has insufficient balance.`)
                     continue
                 }
-
+                logger.info(`From balance : ${fromAccount.balance}`)
                 // TODO: Handle coin burn
                 let toAccount: Account | undefined
                 const toIndex = mapIndex.get(tx.to.toString())
@@ -168,10 +169,11 @@ export class WorldState {
                 if (toAccount === undefined) {
                     toAccount = new Account({ balance: 0, nonce: 0 })
                 }
+                logger.info(`toAccount balance : ${toAccount.balance}`)
 
                 if (tx.nonce !== (fromAccount.nonce + 1)) {
                     invalidTxs.push(tx)
-                    logger.info(`Tx ${tx.unsignedHash()} Rejected: TxNonce=${tx.nonce}  AccountNonce=${fromAccount.nonce}`)
+                    logger.info(`Tx ${tx.unsignedHash()} Rejected: TxNonce=${tx.nonce}  ${tx.from}Nonce=${fromAccount.nonce}`)
                     continue
                 }
 
@@ -187,6 +189,7 @@ export class WorldState {
                 fromAccount.balance -= (tx.amount + tx.fee)
                 toAccount.balance += tx.amount
                 fromAccount.nonce++
+                logger.info(`After tx : ${fromAccount.balance} / ${toAccount.balance} / ${tx.amount} / ${tx.fee}`)
                 if (fromIndex === undefined) {
                     mapIndex.set(tx.from.toString(), changes.push({ address: tx.from, account: fromAccount }) - 1)
                 } else {

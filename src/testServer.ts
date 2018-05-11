@@ -14,6 +14,7 @@ const logger = getLogger("TestServer")
 
 export class TestServer {
 
+    public static walletNumber = 5
     public server: Server
     private txs: Tx[] = []
     private index: number = 1
@@ -34,7 +35,7 @@ export class TestServer {
     }
 
     public async showWallets() {
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < TestServer.walletNumber; i++) {
             const name = `test${i}`
             const w = this.wallets[i]
             const account = await this.server.consensus.getAccount(w.pubKey.address())
@@ -45,7 +46,7 @@ export class TestServer {
         }
     }
     public async makeWallet() {
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < TestServer.walletNumber; i++) {
             const name = `test${i}`
             const password = ""
             const w = await Wallet.loadKeys(name, password)
@@ -60,7 +61,7 @@ export class TestServer {
         setInterval(() => {
             // this.showWallets()
             this.makeTx()
-        }, 10000)
+        }, 3000)
         setInterval(() => {
             this.makeBlock()
         }, 5000)
@@ -71,15 +72,17 @@ export class TestServer {
         this.nonce = 0
 
         let n = randomInt(0, 90)
-        n = 5
+        n = 1
         const txList: SignedTx[] = []
         for (let i = 0; i < n; i++) {
             // get nonce, increase 1
-            const toWallet = this.wallets[randomInt(0, this.wallets.length - 1)]
+            // const toWallet = this.wallets[randomInt(0, this.wallets.length - 1)]
+            const toWallet = this.wallets[i]
             assert(0 <= i && i < this.wallets.length)
             assert(toWallet)
             const toAddr = toWallet.pubKey.address()
-            const fromWallet = this.wallets[randomInt(0, this.wallets.length - 1)]
+            // const fromWallet = this.wallets[randomInt(0, this.wallets.length - 1)]
+            const fromWallet = this.wallets[i + 1]
             assert(0 <= i + 1 && i + 1 < this.wallets.length)
             assert(fromWallet)
             const fromAddr = fromWallet.pubKey.address()
@@ -99,9 +102,8 @@ export class TestServer {
         }
 
         const added = await this.txPool.putTxs(txList)
-        // logger.debug(`Added Tx=${added}`)
-        const encoded: Uint8Array = proto.Network.encode({ putTx: { txs: txList } }).finish()
-        this.server.network.broadcast(new Buffer(encoded), null)
+        /* const encoded: Uint8Array = proto.Network.encode({ putTx: { txs: txList } }).finish()
+         this.server.network.broadcast(new Buffer(encoded), null)*/
 
     }
 

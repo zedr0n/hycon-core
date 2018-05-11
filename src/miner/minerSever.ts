@@ -26,7 +26,7 @@ export class MinerServer implements IMiner {
     public static readonly LEN_HEX_RESULT: number = 64
 
     // variable
-    public static useCpuMiner: boolean = true
+    public static useCpuMiner: boolean = false
     private server: Server
     private stratumServer: StratumServer
     private cpuMiner: CpuMiner
@@ -147,6 +147,7 @@ export class MinerServer implements IMiner {
 
         const miners = this.stratumServer.getMinerCount() + (MinerServer.useCpuMiner ? 1 : 0)
         const maxNonce = Long.MAX_UNSIGNED_VALUE
+        if (miners === 0) { return Long.UZERO }
         const unit = maxNonce.divide(miners)
         return unit
     }
