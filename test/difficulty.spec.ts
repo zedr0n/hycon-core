@@ -83,7 +83,7 @@ fdescribe("Difficulty", () => {
         expect(compare).toEqual(false)
     })
 
-    xit("greaterThan: should return false if the difficulty is equal to the given hash", () => {
+    it("greaterThan: should return false if the difficulty is equal to the given hash", () => {
         difficulty = new Difficulty(0x0a, 0x00)
         const equalHashBytes = new Uint8Array([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -94,8 +94,11 @@ fdescribe("Difficulty", () => {
 
     })
 
-    xit("multiply: should return the product of the difficulty value and the number", () => {
-        expect(false).toBe(true)
+    it("multiply: should return the product of the difficulty value and the number", () => {
+        difficulty = new Difficulty(0x010203, 0x10)
+        const scalar = 3
+        const correctDifficulty = new Difficulty(0x030609, 0x10)
+        expect(difficulty.multiply(scalar).encode()).toEqual(correctDifficulty.encode())
     })
 
 })

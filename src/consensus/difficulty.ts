@@ -1,5 +1,3 @@
-// import { Hash } from "../util/hash"
-
 // tslint:disable:no-bitwise
 export class Difficulty {
 
@@ -98,7 +96,7 @@ export class Difficulty {
         }
     }
 
-    public multiply(num: number) {
-        return 0
+    public multiply(num: number): Difficulty {
+        return new Difficulty(0, 0)
     }
 }
