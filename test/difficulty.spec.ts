@@ -28,23 +28,27 @@ describe("Difficulty", () => {
         expect(difficulty).toBeDefined()
     })
 
-    it("encode: should encode the mantissa in the proper position", () => {
+    it("encode: should encode the mantissa in the first position", () => {
         // 0x00_00_01
         difficulty = new Difficulty(1, 0)
-        let encodedDifficulty = difficulty.encode()
-        let correctEncodedDifficulty = new Uint8Array([0, 1, 0, 0])
+        const encodedDifficulty = difficulty.encode()
+        const correctEncodedDifficulty = new Uint8Array([0, 1, 0, 0])
         expect(encodedDifficulty).toEqual(correctEncodedDifficulty)
+    })
 
+    it("encode: should encode the mantissa in the second position", () => {
         // 0x00_01_00
         difficulty = new Difficulty(256, 0)
-        encodedDifficulty = difficulty.encode()
-        correctEncodedDifficulty = new Uint8Array([0, 0, 1, 0])
+        const encodedDifficulty = difficulty.encode()
+        const correctEncodedDifficulty = new Uint8Array([0, 0, 1, 0])
         expect(encodedDifficulty).toEqual(correctEncodedDifficulty)
+    })
 
+    it("encode: should encode the mantissa in the third position", () => {
         // 0x01_00_00
         difficulty = new Difficulty(65536, 0)
-        encodedDifficulty = difficulty.encode()
-        correctEncodedDifficulty = new Uint8Array([0, 0, 0, 1])
+        const encodedDifficulty = difficulty.encode()
+        const correctEncodedDifficulty = new Uint8Array([0, 0, 0, 1])
         expect(encodedDifficulty).toEqual(correctEncodedDifficulty)
     })
 
@@ -67,18 +71,18 @@ describe("Difficulty", () => {
                                              0, 0, 0, 0, 0, 0, 0, 0,
                                              0, 0, 0, 0, 0, 0, 0, 0])
         const littleHash = new Hash(littleHashBytes)
-        const compare = difficulty.greaterThan(littleHash)
+        const compare = difficulty.greaterThan(littleHash.reverse())
         expect(compare).toEqual(true)
     })
 
     it("greaterThan: should return false if the difficulty is less than the given hash", () => {
         difficulty = new Difficulty(10, 0)
-        const littleHashBytes = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0,
+        const bigHashBytes = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0,
                                                 0, 0, 0, 0, 0, 0, 0, 0,
                                                 0, 0, 0, 0, 0, 0, 0, 0,
                                                 0, 0, 0, 0, 0, 0, 0, 9])
-        const littleHash = new Hash(littleHashBytes)
-        const compare = difficulty.greaterThan(littleHash)
+        const bigHash = new Hash(bigHashBytes)
+        const compare = difficulty.greaterThan(bigHash.reverse())
         expect(compare).toEqual(false)
     })
 

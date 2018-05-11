@@ -1,4 +1,4 @@
-import { Hash } from "../util/hash"
+// import { Hash } from "../util/hash"
 
 // tslint:disable:no-bitwise
 export class Difficulty {
@@ -14,7 +14,7 @@ export class Difficulty {
         }
     }
 
-    public static unpackMantissa(num: Uint8Array|Hash ): number {
+    public static unpackMantissa(num: Uint8Array ): number {
         let mantissa = 0
 
         if (num.length === 3) {
@@ -39,7 +39,7 @@ export class Difficulty {
             throw new Error("num must be either 3, 4 or 32 bytes long")
         }
     }
-    public static unpackExponent(num: Uint8Array|Hash): number {
+    public static unpackExponent(num: Uint8Array): number {
         const msb = Difficulty.getMsb(num)
 
         let exponent = 0
@@ -52,7 +52,7 @@ export class Difficulty {
         return exponent
     }
 
-    public static getMsb(num: Uint8Array|Hash): number {
+    public static getMsb(num: Uint8Array): number {
         let msb = 0
         for (let i = 31; i >= 0 ; i--) {
             if (num[i] > 0) {
@@ -90,10 +90,9 @@ export class Difficulty {
         return packed
     }
 
-    public greaterThan(hash: Hash): boolean {
-        const reverseHash = hash.reverse()
-        const mantissa = Difficulty.unpackMantissa(reverseHash)
-        const exponent = Difficulty.unpackExponent(reverseHash)
+    public greaterThan(byteArray: Uint8Array): boolean {
+        const mantissa = Difficulty.unpackMantissa(byteArray)
+        const exponent = Difficulty.unpackExponent(byteArray)
 
         const exponentCompare = this.e > exponent
         const mantissaCompare = this.m > mantissa
