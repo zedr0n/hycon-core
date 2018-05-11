@@ -17,7 +17,7 @@ fdescribe("Difficulty", () => {
     })
 
     it("decode: should decode a 4 byte number into a Difficulty object", () => {
-        const packedNumber = new Uint8Array([1, 2, 3, 4])
+        const packedNumber = 0x01_04_03_02
         difficulty = Difficulty.decode(packedNumber)
         const repackedNumber = difficulty.encode()
         expect(repackedNumber).toEqual(new Uint8Array([1, 2, 3, 4]))

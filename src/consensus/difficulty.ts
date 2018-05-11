@@ -3,15 +3,11 @@
 // tslint:disable:no-bitwise
 export class Difficulty {
 
-    public static decode(num: Uint8Array): Difficulty {
-        if (num.length === 4) {
-            const exponent = num[0]
-            const mantissa = Difficulty.unpackMantissa(num)
+    public static decode(num: number): Difficulty {
+        const exponent = num >> 24
+        const mantissa = num & 0xFF_FF_FF
 
-            return new Difficulty(mantissa, exponent)
-        } else {
-            throw new Error("num must be 4 bytes long")
-        }
+        return new Difficulty(mantissa, exponent)
     }
 
     public static unpackMantissa(num: Uint8Array ): number {
@@ -71,17 +67,9 @@ export class Difficulty {
 
     private e: number
 
-    constructor(mantissa?: number, exponent?: number, byteArray?: Uint8Array) {
-        if ((mantissa !== undefined) && (exponent !== undefined)) {
-            this.m = mantissa
-            this.e = exponent
-        } else if (byteArray !== undefined) {
-            if (byteArray.length === 4) {
-                return Difficulty.decode(byteArray)
-            }
-        } else {
-            throw new Error("You must supply either both the mantissa and exponent, or a byte array")
-        }
+    constructor(mantissa: number, exponent: number) {
+        this.m = mantissa
+        this.e = exponent
     }
 
     public encode(): Uint8Array {
