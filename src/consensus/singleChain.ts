@@ -326,8 +326,7 @@ export class SingleChain implements IConsensus {
         try {
             const previousHash = new Hash(this.blockTip.header)
             // TODO : get Miner address -> If miner is undefined, occur error
-            const miner: Address = new Address(0)
-            logger.info(`PreviousHash : ${previousHash}`)
+            const miner: Address = undefined
             const previousHeader = await this.db.getBlockHeader(previousHash)
             txs.sort((txA, txB) => txA.nonce - txB.nonce)
             const worldStateResult = await this.worldState.next(txs, previousHeader.stateRoot, miner)

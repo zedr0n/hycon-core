@@ -36,7 +36,7 @@ export class Block implements proto.IBlock {
     public set(block: proto.IBlock): void {
         if (block.txs === undefined) { throw (new Error("Block Txs are missing")) }
         if (block.header === undefined) { throw (new Error("Block Header is missing in Block")) }
-        if (block.miner === undefined) { throw (new Error("Miner is missing")) }
+        // if (block.miner === undefined) { throw (new Error("Miner is missing")) }
 
         this.txs = []
         for (const tx of block.txs) {
@@ -49,7 +49,9 @@ export class Block implements proto.IBlock {
             this.header.set(block.header)
         }
 
-        this.miner = new Address(block.miner)
+        if (block.miner !== undefined) {
+            this.miner = new Address(block.miner)
+        }
     }
 
     public updateMerkleRoot(): void {
