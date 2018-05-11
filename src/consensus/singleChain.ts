@@ -483,7 +483,6 @@ export class SingleChain implements IConsensus {
             hash = newBlockHashes.pop()
             block = newBlocks.pop()
             await this.db.setBlockStatus(hash, BlockStatus.MainChain)
-            this.graph.addToGraph(block.header, BlockStatus.MainChain)
             await this.db.setHashAtHeight(pushHeight, hash)
             pushHeight += 1
             txs = this.server.txPool.updateTxs(block.txs, newBlockHashes.length > 0 ? 0 : txCount)
