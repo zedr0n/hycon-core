@@ -171,7 +171,7 @@ export class WorldState {
 
                 if (tx.nonce !== (fromAccount.nonce + 1)) {
                     invalidTxs.push(tx)
-                    logger.info(`Tx ${tx.unsignedHash()} Rejected: The balance of the account is insufficient.`)
+                    logger.info(`Tx ${tx.unsignedHash()} Rejected: TxNonce=${tx.nonce}  AccountNonce=${fromAccount.nonce}`)
                     continue
                 }
 
