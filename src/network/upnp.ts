@@ -18,11 +18,11 @@ export class UpnpServer {
     constructor(port: number, server: Server) {
         UpnpServer.port = port
         this.server = server
-        if (server) {
-            if (server.options.networkid) {
-                UpnpServer.networkid = server.options.networkid
-            }
+
+        if (Server.globalOptions.networkid) {
+            UpnpServer.networkid = Server.globalOptions.networkid
         }
+
         setTimeout(() => {
             this.run()
         }, 100)
