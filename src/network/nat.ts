@@ -1,3 +1,4 @@
+import * as ip from "ip"
 import { getLogger } from "log4js"
 import * as natUpnp from "nat-upnp"
 import * as proto from "../serialization/proto"
@@ -39,15 +40,15 @@ export class NatUpnp {
     }
     private static async _externalIp(): Promise<any> {
         return await new Promise((resolve, reject) => {
-            client.externalIp((err: any, ip: any) => {
+            client.externalIp((err: any, publicIp: any) => {
                 if (err) { reject(`Get external IP failed`) }
-                resolve(ip)
+                resolve(publicIp)
             })
         })
     }
     public publicIp: string
+    public publicPort: number
     private privatePort: number
-    private publicPort: number
     private network: INetwork
 
     // constructor(port: number) {
@@ -65,24 +66,21 @@ export class NatUpnp {
         this.privatePort = port
         this.publicPort = NaN
         this.network = net
-        setTimeout(() => {
-            this.run()
-        }, 500)
     }
 
-    public async run() {
+    public async run(): Promise<void> {
         try {
             this.publicPort = await NatUpnp.mapPort(this.privatePort)
         } catch (e) {
-            this.publicPort = NaN
-            logger.warn(`Upnp Warning: ${e}, please confirm your router supports UPNP and that UPNP is enabled or you just not behind the NAT.`)
+            this.publicPort = this.privatePort
+            logger.warn(`Upnp Warning: ${e}, please confirm your router supports UPNP and that UPNP is enabled or you just not behind the NAT, Hycon will use your local port:${this.privatePort}`)
         }
         try {
             this.publicIp = await NatUpnp._externalIp()
             logger.info(`External Ip=${this.publicIp}`)
         } catch (e) {
-            this.publicIp = ""
-            logger.warn("Get external IP failed")
+            this.publicIp = ip.address()
+            logger.warn(`Get external IP failed, hycon will use your local IP:${this.publicIp} if you are not behind NAT`)
         }
     }
 }

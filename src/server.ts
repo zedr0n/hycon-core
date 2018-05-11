@@ -84,7 +84,7 @@ export class Server {
             for (const peer of this.options.peer) {
                 const [ip, port] = peer.split(":")
                 logger.info(`Connecting to ${ip}:${port}`)
-                this.network.connect(ip, port).catch((e) => logger.error(`Failed to connect to client: ${e}`))
+                this.network.connect(ip, port, true).catch((e) => logger.error(`Failed to connect to client: ${e}`))
             }
         }
         this.miner.start()

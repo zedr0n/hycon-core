@@ -36,10 +36,15 @@ export class PeerDb {
             const key = PeerDb.ipeer2key(peer)
             const value = PeerDb.ipeer2value(peer)
             await this.db.put(key, value)
-            const index = this.peers.indexOf(peer)
-            if (index > -1) {
-                this.peers[index] = peer
-            } else {
+            let cnt = 0
+            for (const p of this.peers) {
+                if (p.host === peer.host && p.port === peer.port) {
+                    this.peers[cnt] = peer
+                    break
+                 }
+                cnt ++
+            }
+            if (cnt === this.peers.length) {
                 this.peers.push(peer)
             }
             logger.info(`Saved to db ${peer.host}:${peer.port}`)
@@ -88,11 +93,14 @@ export class PeerDb {
         try {
             const key = PeerDb.ipeer2key(peer)
             await this.db.del(key)
-            const index = this.peers.indexOf(peer)
-            if (index > -1) {
-                this.peers.splice(index, 1)
-            } else {
-                logger.warn(`cannot found at peers: ${peer.host}:${peer.port}`)
+            let cnt = 0
+            for (const p of this.peers) {
+                if (p.host === peer.host && p.port === peer.port) {
+                    this.peers.splice(cnt, 1)
+                    logger.info(`Remove ${peer.host}:${peer.port} from DB`)
+                    break
+                 }
+                cnt ++
             }
         } catch (e) {
             logger.info(`Could not delete from db: ${peer.host}:${peer.port}`)

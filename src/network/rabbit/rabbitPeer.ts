@@ -35,6 +35,8 @@ export class RabbitPeer extends BasePeer implements IPeer {
         // set status
         this.myStatus.version = 0
         this.myStatus.networkid = "hycon"
+        this.myStatus.ip = ""
+        this.myStatus.port = NaN
         this.peerDB = peerDB
     }
 
@@ -251,6 +253,16 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     private async respondStatus(reply: boolean, request: proto.IStatus): Promise<IResponse> {
+        logger.info(`status info: ${request.ip}:${request.port}`)
+        if (request.ip !== "" && request.port !== 0) {
+            const peer: proto.IPeer = proto.Peer.create({
+                failCount: 0,
+                host: request.ip,
+                lastSeen: Date.now(),
+                port: request.port,
+            })
+            await this.peerDB.put(peer)
+        }
         const message: proto.INetwork = {
             statusReturn: { status: this.myStatus, success: true },
         }

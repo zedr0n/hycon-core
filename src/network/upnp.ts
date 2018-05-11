@@ -84,7 +84,7 @@ export class UpnpClient {
                     // logger.debug("DATE:", date)
                     logger.info(`DETECT IP Local=${isLocal} Product=${product} IP=${localIP} Port=${localPort}`)
                     try {
-                        await this.rabbitNetwork.connect(localIP, Number(localPort))
+                        await this.rabbitNetwork.connect(localIP, Number(localPort), true)
                     } catch (e) {
                         logger.warn(`${e}`)
                     }
