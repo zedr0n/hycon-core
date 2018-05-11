@@ -1,7 +1,7 @@
 import { Difficulty } from "../src/consensus/difficulty"
 import { Hash } from "../src/util/hash"
 
-describe("Difficulty", () => {
+fdescribe("Difficulty", () => {
     let difficulty: Difficulty
 
     it("unpackMantissa: should correctly unpack mantissa from a 4 byte number", () => {

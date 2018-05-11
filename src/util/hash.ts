@@ -13,7 +13,7 @@ import * as proto from "../serialization/proto"
 // tslint:disable-next-line:no-var-requires
 const cryptonight = require("node-cryptonight").asyncHash
 
-function toUint8Array(ob?: Tx | Block | GenesisBlockHeader | BlockHeader | string | Uint8Array | SignedTx | GenesisTx | GenesisSignedTx | StateNode | Account) {
+function toUint8Array(ob?: Tx | Block | GenesisBlockHeader | BlockHeader | string | Uint8Array | SignedTx | GenesisTx | GenesisSignedTx | StateNode | Account): Uint8Array {
     if (ob !== undefined) {
         if (typeof ob === "string") {
             return Hash.hash(ob)
@@ -25,7 +25,11 @@ function toUint8Array(ob?: Tx | Block | GenesisBlockHeader | BlockHeader | strin
         } else if (ob instanceof Tx || ob instanceof BlockHeader || ob instanceof BaseBlockHeader || ob instanceof Block || ob instanceof SignedTx || ob instanceof StateNode || ob instanceof Account || ob instanceof GenesisBlockHeader || ob instanceof GenesisTx || ob instanceof GenesisSignedTx) {
             return Hash.hash(ob.encode())
         }
-        return Hash.hash(ob)
+        // Danger: typescript claims this line is unreachable, but it is reachable via the slice function
+        if (ob === 32) {
+            return ob // Here we return the number 32
+        }
+        throw new Error("Trying to allocate a hash which is not 32 bytes long")
     }
     return Hash.emptyHash()
 }

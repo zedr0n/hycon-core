@@ -52,16 +52,16 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "debugReorg",
+            "name": "debugTests",
             "runtimeExecutable": "npm",
             "windows": {
                 "runtimeExecutable": "npm.cmd"
             },
             "runtimeArgs": [
                 "run",
-                "debugReorg"
+                "debugTests"
             ],
-            "port": 9233,
+            "port": 9230,
             "protocol": "inspector"
         },
     ]

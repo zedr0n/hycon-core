@@ -10,6 +10,7 @@
     "protogen": "pbjs -t static-module -w commonjs -o src/serialization/proto.js proto/main.proto &&  pbts -o src/serialization/proto.d.ts src/serialization/proto.js && ./src/serialization/trim_null.sh",
     "debug": "./node_modules/.bin/ts-node --inspect=9231 --inspect-brk src/main.ts --port=8148  --networkid=3  --writing --str_port=9081 --mine",
     "debug2": "./node_modules/.bin/ts-node  --inspect=9232 --inspect-brk  src/main.ts  --networkid=3 --port=8149 --writing --str_port=9082 --peer localhost:8149",
+    "debugTests": "./node_modules/.bin/ts-node  --inspect=9230 --inspect-brk  test/runner.ts",
     "test": "rm -rf build && tsc && istanbul cover node_modules/jasmine/bin/jasmine.js -x **/proto.*  -- --config=jasmine.json && remap-istanbul -i ./coverage/coverage.json -o ./coverage/remap-report -t html",
     "debugNetwork": "./node_modules/.bin/ts-node --inspect=9231 --inspect-brk src/main.ts --port=8151 --networkid=3 --str_port=9081 --writing",
     "startNetwork": "./node_modules/.bin/ts-node src/network/turtle/main.ts --port=8148",
