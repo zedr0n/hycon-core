@@ -25,7 +25,8 @@
     "testNetwork3": "./node_modules/.bin/ts-node src/main.ts --port=8153 --networkid=3 --str_port=9083 --writing",
     "clear": "rm -rf deleteme* ./wallet peerdb",
     "wallet": "./node_modules/.bin/ts-node src/main.ts --wallet",
-    "visTest": "./node_modules/.bin/ts-node src/util/visTest.ts"
+    "visTest": "./node_modules/.bin/ts-node src/util/visTest.ts",
+    "package": "tsc && pkg package.json"
   },
   "author": "",
   "license": "ISC",
@@ -66,8 +67,6 @@
     "espree": "^3.5.4",
     "express": "^4.16.3",
     "fs-extra": "^5.0.0",
-    "gnu-plot": "^0.1.6",
-    "graphviz": "0.0.8",
     "ip": "^1.1.5",
     "jsonwebtoken": "^8.2.1",
     "levelup": "^2.0.2",
@@ -80,7 +79,6 @@
     "network": "^0.4.1",
     "node-cryptonight": "git://github.com/dev-jbam/node-cryptonight.git",
     "node-ssdp": "^3.3.0",
-    "protobufjs": "^6.8.6",
     "random-int": "^1.0.0",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",

@@ -15,7 +15,6 @@ import { MinerServer } from "../miner/minerSever"
 import * as proto from "../serialization/proto"
 import { Server } from "../server"
 import * as utils from "../util/difficulty"
-import { Graph } from "../util/graph"
 import { Hash } from "../util/hash"
 import { Difficulty } from "./../consensus/difficulty"
 import { Account } from "./database/account"
@@ -36,7 +35,7 @@ export class SingleChain implements IConsensus {
     private blockTip: DBBlock
     private headerTip: DBBlock
     private txUnit: number
-    private graph: Graph // For debug
+    private forkHeight: number
     private txdb?: TxDatabase
     constructor(server: Server, dbPath: string, wsPath: string, filePath: string, txPath?: string) {
         this.server = server
@@ -44,7 +43,6 @@ export class SingleChain implements IConsensus {
         this.db = new Database(dbPath, filePath)
         this.worldState = new WorldState(wsPath)
         this.txUnit = 1000
-        this.graph = new Graph()
         if (txPath) { this.txdb = new TxDatabase(txPath) }
     }
     public async getNonce(address: Address): Promise<number> {
@@ -61,7 +59,6 @@ export class SingleChain implements IConsensus {
 
             if (this.blockTip === undefined) {
                 const genesis = await this.initGenesisBlock()
-                this.graph.initGraph(genesis.header)
             }
 
             this.headerTip = await this.db.getHeaderTip()
