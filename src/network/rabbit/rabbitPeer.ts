@@ -19,18 +19,18 @@ const logger = getLogger("NetPeer")
 
 interface IResponse { message: proto.INetwork, relay: boolean }
 export class RabbitPeer extends BasePeer implements IPeer {
-    private concensus: IConsensus
+    private consensus: IConsensus
     private txPool: ITxPool
     private network: INetwork
     private myStatus: proto.Status = new proto.Status()
     private peerDB: PeerDb
 
-    constructor(socket: Socket, network: INetwork, concensus: IConsensus, txPool: ITxPool, peerDB: PeerDb) {
+    constructor(socket: Socket, network: INetwork, consensus: IConsensus, txPool: ITxPool, peerDB: PeerDb) {
         super(socket)
         // tslint:disable-next-line:max-line-length
         logger.info(`New Netpeer Local=${RabbitNetwork.ipv6Toipv4(socket.localAddress)}:${socket.localPort} --> Remote=${RabbitNetwork.ipv6Toipv4(socket.remoteAddress)}:${socket.remotePort}`)
         this.network = network
-        this.concensus = concensus
+        this.consensus = consensus
         this.txPool = txPool
         // set status
         this.myStatus.version = 0
@@ -317,7 +317,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
             const promises: Array<Promise<boolean>> = []
             for (const iblock of request.blocks) {
                 const block = new Block(iblock)
-                promises.push(this.concensus.putBlock(block))
+                promises.push(this.consensus.putBlock(block))
             }
             const results = await Promise.all(promises)
             relay = results.every((value) => value)
@@ -337,7 +337,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
             const blockPromise: Array<Promise<AnyBlock>> = []
             for (const iHash of request.hashes) {
                 const hash = new Hash(iHash)
-                blockPromise.push(this.concensus.getBlockByHash(hash))
+                blockPromise.push(this.consensus.getBlockByHash(hash))
             }
             const blocks = await Promise.all(blockPromise)
             message = { getBlocksByHashReturn: { success: true, blocks } }
@@ -349,36 +349,89 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     private async respondGetHeadersByHash(reply: boolean, request: proto.IGetHeadersByHash): Promise<IResponse> {
-        const message: proto.INetwork = { getHeadersByHashReturn: { success: true, headers: [] } }
+        let message: proto.INetwork
+        try {
+            const headerPromise: Array<Promise<AnyBlockHeader>> = []
+            for (const iHash of request.hashes) {
+                const hash = new Hash(iHash)
+                headerPromise.push(this.consensus.getHeaderByHash(hash))
+            }
+            const headers = await Promise.all(headerPromise)
+            message = { getHeadersByHashReturn: { success: true, headers } }
+        } catch (e) {
+            logger.info(`Failed to getHeaderByHash: ${e}`)
+            message = { getBlocksByHashReturn: { success: false } }
+        }
         return { message, relay: false }
     }
 
     private async respondGetBlocksByRange(reply: boolean, request: proto.IGetBlocksByRange): Promise<IResponse> {
-        const message: proto.INetwork = { getBlocksByRangeReturn: { success: false, blocks: [] } }
+        let message: proto.INetwork
+        try {
+            const fromHeight = Number(request.fromHeight)
+            const count = Number(request.count)
+            const blocks = await this.consensus.getBlocksRange(fromHeight, count)
+            message = { getBlocksByRangeReturn: { success: true, blocks } }
+        } catch (e) {
+            logger.info(`Failed to getBlocksByRange: ${e}`)
+            message = { getBlocksByRangeReturn: { success: false } }
+        }
         return { message, relay: false }
     }
 
     private async respondGetHeadersByRange(reply: boolean, request: proto.IGetHeadersByRange): Promise<IResponse> {
-        this.concensus.getHeadersRange(Number(request.fromHeight), Number(request.count))
-        const message: proto.INetwork = { getHeadersByRangeReturn: { success: false, headers: [] } }
+        let message: proto.INetwork
+        try {
+            const fromHeight = Number(request.fromHeight)
+            const count = Number(request.count)
+            const headers = await this.consensus.getHeadersRange(fromHeight, count)
+            message = { getHeadersByRangeReturn: { success: true, headers } }
+        } catch (e) {
+            logger.info(`Failed to getHeadersByRange: ${e}`)
+            message = { getHeadersByRangeReturn: { success: false } }
+        }
         return { message, relay: false }
     }
 
     private async respondGetTip(reply: boolean, request: proto.IGetTip): Promise<IResponse> {
-        // this.concensus.respondGetTip()
-        const message: proto.INetwork = { getTipReturn: { success: false, hash: new Uint8Array(0), height: 0 } }
+        let message: proto.INetwork
+        try {
+            const tip = await this.consensus.getBlocksTip()
+            message = { getTipReturn: { success: true, hash: tip.hash, height: tip.height } }
+        } catch (e) {
+            logger.info(`Failed to getBlockTip: ${e}`)
+            message = { getTipReturn: { success: false } }
+        }
         return { message, relay: false }
     }
 
     private async respondPutHeaders(reply: boolean, request: proto.IPutHeaders): Promise<IResponse> {
-        // this.concensus.respondPutHeaders()
-        const message: proto.INetwork = { putHeadersReturn: { success: false } }
-        return { message, relay: false }
+        let relay = false
+        try {
+            const promises: Array<Promise<boolean>> = []
+            for (const iheader of request.headers) {
+                const header = new BlockHeader(iheader)
+                promises.push(this.consensus.putHeader(header))
+            }
+            const results = await Promise.all(promises)
+            relay = results.every((value) => value)
+        } catch (e) {
+            logger.info(`Failed to put header: ${e}`)
+        }
+        logger.debug(`PutHeader`)
+        return { message: { putHeadersReturn: { success: relay } }, relay }
     }
 
     private async respondGetHash(reply: boolean, request: proto.IGetHash): Promise<IResponse> {
-        // this.concensus.respondGetHash()
-        const message: proto.INetwork = { getHashReturn: { success: false, hash: new Uint8Array(0) } }
+        let message: proto.INetwork
+        const height = Number(request.height)
+        try {
+            const hash = await this.consensus.getHash(height)
+            message = { getHashReturn: { success: true, hash } }
+        } catch (e) {
+            logger.info(`Failed to getHash: ${e}`)
+            message = { getHashReturn: { success: false } }
+        }
         return { message, relay: false }
     }
 }
