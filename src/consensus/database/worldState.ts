@@ -77,7 +77,7 @@ export class WorldState {
                     await this.print(node.child, n + 1, concat(prefix, node.address))
                 }
             } else if (object.account !== undefined) {
-                logger.info(`${indent}(${prefix.length})${prefix} --> ${object.account.balance} --> (${hash.toString()}) : count(${object.refCount})`)
+                logger.info(`${indent}(${prefix.length})${new Address(prefix).toString()} --> ${object.account.balance} --> (${hash.toString()}) : count(${object.refCount})`)
             } else {
                 logger.info(`${indent}Could not find '${hash.toString()}'`)
             }
