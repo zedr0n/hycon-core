@@ -34,7 +34,6 @@ export class SingleChain implements IConsensus {
     private blockTip: DBBlock
     private headerTip: DBBlock
     private txUnit: number
-    private forkHeight: number
     private graph: Graph // For debug
     private txdb?: TxDatabase
     constructor(server: Server, dbPath: string, wsPath: string, filePath: string, txPath?: string) {
@@ -42,7 +41,6 @@ export class SingleChain implements IConsensus {
         this.newBlockCallbacks = []
         this.db = new Database(dbPath, filePath)
         this.worldState = new WorldState(wsPath)
-        this.forkHeight = -1
         this.txUnit = 1000
         this.graph = new Graph()
         if (txPath) { this.txdb = new TxDatabase(txPath) }
@@ -60,22 +58,7 @@ export class SingleChain implements IConsensus {
             this.headerTip = await this.db.getHeaderTip()
 
             if (this.blockTip === undefined) {
-                logger.debug(`No blocks in DB, loading genesis from file.`)
-                const genesis = GenesisBlock.loadFromFile()
-                const genesisHash = new Hash(genesis.header)
-                const transition = await this.worldState.first(genesis)
-                await this.worldState.putPending(transition.batch, transition.mapAccount)
-                genesis.header.stateRoot = transition.currentStateRoot
-
-                // Test wallets
-                const testWalletTransition = await this.worldState.createTestAddresses(transition.currentStateRoot)
-                await this.worldState.putPending(testWalletTransition.batch, testWalletTransition.mapAccount)
-                genesis.header.stateRoot = testWalletTransition.currentStateRoot
-                await this.worldState.print(testWalletTransition.currentStateRoot)
-
-                await this.putBlock(genesis)
-                this.blockTip = await this.db.getBlockTip()
-                // await this.putBlock(genesis)
+                this.initGenesisBlock()
                 this.graph.initGraph(genesis.header)
             }
 
@@ -97,10 +80,11 @@ export class SingleChain implements IConsensus {
         }
     }
 
-    public async putBlock(block: AnyBlock): Promise<boolean> {
+    public async putBlock(block: Block): Promise<boolean> {
         try {
             const blockHash = new Hash(block.header)
             logger.info(`Put Block : ${blockHash}`)
+
             const blockStatus = await this.getBlockStatus(blockHash)
             if (blockStatus === BlockStatus.Rejected) {
                 logger.warn(`Already rejected Block : ${blockHash}`)
@@ -109,6 +93,7 @@ export class SingleChain implements IConsensus {
                 logger.warn(`Already exsited Header : ${blockHash}`)
                 return false
             }
+
             let blockTxs: SignedTx[] = []
             if (block instanceof Block) {
                 blockTxs = block.txs
@@ -131,27 +116,7 @@ export class SingleChain implements IConsensus {
             if (this.txdb) { await this.txdb.putTxs(blockHash, block.txs) }
 
             // Update headerTopTip first, then update blockTopTip
-            this.headerTip = this.updateTopTip(this.headerTip, current, previous).newTip
-            const { newTip, prevTip, isTopTip } = this.updateTopTip(this.blockTip, current, previous)
-            this.blockTip = newTip
-            const bStatus: BlockStatus = (isTopTip) ? BlockStatus.MainChain : BlockStatus.Block
-            if (isTopTip) {
-                await this.db.setHashByHeight(current.height, blockHash)
-                await this.db.setBlockTip(blockHash)
-                if (this.headerTip.height <= current.height) {
-                    await this.db.setHeaderTip(blockHash)
-                }
-                const bTip = await this.db.getBlockTip()
-            }
-            await this.db.setBlockStatus(blockHash, bStatus)
-
-            utils.processBlock(block.header.difficulty)
-
-            this.newBlock(block)
-            // TODO : Tidy up code.
-            if (isTopTip) { await this.reorganization() }
-            const txs = this.server.txPool.updateTxs(blockTxs, this.txUnit)
-            if (isTopTip) { this.createCandidateBlock(txs) }
+            this.organizeChains(blockHash, current, block, this.txUnit)
             return true
         } catch (e) {
             logger.error(e)
@@ -305,6 +270,30 @@ export class SingleChain implements IConsensus {
         }
     }
 
+    private async initGenesisBlock() {
+        logger.debug(`No blocks in DB, loading genesis from file.`)
+        const genesis = GenesisBlock.loadFromFile()
+        const genesisHash = new Hash(genesis.header)
+        const transition = await this.worldState.first(genesis)
+        await this.worldState.putPending(transition.batch, transition.mapAccount)
+        genesis.header.stateRoot = transition.currentStateRoot
+
+        // Test wallets
+        const testWalletTransition = await this.worldState.createTestAddresses(transition.currentStateRoot)
+        await this.worldState.putPending(testWalletTransition.batch, testWalletTransition.mapAccount)
+        genesis.header.stateRoot = testWalletTransition.currentStateRoot
+        await this.worldState.print(testWalletTransition.currentStateRoot)
+        // this.blockTip = await this.db.getBlockTip()
+        const { current } = await this.db.putBlock(genesisHash, genesis)
+        this.blockTip = current
+        // TODO status -> MainChain
+        // TODO height -> hash
+        // TODO tip
+        if (this.txdb) {
+            await this.txdb.putTxs(genesisHash, genesis.txs)
+        }
+    }
+
     // tslint:disable-next-line:max-line-length
     private updateTopTip(tip: DBBlock, block: DBBlock, previous?: DBBlock): { newTip: DBBlock, prevTip: Hash | undefined, isTopTip: boolean } {
         try {
@@ -418,8 +407,80 @@ export class SingleChain implements IConsensus {
         return Promise.resolve(false)
     }
 
-    private async reorganization(): Promise<void> {
+    private async organizeChains(newBlockHash: Hash, dbBlock: DBBlock, block?: AnyBlock, txCount: number = 0): Promise<void> {
         logger.info(`Reorg logic should be implemented`)
+
+        if (this.headerTip === undefined || this.headerTip.height < dbBlock.height) {
+            this.headerTip = dbBlock
+            await this.db.setHeaderTip(newBlockHash)
+        }
+
+        if (block !== undefined) {
+            if (this.blockTip === undefined || this.blockTip.height < dbBlock.height) {
+                const txs = await this.reorganize(newBlockHash, block, dbBlock.height, txCount)
+                this.blockTip = dbBlock // TODO: Reorganize first
+                await this.db.setBlockTip(newBlockHash)
+                utils.processBlock(dbBlock.header.difficulty)
+                this.createCandidateBlock(txs)
+            } else {
+                this.db.setBlockStatus(newBlockHash, BlockStatus.Block)
+            }
+        } else {
+            this.db.setBlockStatus(newBlockHash, BlockStatus.Header)
+        }
+    }
+
+    private async reorganize(newBlockHash: Hash, newBlock: Block, newBlockHeight: number, txCount: number): Promise<SignedTx[]> {
+        const newBlockHashes: Hash[] = []
+        const newBlocks: Block[] = []
+        let popStopHeight = newBlockHeight
+        let hash = newBlockHash
+        let block: Block = newBlock
+        while (popStopHeight > 0) {
+            newBlockHashes.push(hash)
+            newBlocks.push(block)
+
+            hash = block.header.previousHash[0]
+            if (await this.getBlockStatus(hash) === BlockStatus.MainChain) {
+                break
+            }
+            const tmpBlock = await this.db.getBlock(hash)
+            if (!(tmpBlock instanceof Block)) {
+                throw new Error("Error trying to reorganize past the genesis block")
+            }
+            block = tmpBlock
+            popStopHeight -= 1
+        }
+
+        let popHeight = this.blockTip.height
+        let popHash = new Hash(this.blockTip.header)
+        while (popHeight >= popStopHeight) {
+            const popBlock = await this.db.getBlock(popHash)
+            if (!(popBlock instanceof Block)) {
+                throw new Error("Error trying to reorganize past the genesis block")
+            }
+            this.db.setBlockStatus(popHash, BlockStatus.Block)
+            this.server.txPool.putTxs(popBlock.txs)
+            popHash = popBlock.header.previousHash[0]
+            popHeight -= 1
+        }
+
+        if (newBlocks.length !== newBlockHashes.length) {
+            throw new Error("Error during reorganization")
+        }
+
+        let txs: SignedTx[] = []
+        let pushHeight = popStopHeight
+        while (newBlockHashes.length > 0) {
+            hash = newBlockHashes.pop()
+            this.db.setBlockStatus(hash, BlockStatus.MainChain)
+            this.db.setHashByHeight(pushHeight, hash)
+            pushHeight += 1
+            block = newBlocks.pop()
+            txs = this.server.txPool.updateTxs(block.txs, newBlockHashes.length > 0 ? 0 : txCount)
+            this.newBlock(block)
+        }
+        return txs
     }
 }
 

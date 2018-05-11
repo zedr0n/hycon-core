@@ -111,13 +111,7 @@ export class Database {
         }
     }
 
-    public async setBlockStatus(hash: Hash, status?: BlockStatus): Promise<void> {
-        if (status === undefined) {
-            const block = await this.getDBBlock(hash)
-            if (block === undefined) { status = BlockStatus.Nothing } else {
-                status = (block.fileNumber === undefined) ? BlockStatus.Header : BlockStatus.MainChain
-            }
-        }
+    public async setBlockStatus(hash: Hash, status: BlockStatus): Promise<void> {
         await this.database.put("s" + hash, status)
     }
 
@@ -257,17 +251,16 @@ export class Database {
     private async makeDBBlock(header: AnyBlockHeader): Promise<{ current: DBBlock, previous?: DBBlock }> {
         try {
             let height = 0
+            let previous: DBBlock
             if (header instanceof BlockHeader) {
                 if (header.previousHash.length <= 0) {
                     return Promise.reject(`Block has no previous hashes`)
                 }
                 // Async safe, previousBlock's height will not change
-                const previous = await this.getDBBlock(header.previousHash[0])
+                previous = await this.getDBBlock(header.previousHash[0])
                 height = previous.height + 1
-
-                return { current: new DBBlock({ header, height }), previous }
             }
-            return { current: new DBBlock({ header, height }) }
+            return { current: new DBBlock({ header, height }), previous }
         } catch (e) {
             logger.error(`fail to make DBBlock : ${e}`)
             return Promise.reject(e)
