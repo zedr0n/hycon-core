@@ -93,11 +93,28 @@ export class SingleChain implements IConsensus {
                 logger.warn(`Already exsited Header : ${blockHash}`)
                 return false
             }
-
-            const previousHeader = await this.db.getBlockHeader(block.header.previousHash[0])
-            if (previousHeader === undefined) {
-                logger.info(`Previous Header not Found`)
-                return false
+            let blockTxs: SignedTx[] = []
+            if (block instanceof Block) {
+                blockTxs = block.txs
+                const previousHeader = await this.db.getBlockHeader(block.header.previousHash[0])
+                if (previousHeader === undefined) {
+                    logger.info(`Previous Header not Found`)
+                    return false
+                }
+                const verifyResult = await this.verifyBlock(block, previousHeader)
+                if (!verifyResult.isVerified) {
+                    logger.error(`Invalid Block Rejected : ${blockHash}`)
+                    await this.db.setBlockStatus(blockHash, BlockStatus.Rejected)
+                    return false
+                }
+                const transitionResult = verifyResult.stateTransition
+                await this.worldState.putPending(transitionResult.batch, transitionResult.mapAccount)
+                if (block.txs.length > 0) {
+                    const f = await this.worldState.getAccount(block.header.stateRoot, block.txs[0].from)
+                    const t = await this.worldState.getAccount(block.header.stateRoot, block.txs[0].to)
+                    logger.info(`From : ${f} / To : ${t}`)
+                }
+                this.graph.addToGraph(block.header, this.graph.color.outgoing)
             }
 
             const verifyResult = await this.verifyBlock(block, previousHeader)
