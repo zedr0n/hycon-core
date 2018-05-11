@@ -5,93 +5,90 @@ fdescribe("Difficulty", () => {
     let difficulty: Difficulty
 
     it("unpackMantissa: should correctly unpack mantissa from a 4 byte number", () => {
-        const packedNumber = new Uint8Array([0, 1, 0, 0])
+        const packedNumber = new Uint8Array([0x00, 0x01, 0x00, 0x00])
         const mantissa = Difficulty.unpackMantissa(packedNumber)
-        expect(mantissa).toEqual(1)
+        expect(mantissa).toEqual(0x01)
     })
 
     it("unpackMantissa: should correctly unpack mantissa from a 4 byte number", () => {
-        const packedNumber = new Uint8Array([0, 1, 2, 3])
+        const packedNumber = new Uint8Array([0x00, 0x01, 0x02, 0x03])
         const mantissa = Difficulty.unpackMantissa(packedNumber)
-        expect(mantissa).toEqual(197121)
+        expect(mantissa).toEqual(0x030201)
     })
 
     it("decode: should decode a 4 byte number into a Difficulty object", () => {
         const packedNumber = 0x01_04_03_02
         difficulty = Difficulty.decode(packedNumber)
         const repackedNumber = difficulty.encode()
-        expect(repackedNumber).toEqual(new Uint8Array([1, 2, 3, 4]))
+        expect(repackedNumber).toEqual(new Uint8Array([0x01, 0x02, 0x03, 0x04]))
     })
 
     it("constructor: should create a difficulty object without generating a runtime error", () => {
-        difficulty = new Difficulty(1, 0)
+        difficulty = new Difficulty(0x01, 0x00)
         expect(difficulty).toBeDefined()
     })
 
     it("encode: should encode the mantissa in the first position", () => {
-        // 0x00_00_01
-        difficulty = new Difficulty(1, 0)
+        difficulty = new Difficulty(0x00_00_01, 0x00)
         const encodedDifficulty = difficulty.encode()
-        const correctEncodedDifficulty = new Uint8Array([0, 1, 0, 0])
+        const correctEncodedDifficulty = new Uint8Array([0x00, 0x01, 0x00, 0x00])
         expect(encodedDifficulty).toEqual(correctEncodedDifficulty)
     })
 
     it("encode: should encode the mantissa in the second position", () => {
-        // 0x00_01_00
-        difficulty = new Difficulty(256, 0)
+        difficulty = new Difficulty(0x00_01_00, 0x00)
         const encodedDifficulty = difficulty.encode()
-        const correctEncodedDifficulty = new Uint8Array([0, 0, 1, 0])
+        const correctEncodedDifficulty = new Uint8Array([0x00, 0x00, 0x01, 0x00])
         expect(encodedDifficulty).toEqual(correctEncodedDifficulty)
     })
 
     it("encode: should encode the mantissa in the third position", () => {
-        // 0x01_00_00
-        difficulty = new Difficulty(65536, 0)
+        difficulty = new Difficulty(0x01_00_00, 0x00)
         const encodedDifficulty = difficulty.encode()
-        const correctEncodedDifficulty = new Uint8Array([0, 0, 0, 1])
+        const correctEncodedDifficulty = new Uint8Array([0x00, 0x00, 0x00, 0x01])
         expect(encodedDifficulty).toEqual(correctEncodedDifficulty)
     })
 
     it("encode: should encode the exponent in the proper position", () => {
-        difficulty = new Difficulty(0, 1)
+        difficulty = new Difficulty(0x00, 0x01)
         let encodedDifficulty = difficulty.encode()
-        let correctEncodedDifficulty = new Uint8Array([1, 0, 0, 0])
+        let correctEncodedDifficulty = new Uint8Array([0x01, 0x00, 0x00, 0x00])
         expect(encodedDifficulty).toEqual(correctEncodedDifficulty)
 
-        difficulty = new Difficulty(0, 16)
+        difficulty = new Difficulty(0x00, 0x10)
         encodedDifficulty = difficulty.encode()
-        correctEncodedDifficulty = new Uint8Array([16, 0, 0, 0])
+        correctEncodedDifficulty = new Uint8Array([0x10, 0x00, 0x00, 0x00])
         expect(encodedDifficulty).toEqual(correctEncodedDifficulty)
     })
 
     it("greaterThan: should return true if the difficulty value is greater than the given hash", () => {
-        difficulty = new Difficulty(10, 0)
-        const littleHashBytes = new Uint8Array([9, 0, 0, 0, 0, 0, 0, 0,
-                                             0, 0, 0, 0, 0, 0, 0, 0,
-                                             0, 0, 0, 0, 0, 0, 0, 0,
-                                             0, 0, 0, 0, 0, 0, 0, 0])
+        difficulty = new Difficulty(0x0a, 0x00)
+        const littleHashBytes = new Uint8Array([0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
         const littleHash = new Hash(littleHashBytes)
         const compare = difficulty.greaterThan(littleHash)
         expect(compare).toEqual(true)
     })
 
     it("greaterThan: should return false if the difficulty is less than the given hash", () => {
-        difficulty = new Difficulty(10, 0)
-        const bigHashBytes = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0,
-                                                0, 0, 0, 0, 0, 0, 0, 0,
-                                                0, 0, 0, 0, 0, 0, 0, 0,
-                                                0, 0, 0, 0, 0, 0, 0, 9])
+        difficulty = new Difficulty(0x0a, 0x00)
+        const bigHashBytes = new Uint8Array([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09])
         const bigHash = new Hash(bigHashBytes)
         const compare = difficulty.greaterThan(bigHash)
         expect(compare).toEqual(false)
     })
 
     xit("greaterThan: should return false if the difficulty is equal to the given hash", () => {
-        difficulty = new Difficulty(10, 0)
-        const equalHashBytes = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0,
-                                               0, 0, 0, 0, 0, 0, 0, 0,
-                                               0, 0, 0, 0, 0, 0, 0, 0,
-                                               0, 0, 0, 0, 0, 0, 0, 10])
+        difficulty = new Difficulty(0x0a, 0x00)
+        const equalHashBytes = new Uint8Array([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0a])
         const equalHash = new Hash(equalHashBytes)
         const compare = difficulty.greaterThan(equalHash)
 
