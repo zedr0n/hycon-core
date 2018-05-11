@@ -71,7 +71,7 @@ fdescribe("Difficulty", () => {
                                              0, 0, 0, 0, 0, 0, 0, 0,
                                              0, 0, 0, 0, 0, 0, 0, 0])
         const littleHash = new Hash(littleHashBytes)
-        const compare = difficulty.greaterThan(littleHash.reverse())
+        const compare = difficulty.greaterThan(littleHash)
         expect(compare).toEqual(true)
     })
 
@@ -82,7 +82,7 @@ fdescribe("Difficulty", () => {
                                                 0, 0, 0, 0, 0, 0, 0, 0,
                                                 0, 0, 0, 0, 0, 0, 0, 9])
         const bigHash = new Hash(bigHashBytes)
-        const compare = difficulty.greaterThan(bigHash.reverse())
+        const compare = difficulty.greaterThan(bigHash)
         expect(compare).toEqual(false)
     })
 

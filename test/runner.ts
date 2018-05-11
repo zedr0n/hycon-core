@@ -1,8 +1,8 @@
 import { } from "jasmine"
 
-const Jasmine = require("jasmine")
+import Jasmine = require("jasmine")
 
-const j = new Jasmine()
+const j = new Jasmine({})
 
 j.loadConfigFile("jasmine-ts.json")
 j.configureDefaultReporter({

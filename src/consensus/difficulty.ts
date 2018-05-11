@@ -16,28 +16,32 @@ export class Difficulty {
 
     public static unpackMantissa(num: Uint8Array ): number {
         let mantissa = 0
+        const mantissaBytes = new Uint8Array(3)
 
-        if (num.length === 3) {
-            for (let i = 2; i >= 0; i--) {
-                mantissa = mantissa << 8
-                mantissa = mantissa + num[i]
-            }
-            return mantissa
-        } else if (num.length === 4) {
-            const mantissaBytes = num.slice(1, 4)
-            return Difficulty.unpackMantissa(mantissaBytes)
-        } else if (num.length === 32) {
+        if (num.length === 32) {
             const msb = Difficulty.getMsb(num)
-            let mantissaBytes: Uint8Array
             if (msb > 2) {
-                mantissaBytes = num.slice(msb - 2, msb + 1)
+                for (let i = msb - 2; i < msb + 1; i++) {
+                    mantissaBytes[i] = num[i]
+                }
             } else {
-                mantissaBytes = num.slice(0, 3)
+                for (let i = 0; i < 3; i++) {
+                    mantissaBytes[i] = num[i]
+                }
             }
-            return Difficulty.unpackMantissa(mantissaBytes)
+        } else if (num.length === 4) {
+            for (let i = 1; i < 4; i++) {
+                mantissaBytes[i - 1] = num[i]
+            }
         } else {
-            throw new Error("num must be either 3, 4 or 32 bytes long")
+            throw Error("num must be either 3, 4, or 32 bytes long")
         }
+
+        for (let i = 2; i >= 0; i--) {
+            mantissa = mantissa << 8
+            mantissa = mantissa + mantissaBytes[i]
+        }
+        return mantissa
     }
     public static unpackExponent(num: Uint8Array): number {
         const msb = Difficulty.getMsb(num)
@@ -94,7 +98,7 @@ export class Difficulty {
         const mantissa = Difficulty.unpackMantissa(byteArray)
         const exponent = Difficulty.unpackExponent(byteArray)
 
-        const exponentCompare = this.e > exponent
+        const exponentCompare = this.e >= exponent
         const mantissaCompare = this.m > mantissa
 
         if (mantissaCompare && exponentCompare) {
