@@ -145,8 +145,8 @@ export class RabbitNetwork implements INetwork {
         return new Promise<RabbitPeer>((resolved, reject) => {
             const key = RabbitNetwork.string2key(host, port)
             if (this.clientTable.has(key)) {
-                logger.debug(`${host}:${port} Already Exists`)
-                this.report()
+                // logger.debug(`${host}:${port} Already Exists`)
+                // this.report()
                 throw new Error(`${host}:${port} Already Exists`)
             }
             logger.info(`Attempting to connect to ${host}:${port}`)
@@ -172,14 +172,14 @@ export class RabbitNetwork implements INetwork {
         const peer = new RabbitPeer(socket, this, this.hycon.consensus, this.hycon.txPool, this.peerDB)
         try {
             this.peerTable.set(key, peer)
-            logger.info(`peer ${ipeer.host}:${ipeer.port} has been saved`)
+            logger.info(`${ipeer.host}:${ipeer.port} has been saved to All Peers`)
         } catch (e) {
             logger.info(`e`)
         }
         socket.on("close", async (error) => {
             try {
                 this.peerTable.delete(key)
-                logger.info(`peer ${key}:${this.peerTable.size}, ${ipeer.host}:${ipeer.port} has been removed`)
+                logger.info(`${key}:${this.peerTable.size}, ${ipeer.host}:${ipeer.port} has been removed from All Peers`)
             } catch (e) {
                 logger.info(`e`)
             }
@@ -198,7 +198,7 @@ export class RabbitNetwork implements INetwork {
             this.clientTable.set(key, peer)
             this.peerTable.set(key, peer)
             await this.peerDB.put(ipeer)
-            logger.info(`peer ${ipeer.host}:${ipeer.port} has been saved`)
+            logger.info(`peer ${ipeer.host}:${ipeer.port} has been saved to both Peers`)
         } catch (e) {
             logger.info(`e`)
         }
@@ -207,7 +207,7 @@ export class RabbitNetwork implements INetwork {
                 this.clientTable.delete(key)
                 this.peerTable.delete(key)
                 await this.peerDB.remove(ipeer)
-                logger.info(`peer ${key}:${this.peerTable.size}, ${ipeer.host}:${ipeer.port} has been removed`)
+                logger.info(`peer ${key}:${this.peerTable.size}, ${ipeer.host}:${ipeer.port} has been removed from both Peers`)
             } catch (e) {
                 logger.info(`e`)
             }

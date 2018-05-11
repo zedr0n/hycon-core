@@ -65,6 +65,10 @@ export class RabbitPeer extends BasePeer implements IPeer {
         return new Hash(reply.getHashReturn.hash)
     }
 
+    public async setStatus(ip: string, port: number): Promise<void> {
+        this.myStatus.ip = ip
+        this.myStatus.port = port
+    }
     public async status(): Promise<proto.IStatus> {
         const { reply, packet } = await this.sendRequest({ status: this.myStatus })
         if (reply.statusReturn === undefined) {

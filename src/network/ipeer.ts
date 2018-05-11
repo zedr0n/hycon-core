@@ -10,17 +10,18 @@ import { Hash } from "../util/hash"
 type PingResponse = any // TODO: define type
 
 export interface IPeer {
-    status(): Promise<IStatus>
-    ping(): Promise<number>
-    putTxs(txs: SignedTx[]): Promise<boolean>
-    getTxs(minFee?: number): Promise<SignedTx[]>
-    putBlocks(blocks: AnyBlock[]): Promise<boolean>
-    putHeaders(header: AnyBlockHeader[]): Promise<boolean>// TODO
-    getHash(height: number): Promise<Hash>// TODO
-    getBlocksByHashes(hashes: Hash[]): Promise<Block[]>
-    getHeadersByHashes(hashes: Hash[]): Promise<AnyBlockHeader[]>
-    getBlocksByRange(fromHeight: number, count: number): Promise<Block[]>
-    getHeadersByRange(fromHeight: number, count: number): Promise<AnyBlockHeader[]>
-    getTip(): Promise<{ hash: Hash, height: number }> // TODO
+    setStatus(ip: string, port: number): Promise<void >
+    status(): Promise < IStatus >
+    ping(): Promise < number >
+    putTxs(txs: SignedTx[]): Promise < boolean >
+    getTxs(minFee ?: number): Promise < SignedTx[] >
+    putBlocks(blocks: AnyBlock[]): Promise < boolean >
+    putHeaders(header: AnyBlockHeader[]): Promise < boolean > // TODO
+    getHash(height: number): Promise < Hash > // TODO
+    getBlocksByHashes(hashes: Hash[]): Promise < Block[] >
+    getHeadersByHashes(hashes: Hash[]): Promise < AnyBlockHeader[] >
+    getBlocksByRange(fromHeight: number, count: number): Promise < Block[] >
+    getHeadersByRange(fromHeight: number, count: number): Promise < AnyBlockHeader[] >
+    getTip(): Promise < { hash: Hash, height: number } > // TODO
     getPeers(count: number): Promise<proto.IPeer[]> // TODO
 }

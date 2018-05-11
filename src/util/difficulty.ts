@@ -10,7 +10,7 @@ const target: number = 30000
 // tslint:disable-next-line:no-var-requires
 const dataDiff: number[][] = []
 const upperLimit = 4
-const plot = require("gnu-plot")()
+// const plot = require("gnu-plot")()
 const logger = getLogger("difficulty")
 
 // tslint:disable:no-bitwise
@@ -49,18 +49,18 @@ function calcEMA(): number {
     return emas[emas.length - 1]
 }
 
-function plotDiff(value: number) {
-    plot.set({
-        grid: "ture", xrange: "[0: ]", yrange: `[0:${upperLimit + 0.3}]`,
-    })
-    dataDiff.push([++dataDiff.length, value])
-    plot.plot([{
-        color: "red",
-        data: dataDiff,
-        style: "linespoints",
-        title: "Difficulty",
-    }])
-}
+// function plotDiff(value: number) {
+//     plot.set({
+//         grid: "ture", xrange: "[0: ]", yrange: `[0:${upperLimit + 0.3}]`,
+//     })
+//     dataDiff.push([++dataDiff.length, value])
+//     plot.plot([{
+//         color: "red",
+//         data: dataDiff,
+//         style: "linespoints",
+//         title: "Difficulty",
+//     }])
+// }
 
 export function processBlock(diff: number, timestamp: number = Date.now()): void {
     if (diff <= 0) { diff = lastDifficulty }
