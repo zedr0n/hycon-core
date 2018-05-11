@@ -103,9 +103,9 @@ export class RabbitNetwork implements INetwork {
     }
 
     public getRandomPeer(): IPeer {
-        const index = Math.floor(Math.random() * this.peerTable.size)
+        const index = Math.floor(Math.random() * this.clientTable.size)
         let cntr = 0
-        for (const value of this.peerTable.values()) {
+        for (const value of this.clientTable.values()) {
             if (cntr++ === index) {
                 return value
             }
@@ -115,7 +115,7 @@ export class RabbitNetwork implements INetwork {
         const randomList: number[] = []
         const iPeer: IPeer[] = []
         while (randomList.length < count) {
-            const index = Math.floor(Math.random() * this.peerTable.size)
+            const index = Math.floor(Math.random() * this.clientTable.size)
             if (randomList.indexOf(index) === -1) {
                 randomList.push(index)
             }
@@ -123,7 +123,7 @@ export class RabbitNetwork implements INetwork {
 
         let cntr = 0
         let index2 = 0
-        for (const value of this.peerTable.values()) {
+        for (const value of this.clientTable.values()) {
             if (cntr++ === randomList[index2]) {
                 iPeer.push(value)
                 index2 += 1
