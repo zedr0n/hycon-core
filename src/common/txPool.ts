@@ -22,8 +22,8 @@ export class TxPool implements ITxPool {
         this.minFee = minFee === undefined ? 0 : minFee
     }
 
-    public async putTxs(newTxs: SignedTx[]): Promise<number> {
-        const { count, lowestIndex } = await this.insert(newTxs)
+    public putTxs(newTxs: SignedTx[]): number {
+        const { count, lowestIndex } = this.insert(newTxs)
         this.callback(lowestIndex)
         return count
     }
@@ -37,7 +37,7 @@ export class TxPool implements ITxPool {
         this.callbacks.push({ callback, n })
     }
 
-    private async insert(newTxs: SignedTx[]): Promise<{ count: number, lowestIndex?: number }> {
+    private insert(newTxs: SignedTx[]): { count: number, lowestIndex?: number } {
         newTxs.sort((a, b) => b.fee - a.fee)
         let lowestIndex
         let count = 0

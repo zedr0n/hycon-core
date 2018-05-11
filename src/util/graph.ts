@@ -1,5 +1,7 @@
+import { cloneElement } from "react"
 import { BlockHeader } from "../common/blockHeader"
 import { GenesisBlockHeader } from "../common/genesisHeader"
+import { BlockStatus } from "../consensus/sync"
 import { Hash } from "./hash"
 
 // tslint:disable-next-line:no-var-requires
@@ -19,9 +21,10 @@ export class Graph {
             nodes: new Map<string, boolean>(),
         }
         this.color = {
+            block: "lightgreen",
             genesis: "orange",
-            incoming: "lightgrey",
-            outgoing: "skyblue",
+            header: "lightgrey",
+            mainchain: "skyblue",
         }
         this.outFile = "kandanHYCON.png"
     }
@@ -32,9 +35,21 @@ export class Graph {
         this.renderGraph()
     }
 
-    public addToGraph(header: BlockHeader, color: string) {
+    public addToGraph(header: BlockHeader, status: BlockStatus) {
         const blockHash = new Hash(header)
         const id = blockHash.toHex().slice(0, 6)
+        let color
+        switch (status) {
+            case BlockStatus.Block:
+                color = this.color.block
+                break
+            case BlockStatus.Header:
+                color = this.color.header
+                break
+            case BlockStatus.MainChain:
+                color = this.color.mainchain
+                break
+        }
         this.addNode(id, color)
         for (const prevHash of header.previousHash) {
             const pid = prevHash.toHex().slice(0, 6)

@@ -95,18 +95,18 @@ export class Database {
         })
     }
 
-    public async setHashByHeight(height: number, hash: Hash): Promise<void> {
+    public async setHashAtHeight(height: number, hash: Hash): Promise<void> {
         await this.database.put(height, hash.toString())
     }
 
-    public async getHashByHeight(height: number): Promise<Hash> {
+    public async getHashAtHeight(height: number): Promise<Hash> {
         try {
             const hashData = await this.database.get(height)
             const hash = Hash.decode(hashData.toString())
-            return Promise.resolve(hash)
+            return hash
         } catch (e) {
-            if (e.notFound) { return Promise.resolve(undefined) }
-            logger.error(`Fail to getHashByHeight : ${e}`)
+            if (e.notFound) { return undefined }
+            logger.error(`Fail to getHashAtHeight : ${e}`)
             return Promise.reject(e)
         }
     }
@@ -119,9 +119,9 @@ export class Database {
         try {
             const key = "s" + hash
             const status = await this.database.get(key)
-            return Promise.resolve(Number(status))
+            return Number(status)
         } catch (e) {
-            if (e.notFound) { return Promise.resolve(0) }
+            if (e.notFound) { return 0 }
             logger.error(`Fail to getBlockStatus : ${e}`)
             return Promise.reject(e)
         }
@@ -165,7 +165,7 @@ export class Database {
         try {
             const dbBlock = await this.getDBBlock(hash)
             if (dbBlock === undefined) { return undefined }
-            return Promise.resolve(dbBlock.header)
+            return dbBlock.header
         } catch (e) {
             logger.error(`getBlockHeader failed : Hash=${Hash}\n${e}`)
             return Promise.reject(e)
@@ -180,7 +180,7 @@ export class Database {
                 const block = await this.dbBlockToBlock(dbBlock)
                 blockArray.push(block)
             }
-            return Promise.resolve(blockArray)
+            return blockArray
         } catch (e) {
             logger.error(`getBlocksRange failed\n${e}`)
             return Promise.reject(e)
@@ -193,7 +193,7 @@ export class Database {
             for (const dbBlock of dbBlockArray) {
                 headerArray.push(dbBlock.header)
             }
-            return Promise.resolve(headerArray)
+            return headerArray
         } catch (e) {
             logger.error(`getHeadersRange failed\n${e}`)
             return Promise.reject(e)
@@ -205,13 +205,13 @@ export class Database {
             const dbBlockArray: DBBlock[] = []
             let height = fromHeight
             for (let i = 0; i < count; i++) {
-                const hash = await this.getHashByHeight(height)
+                const hash = await this.getHashAtHeight(height)
                 if (hash === undefined) { break }
                 const dbBlock = DBBlock.decode(hash)
                 dbBlockArray.push(dbBlock)
                 height++
             }
-            return Promise.resolve(dbBlockArray)
+            return dbBlockArray
         } catch (e) {
             logger.error(`getBlocksRange failed\n${e}`)
             return Promise.reject(e)
@@ -226,7 +226,7 @@ export class Database {
             decodingDBEntry = true
             const block = DBBlock.decode(encodedBlock)
             if (block) {
-                return Promise.resolve(block)
+                return block
             } else {
                 // TODO: Schedule Rebuild from file or rerequest from network
                 logger.debug(`Could not decode block ${hash}`)
@@ -235,7 +235,7 @@ export class Database {
                 throw decodeError
             }
         } catch (e) {
-            if (e.notFound) { return Promise.resolve(undefined) }
+            if (e.notFound) { return undefined }
             if (decodingDBEntry) {
                 // TODO: Schedule rerequest or file lookup
                 logger.debug(`Could not decode block ${hash}`)
@@ -320,7 +320,7 @@ export class Database {
             const hashData = await this.database.get(key)
             const hash = Hash.decode(hashData.toString())
             const block = await this.getDBBlock(hash)
-            return Promise.resolve(block)
+            return block
         } catch (e) {
             if (e.notFound) { return undefined }
             logger.error(`Fail to getTip : ${e}`)

@@ -58,7 +58,7 @@ export class SingleChain implements IConsensus {
             this.headerTip = await this.db.getHeaderTip()
 
             if (this.blockTip === undefined) {
-                this.initGenesisBlock()
+                const genesis = await this.initGenesisBlock()
                 this.graph.initGraph(genesis.header)
             }
 
@@ -94,36 +94,33 @@ export class SingleChain implements IConsensus {
                 return false
             }
 
-            let blockTxs: SignedTx[] = []
-            if (block instanceof Block) {
-                blockTxs = block.txs
-                const previousHeader = await this.db.getBlockHeader(block.header.previousHash[0])
-                if (previousHeader === undefined) {
-                    logger.info(`Previous Header not Found`)
-                    return false
-                }
-                const verifyResult = await this.verifyBlock(block, previousHeader)
-                if (!verifyResult.isVerified) {
-                    logger.error(`Invalid Block Rejected : ${blockHash}`)
-                    await this.db.setBlockStatus(blockHash, BlockStatus.Rejected)
-                    return false
-                }
-                const transitionResult = verifyResult.stateTransition
-                await this.worldState.putPending(transitionResult.batch, transitionResult.mapAccount)
-                this.graph.addToGraph(block.header, this.graph.color.outgoing)
+            const previousHeader = await this.db.getBlockHeader(block.header.previousHash[0])
+            if (previousHeader === undefined) {
+                logger.info(`Previous Header not Found`)
+                return false
             }
+
+            const verifyResult = await this.verifyBlock(block, previousHeader)
+            if (!verifyResult.isVerified) {
+                logger.error(`Invalid Block Rejected : ${blockHash}`)
+                await this.db.setBlockStatus(blockHash, BlockStatus.Rejected)
+                return false
+            }
+
+            const transitionResult = verifyResult.stateTransition
+            await this.worldState.putPending(transitionResult.batch, transitionResult.mapAccount)
             const { current, previous } = await this.db.putBlock(blockHash, block)
             if (this.txdb) { await this.txdb.putTxs(blockHash, block.txs) }
 
-            // Update headerTopTip first, then update blockTopTip
-            this.organizeChains(blockHash, current, block, this.txUnit)
+            await this.organizeChains(blockHash, current, block, this.txUnit)
+
             return true
         } catch (e) {
             logger.error(e)
             return false
         }
     }
-    public async putHeader(header: AnyBlockHeader): Promise<boolean> {
+    public async putHeader(header: BlockHeader): Promise<boolean> {
         try {
             const blockHash = new Hash(header)
             const blockStatus = await this.getBlockStatus(new Hash(header))
@@ -134,24 +131,19 @@ export class SingleChain implements IConsensus {
                 logger.warn(`Already exsited Header : ${blockHash}`)
                 return false
             }
-            if (header instanceof BlockHeader) {
-                if (!await this.verifyHeader(header)) {
-                    logger.error(`Invalid Header Rejected : ${blockHash}`)
-                    await this.db.setBlockStatus(blockHash, BlockStatus.Rejected)
-                    return Promise.resolve(false)
-                }
+
+            if (!await this.verifyHeader(header)) {
+                logger.error(`Invalid Header Rejected : ${blockHash}`)
+                await this.db.setBlockStatus(blockHash, BlockStatus.Rejected)
+                return false
             }
+
             const { current, previous } = await this.db.putHeader(blockHash, header)
-            await this.db.setBlockStatus(blockHash, BlockStatus.Header)
+            await this.organizeChains(blockHash, current)
 
-            const { newTip, prevTip, isTopTip } = this.updateTopTip(this.headerTip, current, previous)
-
-            if (isTopTip) {
-                this.headerTip = newTip
-                await this.db.setHeaderTip(blockHash)
-            }
-            return Promise.resolve(true)
+            return true
         } catch (e) {
+            logger.error(`Fail to putHeader in SingleChain : ${e}`)
             return Promise.reject(e)
         }
     }
@@ -183,7 +175,7 @@ export class SingleChain implements IConsensus {
         try {
             const header = await this.db.getBlockHeader(hash)
             if (header === undefined) { return Promise.reject(`Not found header ${hash.toString()}`) }
-            return Promise.resolve(header)
+            return header
         } catch (e) {
             logger.error(`Fail to getHeaderByHash : ${e}`)
             Promise.reject(e)
@@ -193,7 +185,7 @@ export class SingleChain implements IConsensus {
     public getBlocksRange(fromHeight: number, count?: number): Promise<AnyBlock[]> {
         try {
             const blockArray = this.db.getBlocksRange(fromHeight, count)
-            return Promise.resolve(blockArray)
+            return blockArray
         } catch (e) {
             logger.error(`Fail to getBlocksRange : ${e}`)
             Promise.reject(e)
@@ -208,7 +200,7 @@ export class SingleChain implements IConsensus {
         try {
             if (this.blockTip !== undefined) {
                 const account = await this.worldState.getAccount(this.blockTip.header.stateRoot, address)
-                return Promise.resolve(account)
+                return account
             } else {
                 logger.error(`There is not any tips`)
                 return Promise.reject(`There is not any tips`)
@@ -243,9 +235,9 @@ export class SingleChain implements IConsensus {
         return { hash: new Hash(block.header), height: block.height }
     }
 
-    public isTxValid(tx: SignedTx): Promise<boolean> {
+    public async isTxValid(tx: SignedTx): Promise<boolean> {
         // TODO : Check existence in DB.
-        return Promise.resolve(true)
+        return true
     }
 
     public async getTx(hash: Hash): Promise<TxList | undefined> {
@@ -253,15 +245,15 @@ export class SingleChain implements IConsensus {
             return await this.txdb.getTx(hash)
         } else {
             logger.error(`User not use txDatabase for RestAPI`)
-            return Promise.resolve(undefined)
+            return undefined
         }
     }
     public async getHash(height: number): Promise<Hash> {
-        return await this.db.getHashByHeight(height)
+        return await this.db.getHashAtHeight(height)
     }
 
     public async testMakeBlock(txs: SignedTx[]): Promise<Block> {
-        return Promise.resolve(await this.createCandidateBlock(txs))
+        return await this.createCandidateBlock(txs)
     }
 
     private newBlock(block: AnyBlock): void {
@@ -270,27 +262,34 @@ export class SingleChain implements IConsensus {
         }
     }
 
-    private async initGenesisBlock() {
-        logger.debug(`No blocks in DB, loading genesis from file.`)
-        const genesis = GenesisBlock.loadFromFile()
-        const genesisHash = new Hash(genesis.header)
-        const transition = await this.worldState.first(genesis)
-        await this.worldState.putPending(transition.batch, transition.mapAccount)
-        genesis.header.stateRoot = transition.currentStateRoot
-
-        // Test wallets
-        const testWalletTransition = await this.worldState.createTestAddresses(transition.currentStateRoot)
-        await this.worldState.putPending(testWalletTransition.batch, testWalletTransition.mapAccount)
-        genesis.header.stateRoot = testWalletTransition.currentStateRoot
-        await this.worldState.print(testWalletTransition.currentStateRoot)
-        // this.blockTip = await this.db.getBlockTip()
-        const { current } = await this.db.putBlock(genesisHash, genesis)
-        this.blockTip = current
-        // TODO status -> MainChain
-        // TODO height -> hash
-        // TODO tip
-        if (this.txdb) {
-            await this.txdb.putTxs(genesisHash, genesis.txs)
+    private async initGenesisBlock(): Promise<GenesisBlock> {
+        try {
+            const genesis = GenesisBlock.loadFromFile()
+            let genesisHash = new Hash(genesis.header)
+            const transition = await this.worldState.first(genesis)
+            await this.worldState.putPending(transition.batch, transition.mapAccount)
+            genesis.header.stateRoot = transition.currentStateRoot
+            // Test wallets
+            const testWalletTransition = await this.worldState.createTestAddresses(transition.currentStateRoot)
+            await this.worldState.putPending(testWalletTransition.batch, testWalletTransition.mapAccount)
+            genesis.header.stateRoot = testWalletTransition.currentStateRoot
+            await this.worldState.print(testWalletTransition.currentStateRoot)
+            genesisHash = new Hash(genesis.header)
+            const { current } = await this.db.putBlock(genesisHash, genesis)
+            const block = await this.db.getBlockHeader(genesisHash)
+            this.headerTip = current
+            this.blockTip = current
+            await this.db.setBlockStatus(genesisHash, BlockStatus.MainChain)
+            await this.db.setHashAtHeight(0, genesisHash)
+            await this.db.setHeaderTip(genesisHash)
+            await this.db.setBlockTip(genesisHash)
+            if (this.txdb) {
+                await this.txdb.putTxs(genesisHash, genesis.txs)
+            }
+            return genesis
+        } catch (e) {
+            logger.error(`Fail to initGenesisBlock : ${e}`)
+            return Promise.reject(e)
         }
     }
 
@@ -328,6 +327,7 @@ export class SingleChain implements IConsensus {
             const previousHash = new Hash(this.blockTip.header)
             // TODO : get Miner address -> If miner is undefined, occur error
             const miner: Address = new Address(0)
+            logger.info(`PreviousHash : ${previousHash}`)
             const previousHeader = await this.db.getBlockHeader(previousHash)
             txs.sort((txA, txB) => txA.nonce - txB.nonce)
             const worldStateResult = await this.worldState.next(txs, previousHeader.stateRoot, miner)
@@ -344,7 +344,7 @@ export class SingleChain implements IConsensus {
 
             if (!await this.verifyPreBlock(newBlock, previousHeader)) { throw new Error("Not verified.") }
             this.server.miner.newCandidateBlock(newBlock)
-            return Promise.resolve(newBlock)
+            return newBlock
         } catch (e) {
             logger.error(`Fail to createCandidateBlock : ${e}`)
             return Promise.reject(e)
@@ -355,25 +355,25 @@ export class SingleChain implements IConsensus {
         const isValidHeader = await this.verifyHeader(block.header)
         if (!isValidHeader) {
             logger.warn(`Invalid header`)
-            return Promise.resolve({ isVerified: false })
+            return { isVerified: false }
         }
 
         const verifyResult = await this.verifyPreBlock(block, previousHeader)
         if (!verifyResult.isVerified) {
-            return Promise.resolve({ isVerified: false })
+            return { isVerified: false }
         }
 
-        return Promise.resolve(verifyResult)
+        return verifyResult
     }
 
     private async verifyPreBlock(block: Block, previousHeader: AnyBlockHeader): Promise<{ isVerified: boolean, stateTransition?: IStateTransition }> {
         const txVerify = block.txs.every((tx) => verifyTx(tx))
-        if (!txVerify) { return Promise.resolve({ isVerified: false }) }
+        if (!txVerify) { return { isVerified: false } }
 
         const merkleRootVerify = block.calculateMerkleRoot().equals(block.header.merkleRoot)
         if (!merkleRootVerify) {
             logger.warn(`Invalid merkleRoot`)
-            return Promise.resolve({ isVerified: false })
+            return { isVerified: false }
         }
         const { stateTransition, validTxs, invalidTxs } = await this.worldState.next(block.txs, previousHeader.stateRoot, block.miner)
         if (!stateTransition.currentStateRoot.equals(block.header.stateRoot)) {
@@ -401,13 +401,13 @@ export class SingleChain implements IConsensus {
         const target = new Uint8Array(bufTarget).subarray(0, MinerServer.LEN_TARGET)
 
         if ((cryptoHash[0] < target[0]) || ((cryptoHash[0] === target[0]) && (cryptoHash[1] < target[1]))) {
-            return Promise.resolve(true)
+            return true
         }
         logger.warn(`Fail to verifyHeader with difficulty nonce.`)
-        return Promise.resolve(false)
+        return false
     }
 
-    private async organizeChains(newBlockHash: Hash, dbBlock: DBBlock, block?: AnyBlock, txCount: number = 0): Promise<void> {
+    private async organizeChains(newBlockHash: Hash, dbBlock: DBBlock, block?: Block, txCount: number = 0): Promise<void> {
         logger.info(`Reorg logic should be implemented`)
 
         if (this.headerTip === undefined || this.headerTip.height < dbBlock.height) {
@@ -423,10 +423,12 @@ export class SingleChain implements IConsensus {
                 utils.processBlock(dbBlock.header.difficulty)
                 this.createCandidateBlock(txs)
             } else {
-                this.db.setBlockStatus(newBlockHash, BlockStatus.Block)
+                await this.db.setBlockStatus(newBlockHash, BlockStatus.Block)
+                this.graph.addToGraph(block.header, BlockStatus.Block)
             }
         } else {
-            this.db.setBlockStatus(newBlockHash, BlockStatus.Header)
+            await this.db.setBlockStatus(newBlockHash, BlockStatus.Header)
+            this.graph.addToGraph(block.header, BlockStatus.Header)
         }
     }
 
@@ -459,7 +461,8 @@ export class SingleChain implements IConsensus {
             if (!(popBlock instanceof Block)) {
                 throw new Error("Error trying to reorganize past the genesis block")
             }
-            this.db.setBlockStatus(popHash, BlockStatus.Block)
+            await this.db.setBlockStatus(popHash, BlockStatus.Block)
+            this.graph.addToGraph(block.header, BlockStatus.Block)
             this.server.txPool.putTxs(popBlock.txs)
             popHash = popBlock.header.previousHash[0]
             popHeight -= 1
@@ -473,8 +476,9 @@ export class SingleChain implements IConsensus {
         let pushHeight = popStopHeight
         while (newBlockHashes.length > 0) {
             hash = newBlockHashes.pop()
-            this.db.setBlockStatus(hash, BlockStatus.MainChain)
-            this.db.setHashByHeight(pushHeight, hash)
+            await this.db.setBlockStatus(hash, BlockStatus.MainChain)
+            this.graph.addToGraph(block.header, BlockStatus.MainChain)
+            await this.db.setHashAtHeight(pushHeight, hash)
             pushHeight += 1
             block = newBlocks.pop()
             txs = this.server.txPool.updateTxs(block.txs, newBlockHashes.length > 0 ? 0 : txCount)
