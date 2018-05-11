@@ -1,7 +1,7 @@
 import { Difficulty } from "../src/consensus/difficulty"
 import { Hash } from "../src/util/hash"
 
-fdescribe("Difficulty", () => {
+describe("Difficulty", () => {
     let difficulty: Difficulty
 
     it("unpackMantissa: should correctly unpack mantissa from a 4 byte number", () => {
@@ -20,7 +20,7 @@ fdescribe("Difficulty", () => {
         const packedNumber = 0x01_04_03_02
         difficulty = Difficulty.decode(packedNumber)
         const repackedNumber = difficulty.encode()
-        expect(repackedNumber).toEqual(new Uint8Array([0x01, 0x02, 0x03, 0x04]))
+        expect(repackedNumber).toEqual(0x01_04_03_02)
     })
 
     it("constructor: should create a difficulty object without generating a runtime error", () => {
@@ -31,33 +31,35 @@ fdescribe("Difficulty", () => {
     it("encode: should encode the mantissa in the first position", () => {
         difficulty = new Difficulty(0x00_00_01, 0x00)
         const encodedDifficulty = difficulty.encode()
-        const correctEncodedDifficulty = new Uint8Array([0x00, 0x01, 0x00, 0x00])
+        const correctEncodedDifficulty = 0x00_00_00_01
         expect(encodedDifficulty).toEqual(correctEncodedDifficulty)
     })
 
     it("encode: should encode the mantissa in the second position", () => {
         difficulty = new Difficulty(0x00_01_00, 0x00)
         const encodedDifficulty = difficulty.encode()
-        const correctEncodedDifficulty = new Uint8Array([0x00, 0x00, 0x01, 0x00])
+        const correctEncodedDifficulty = 0x01_00_00_01
         expect(encodedDifficulty).toEqual(correctEncodedDifficulty)
     })
 
     it("encode: should encode the mantissa in the third position", () => {
         difficulty = new Difficulty(0x01_00_00, 0x00)
         const encodedDifficulty = difficulty.encode()
-        const correctEncodedDifficulty = new Uint8Array([0x00, 0x00, 0x00, 0x01])
+        const correctEncodedDifficulty = 0x02_00_00_01
         expect(encodedDifficulty).toEqual(correctEncodedDifficulty)
     })
 
     it("encode: should encode the exponent in the proper position", () => {
         difficulty = new Difficulty(0x00, 0x01)
-        let encodedDifficulty = difficulty.encode()
-        let correctEncodedDifficulty = new Uint8Array([0x01, 0x00, 0x00, 0x00])
+        const encodedDifficulty = difficulty.encode()
+        const correctEncodedDifficulty = 0x01_00_00_00
         expect(encodedDifficulty).toEqual(correctEncodedDifficulty)
+    })
 
+    it("encode: should encode the exponent in the proper position", () => {
         difficulty = new Difficulty(0x00, 0x10)
-        encodedDifficulty = difficulty.encode()
-        correctEncodedDifficulty = new Uint8Array([0x10, 0x00, 0x00, 0x00])
+        const encodedDifficulty = difficulty.encode()
+        const correctEncodedDifficulty = 0x10_00_00_00
         expect(encodedDifficulty).toEqual(correctEncodedDifficulty)
     })
 
@@ -95,10 +97,86 @@ fdescribe("Difficulty", () => {
     })
 
     it("multiply: should return the product of the difficulty value and the number", () => {
-        difficulty = new Difficulty(0x010203, 0x10)
-        const scalar = 3
-        const correctDifficulty = new Difficulty(0x030609, 0x10)
+        difficulty = new Difficulty(0x01_02_03, 0x10)
+        const scalar = 0x03
+        const correctDifficulty = new Difficulty(0x03_06_09, 0x10)
+
+        const multipliedDifficulty = difficulty.multiply(scalar)
+
+        expect(multipliedDifficulty.encode()).toEqual(correctDifficulty.encode())
+    })
+
+    it("multiply: 1 should return the product of the difficulty value and the number", () => {
+        difficulty = new Difficulty(0x01_02_03, 0x10)
+        const scalar = 0x10
+        const correctDifficulty = new Difficulty(0x10_20_30, 0x10)
         expect(difficulty.multiply(scalar).encode()).toEqual(correctDifficulty.encode())
     })
 
+    it("multiply: 2 should return the product of the difficulty value and the number", () => {
+        difficulty = new Difficulty(0x01_02_03, 0x10)
+        const scalar = 0x01_00
+        const correctDifficulty = new Difficulty(0x01_02_03, 0x11)
+        expect(difficulty.multiply(scalar).encode()).toEqual(correctDifficulty.encode())
+    })
+
+    it("multiply: 3 should return the product of the difficulty value and the number", () => {
+        difficulty = new Difficulty(0x01_02_03, 0x10)
+        const scalar = 0x10_00
+        const correctDifficulty = 0x11_10_20_30
+
+        const product = difficulty.multiply(scalar)
+
+        expect(product.encode()).toEqual(correctDifficulty)
+    })
+
+    it("multiply: 4 should return the product of the difficulty value and the number", () => {
+        difficulty = new Difficulty(0x01_02_03, 0x10)
+        const scalar = 0x01_00_00
+        const correctDifficulty = 0x12_01_02_03
+
+        const product = difficulty.multiply(scalar)
+
+        expect(product.encode()).toEqual(correctDifficulty)
+    })
+
+    it("multiply: 5 should return the product of the difficulty value and the number", () => {
+        difficulty = new Difficulty(0x01_02_03, 0x10)
+        const scalar = 0x10_00_00
+        const correctDifficulty = 0x12_10_20_30
+
+        const product = difficulty.multiply(scalar)
+
+        expect(product.encode()).toEqual(correctDifficulty)
+    })
+
+    it("multiply: 6 should handle a non-integer multiplication", () => {
+        difficulty = new Difficulty(0x01_02_04, 0x10)
+        const scalar = 1.5
+        const correctDifficulty = 0x10_01_83_06
+
+        const product = difficulty.multiply(scalar)
+
+        expect(product.encode()).toEqual(correctDifficulty)
+    })
+
+    it("multiply: 7 should handle a non-integer multiplication that shifts the exponent", () => {
+        difficulty = new Difficulty(0x01_02_04, 0x10)
+        const scalar = 1 / 16
+        const correctDifficulty = 0x0F_10_20_40
+
+        const product = difficulty.multiply(scalar)
+
+        expect(product.encode()).toEqual(correctDifficulty)
+    })
+
+    it("multiply: 8 should handle a non-integer multiplication that shifts the exponent", () => {
+        difficulty = new Difficulty(0x00_00_04, 0x10)
+        const scalar = 256 + 1 / 16
+        const correctDifficulty = 0x0F_04_00_40
+
+        const product = difficulty.multiply(scalar)
+
+        expect(product.encode()).toEqual(correctDifficulty)
+    })
 })

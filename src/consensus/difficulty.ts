@@ -1,4 +1,5 @@
 // tslint:disable:no-bitwise
+
 export class Difficulty {
 
     public static decode(num: number): Difficulty {
@@ -7,7 +8,15 @@ export class Difficulty {
 
         return new Difficulty(mantissa, exponent)
     }
-
+    public static normalize(mantissa: number, exponent: number) {
+        if (mantissa !== 0) {
+            while ((mantissa & 0xFF) === 0) {
+                mantissa = mantissa >> 8
+                exponent += 1
+            }
+        }
+        return {mantissa, exponent}
+    }
     public static unpackMantissa(num: Uint8Array ): number {
         let mantissa = 0
         const mantissaBytes = new Uint8Array(3)
@@ -66,18 +75,27 @@ export class Difficulty {
     private e: number
 
     constructor(mantissa: number, exponent: number) {
-        this.m = mantissa
-        this.e = exponent
+        const normalized = Difficulty.normalize(mantissa, exponent)
+        this.m = normalized.mantissa
+        this.e = normalized.exponent
+    }
+    public inspect(value: number) {
+        const buf = new Buffer(6)
+        buf.writeUIntBE(value, 0, 6)
+        return "0x" + buf.toString("hex")
     }
 
-    public encode(): Uint8Array {
-
-        const packed = new Uint8Array([0, 0, 0, 0])
-        packed[0] = this.e
-        for (let i = 3; i > 0; i--) {
-            packed[i] = this.m >> ((i - 1) * 8)
+    public encode(): number {
+        const packedBytes = new Uint8Array([0, 0, 0, 0])
+        packedBytes[3] = this.e
+        for (let i = 2; i >= 0; i--) {
+            packedBytes[i] = this.m >> ((i - 1) * 8)
         }
-        return packed
+        let packed = 0
+        for (let i = 0; i < 4; i++) {
+            packed += packedBytes[i] << (i * 8)
+        }
+        return (this.e << 24) + this.m
     }
 
     public greaterThan(byteArray: Uint8Array): boolean {
@@ -97,6 +115,23 @@ export class Difficulty {
     }
 
     public multiply(num: number): Difficulty {
-        return new Difficulty(0, 0)
+        let newMantissa = num * this.m
+        let newExponent = this.e
+        const mBits = Math.ceil(Math.log2(newMantissa))
+        const shift = Math.ceil((mBits - 24) / 8)
+        newExponent = this.e + shift
+
+        if (newExponent < 0) {
+            newExponent = 0
+        }
+
+        if (shift !== 0) {
+            newMantissa = Math.round(newMantissa / Math.pow(2, shift * 8))
+        }
+        newMantissa = Math.round(newMantissa)
+
+        // Normalize the mantissa
+        const {mantissa, exponent} = Difficulty.normalize(newMantissa, newExponent)
+        return new Difficulty(mantissa, exponent)
     }
 }

@@ -1,5 +1,3 @@
-import { } from "jasmine"
-
 import Jasmine = require("jasmine")
 
 const j = new Jasmine({})
