@@ -73,10 +73,6 @@ export interface IRest {
     hyconWalletListener(callback: (isHyconWallet: boolean) => void): void
     setLoading(loading: boolean): void
     setIsHyconWallet(isHyconWallet: boolean): void
-
-    // login & jwt
-    apiLogin(user: IUser): Promise<string>
-
     createNewWallet(meta: IHyconWallet): Promise<IHyconWallet | IResponseError>
     getWalletBalance(address: string): Promise<{balance: number} | IResponseError>
     getWalletTransactions(address: string, nonce?: number): Promise<{ txs: ITxProp[]} | IResponseError>

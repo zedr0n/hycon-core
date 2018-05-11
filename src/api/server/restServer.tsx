@@ -29,15 +29,6 @@ export class RestServer implements IRest {
     }
     public setLoading(loading: boolean): void { }
 
-    public async apiLogin(user: IUser): Promise<string> {
-        try {
-            const token = jwt.sign({ user }, "secretkey")
-            return Promise.resolve(token)
-        } catch (e) {
-            return Promise.reject(e)
-        }
-    }
-
     public async createNewWallet(meta: IHyconWallet): Promise<IHyconWallet | IResponseError> {
         try {
             let wallet: Wallet
