@@ -62,12 +62,12 @@ describe("Difficulty", () => {
 
     it("greaterThan: should return true if the difficulty value is greater than the given hash", () => {
         difficulty = new Difficulty(10, 0)
-        const bigHashBytes = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0,
+        const littleHashBytes = new Uint8Array([9, 0, 0, 0, 0, 0, 0, 0,
                                              0, 0, 0, 0, 0, 0, 0, 0,
                                              0, 0, 0, 0, 0, 0, 0, 0,
-                                             0, 0, 0, 0, 0, 0, 0, 11])
-        const bigHash = new Hash(bigHashBytes)
-        const compare = difficulty.greaterThan(bigHash)
+                                             0, 0, 0, 0, 0, 0, 0, 0])
+        const littleHash = new Hash(littleHashBytes)
+        const compare = difficulty.greaterThan(littleHash)
         expect(compare).toEqual(true)
     })
 

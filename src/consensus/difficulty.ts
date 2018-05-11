@@ -14,7 +14,7 @@ export class Difficulty {
         }
     }
 
-    public static unpackMantissa(num: Uint8Array|Hash): number {
+    public static unpackMantissa(num: Uint8Array|Hash ): number {
         let mantissa = 0
 
         if (num.length === 3) {
@@ -91,8 +91,9 @@ export class Difficulty {
     }
 
     public greaterThan(hash: Hash): boolean {
-        const mantissa = Difficulty.unpackMantissa(hash)
-        const exponent = Difficulty.unpackExponent(hash)
+        const reverseHash = hash.reverse()
+        const mantissa = Difficulty.unpackMantissa(reverseHash)
+        const exponent = Difficulty.unpackExponent(reverseHash)
 
         const exponentCompare = this.e > exponent
         const mantissaCompare = this.m > mantissa
