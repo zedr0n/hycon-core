@@ -18,9 +18,9 @@ const logger = getLogger("Network")
 const randomInt = require("random-int")
 export class RabbitNetwork implements INetwork {
     public static seeds: any[] = [
-        { host: "hycon.io", port: 8080 },
-        { host: "hycon.io", port: 8080 },
-        { host: "hycon.io", port: 8080 },
+        { host: "hycon1.io", port: 8148 },
+        { host: "hycon2.io", port: 8148 },
+        { host: "hycon3.io", port: 8148 },
     ]
     public static failLimit: number
     public static socket2Ipeer(socket: Socket): proto.IPeer {
@@ -97,9 +97,9 @@ export class RabbitNetwork implements INetwork {
         setInterval(() => {
             logger.debug(`All Peers Count=${this.peerTable.size}   Client Peer Size= ${this.clientTable.size}  PeerDB Size= ${this.peerDB.peers.length}`)
             this.report()
-        }, 5000)
+        }, 10 * 1000)
 
-        setInterval(() => { this.findPeers() }, 4000)
+        setInterval(() => { this.findPeers() }, 10 * 1000)
 
         return true
     }
