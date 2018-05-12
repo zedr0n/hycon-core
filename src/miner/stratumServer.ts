@@ -51,16 +51,14 @@ export class StratumServer {
             if (socket !== undefined) {
                 socket.notify([
                     zeroPad((jobUnit.multiply(index + (MinerServer.useCpuMiner ? 1 : 0))).toString(MinerServer.LEN_HEX_NONCE), MinerServer.LEN_HEX_NONCE), // job_id
-                    new Buffer(this.prehash).toString("hex"),
-                    new Buffer(this.target).toString("hex"),
+                    new Buffer(this.prehash).toString("hex"),       // prehash
+                    new Buffer(this.target).toString("hex"),        // difficulty (2byte hex)
+                    "0",                                            // difficulty (zero count)
                     zeroPad((jobUnit).toString(MinerServer.LEN_HEX_NONCE), MinerServer.LEN_HEX_NONCE), // job_unit
-                    [
-                        "0000000000000000000000000000000000000000000000000000000000000000",
-                    ], // branches
-                    "00000001", // block_version
-                    "00000000", // nbit
-                    "00000000", // ntime
-                    true, // clean
+                    "0", // empty
+                    "0", // empty
+                    "0", // empty
+                    true, // empty
                 ]).then(
                     () => {
                         logger.debug(`Put work - ${index} miner success `)
@@ -85,10 +83,10 @@ export class StratumServer {
             switch (req.method) {
                 case "subscribe":
                     deferred.resolve([
-                        "0000", // difficulty
-                        "00000000000000000000000000000000", // subscription_id
-                        "00000000", // extranonce1
-                        4, // extranonce2_size
+                        socket.id.toString(), // socket id
+                        "0", // empty
+                        "0", // empty
+                        4, // empty
                     ])
                     break
                 case "authorize":
