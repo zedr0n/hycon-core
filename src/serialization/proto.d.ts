@@ -252,12 +252,6 @@ export interface IStatus {
     /** Status networkid */
     networkid?: string;
 
-    /** Status hash */
-    hash?: Uint8Array;
-
-    /** Status ip */
-    ip?: string;
-
     /** Status port */
     port?: number;
 }
@@ -276,12 +270,6 @@ export class Status implements IStatus {
 
     /** Status networkid. */
     public networkid: string;
-
-    /** Status hash. */
-    public hash: Uint8Array;
-
-    /** Status ip. */
-    public ip: string;
 
     /** Status port. */
     public port: number;
@@ -3749,6 +3737,9 @@ export interface IPeer {
 
     /** Peer failCount */
     failCount?: number;
+
+    /** Peer lastAttemp */
+    lastAttemp?: number|Long;
 }
 
 /** Represents a Peer. */
@@ -3771,6 +3762,9 @@ export class Peer implements IPeer {
 
     /** Peer failCount. */
     public failCount: number;
+
+    /** Peer lastAttemp. */
+    public lastAttemp: (number|Long);
 
     /**
      * Creates a new Peer instance using the specified properties.

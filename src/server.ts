@@ -67,7 +67,7 @@ export class Server {
             Server.globalOptions.postfix = ""
         }
         const postfix = Server.globalOptions.postfix
-        this.consensus = new SingleChain(this, "deleteme.db" + postfix, "deleteme.ws" + postfix, "deleteme.file" + postfix)
+        this.consensus = new SingleChain(this, "blockdb" + postfix, "worldstate" + postfix, "rawblock" + postfix)
         this.network = new RabbitNetwork(this, Server.globalOptions.port, "deleteme.peer" + postfix)
 
         this.wallet = new WalletManager(this)

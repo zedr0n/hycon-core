@@ -1,158 +1,153 @@
+import levelup = require("levelup")
 import { getLogger } from "log4js"
+import Long = require("long")
+import rocksdb = require("rocksdb")
+import { AsyncLock } from "../common/asyncLock"
 import * as proto from "../serialization/proto"
 import { Hash } from "../util/hash"
+import { IPeer } from "./ipeer"
 
-// tslint:disable-next-line:no-var-requires
-import levelup = require("levelup") // javascript binding
-// tslint:disable-next-line:no-var-requires
-const rocksdb = require("rocksdb")  // c++ binding
 const logger = getLogger("PeerDb")
-logger.level = "debug"
 
 export class PeerDb {
-    public static ipeer2key(peer: proto.IPeer): string {
-        const hash = new Hash(peer.host + peer.port.toString()) // TS typechecking is incorrect
-        return hash.toHex()
+    public static ipeer2key(peer: proto.IPeer): number {
+        const hash = new Hash(peer.host + peer.port.toString())
+        let key = 0
+        for (let i = 0; i < 6; i--) {
+            // tslint:disable-next-line:no-bitwise
+            key = (key << 8) + hash[i]
+        }
+        return key
     }
     public static ipeer2value(peer: proto.IPeer): Buffer {
         const buf: any = proto.Peer.encode(peer).finish()// TS typechecking is incorrect
         const value = Buffer.from(buf)
         return value
     }
-    public db: levelup.LevelUp // database
-    public peers: proto.IPeer[]
+    private db: levelup.LevelUp // database
+    private keys: number[]
+    private keyListLock: AsyncLock// This lock protects this.keys from concurrent usage
 
-    constructor(peerDbPath: string = "deleteme.peer") {
-        this.db = levelup(rocksdb(peerDbPath))
-        this.peers = []
+    constructor(peerDbPath: string = "peerdb") {
+        const rocksDB: any = rocksdb(peerDbPath)// TODO: Fix levelup type declarartion
+        this.db = levelup(rocksDB)
+        this.keyListLock = new AsyncLock(true) // Locked until this.keys is initialized
         const db: any = this.db // TODO: Fix levelup type declarartion
         db.on("open", async () => {
-            await this.maintainKeys()
+            this.keys = await this.getKeys()
+            this.keyListLock.releaseLock()
         })
     }
 
-    public async put(peer: proto.IPeer): Promise<void> {
-        try {
-            const key = PeerDb.ipeer2key(peer)
-            const value = PeerDb.ipeer2value(peer)
-            await this.db.put(key, value)
-            let cnt = 0
-            for (const p of this.peers) {
-                if (p.host === peer.host && p.port === peer.port) {
-                    this.peers[cnt] = peer
-                    break
-                }
-                cnt++
-            }
-            if (cnt === this.peers.length) {
-                this.peers.push(peer)
-            }
-            logger.info(`Saved to db ${peer.host}:${peer.port}`)
-            return
-        } catch (e) {
-            logger.info(`Failed to put peer ${peer.host}:${peer.port} into PeerDB: ${e}`)
-            throw e
-        }
+    public peerCount(): number {
+        return this.keys.length
     }
 
-    public async get(key: string): Promise<proto.IPeer> {
+    public async seen(peer: proto.IPeer) {
+        const key = PeerDb.ipeer2key(peer)
+        peer.lastSeen = Date.now()
+        peer.failCount = 0
+        return this.put(peer)
+    }
+
+    public async fail(peer: proto.IPeer, limit: number) {
+        const key = PeerDb.ipeer2key(peer)
+        peer = await this.get(key)
+        if (peer.failCount === undefined) {
+            peer.failCount = 1
+        } else {
+            peer.failCount++
+        }
+
+        if (peer.failCount <= limit) {
+            await this.put(peer)
+        } else {
+            await this.remove(peer)
+        }
+
+    }
+
+    public async put(peer: proto.IPeer): Promise<proto.IPeer> {
+        const key = PeerDb.ipeer2key(peer)
+        const value = PeerDb.ipeer2value(peer)
+        return this.keyListLock.critical<proto.IPeer>(async () => {
+            await this.db.put(key, value)
+            logger.info(`Saved to db ${peer.host}:${peer.port}`)
+            if (this.keys.indexOf(key) === -1) {
+                this.keys.push(key)
+            }
+            return peer
+        })
+    }
+
+    public async get(key: number): Promise<proto.IPeer | undefined> {
         try {
             const result = await this.db.get(key)
             const peer = proto.Peer.decode(result)
             return peer
         } catch (e) {
-            logger.error(`Could not get key '${key}': ${e}`)
+            if (e.notFound) {
+                return undefined
+            }
+            logger.info(`Could not get key '${key}': ${e}`)
             throw e
         }
-    }
-
-    public async listAll(): Promise<proto.IPeer[]> {
-        const peers: proto.IPeer[] = []
-        try {
-            this.db.createReadStream()
-                .on("data", (data: any) => {
-                    const peer: proto.IPeer = proto.Peer.decode(data.value)
-                    peers.push(peer)
-                })
-                .on("end", () => {
-                    logger.info(`reload peers:${peers.length} from peer db`)
-                    for (const peer of peers) {
-                        logger.info(`${peer.host}:${peer.port}`)
-                    }
-                })
-            return Promise.resolve(peers)
-
-        } catch (e) {
-            logger.error(`Could not get all keys from DB: ${e}`)
-            throw e
-        }
-
     }
 
     public async remove(peer: proto.IPeer): Promise<void> {
-        try {
-            const key = PeerDb.ipeer2key(peer)
+        const key = PeerDb.ipeer2key(peer)
+        let index = this.keys.indexOf(key)
+        return this.keyListLock.critical(async () => {
             await this.db.del(key)
-            let cnt = 0
-            for (const p of this.peers) {
-                if (p.host === peer.host && p.port === peer.port) {
-                    this.peers.splice(cnt, 1)
-                    logger.info(`Remove ${peer.host}:${peer.port} from DB`)
-                    break
-                }
-                cnt++
+            while (index !== -1) {
+                this.keys.splice(index, 1)
+                index = this.keys.indexOf(key)
             }
-        } catch (e) {
-            logger.error(`Could not delete from db: ${peer.host}:${peer.port}`)
-        }
+        })
     }
 
-    public async clearAll(): Promise<void> {
-        try {
-            this.db.createKeyStream()
-                .on("data", async (key: string) => {
-                    await this.db.del(key)
+    public async getRandomPeer(connections: Map<number, IPeer>): Promise<proto.IPeer | undefined> {
+        return this.keyListLock.critical(async () => {
+            let key: number
+            if (connections.size < this.keys.length) {
+                // Use the more potentially CPU intensive method when the number of connections is low or the peerDB is large
+                do {
+                    const index = Math.floor(this.keys.length * Math.random())
+                    key = this.keys[index]
+                } while (connections.has(key))
+            } else {
+                // Use more memory intensive the number of connections approaches the DB size
+                const filtered = this.keys.filter((filterkey) => !connections.has(filterkey))
+                if (filtered.length === 0) {
+                    return undefined
+                }
+                const index = Math.floor(filtered.length * Math.random())
+                key = filtered[index]
+            }
+            const buffer = await this.db.get(key)
+            return proto.Peer.decode(buffer)
+        })
+    }
+
+    private async getKeys(): Promise<number[]> {
+        return new Promise<number[]>((resolve, reject) => {
+            const keys: number[] = []
+            const stream = this.db.createKeyStream()
+                .on("data", async (key: Buffer) => {
+                    const num = Number(key)
+                    if (Number.isNaN(num)) {
+                        logger.info(`Peer db contains unexpected key '${key.toString()}'`)
+                    } else {
+                        keys.push(num)
+                    }
+                })
+                .on("error", (e: any) => {
+                    logger.info(`Could not clear all elements from DB: ${e}`)
+                    reject(e)
                 })
                 .on("end", () => {
-                    logger.info("clear db")
-                    this.peers = []
-                    return
+                    resolve()
                 })
-        } catch (e) {
-            logger.error(`Could not clear all elements from DB: ${e}`)
-            throw e
-        }
-    }
-
-    public async getRecentActivePeers(n: number): Promise<proto.IPeer[]> {
-        try {
-            await new Promise((resolve, reject) => {
-                if (n < this.peers.length) {
-                    this.peers.sort((a: proto.IPeer, b: proto.IPeer) => {
-                        if (a.lastSeen > b.lastSeen) {
-                            return -1
-                        }
-                        if (a.lastSeen < b.lastSeen) {
-                            return 1
-                        }
-                        return 0
-                    })
-                    return Promise.resolve(this.peers.slice(0, n))
-                } else {
-                    return Promise.resolve(this.peers)
-                }
-            })
-        } catch (e) {
-            logger.error(`Could not get recent active Peers: ${e}`)
-            return Promise.reject(e)
-        }
-    }
-
-    public async maintainKeys(): Promise<void> {
-        try {
-            this.peers = await this.listAll()
-        } catch (e) {
-            logger.error(`Could not get all keys from DB: ${e}`)
-        }
+        })
     }
 }

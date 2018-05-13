@@ -11,7 +11,7 @@ describe("Network", () => {
     beforeAll(testAsync(async () => {
         tcp = new RabbitNetwork(undefined, 8148)
         await tcp.start()
-        client = await tcp.connect("localhost", 8148, true)
+        client = await tcp.connect("localhost", 8148)
     }))
 
     it("Can send ping", testAsync(async () => {

@@ -1078,8 +1078,6 @@ $root.Status = (function() {
      * @interface IStatus
      * @property {number|Long|null} [version] Status version
      * @property {string|null} [networkid] Status networkid
-     * @property {Uint8Array|null} [hash] Status hash
-     * @property {string|null} [ip] Status ip
      * @property {number|null} [port] Status port
      */
 
@@ -1113,22 +1111,6 @@ $root.Status = (function() {
      * @instance
      */
     Status.prototype.networkid = "";
-
-    /**
-     * Status hash.
-     * @member {Uint8Array} hash
-     * @memberof Status
-     * @instance
-     */
-    Status.prototype.hash = $util.newBuffer([]);
-
-    /**
-     * Status ip.
-     * @member {string} ip
-     * @memberof Status
-     * @instance
-     */
-    Status.prototype.ip = "";
 
     /**
      * Status port.
@@ -1166,10 +1148,6 @@ $root.Status = (function() {
             writer.uint32(/* id 1, wireType 0 =*/8).int64(message.version);
         if (message.networkid != null && message.hasOwnProperty("networkid"))
             writer.uint32(/* id 2, wireType 2 =*/18).string(message.networkid);
-        if (message.hash != null && message.hasOwnProperty("hash"))
-            writer.uint32(/* id 3, wireType 2 =*/26).bytes(message.hash);
-        if (message.ip != null && message.hasOwnProperty("ip"))
-            writer.uint32(/* id 4, wireType 2 =*/34).string(message.ip);
         if (message.port != null && message.hasOwnProperty("port"))
             writer.uint32(/* id 5, wireType 0 =*/40).int32(message.port);
         return writer;
@@ -1211,12 +1189,6 @@ $root.Status = (function() {
                 break;
             case 2:
                 message.networkid = reader.string();
-                break;
-            case 3:
-                message.hash = reader.bytes();
-                break;
-            case 4:
-                message.ip = reader.string();
                 break;
             case 5:
                 message.port = reader.int32();
@@ -1262,12 +1234,6 @@ $root.Status = (function() {
         if (message.networkid != null && message.hasOwnProperty("networkid"))
             if (!$util.isString(message.networkid))
                 return "networkid: string expected";
-        if (message.hash != null && message.hasOwnProperty("hash"))
-            if (!(message.hash && typeof message.hash.length === "number" || $util.isString(message.hash)))
-                return "hash: buffer expected";
-        if (message.ip != null && message.hasOwnProperty("ip"))
-            if (!$util.isString(message.ip))
-                return "ip: string expected";
         if (message.port != null && message.hasOwnProperty("port"))
             if (!$util.isInteger(message.port))
                 return "port: integer expected";
@@ -1297,13 +1263,6 @@ $root.Status = (function() {
                 message.version = new $util.LongBits(object.version.low >>> 0, object.version.high >>> 0).toNumber();
         if (object.networkid != null)
             message.networkid = String(object.networkid);
-        if (object.hash != null)
-            if (typeof object.hash === "string")
-                $util.base64.decode(object.hash, message.hash = $util.newBuffer($util.base64.length(object.hash)), 0);
-            else if (object.hash.length)
-                message.hash = object.hash;
-        if (object.ip != null)
-            message.ip = String(object.ip);
         if (object.port != null)
             message.port = object.port | 0;
         return message;
@@ -1329,8 +1288,6 @@ $root.Status = (function() {
             } else
                 object.version = options.longs === String ? "0" : 0;
             object.networkid = "";
-            object.hash = options.bytes === String ? "" : [];
-            object.ip = "";
             object.port = 0;
         }
         if (message.version != null && message.hasOwnProperty("version"))
@@ -1340,10 +1297,6 @@ $root.Status = (function() {
                 object.version = options.longs === String ? $util.Long.prototype.toString.call(message.version) : options.longs === Number ? new $util.LongBits(message.version.low >>> 0, message.version.high >>> 0).toNumber() : message.version;
         if (message.networkid != null && message.hasOwnProperty("networkid"))
             object.networkid = message.networkid;
-        if (message.hash != null && message.hasOwnProperty("hash"))
-            object.hash = options.bytes === String ? $util.base64.encode(message.hash, 0, message.hash.length) : options.bytes === Array ? Array.prototype.slice.call(message.hash) : message.hash;
-        if (message.ip != null && message.hasOwnProperty("ip"))
-            object.ip = message.ip;
         if (message.port != null && message.hasOwnProperty("port"))
             object.port = message.port;
         return object;
@@ -9380,6 +9333,7 @@ $root.Peer = (function() {
      * @property {number|null} [port] Peer port
      * @property {number|Long|null} [lastSeen] Peer lastSeen
      * @property {number|null} [failCount] Peer failCount
+     * @property {number|Long|null} [lastAttemp] Peer lastAttemp
      */
 
     /**
@@ -9430,6 +9384,14 @@ $root.Peer = (function() {
     Peer.prototype.failCount = 0;
 
     /**
+     * Peer lastAttemp.
+     * @member {number|Long} lastAttemp
+     * @memberof Peer
+     * @instance
+     */
+    Peer.prototype.lastAttemp = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+    /**
      * Creates a new Peer instance using the specified properties.
      * @function create
      * @memberof Peer
@@ -9461,6 +9423,8 @@ $root.Peer = (function() {
             writer.uint32(/* id 3, wireType 0 =*/24).int64(message.lastSeen);
         if (message.failCount != null && message.hasOwnProperty("failCount"))
             writer.uint32(/* id 4, wireType 0 =*/32).int32(message.failCount);
+        if (message.lastAttemp != null && message.hasOwnProperty("lastAttemp"))
+            writer.uint32(/* id 5, wireType 0 =*/40).int64(message.lastAttemp);
         return writer;
     };
 
@@ -9506,6 +9470,9 @@ $root.Peer = (function() {
                 break;
             case 4:
                 message.failCount = reader.int32();
+                break;
+            case 5:
+                message.lastAttemp = reader.int64();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -9554,6 +9521,9 @@ $root.Peer = (function() {
         if (message.failCount != null && message.hasOwnProperty("failCount"))
             if (!$util.isInteger(message.failCount))
                 return "failCount: integer expected";
+        if (message.lastAttemp != null && message.hasOwnProperty("lastAttemp"))
+            if (!$util.isInteger(message.lastAttemp) && !(message.lastAttemp && $util.isInteger(message.lastAttemp.low) && $util.isInteger(message.lastAttemp.high)))
+                return "lastAttemp: integer|Long expected";
         return null;
     };
 
@@ -9584,6 +9554,15 @@ $root.Peer = (function() {
                 message.lastSeen = new $util.LongBits(object.lastSeen.low >>> 0, object.lastSeen.high >>> 0).toNumber();
         if (object.failCount != null)
             message.failCount = object.failCount | 0;
+        if (object.lastAttemp != null)
+            if ($util.Long)
+                (message.lastAttemp = $util.Long.fromValue(object.lastAttemp)).unsigned = false;
+            else if (typeof object.lastAttemp === "string")
+                message.lastAttemp = parseInt(object.lastAttemp, 10);
+            else if (typeof object.lastAttemp === "number")
+                message.lastAttemp = object.lastAttemp;
+            else if (typeof object.lastAttemp === "object")
+                message.lastAttemp = new $util.LongBits(object.lastAttemp.low >>> 0, object.lastAttemp.high >>> 0).toNumber();
         return message;
     };
 
@@ -9609,6 +9588,11 @@ $root.Peer = (function() {
             } else
                 object.lastSeen = options.longs === String ? "0" : 0;
             object.failCount = 0;
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, false);
+                object.lastAttemp = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.lastAttemp = options.longs === String ? "0" : 0;
         }
         if (message.host != null && message.hasOwnProperty("host"))
             object.host = message.host;
@@ -9621,6 +9605,11 @@ $root.Peer = (function() {
                 object.lastSeen = options.longs === String ? $util.Long.prototype.toString.call(message.lastSeen) : options.longs === Number ? new $util.LongBits(message.lastSeen.low >>> 0, message.lastSeen.high >>> 0).toNumber() : message.lastSeen;
         if (message.failCount != null && message.hasOwnProperty("failCount"))
             object.failCount = message.failCount;
+        if (message.lastAttemp != null && message.hasOwnProperty("lastAttemp"))
+            if (typeof message.lastAttemp === "number")
+                object.lastAttemp = options.longs === String ? String(message.lastAttemp) : message.lastAttemp;
+            else
+                object.lastAttemp = options.longs === String ? $util.Long.prototype.toString.call(message.lastAttemp) : options.longs === Number ? new $util.LongBits(message.lastAttemp.low >>> 0, message.lastAttemp.high >>> 0).toNumber() : message.lastAttemp;
         return object;
     };
 

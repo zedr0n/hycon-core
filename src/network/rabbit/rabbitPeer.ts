@@ -21,22 +21,16 @@ interface IResponse { message: proto.INetwork, relay: boolean }
 export class RabbitPeer extends BasePeer implements IPeer {
     private consensus: IConsensus
     private txPool: ITxPool
-    private network: INetwork
-    private myStatus: proto.Status = new proto.Status()
+    private network: RabbitNetwork
     private peerDB: PeerDb
 
-    constructor(socket: Socket, network: INetwork, consensus: IConsensus, txPool: ITxPool, peerDB: PeerDb) {
+    constructor(socket: Socket, network: RabbitNetwork, consensus: IConsensus, txPool: ITxPool, peerDB: PeerDb) {
         super(socket)
         // tslint:disable-next-line:max-line-length
         logger.info(`New Netpeer Local=${RabbitNetwork.ipv6Toipv4(socket.localAddress)}:${socket.localPort} --> Remote=${RabbitNetwork.ipv6Toipv4(socket.remoteAddress)}:${socket.remotePort}`)
         this.network = network
         this.consensus = consensus
         this.txPool = txPool
-        // set status
-        this.myStatus.version = 0
-        this.myStatus.networkid = "hycon"
-        this.myStatus.ip = ""
-        this.myStatus.port = NaN
         this.peerDB = peerDB
     }
 
@@ -67,12 +61,14 @@ export class RabbitPeer extends BasePeer implements IPeer {
         return new Hash(reply.getHashReturn.hash)
     }
 
-    public async setStatus(ip: string, port: number): Promise<void> {
-        this.myStatus.ip = ip
-        this.myStatus.port = port
-    }
     public async status(): Promise<proto.IStatus> {
-        const { reply, packet } = await this.sendRequest({ status: this.myStatus })
+        const { reply, packet } = await this.sendRequest({
+            status: {
+                networkid: "hycon",
+                port: this.network.port,
+                version: this.network.version,
+            },
+        })
         if (reply.statusReturn === undefined) {
             this.protocolError()
             throw new Error("Invalid response")
@@ -93,7 +89,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
         return reply.pingReturn.nonce as number
     }
 
-    public async getPeers(count: number): Promise<proto.IPeer[]> {
+    public async getPeers(count?: number): Promise<proto.IPeer[]> {
         const { reply, packet } = await this.sendRequest({ getPeers: { count } })
         if (reply.getPeersReturn === undefined) {
             this.protocolError()
@@ -188,11 +184,6 @@ export class RabbitPeer extends BasePeer implements IPeer {
         return headers
     }
 
-    public async onConnected() {
-        const peerStatus = await this.status()
-        logger.debug(`My Status=${JSON.stringify(this.myStatus)}  Peer Status=${JSON.stringify(peerStatus)}`)
-    }
-
     // this is called in BasePeer's onPacket
     protected async respond(id: number, request: proto.Network, packet: Buffer): Promise<void> {
         let response: IResponse
@@ -253,18 +244,15 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     private async respondStatus(reply: boolean, request: proto.IStatus): Promise<IResponse> {
-        logger.info(`status info: ${request.ip}:${request.port}`)
-        if (request.ip !== "" && request.port !== 0) {
-            const peer: proto.IPeer = proto.Peer.create({
-                failCount: 0,
-                host: request.ip,
-                lastSeen: Date.now(),
-                port: request.port,
-            })
-            await this.peerDB.put(peer)
-        }
         const message: proto.INetwork = {
-            statusReturn: { status: this.myStatus, success: true },
+            statusReturn: {
+                status: {
+                    networkid: this.network.networkid,
+                    port: this.network.port,
+                    version: this.network.version,
+                },
+                success: true,
+            },
         }
         const relay = false
         return { message, relay }
@@ -279,7 +267,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     private async respondGetPeers(reply: boolean, request: proto.IGetPeers): Promise<IResponse> {
         try {
             const num = request.count
-            const peers: proto.IPeer[] = await this.peerDB.getRecentActivePeers(num)
+            const peers: proto.IPeer[] = this.network.getConnections()
             const message: proto.INetwork = { getPeersReturn: { success: true, peers } }
             const relay = false
             return { message, relay }

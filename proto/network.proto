@@ -50,8 +50,6 @@ message Network {
 message Status {
     int64 version = 1;
     string networkid = 2;
-    bytes hash=3;
-    string ip=4;
     int32 port=5;
 }
 

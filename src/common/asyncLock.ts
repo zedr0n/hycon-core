@@ -2,7 +2,7 @@ type lockCallBack = () => void
 export class AsyncLock {
     private locked: boolean
     private lockTransferQueue: lockCallBack[]
-    constructor() {
+    constructor(locked: boolean = false) {
         this.locked = false
         this.lockTransferQueue = []
     }
