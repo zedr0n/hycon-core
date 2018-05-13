@@ -11,8 +11,8 @@ export class PublicKey {
         if (pubKeySource instanceof Buffer) {
             this.pubKey = pubKeySource
         } else {
-            const hash = pubKeySource.unsignedHash().toBuffer()
-            this.pubKey = secp256k1.recover(hash, pubKeySource.signature, pubKeySource.recovery)
+            const hash = new Hash(pubKeySource)
+            this.pubKey = secp256k1.recover(hash.toBuffer(), pubKeySource.signature, pubKeySource.recovery)
         }
     }
 
@@ -29,7 +29,8 @@ export class PublicKey {
         if (!tx.signature) { return false }
 
         try {
-            return secp256k1.verify(tx.unsignedHash().toBuffer(), tx.signature, this.pubKey)
+            const hash = new Hash(tx)
+            return secp256k1.verify(hash.toBuffer(), tx.signature, this.pubKey)
         } catch (e) {
             return false
         }

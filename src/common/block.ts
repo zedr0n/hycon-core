@@ -64,7 +64,7 @@ export class Block implements proto.IBlock {
     public calculateMerkleRoot(): Hash {
         const values: Uint8Array[] = []
         this.txs.forEach((tx) => {
-            const hash = Hash.hash(proto.Tx.encode(tx).finish())
+            const hash = new Hash(tx)
             values.push(hash)
         })
         const outArr = merkle(values, Hash.hash)

@@ -32,8 +32,11 @@ export class GenesisSignedTx implements proto.ITx {
         }
     }
 
+    /**
+     * @deprecated Use new Hash(tx)
+     */
     public unsignedHash(): Hash {
-        return new Hash(new GenesisTx(this))
+        return new Hash(this)
     }
 
     public set(stx: proto.ITx): void {

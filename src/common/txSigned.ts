@@ -1,5 +1,6 @@
 import { getLogger } from "log4js"
 import * as Long from "long"
+import { deprecate } from "util"
 import { Address } from "../common/address"
 import { PublicKey } from "../common/publicKey"
 import * as proto from "../serialization/proto"
@@ -34,8 +35,11 @@ export class SignedTx implements proto.ITx {
         }
     }
 
+    /**
+     * @deprecated Use new Hash(tx)
+     */
     public unsignedHash(): Hash {
-        return new Hash(new Tx(this))
+        return new Hash(this)
     }
 
     public set(stx: proto.ITx): void {

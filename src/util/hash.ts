@@ -22,7 +22,12 @@ function toUint8Array(ob?: Tx | Block | GenesisBlockHeader | BlockHeader | strin
                 throw new Error(`Hash length ${ob.length} but should be 32`)
             }
             return ob
-        } else if (ob instanceof Tx || ob instanceof BlockHeader || ob instanceof BaseBlockHeader || ob instanceof Block || ob instanceof SignedTx || ob instanceof StateNode || ob instanceof Account || ob instanceof GenesisBlockHeader || ob instanceof GenesisTx || ob instanceof GenesisSignedTx) {
+        } else if (ob instanceof SignedTx || ob instanceof GenesisSignedTx) {
+            const usignedTx = Object.assign({}, ob)
+            delete usignedTx.recovery
+            delete usignedTx.signature
+            return Hash.hash(proto.Tx.encode(usignedTx).finish())
+        } else if (ob instanceof Tx || ob instanceof BlockHeader || ob instanceof BaseBlockHeader || ob instanceof Block || ob instanceof StateNode || ob instanceof Account || ob instanceof GenesisBlockHeader || ob instanceof GenesisTx) {
             return Hash.hash(ob.encode())
         }
         // Danger: typescript claims this line is unreachable, but it is reachable via the slice function

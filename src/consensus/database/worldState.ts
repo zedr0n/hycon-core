@@ -142,7 +142,7 @@ export class WorldState {
                 if (tx.from.equals(tx.to)) {
                     // TODO: Remove this if function and test
                     invalidTxs.push(tx)
-                    logger.debug(`Tx ${tx.unsignedHash()} Removed: from address ${tx.from.toString()}) == to address (${tx.to.toString()}`)
+                    logger.debug(`Tx ${new Hash(tx)} Removed: from address ${tx.from.toString()}) == to address (${tx.to.toString()}`)
                     continue
                 }
                 let fromAccount: Account | undefined
@@ -154,7 +154,7 @@ export class WorldState {
                 }
                 if (fromAccount === undefined) {
                     invalidTxs.push(tx)
-                    logger.error(`Tx ${tx.unsignedHash()} Rejected: ${tx.from.toString()} has not been seen before, so it has insufficient balance.`)
+                    logger.error(`Tx ${new Hash(tx)} Rejected: ${tx.from.toString()} has not been seen before, so it has insufficient balance.`)
                     continue
                 }
                 logger.info(`From balance : ${fromAccount.balance}`)
@@ -173,13 +173,13 @@ export class WorldState {
 
                 if (tx.nonce !== (fromAccount.nonce + 1)) {
                     invalidTxs.push(tx)
-                    logger.info(`Tx ${tx.unsignedHash()} Rejected: TxNonce=${tx.nonce}  ${tx.from}Nonce=${fromAccount.nonce}`)
+                    logger.info(`Tx ${new Hash(tx)} Rejected: TxNonce=${tx.nonce}  ${tx.from}Nonce=${fromAccount.nonce}`)
                     continue
                 }
 
                 if (fromAccount.balance < (tx.amount + tx.fee)) {
                     invalidTxs.push(tx)
-                    logger.info(`Tx ${tx.unsignedHash()} Rejected: The balance of the account is insufficient.`)
+                    logger.info(`Tx ${new Hash(tx)} Rejected: The balance of the account is insufficient.`)
                     continue
                 }
 
