@@ -1,6 +1,7 @@
 
 import { getLogger } from "log4js"
 import { zeroPad } from "../util/commonUtil"
+import { Difficulty } from "./../consensus/difficulty"
 import { MinerServer } from "./minerSever"
 
 // tslint:disable-next-line:no-var-requires
@@ -14,7 +15,7 @@ export class StratumServer {
     private net: any = undefined
 
     private prehash: Uint8Array | undefined
-    private target: Uint8Array | undefined
+    private difficulty: Difficulty | undefined
     private socketsId: any[] = []
     private mapSocket: Map<string, any> = new Map<string, any>()
 
@@ -34,17 +35,18 @@ export class StratumServer {
 
     public start() {
         this.prehash = undefined
-        this.target = undefined
+        this.difficulty = undefined
     }
     public stop() {
         this.prehash = undefined
-        this.target = undefined
+        this.difficulty = undefined
     }
 
-    public putWork(prehash: Uint8Array, target: Uint8Array, jobUnit: Long) {
+    public putWork(prehash: Uint8Array, difficulty: Difficulty, jobUnit: Long) {
         logger.info(`>>>>>>>>>Put Work in stratumServer : ${Buffer.from(prehash.buffer).toString("hex")}`)
         this.prehash = prehash
-        this.target = target
+        this.difficulty = difficulty
+        const {offset, target} = difficulty.getMinerParameters()
 
         for (let index = 0; index < this.socketsId.length; index++) {
             const socket = this.mapSocket.get(this.socketsId[index])
@@ -52,8 +54,8 @@ export class StratumServer {
                 socket.notify([
                     zeroPad((jobUnit.multiply(index + (MinerServer.useCpuMiner ? 1 : 0))).toString(MinerServer.LEN_HEX_NONCE), MinerServer.LEN_HEX_NONCE), // job_id
                     new Buffer(this.prehash).toString("hex"),       // prehash
-                    new Buffer(this.target).toString("hex"),        // difficulty (2byte hex)
-                    "0",                                            // difficulty (zero count)
+                    target,                                            // difficulty (2byte hex)
+                    offset,                                            // difficulty (zero count)
                     zeroPad((jobUnit).toString(MinerServer.LEN_HEX_NONCE), MinerServer.LEN_HEX_NONCE), // job_unit
                     "0", // empty
                     "0", // empty
@@ -121,7 +123,7 @@ export class StratumServer {
 
     private async completeWork(nonce: string): Promise<boolean> {
         try {
-            if (this.prehash === undefined || this.target === undefined) {
+            if (this.prehash === undefined || this.difficulty === undefined) {
                 logger.debug(`This Block is already confirm (NONCE : ${nonce})`)
                 return Promise.resolve(false)
             } else {

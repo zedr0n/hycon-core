@@ -17,6 +17,7 @@ import { Server } from "../server"
 import * as utils from "../util/difficulty"
 import { Graph } from "../util/graph"
 import { Hash } from "../util/hash"
+import { Difficulty } from "./../consensus/difficulty"
 import { Account } from "./database/account"
 import { Database } from "./database/database"
 import { DBBlock } from "./database/dbblock"
@@ -401,11 +402,10 @@ export class SingleChain implements IConsensus {
     private async verifyHeader(header: BlockHeader): Promise<boolean> {
         const preHash = header.preHash()
         const cryptoHash = await CpuMiner.hash(preHash, header.nonce.toString(16))
-        const difficulty = header.difficulty
-        const bufTarget = Buffer.from(utils.difficulty(utils.unforcedInt(difficulty)), "hex")
-        const target = new Uint8Array(bufTarget).subarray(0, MinerServer.LEN_TARGET)
+        // Todo need to check header.difficulty is a float or integer
+        const difficulty: Difficulty = Difficulty.decode(header.difficulty)
 
-        if ((cryptoHash[0] < target[0]) || ((cryptoHash[0] === target[0]) && (cryptoHash[1] < target[1]))) {
+        if (difficulty.greaterThan(cryptoHash)) {
             return true
         }
         logger.warn(`Fail to verifyHeader with difficulty nonce.`)

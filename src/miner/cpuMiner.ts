@@ -1,5 +1,6 @@
 import { getLogger } from "log4js"
 import Long = require("long")
+import { Difficulty } from "../consensus/difficulty"
 import { zeroPad } from "../util/commonUtil"
 import { Hash } from "../util/hash"
 import { MinerServer } from "./minerSever"
@@ -8,11 +9,12 @@ const logger = getLogger("CpuMiner")
 export class CpuMiner {
     private minerServer: MinerServer
     private prehash: Uint8Array | undefined
-    private target: Uint8Array | undefined
+    private difficulty: Difficulty | undefined
     private nonce: Long | undefined
     private lastNonce: Long | undefined
-
     private isMining: boolean
+
+    private wakeup: () => void
 
     constructor(minerServer: MinerServer) {
         logger.debug(`CPU Miner`)
@@ -34,18 +36,19 @@ export class CpuMiner {
 
     public async mine() {
         while (true) {
-            if (this.prehash === undefined || this.target === undefined || this.isMining === false) {
-                await sleep(1000)
+            if (this.prehash === undefined || this.difficulty === undefined || this.isMining === false) {
+                await new Promise<void>((resolve) => {this.wakeup = resolve})
             } else {
                 this.nonce = Long.UZERO
 
                 while (this.nonce !== undefined && this.nonce.compare(this.lastNonce)) {
                     const result = await CpuMiner.hash(this.prehash, this.nonce.toString(16))
-                    if (this.target === undefined) {
+                    if (this.difficulty === undefined) {
                         logger.info(`Already mined block`)
                         break
                     }
-                    if ((result[0] < this.target[0]) || ((result[0] === this.target[0]) && (result[1] < this.target[1]))) {
+
+                    if (this.difficulty.greaterThan(result)) {
                         logger.debug(`>>>>>>>>Submit - nonce : ${zeroPad(this.nonce.toString(16), MinerServer.LEN_HEX_NONCE)} / hash : ${Buffer.from(result.buffer).toString("hex")}`)
                         this.minerServer.submitNonce(this.nonce.toString(16))
                     }
@@ -79,21 +82,18 @@ export class CpuMiner {
         }
     }
 
-    public putWork(prehash: Uint8Array, target: Uint8Array, lastNonce: Long) {
+    public putWork(prehash: Uint8Array, difficulty: Difficulty, lastNonce: Long) {
         this.prehash = prehash
-        this.target = target
+        this.difficulty = difficulty
         this.nonce = Long.UZERO
         this.lastNonce = lastNonce
+        this.wakeup()
     }
 
     private init() {
         this.prehash = undefined
-        this.target = undefined
+        this.difficulty = undefined
         this.nonce = undefined
         this.lastNonce = undefined
     }
-}
-
-function sleep(ms = 0) {
-    return new Promise((r) => setTimeout(r, ms))
 }

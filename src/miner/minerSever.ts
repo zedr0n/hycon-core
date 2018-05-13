@@ -5,6 +5,7 @@ import { Server } from "../server"
 import { zeroPad } from "../util/commonUtil"
 import * as util from "../util/difficulty"
 import { Hash } from "../util/hash"
+import { Difficulty } from "./../consensus/difficulty"
 import { CpuMiner } from "./cpuMiner"
 import { IMiner } from "./iminer"
 import { StratumServer } from "./stratumServer"
@@ -32,7 +33,7 @@ export class MinerServer implements IMiner {
     private cpuMiner: CpuMiner
     private block: Block | undefined
     private prehash: Uint8Array | undefined
-    private target: Uint8Array
+    private difficulty: Difficulty
     private listCallBackNewBlock: (block: Block) => void
 
     public constructor(server: Server, stratumPort: number) {
@@ -58,19 +59,18 @@ export class MinerServer implements IMiner {
 
         // set Target
         const target = candidateBlock.header.difficulty
-        const bufTarget = Buffer.from(util.difficulty(util.unforcedInt(target)), "hex")
-        this.target = new Uint8Array(bufTarget).subarray(0, MinerServer.LEN_TARGET)
-
+        this.difficulty = Difficulty.decode(target)
+        const params = this.difficulty.getMinerParameters()
         // check miner count
         const jobUnit = this.calculateJobUnit()
 
-        logger.info(`Send candidate block to miner - prehash : ${Buffer.from(candidateBlock.header.preHash().buffer).toString("hex")} / target : ${Buffer.from(this.target.buffer).toString("hex")}`)
+        logger.info(`Send candidate block to miner - prehash : ${Buffer.from(candidateBlock.header.preHash().buffer).toString("hex")} / offset : ${params.offset} target : ${params.target}`)
 
         // notify cpuminer and stratum server
         if (MinerServer.useCpuMiner) {
-            this.cpuMiner.putWork(this.prehash, this.target, jobUnit)
+            this.cpuMiner.putWork(this.prehash, this.difficulty, jobUnit)
         }
-        this.stratumServer.putWork(this.prehash, this.target, jobUnit)
+        this.stratumServer.putWork(this.prehash, this.difficulty, jobUnit)
     }
     public async submitNonce(nonce: string): Promise<boolean> {
         return new Promise<boolean>(async (resolve, reject) => {
@@ -124,23 +124,22 @@ export class MinerServer implements IMiner {
     private init() {
         this.block = undefined
         this.prehash = undefined
-        this.target = undefined
+        this.difficulty = undefined
     }
 
     private async checkNonce(nonce: string): Promise<boolean> {
-        return new Promise<boolean>(async (resolve, reject) => {
-            if (this.prehash === undefined) {
-                return resolve(false)
-            }
-            const result = await CpuMiner.hash(this.prehash, nonce)
-            if ((result[0] < this.target[0] || ((result[0] === this.target[0]) && (result[1] < this.target[1])))) {
-                logger.debug(`HASH Result : ${Buffer.from(result.buffer).toString("hex")}`)
-                resolve(true)
-            } else {
-                logger.debug(`HASH Result : ${Buffer.from(result.buffer).toString("hex")}`)
-                resolve(false)
-            }
-        })
+        if (this.prehash === undefined) {
+            return false
+        }
+        const result = await CpuMiner.hash(this.prehash, nonce)
+
+        if (this.difficulty.greaterThan(result)) {
+            logger.debug(`HASH Result : ${Buffer.from(result.buffer).toString("hex")}`)
+            return true
+        } else {
+            logger.debug(`HASH Result : ${Buffer.from(result.buffer).toString("hex")}`)
+            return false
+        }
     }
 
     private calculateJobUnit(): Long {

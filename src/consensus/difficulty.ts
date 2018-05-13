@@ -1,7 +1,6 @@
 // tslint:disable:no-bitwise
 
 export class Difficulty {
-
     public static decode(num: number): Difficulty {
         const exponent = num >> 24
         const mantissa = num & 0xFFFFFF
@@ -17,58 +16,6 @@ export class Difficulty {
         }
         return { mantissa, exponent }
     }
-    private static unpackMantissa(num: Uint8Array ): number {
-        let mantissa = 0
-        const mantissaBytes = new Uint8Array(3)
-
-        if (num.length === 32) {
-            const msb = Difficulty.getMsb(num)
-            if (msb > 2) {
-                for (let i = msb - 2; i < msb + 1; i++) {
-                    mantissaBytes[i] = num[i]
-                }
-            } else {
-                for (let i = 0; i < 3; i++) {
-                    mantissaBytes[i] = num[i]
-                }
-            }
-        } else if (num.length === 4) {
-            for (let i = 1; i < 4; i++) {
-                mantissaBytes[i - 1] = num[i]
-            }
-        } else {
-            throw Error("num must be either 3, 4, or 32 bytes long")
-        }
-
-        for (let i = 2; i >= 0; i--) {
-            mantissa = mantissa << 8
-            mantissa = mantissa + mantissaBytes[i]
-        }
-        return mantissa
-    }
-    private static unpackExponent(num: Uint8Array): number {
-        const msb = Difficulty.getMsb(num)
-
-        let exponent = 0
-        if (msb === 0) {
-            exponent = 0
-        } else {
-            // Byte align the exponent value
-            exponent = (msb - 1) * 8 + Math.ceil(Math.log2(num[msb] === 0 ? 1 : num[msb]))
-        }
-        return exponent
-    }
-
-    private static getMsb(num: Uint8Array): number {
-        let msb = 0
-        for (let i = 31; i >= 0; i--) {
-            if (num[i] > 0) {
-                msb = i
-                break
-            }
-        }
-        return msb
-    }
 
     private m: number
 
@@ -80,33 +27,47 @@ export class Difficulty {
         this.e = normalized.exponent
     }
 
+    public getMinerParameters(): {offset: number, target: string} {
+        let offset = this.e * 2
+        let target = this.m
+        const extraHex = Math.ceil((Math.log2(this.m) - 16) / 4)
+        if (extraHex > 0) {
+            target >>= (extraHex * 4)
+            offset += extraHex
+        }
+        return {offset, target: target.toString(16)}
+    }
+
+    public inspect(value: number) {
+        const buf = new Buffer(6)
+        buf.writeUIntBE(value, 0, 6)
+        return "0x" + buf.toString("hex")
+    }
+
     public encode(): number {
-        const packedBytes = new Uint8Array([0, 0, 0, 0])
-        packedBytes[3] = this.e
-        for (let i = 2; i >= 0; i--) {
-            packedBytes[i] = this.m >> ((i - 1) * 8)
-        }
-        let packed = 0
-        for (let i = 0; i < 4; i++) {
-            packed += packedBytes[i] << (i * 8)
-        }
         return (this.e << 24) + this.m
     }
 
     public greaterThan(byteArray: Uint8Array): boolean {
-        const mantissa = Difficulty.unpackMantissa(byteArray)
-        const exponent = Difficulty.unpackExponent(byteArray)
-
-        const exponentCompare = this.e >= exponent
-        const mantissaCompare = this.m > mantissa
-
-        if (mantissaCompare && exponentCompare) {
-            return true
-        } else if (mantissa > 0 && exponentCompare) {
-            return true
-        } else {
-            return false
+        let i = 31
+        let offset = 32 - this.e
+        while (i >= offset) {
+            if (byteArray[i] !== 0) {
+                return false
+            }
+            i--
         }
+        offset = i - 3
+        let mComp = 0
+        while (i > offset)  {
+            mComp <<= 8
+            if (i >= 0) {
+                mComp += byteArray[i]
+            }
+            i--
+        }
+
+        return (this.m > mComp)
     }
 
     public multiply(num: number): Difficulty {
