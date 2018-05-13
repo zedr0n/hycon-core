@@ -4,7 +4,7 @@ export class Difficulty {
 
     public static decode(num: number): Difficulty {
         const exponent = num >> 24
-        const mantissa = num & 0xFF_FF_FF
+        const mantissa = num & 0xFFFFFF
 
         return new Difficulty(mantissa, exponent)
     }
@@ -15,9 +15,9 @@ export class Difficulty {
                 exponent += 1
             }
         }
-        return {mantissa, exponent}
+        return { mantissa, exponent }
     }
-    public static unpackMantissa(num: Uint8Array ): number {
+    public static unpackMantissa(num: Uint8Array): number {
         let mantissa = 0
         const mantissaBytes = new Uint8Array(3)
 
@@ -61,7 +61,7 @@ export class Difficulty {
 
     public static getMsb(num: Uint8Array): number {
         let msb = 0
-        for (let i = 31; i >= 0 ; i--) {
+        for (let i = 31; i >= 0; i--) {
             if (num[i] > 0) {
                 msb = i
                 break
@@ -131,7 +131,7 @@ export class Difficulty {
         newMantissa = Math.round(newMantissa)
 
         // Normalize the mantissa
-        const {mantissa, exponent} = Difficulty.normalize(newMantissa, newExponent)
+        const { mantissa, exponent } = Difficulty.normalize(newMantissa, newExponent)
         return new Difficulty(mantissa, exponent)
     }
 }
