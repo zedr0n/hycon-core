@@ -12,6 +12,7 @@ import { TxPool } from "../common/txPool"
 import { SignedTx } from "../common/txSigned"
 import { CpuMiner } from "../miner/cpuMiner"
 import { MinerServer } from "../miner/minerSever"
+import * as proto from "../serialization/proto"
 import { Server } from "../server"
 import * as utils from "../util/difficulty"
 import { Graph } from "../util/graph"
@@ -72,13 +73,17 @@ export class SingleChain implements IConsensus {
             }
 
             this.server.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock(txs))
-            this.server.miner.addCallbackNewBlock((block: Block) => this.putBlock(block))
+            this.server.miner.addCallbackNewBlock(
+                (block: Block) => {
+                    this.onMinedBlock(block)
+                })
             logger.debug(`Initialization of singlechain is over.`)
         } catch (e) {
             logger.error(`Initialization fail in singleChain : ${e}`)
             process.exit(1)
         }
     }
+
     public async putBlock(block: Block): Promise<boolean> {
         try {
             const blockHash = new Hash(block.header)
@@ -485,6 +490,13 @@ export class SingleChain implements IConsensus {
             this.newBlock(block)
         }
         return txs
+    }
+
+    private async onMinedBlock(block: Block) {
+        await this.putBlock(block)
+        // start network propagation
+        const encoded: Uint8Array = proto.Network.encode({ putBlock: { blocks: [block] } }).finish()
+        this.server.network.broadcast(new Buffer(encoded), null)
     }
 }
 
