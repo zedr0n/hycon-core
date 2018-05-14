@@ -23,6 +23,7 @@ export class RabbitNetwork implements INetwork {
         { host: "hycon3.io", port: 8148 },
     ]
     public static failLimit: number
+
     public static socket2Ipeer(socket: Socket): proto.IPeer {
         return proto.Peer.create({
             failCount: 0,
@@ -94,11 +95,10 @@ export class RabbitNetwork implements INetwork {
             // upnp
             this.upnpServer = new UpnpServer(this.port, this.hycon)
             this.upnpClient = new UpnpClient(this, this.hycon)
+            // nat
+            this.natUpnp = new NatUpnp(this.port, this)
+            await this.natUpnp.run()
         }
-
-        // nat
-        this.natUpnp = new NatUpnp(this.port, this)
-        await this.natUpnp.run()
 
         await this.connectPeersInDB()
 
@@ -107,7 +107,9 @@ export class RabbitNetwork implements INetwork {
             this.report()
         }, 10 * 1000)
 
-        setInterval(() => { this.findPeers() }, 10 * 1000)
+        if (useUpnp) {
+            setInterval(() => { this.findPeers() }, 10 * 1000)
+        }
 
         return true
     }
@@ -229,14 +231,18 @@ export class RabbitNetwork implements INetwork {
         socket.on("error", async (error) => {
             logger.error(`Connection error ${ipeer.host}:${ipeer.port} : ${error}`)
         })
-        if (this.natUpnp.publicIp !== "" && !isNaN(this.natUpnp.publicPort) && !local) {
-            peer.setStatus(this.natUpnp.publicIp, this.natUpnp.publicPort)
+
+        if (this.natUpnp) {
+            if (this.natUpnp.publicIp !== "" && !isNaN(this.natUpnp.publicPort) && !local) {
+                peer.setStatus(this.natUpnp.publicIp, this.natUpnp.publicPort)
+            }
         }
         peer.onConnected()
         return peer
     }
 
     private async findPeers(): Promise<void> {
+
         const necessaryPeers = this.targetPeerCount - this.clientTable.size
         if (necessaryPeers <= 0) {
             return
