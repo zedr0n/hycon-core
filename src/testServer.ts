@@ -138,89 +138,105 @@ export class TestServer {
          this.server.network.broadcast(new Buffer(encoded), null)*/
     }
 
-    // TODO : remove Wallet
-    // tslint:disable-next-line:member-ordering
-    public async testTx(): Promise<void> {
-        const wallets: Wallet[] = []
-        await Wallet.walletInit()
-        for (let i = 0; i < 10; i++) {
-            wallets.push(Wallet.generateKey())
-        }
-        const idxX = Math.floor(Math.random() * 10)
-        let idxY = idxX + 1
-        if (idxY === 100) { idxY = idxY - 2 }
-
-        const toWallet = wallets[idxX]
-        const toAddr = toWallet.pubKey.address()
-        const fromWallet = wallets[idxY]
-        logger.debug(`>>>>>toWallet, fromWallet: ${toWallet.pubKey.address().toString()}, ${fromWallet.pubKey.address().toString()}`)
-        let nonce = 0
-        const tx = fromWallet.send(toAddr, 100, nonce++, 10)
-        logger.debug(`>>>>>tx: ${tx.amount}, ${tx.fee}, ${tx.to}, ${tx.from}`)
-        await this.txPool.putTxs([tx])
-    }
-
     // TODO : Block, hash, SignedTx, randomBytes import, and testMakeBlock(db, consensus) remove
     // tslint:disable-next-line:member-ordering
     public async testConsensus() {
-        const stxArray: SignedTx[] = []
-        for (let i = 0; i < 10; i++) {
-            stxArray.push(new SignedTx({
-                amount: 10000,
-                fee: 1,
-                from: randomBytes(20),
-                nonce: 1,
-                recovery: 1,
-                signature: randomBytes(32),
-                to: randomBytes(20),
-            }))
-        }
+        const block1 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 3))
+        const block1Hash = new Hash(block1.header)
+        logger.error(`########################   Make block1:${block1Hash}`)
+        const block2 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 3))
+        const decodeBlock = Block.decode(block1.encode())
+
+        const block2Hash = new Hash(block1.header)
+        logger.error(`########################   Make block2:${block2Hash}`)
+        const block3 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 3))
+        const block3Hash = new Hash(block3.header)
+        logger.error(`########################   Make block3:${block3Hash}`)
+
         setTimeout(async () => {
-            logger.info(`Make block1`)
-            const block1 = await this.consensus.testMakeBlock(stxArray.slice(0, 3))
-            const block1Hash = new Hash(block1.header)
-            logger.info(`Make block2`)
-            const block2 = await this.consensus.testMakeBlock(stxArray.slice(3, 7))
-            const block2Hash = new Hash(block2.header)
-            logger.info(`Save block1`)
+            logger.error(`########################   Save block1`)
+            for (const tx of block1.txs) {
+                logger.error(`Tx : ${new Hash(tx)}`)
+            }
+            await this.server.consensus.putBlock(block1)
+            const bTip1 = this.server.consensus.getBlocksTip()
+            const hTip1 = this.server.consensus.getHeaderTip()
+            logger.error(`########################   Block1Tip : ${bTip1.hash}(${bTip1.height}) / Header1Tip : ${hTip1.hash}(${hTip1.height})`)
+            const tipHash1 = await this.server.consensus.getHash(bTip1.height)
+            logger.error(`########################   Get Hash using Tip Height : ${tipHash1}`)
 
-            await this.consensus.putBlock(block1)
-            let status1 = await this.consensus.getBlockStatus(block1Hash)
-            const bTip1 = this.consensus.getBlocksTip()
-            const hTip1 = this.consensus.getHeaderTip()
-            logger.info(`Block1 Status : ${status1} / Hash : ${block1Hash}\n`)
-            logger.info(`Block1Tip : ${bTip1.hash}(${bTip1.height}) / Header1Tip : ${hTip1.hash}(${hTip1.height})`)
-            const tipHash1 = await this.consensus.getHash(bTip1.height)
-            logger.info(`Get Hash using Tip Height : ${tipHash1}`)
+            logger.error(`########################   Save block2`)
+            for (const tx of block2.txs) {
+                logger.error(`Tx : ${new Hash(tx)}`)
+            }
+            await this.server.consensus.putBlock(block2)
+            const bTip2 = this.server.consensus.getBlocksTip()
+            const hTip2 = this.server.consensus.getHeaderTip()
+            logger.error(`########################   Block2Tip : ${bTip2.hash}(${bTip2.height}) / Header2Tip : ${hTip2.hash}(${hTip2.height})`)
+            const tipHash2 = await this.server.consensus.getHash(bTip2.height)
+            logger.error(`########################   Get Hash using Tip Height : ${tipHash2}`)
 
-            logger.info(`Save block2`)
-            await this.consensus.putBlock(block2)
-            status1 = await this.consensus.getBlockStatus(block1Hash)
-            let status2 = await this.consensus.getBlockStatus(block2Hash)
-            const bTip2 = this.consensus.getBlocksTip()
-            const hTip2 = this.consensus.getHeaderTip()
-            logger.info(`Block2 Status : ${status2} / Hash : ${block2Hash}\n`)
-            logger.info(`Block1 Status : ${status1} / Hash : ${block1Hash}\n`)
-            logger.info(`Block2Tip : ${bTip2.hash}(${bTip2.height}) / Header2Tip : ${hTip2.hash}(${hTip2.height})`)
-            const tipHash2 = await this.consensus.getHash(bTip2.height)
-            logger.info(`Get Hash using Tip Height : ${tipHash2}`)
+            logger.error(`########################   Save block3`)
+            for (const tx of block3.txs) {
+                logger.error(`Tx : ${new Hash(tx)}`)
+            }
+            await this.server.consensus.putBlock(block3)
+            const bTip3 = this.server.consensus.getBlocksTip()
+            const hTip3 = this.server.consensus.getHeaderTip()
+            logger.error(`########################   Block3Tip : ${bTip3.hash}(${bTip3.height}) / Header2Tip : ${hTip3.hash}(${hTip3.height})`)
+            const tipHash3 = await this.server.consensus.getHash(bTip3.height)
+            logger.error(`########################   Get Hash using Tip Height : ${tipHash3}`)
 
-            logger.info(`Make block3`)
-            const block3 = await this.consensus.testMakeBlock(stxArray.slice(0, 2))
-            const block3Hash = new Hash(block3.header)
-            logger.info(`Save block3`)
-            await this.consensus.putBlock(block3)
-            status1 = await this.consensus.getBlockStatus(block1Hash)
-            status2 = await this.consensus.getBlockStatus(block2Hash)
-            const status3 = await this.consensus.getBlockStatus(block3Hash)
-            const bTip3 = this.consensus.getBlocksTip()
-            const hTip3 = this.consensus.getHeaderTip()
-            logger.info(`Block3 Status : ${status3} / Hash : ${block3Hash}\n`)
-            logger.info(`Block2 Status : ${status2} / Hash : ${block2Hash}\n`)
-            logger.info(`Block1 Status : ${status1} / Hash : ${block1Hash}\n`)
-            logger.info(`Block3Tip : ${bTip3.hash}(${bTip3.height}) / Header3Tip : ${hTip3.hash}(${hTip3.height})`)
-            const tipHash3 = await this.consensus.getHash(bTip3.height)
-            logger.info(`Get Hash using Tip Height : ${tipHash3}`)
-        }, 1000)
+            // Block4(block2)
+            setTimeout(async () => {
+                const block4 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 3), block2)
+                const block4Hash = new Hash(block4.header)
+                logger.error(`########################   Make block4:${block4Hash}`)
+                logger.error(`########################   Save block4`)
+                for (const tx of block4.txs) {
+                    logger.error(`Tx : ${new Hash(tx)}`)
+                }
+                await this.server.consensus.putBlock(block4)
+                const bTip4 = this.server.consensus.getBlocksTip()
+                const hTip4 = this.server.consensus.getHeaderTip()
+                logger.error(`########################   Block4Tip : ${bTip4.hash}(${bTip4.height}) / Header4Tip : ${hTip4.hash}(${hTip4.height})`)
+                const tipHash4 = await this.server.consensus.getHash(bTip4.height)
+                logger.error(`########################   Get Hash using Tip Height : ${tipHash4}`)
+
+                // Block5(block3)
+                setTimeout(async () => {
+                    const block5 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 3), block3)
+                    const block5Hash = new Hash(block5.header)
+                    logger.error(`########################   Make block5:${block5Hash}`)
+                    logger.error(`########################   Save block5`)
+                    for (const tx of block5.txs) {
+                        logger.error(`Tx : ${new Hash(tx)}`)
+                    }
+                    await this.server.consensus.putBlock(block5)
+                    const bTip5 = this.server.consensus.getBlocksTip()
+                    const hTip5 = this.server.consensus.getHeaderTip()
+                    logger.error(`########################   Block5Tip : ${bTip5.hash}(${bTip5.height}) / Header5Tip : ${hTip5.hash}(${hTip5.height})`)
+                    const tipHash5 = await this.server.consensus.getHash(bTip5.height)
+                    logger.error(`########################   Get Hash using Tip Height : ${tipHash5}`)
+
+                    // Block6(block5)
+                    const block6 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 3), block5)
+                    const block6Hash = new Hash(block6.header)
+                    logger.error(`########################   Make block6:${block6Hash}`)
+                    logger.error(`########################   Save block6`)
+                    for (const tx of block6.txs) {
+                        logger.error(`Tx : ${new Hash(tx)}`)
+                    }
+                    await this.server.consensus.putBlock(block6)
+                    const bTip6 = this.server.consensus.getBlocksTip()
+                    const hTip6 = this.server.consensus.getHeaderTip()
+                    logger.error(`########################   Block6Tip : ${bTip6.hash}(${bTip6.height}) / Header5Tip : ${hTip6.hash}(${hTip6.height})`)
+                    const tipHash6 = await this.server.consensus.getHash(bTip6.height)
+                    logger.error(`########################   Get Hash using Tip Height : ${tipHash6}`)
+                }, 1000)
+
+            }, 1000)
+
+        }, 2000)
     }
 }
