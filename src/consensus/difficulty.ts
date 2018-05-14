@@ -28,14 +28,18 @@ export class Difficulty {
     }
 
     public getMinerParameters(): {offset: number, target: string} {
-        let offset = this.e * 2
-        let target = this.m
-        const extraHex = Math.ceil((Math.log2(this.m) - 16) / 4)
-        if (extraHex > 0) {
-            target >>= (extraHex * 4)
-            offset += extraHex
+        let target: string = (this.m).toString(16)
+        const zeroCount = (6 - target.length)
+        const offset = this.e * 2 + zeroCount
+
+        if ( zeroCount < 2) {
+            target = (this.m >> ( (2 - zeroCount) * 4 ) ).toString(16)
         }
-        return {offset, target: target.toString(16)}
+        while ( target.length < 4 ) {
+            target += "f"
+        }
+
+        return {offset, target}
     }
 
     public inspect(value: number) {

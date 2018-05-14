@@ -84,6 +84,42 @@ describe("Difficulty", () => {
 
     })
 
+    it("getMinerParameters: offset should be 33 if expornt is 0x10 and a mantisa is 0x010203", () => {
+        difficulty = new Difficulty(0x010203, 0x10)
+        const params = difficulty.getMinerParameters()
+        expect(params.offset).toEqual(33)
+    })
+
+    it("getMinerParameters: offset should be 2 if expornt is 0x00 and a mantisa is 0x00bbbb", () => {
+        difficulty = new Difficulty(0x00bbbb, 0x00)
+        const params = difficulty.getMinerParameters()
+        expect(params.offset).toEqual(2)
+    })
+
+    it("getMinerParameters: target should be '111f' if a mantisa is 0x000111", () => {
+        difficulty = new Difficulty( 0x000111, 0x00)
+        const params = difficulty.getMinerParameters()
+        expect(params.target).toEqual("111f")
+    })
+
+    it("getMinerParameters: target should be '1000' if a mantisa is 0x1000ff", () => {
+        difficulty = new Difficulty( 0x1000ff, 0x00)
+        const params = difficulty.getMinerParameters()
+        expect(params.target).toEqual("1000")
+    })
+
+    it("getMinerParameters: target should be '0fff' if a mantisa is 0x000000", () => {
+        difficulty = new Difficulty( 0x000000, 0x00)
+        const params = difficulty.getMinerParameters()
+        expect(params.target).toEqual("0fff")
+    })
+
+    it("getMinerParameters: target should be '123f' if a mantisa is 0x0123ff", () => {
+        difficulty = new Difficulty( 0x0123ff, 0x00)
+        const params = difficulty.getMinerParameters()
+        expect(params.target).toEqual("123f")
+    })
+
     it("multiply: should return the product of the difficulty value and the number", () => {
         difficulty = new Difficulty(0x010203, 0x10)
         const scalar = 0x03
