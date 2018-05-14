@@ -339,6 +339,7 @@ export class SingleChain implements IConsensus {
             const worldStateResult = await this.worldState.next(txs, previousHeader.stateRoot, miner)
             const header = new BlockHeader({
                 difficulty: utils.getTargetDifficulty(),
+                // difficulty: 0x0001ffff,
                 merkleRoot: new Hash(),
                 nonce: -1,
                 previousHash: [previousHash],
