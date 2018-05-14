@@ -8,7 +8,7 @@ export class Difficulty {
 
         return new Difficulty(mantissa, exponent)
     }
-    public static normalize(mantissa: number, exponent: number) {
+    private static normalize(mantissa: number, exponent: number) {
         if (mantissa !== 0) {
             while ((mantissa & 0xFF) === 0) {
                 mantissa = mantissa >> 8
@@ -17,7 +17,7 @@ export class Difficulty {
         }
         return { mantissa, exponent }
     }
-    public static unpackMantissa(num: Uint8Array): number {
+    private static unpackMantissa(num: Uint8Array ): number {
         let mantissa = 0
         const mantissaBytes = new Uint8Array(3)
 
@@ -46,7 +46,7 @@ export class Difficulty {
         }
         return mantissa
     }
-    public static unpackExponent(num: Uint8Array): number {
+    private static unpackExponent(num: Uint8Array): number {
         const msb = Difficulty.getMsb(num)
 
         let exponent = 0
@@ -59,7 +59,7 @@ export class Difficulty {
         return exponent
     }
 
-    public static getMsb(num: Uint8Array): number {
+    private static getMsb(num: Uint8Array): number {
         let msb = 0
         for (let i = 31; i >= 0; i--) {
             if (num[i] > 0) {
@@ -78,11 +78,6 @@ export class Difficulty {
         const normalized = Difficulty.normalize(mantissa, exponent)
         this.m = normalized.mantissa
         this.e = normalized.exponent
-    }
-    public inspect(value: number) {
-        const buf = new Buffer(6)
-        buf.writeUIntBE(value, 0, 6)
-        return "0x" + buf.toString("hex")
     }
 
     public encode(): number {

@@ -4,18 +4,6 @@ import { Hash } from "../src/util/hash"
 describe("Difficulty", () => {
     let difficulty: Difficulty
 
-    it("unpackMantissa: should correctly unpack mantissa from a 4 byte number", () => {
-        const packedNumber = new Uint8Array([0x00, 0x01, 0x00, 0x00])
-        const mantissa = Difficulty.unpackMantissa(packedNumber)
-        expect(mantissa).toEqual(0x01)
-    })
-
-    it("unpackMantissa: should correctly unpack mantissa from a 4 byte number", () => {
-        const packedNumber = new Uint8Array([0x00, 0x01, 0x02, 0x03])
-        const mantissa = Difficulty.unpackMantissa(packedNumber)
-        expect(mantissa).toEqual(0x030201)
-    })
-
     it("decode: should decode a 4 byte number into a Difficulty object", () => {
         const packedNumber = 0x01040302
         difficulty = Difficulty.decode(packedNumber)
