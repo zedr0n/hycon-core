@@ -189,9 +189,9 @@ export class SingleChain implements IConsensus {
         }
     }
 
-    public getBlocksRange(fromHeight: number, count?: number): Promise<AnyBlock[]> {
+    public async getBlocksRange(fromHeight: number, count?: number): Promise<AnyBlock[]> {
         try {
-            const blockArray = this.db.getBlocksRange(fromHeight, count)
+            const blockArray = await this.db.getBlocksRange(fromHeight, count)
             return blockArray
         } catch (e) {
             logger.error(`Fail to getBlocksRange : ${e}`)
