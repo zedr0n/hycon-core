@@ -69,7 +69,7 @@ export class Server {
         this.miner = new MinerServer(this, Server.globalOptions.str_port)
         this.txPool = new TxPool(this)
         this.rest = new RestManager(this)
-        this.sync = new Sync(this.network, this.consensus)
+        this.sync = new Sync(this)
     }
     public async run() {
         this.readOptions()

@@ -102,6 +102,7 @@ export class SingleChain implements IConsensus {
             const verifyResult = await this.verifyBlock(block, previousHeader)
             if (!verifyResult.isVerified) {
                 logger.error(`Invalid Block Rejected : ${blockHash}`)
+                this.server.sync.onPreviousNotFound(new Hash(previousHeader))
                 await this.db.setBlockStatus(blockHash, BlockStatus.Rejected)
                 return false
             }

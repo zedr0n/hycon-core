@@ -3,6 +3,7 @@ import { AnyBlock, Block } from "../common/block"
 import { AnyBlockHeader, BlockHeader } from "../common/blockHeader"
 import { INetwork } from "../network/inetwork"
 import { IPeer } from "../network/ipeer"
+import { Server } from "../server"
 import { Hash } from "../util/hash"
 import { IConsensus } from "./iconsensus"
 const logger = getLogger("Sync")
@@ -35,11 +36,34 @@ export class Sync {
     private commonMainChain: ISyncInfo
     private commonBlock: ISyncInfo
     private commonHeader: ISyncInfo
-    constructor(network: INetwork, consensus: IConsensus) {
-        this.peer = network.getRandomPeer()
+
+    private network: INetwork
+
+    constructor(server: Server) {
+        this.peer = undefined
+        this.network = server.network
+        this.consensus = server.consensus
+        // start syncing after a little time
+        setTimeout(() => {
+            this.sync()
+        }, 4000)
     }
 
+    // when previous block is not found
+    // if node is already syncing , it will be ignored
+    public onPreviousNotFound(previousBlockHash: Hash) {
+        this.sync()
+    }
+
+    // in future, for dag
+    // if we keep storing order, maybe we can use this algorithm for dags, too.
     public async sync() {
+        if (this.isSyncing()) {
+            return
+        }
+        logger.debug(`Start Syncing`)
+
+        this.peer = this.network.getRandomPeer()
         const remoteTip = await this.peer.getTip()
         const localTip = this.consensus.getBlocksTip()
         await this.findCommons(remoteTip, localTip)
@@ -55,6 +79,12 @@ export class Sync {
         } else {
             await this.putBlocks(startBlockHeight)
         }
+        this.peer = undefined
+    }
+
+    private isSyncing() {
+        const ret = this.peer !== undefined
+        return ret
     }
 
     private async findCommons(localTip: ITip, remoteTip: ITip) {
