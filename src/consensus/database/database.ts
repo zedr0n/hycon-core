@@ -207,7 +207,7 @@ export class Database {
             for (let i = 0; i < count; i++) {
                 const hash = await this.getHashAtHeight(height)
                 if (hash === undefined) { break }
-                const dbBlock = DBBlock.decode(hash)
+                const dbBlock = await this.getDBBlock(hash)
                 dbBlockArray.push(dbBlock)
                 height++
             }

@@ -66,7 +66,7 @@ export class Sync {
         }
         logger.debug(`Start Syncing`)
 
-        // const testTip = this.consensus.getHeadersRange(0, 1)
+        // const testTip = await this.consensus.getHeadersRange(0, 1)
 
         this.peer = this.network.getRandomPeer()
         if (!this.peer) {
