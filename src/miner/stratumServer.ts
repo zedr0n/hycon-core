@@ -42,7 +42,7 @@ export class StratumServer {
         this.difficulty = undefined
     }
 
-    public putWork(prehash: Uint8Array, difficulty: Difficulty, jobUnit: Long) {
+    public putWork(prehash: Uint8Array, difficulty: Difficulty, minersCount: number) {
         logger.info(`>>>>>>>>>Put Work in stratumServer : ${Buffer.from(prehash.buffer).toString("hex")}`)
         this.prehash = prehash
         this.difficulty = difficulty
@@ -52,11 +52,11 @@ export class StratumServer {
             const socket = this.mapSocket.get(this.socketsId[index])
             if (socket !== undefined) {
                 socket.notify([
-                    zeroPad((jobUnit.multiply(index + (MinerServer.useCpuMiner ? 1 : 0))).toString(MinerServer.LEN_HEX_NONCE), MinerServer.LEN_HEX_NONCE), // job_id
+                    index + (MinerServer.useCpuMiner ? 1 : 0),      // job_id
                     new Buffer(this.prehash).toString("hex"),       // prehash
-                    target,                                            // difficulty (2byte hex)
-                    offset,                                            // difficulty (zero count)
-                    zeroPad((jobUnit).toString(MinerServer.LEN_HEX_NONCE), MinerServer.LEN_HEX_NONCE), // job_unit
+                    target,                                         // difficulty (2byte hex)
+                    offset,                                         // difficulty (zero count)
+                    minersCount,                                    // job_unit
                     "0", // empty
                     "0", // empty
                     "0", // empty

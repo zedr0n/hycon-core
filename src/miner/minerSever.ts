@@ -62,15 +62,15 @@ export class MinerServer implements IMiner {
         this.difficulty = Difficulty.decode(target)
         const params = this.difficulty.getMinerParameters()
         // check miner count
-        const jobUnit = this.calculateJobUnit()
+        const minersCount = this.getMinersCount()
 
         logger.info(`Send candidate block to miner - prehash : ${Buffer.from(candidateBlock.header.preHash().buffer).toString("hex")} / offset : ${params.offset} target : ${params.target}`)
 
         // notify cpuminer and stratum server
         if (MinerServer.useCpuMiner) {
-            this.cpuMiner.putWork(this.prehash, this.difficulty, jobUnit)
+            this.cpuMiner.putWork(this.prehash, this.difficulty, minersCount)
         }
-        this.stratumServer.putWork(this.prehash, this.difficulty, jobUnit)
+        this.stratumServer.putWork(this.prehash, this.difficulty, minersCount)
     }
     public async submitNonce(nonce: string): Promise<boolean> {
         return new Promise<boolean>(async (resolve, reject) => {
@@ -142,12 +142,9 @@ export class MinerServer implements IMiner {
         }
     }
 
-    private calculateJobUnit(): Long {
-
+    private getMinersCount(): number {
         const miners = this.stratumServer.getMinerCount() + (MinerServer.useCpuMiner ? 1 : 0)
-        const maxNonce = Long.MAX_UNSIGNED_VALUE
-        if (miners === 0) { return Long.UZERO }
-        const unit = maxNonce.divide(miners)
-        return unit
+
+        return miners
     }
 }

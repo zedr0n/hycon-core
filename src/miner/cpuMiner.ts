@@ -65,7 +65,7 @@ export class CpuMiner {
             const bufBlock = new Uint8Array(MinerServer.LEN_BLOB)
 
             // set prehash
-            bufBlock.set(new Uint8Array(prehash).reverse())
+            bufBlock.set(new Uint8Array(prehash))
 
             // set nonce
             const strNonce = (nonce.length >= MinerServer.LEN_NONCE) ? nonce : new Array(MinerServer.LEN_NONCE - nonce.length + 1).join("0") + nonce
@@ -82,11 +82,11 @@ export class CpuMiner {
         }
     }
 
-    public putWork(prehash: Uint8Array, difficulty: Difficulty, lastNonce: Long) {
+    public putWork(prehash: Uint8Array, difficulty: Difficulty, minersCount: number) {
         this.prehash = prehash
         this.difficulty = difficulty
         this.nonce = Long.UZERO
-        this.lastNonce = lastNonce
+        this.lastNonce = minersCount === 0 ? Long.MAX_UNSIGNED_VALUE : Long.MAX_UNSIGNED_VALUE.divide(minersCount)
         this.wakeup()
     }
 
