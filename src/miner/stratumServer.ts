@@ -2,7 +2,7 @@
 import { getLogger } from "log4js"
 import { zeroPad } from "../util/commonUtil"
 import { Difficulty } from "./../consensus/difficulty"
-import { MinerServer } from "./minerSever"
+import { MinerServer } from "./minerServer"
 
 // tslint:disable-next-line:no-var-requires
 const LibStratum = require("stratum").Server

@@ -11,7 +11,7 @@ import { IConsensus } from "./consensus/iconsensus"
 import { SingleChain } from "./consensus/singleChain"
 import { Sync } from "./consensus/sync"
 import { IMiner } from "./miner/iminer"
-import { MinerServer } from "./miner/minerSever"
+import { MinerServer } from "./miner/minerServer"
 import { StratumServer } from "./miner/stratumServer"
 import { INetwork } from "./network/inetwork"
 import { RabbitNetwork } from "./network/rabbit/rabbitNetwork" // for speed

@@ -223,4 +223,44 @@ describe("Difficulty", () => {
 
         expect(product.encode()).toEqual(correctDifficulty)
     })
+
+    it("add: 1 should add two difficulty values together", () => {
+        const difficulty1 = new Difficulty(0x00_00_01, 0x00)
+        const difficulty2 = new Difficulty(0x00_00_01, 0x00)
+        const correctSum = 0x00_00_00_02
+
+        const sum = difficulty1.add(difficulty2)
+
+        expect(sum.encode()).toEqual(correctSum)
+    })
+
+    it("add: 2 should add two difficulty values that shift the exponent", () => {
+        const difficulty1 = new Difficulty(0xFF_FF_FF, 0x00)
+        const difficulty2 = new Difficulty(0x00_00_01, 0x00)
+        const correctSum = 0x03_00_00_01
+
+        const sum = difficulty1.add(difficulty2)
+
+        expect(sum.encode()).toEqual(correctSum)
+    })
+
+    it("add: 3 should add two difficulty values with non-overlapping mantissas", () => {
+        const difficulty1 = new Difficulty(0x00_00_01, 0x10)
+        const difficulty2 = new Difficulty(0x00_00_01, 0x00)
+        const correctSum = 0x10_01_00_01
+
+        const sum = difficulty1.add(difficulty2)
+
+        expect(sum.encode()).toEqual(correctSum)
+    })
+
+    it("add: 4 should remain the same value if the precision cannot capture the new value", () => {
+        const difficulty1 = new Difficulty(0x00_00_01, 0x24)
+        const difficulty2 = new Difficulty(0x00_00_01, 0x00)
+        const correctSum = 0x24_00_00_01
+
+        const sum = difficulty1.add(difficulty2)
+
+        expect(sum.encode()).toEqual(correctSum)
+    })
 })

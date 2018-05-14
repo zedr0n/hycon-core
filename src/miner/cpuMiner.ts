@@ -3,7 +3,7 @@ import Long = require("long")
 import { Difficulty } from "../consensus/difficulty"
 import { zeroPad } from "../util/commonUtil"
 import { Hash } from "../util/hash"
-import { MinerServer } from "./minerSever"
+import { MinerServer } from "./minerServer"
 const logger = getLogger("CpuMiner")
 
 export class CpuMiner {

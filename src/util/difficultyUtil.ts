@@ -4,6 +4,7 @@ let lastDifficulty: number = 10000
 const timeArr: number[] = []
 const dTime: number[] = []
 let ema: number = 30000
+const alpha: number = .9
 const weight: number = 0.8
 const adjacent: number = 10
 const target: number = 30000
@@ -37,17 +38,18 @@ export function updateDifficulty(newDifficulty: number): void {
 }
 
 export function updateTimes(timestamp: number): void {
-    timeArr.length === 0 ? dTime.push(target) : dTime.push(timestamp - timeArr[timeArr.length - 1])
+    const timeDelta = timestamp - timeArr[timeArr.length - 1]
+    timeArr.length === 0 ? dTime.push(target) : dTime.push(timeDelta)
     timeArr.push(timestamp)
     if (timeArr.length > 10) {
         timeArr.shift()
         dTime.shift()
     }
-    ema = calcEMA()
+    ema = calcEMA(timeDelta, ema, alpha)
 }
 
-export function calcEMA(): number {
-    return 0
+export function calcEMA(newTime: number, prevEma: number, a: number): number {
+    return a * newTime + (1 - a) * prevEma
 }
 
 export function unforcedInt(intNum: number) {

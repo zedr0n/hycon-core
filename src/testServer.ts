@@ -12,7 +12,7 @@ import { WorldState } from "./consensus/database/worldState"
 import { IConsensus } from "./consensus/iconsensus"
 import { SingleChain } from "./consensus/singleChain"
 import { IMiner } from "./miner/iminer"
-import { MinerServer } from "./miner/minerSever"
+import { MinerServer } from "./miner/minerServer"
 import { StratumServer } from "./miner/stratumServer"
 import { RabbitNetwork } from "./network/rabbit/rabbitNetwork" // for speed
 import { RestManager } from "./rest/restManager"

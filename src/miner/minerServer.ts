@@ -3,7 +3,7 @@ import Long = require("long")
 import { Block } from "../common/block"
 import { Server } from "../server"
 import { zeroPad } from "../util/commonUtil"
-import * as util from "../util/difficulty"
+import * as util from "../util/difficultyUtil"
 import { Hash } from "../util/hash"
 import { Difficulty } from "./../consensus/difficulty"
 import { CpuMiner } from "./cpuMiner"
