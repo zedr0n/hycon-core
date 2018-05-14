@@ -27,8 +27,8 @@ export class Tx implements proto.ITx {
 
         this.from = new Address(tx.from)
         this.to = new Address(tx.to)
-        this.amount = tx.amount instanceof Long ? tx.amount : Long.fromNumber(tx.amount, true)
-        this.fee = tx.fee instanceof Long ? tx.fee : Long.fromNumber(tx.fee, true)
+        this.amount = tx.amount instanceof Long ? tx.amount : Long.fromNumber(tx.amount * 10 ** 9, true)
+        this.fee = tx.fee instanceof Long ? tx.fee : Long.fromNumber(tx.fee * 10 ** 9, true)
         this.nonce = tx.nonce
     }
 

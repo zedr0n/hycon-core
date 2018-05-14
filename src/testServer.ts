@@ -20,6 +20,7 @@ import { RestManager } from "./rest/restManager"
 import { Block, INetwork, Tx } from "./serialization/proto"
 import * as proto from "./serialization/proto"
 import { Server } from "./server"
+import { longToString, toLong } from "./util/commonUtil"
 import { Hash } from "./util/hash"
 import { Wallet } from "./wallet/wallet"
 import { WalletManager } from "./wallet/walletManager"
@@ -90,8 +91,8 @@ export class TestServer {
         }, 5000)
     }
     private async makeTx() {
-        const amt = Long.fromNumber(5.1)
-        const fee = Long.fromNumber(10.1)
+        const amt = 5.1
+        const fee = 10.1
         this.nonce = 0
 
         let n = randomInt(0, 90)
@@ -118,8 +119,8 @@ export class TestServer {
             }
             this.nonceTable.set(fromAddrString, nonce)
             if (!fromAddr.equals(toAddr)) {
-                const tx = fromWallet.send(toAddr, amt.add(randomInt(0, 200)), nonce, fee.add(randomInt(0, 10) / 10))
-                logger.debug(`TX ${i + 1} Amount=${tx.amount} Fee=${tx.fee} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
+                const tx = fromWallet.send(toAddr, toLong(amt + randomInt(0, 200)), nonce, toLong(fee + randomInt(0, 10) / 10))
+                logger.debug(`TX ${i + 1} Amount=${longToString(tx.amount)} Fee=${longToString(tx.fee)} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
                 txList.push(tx)
             }
         }

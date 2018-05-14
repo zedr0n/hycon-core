@@ -20,7 +20,7 @@ export class GenesisTx implements proto.ITx {
         }
 
         this.to = new Address(tx.to)
-        this.amount = tx.amount instanceof Long ? tx.amount : Long.fromNumber(tx.amount, true)
+        this.amount = tx.amount instanceof Long ? tx.amount : Long.fromNumber(tx.amount * 10 ** 9, true)
     }
 
     public equals(tx: GenesisTx): boolean {

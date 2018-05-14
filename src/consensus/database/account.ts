@@ -17,7 +17,7 @@ export class Account implements proto.IAccount {
     public set(account: proto.IAccount) {
         if (account.balance === undefined) { throw new Error("Balance is missing") }
         if (account.nonce === undefined) { throw new Error("Nonce is missing") }
-        this.balance = account.balance instanceof Long ? account.balance : Long.fromNumber(account.balance, true)
+        this.balance = account.balance instanceof Long ? account.balance : Long.fromNumber(account.balance * 10 ** 9, true)
         this.nonce = account.nonce
     }
 

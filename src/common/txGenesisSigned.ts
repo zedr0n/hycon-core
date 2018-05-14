@@ -46,7 +46,7 @@ export class GenesisSignedTx implements proto.ITx {
         if (stx.recovery === undefined) { throw (new Error("recovery not defined in input")) }
 
         this.to = new Address(stx.to)
-        this.amount = stx.amount instanceof Long ? stx.amount : Long.fromNumber(stx.amount, true)
+        this.amount = stx.amount instanceof Long ? stx.amount : Long.fromNumber(stx.amount * 10 ** 9, true)
         this.signature = new Buffer(stx.signature)
         this.recovery = stx.recovery
     }

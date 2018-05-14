@@ -53,8 +53,8 @@ export class SignedTx implements proto.ITx {
 
         this.from = new Address(stx.from)
         this.to = new Address(stx.to)
-        this.amount = stx.amount instanceof Long ? stx.amount : Long.fromNumber(stx.amount, true)
-        this.fee = stx.fee instanceof Long ? stx.fee : Long.fromNumber(stx.fee, true)
+        this.amount = stx.amount instanceof Long ? stx.amount : Long.fromNumber(stx.amount * 10 ** 9, true)
+        this.fee = stx.fee instanceof Long ? stx.fee : Long.fromNumber(stx.fee * 10 ** 9, true)
         this.nonce = stx.nonce
         this.signature = new Buffer(stx.signature)
         this.recovery = stx.recovery
