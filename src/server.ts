@@ -31,6 +31,7 @@ const optionDefinitions = [
     { name: "mine", alias: "m", type: Boolean },
     { name: "visDAG", alias: "d", type: Boolean },
     { name: "wallet", alias: "W", type: Boolean },
+    { name: "disable_upnp", alias: "x", type: Boolean },
 ]
 const logger = getLogger("Server")
 

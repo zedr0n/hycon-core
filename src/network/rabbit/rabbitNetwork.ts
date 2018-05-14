@@ -85,12 +85,19 @@ export class RabbitNetwork implements INetwork {
         })
 
         this.server.on("error", (error) => logger.error(`${error}`))
-        // upnp
-        this.upnpServer = new UpnpServer(this.port, this.hycon)
-        this.upnpClient = new UpnpClient(this, this.hycon)
-        // nat
-        this.natUpnp = new NatUpnp(this.port, this)
-        await this.natUpnp.run()
+        let useUpnp = true
+        if (Server.globalOptions.disable_upnp) {
+            useUpnp = false
+        }
+
+        if (useUpnp) {
+            // upnp
+            this.upnpServer = new UpnpServer(this.port, this.hycon)
+            this.upnpClient = new UpnpClient(this, this.hycon)
+            // nat
+            this.natUpnp = new NatUpnp(this.port, this)
+            await this.natUpnp.run()
+        }
 
         await this.connectPeersInDB()
 
@@ -163,14 +170,14 @@ export class RabbitNetwork implements INetwork {
         })
     }
 
-    private async accept(socket: Socket): Promise < void > {
+    private async accept(socket: Socket): Promise<void> {
         logger.info(`Detect a incoming peer ${RabbitNetwork.ipv6Toipv4(socket.remoteAddress)}:${socket.remotePort}`)
         const ipeer = RabbitNetwork.socket2Ipeer(socket)
         const key = PeerDb.ipeer2key(ipeer)
         await this.newAcceptedConnection(key, socket, ipeer)
     }
 
-    private async newAcceptedConnection(key: string, socket: Socket, ipeer: proto.IPeer): Promise < RabbitPeer > {
+    private async newAcceptedConnection(key: string, socket: Socket, ipeer: proto.IPeer): Promise<RabbitPeer> {
         const peer = new RabbitPeer(socket, this, this.hycon.consensus, this.hycon.txPool, this.peerDB)
         try {
             this.peerTable.set(key, peer)
@@ -194,7 +201,7 @@ export class RabbitNetwork implements INetwork {
     }
 
     // only connecting
-    private async newConnection(key: string, socket: Socket, ipeer: proto.IPeer, local: boolean): Promise < RabbitPeer > {
+    private async newConnection(key: string, socket: Socket, ipeer: proto.IPeer, local: boolean): Promise<RabbitPeer> {
         const peer = new RabbitPeer(socket, this, this.hycon.consensus, this.hycon.txPool, this.peerDB)
         try {
             this.clientTable.set(key, peer)
@@ -228,7 +235,7 @@ export class RabbitNetwork implements INetwork {
         return peer
     }
 
-    private async findPeers(): Promise < void > {
+    private async findPeers(): Promise<void> {
         const necessaryPeers = this.targetPeerCount - this.clientTable.size
         if (necessaryPeers <= 0) {
             return
@@ -251,13 +258,13 @@ export class RabbitNetwork implements INetwork {
         // logger.debug(`Done`)
     }
 
-    private async connectPeersInDB(): Promise < void > {
+    private async connectPeersInDB(): Promise<void> {
         if (this.peerDB.peers.length !== 0) {
             let index = 0
             for (const peer of this.peerDB.peers) {
                 try {
                     const rabbitPeer = await this.connect(peer.host, peer.port, false)
-                    index ++
+                    index++
                 } catch (e) {
                     try {
                         logger.info(`fail to connect to ${peer.host}:${peer.port} : ${e}`)
