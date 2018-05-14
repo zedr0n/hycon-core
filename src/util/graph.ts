@@ -1,8 +1,10 @@
+import { getLogger } from "log4js"
 import { cloneElement } from "react"
-import { BlockHeader, AnyBlockHeader } from "../common/blockHeader"
+import { AnyBlockHeader, BlockHeader } from "../common/blockHeader"
 import { GenesisBlockHeader } from "../common/genesisHeader"
 import { BlockStatus } from "../consensus/sync"
 import { Hash } from "./hash"
+const logger = getLogger("Graph")
 
 // tslint:disable-next-line:no-var-requires
 const tryRequire = require("try-require")
@@ -21,23 +23,24 @@ export class Graph {
             nodes: new Map<string, boolean>(),
         }
         this.color = {
-            block: "lightgreen",
-            genesis: "orange",
-            header: "lightgrey",
-            mainchain: "skyblue",
+            block: "#ff9021",
+            genesis: "#086de0",
+            header: "#9da9b2",
+            mainchain: "#2da7ff",
         }
         this.outFile = "kandanHYCON.png"
     }
     public initGraph(header: GenesisBlockHeader) {
         const blockHash = new Hash(header)
-        const id = blockHash.toHex().slice(0, 6)
+        const id = blockHash.toString().slice(0, 6)
         this.addNode(id, this.color.genesis)
         this.renderGraph()
     }
 
     public addToGraph(header: AnyBlockHeader, status: BlockStatus) {
         const blockHash = new Hash(header)
-        const id = blockHash.toHex().slice(0, 6)
+        const id = blockHash.toString().slice(0, 6)
+        logger.info(`ID : ${id} / status : ${status}`)
         let color
         switch (status) {
             case BlockStatus.Block:
@@ -75,10 +78,8 @@ export class Graph {
     }
 
     private addNode(id: string, color: string) {
-        if (!this.gmap.nodes.get(id)) {
-            this.gviz.addNode(id, { color, style: "filled" })
-            this.gmap.nodes.set(id, true)
-        }
+        this.gviz.addNode(id, { color, style: "filled" })
+        this.gmap.nodes.set(id, true)
     }
 
     private removeNode(id: string) {
@@ -88,7 +89,7 @@ export class Graph {
 
     private addEdge(id: string, pid: string) {
         const key = id + "_" + pid
-        if (!this.gmap.edges.get(key)) {
+        if (this.gmap.edges.get(key) === undefined) {
             this.gviz.addEdge(id, pid)
             this.gmap.edges.set(key, this.gviz.edges.length - 1)
         }

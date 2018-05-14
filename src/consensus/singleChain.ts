@@ -275,8 +275,8 @@ export class SingleChain implements IConsensus {
         return await this.db.getBlockHeight(hash)
     }
 
-    public async testMakeBlock(txs: SignedTx[]): Promise<Block> {
-        return await this.createCandidateBlock(txs)
+    public async testMakeBlock(txs: SignedTx[], previous?: Block): Promise<Block> {
+        return await this.createCandidateBlock(txs, previous)
     }
 
     private newBlock(block: AnyBlock): void {
@@ -316,38 +316,12 @@ export class SingleChain implements IConsensus {
         }
     }
 
-    // tslint:disable-next-line:max-line-length
-    private updateTopTip(tip: DBBlock, block: DBBlock, previous?: DBBlock): { newTip: DBBlock, prevTip: Hash | undefined, isTopTip: boolean } {
+    private async createCandidateBlock(txs: SignedTx[], previous?: Block): Promise<Block> {
         try {
-            let prevTip
-            let isTopTip = false
-            if (block.header instanceof BlockHeader) {
-                if (previous) {
-                    const previousHash = block.header.previousHash[0].toString()
-                    const tipHash = new Hash(tip.header)
-                    if (tipHash.toString() === previousHash || tip.height < block.height) {
-                        prevTip = tipHash
-                        tip = block
-                        isTopTip = true
-                    } else {
-                        // TODO : Change reorg logic.
-                    }
-                } else {
-                    throw new Error(`Previous block undefined in updateTopTip`)
-                }
-            } else {
-                tip = block
-                isTopTip = true
+            let previousHash = new Hash(this.blockTip.header)
+            if (previous) {
+                previousHash = new Hash(previous.header)
             }
-            return { newTip: tip, prevTip, isTopTip }
-        } catch (e) {
-            logger.error(`Fail to updateTopTip : ${e}`)
-            throw new Error(e)
-        }
-    }
-    private async createCandidateBlock(txs: SignedTx[]): Promise<Block> {
-        try {
-            const previousHash = new Hash(this.blockTip.header)
             // TODO : get Miner address -> If miner is undefined, occur error
             const miner: Address = undefined
             const previousHeader = await this.db.getBlockHeader(previousHash)
@@ -424,7 +398,7 @@ export class SingleChain implements IConsensus {
         // Todo need to check header.difficulty is a float or integer
         const difficulty: Difficulty = Difficulty.decode(header.difficulty)
 
-        if ( difficulty.greaterThan(cryptoHash) ) {
+        if (difficulty.greaterThan(cryptoHash)) {
             return true
         }
         logger.warn(`Fail to verifyHeader with difficulty nonce.`)
@@ -432,24 +406,32 @@ export class SingleChain implements IConsensus {
     }
 
     private async organizeChains(newBlockHash: Hash, dbBlock: DBBlock, block?: Block, txCount: number = 0): Promise<void> {
-        if (this.headerTip === undefined || this.headerTip.height < dbBlock.height) {
-            this.headerTip = dbBlock
-            await this.db.setHeaderTip(newBlockHash)
-        }
+        try {
+            logger.info(`Reorg logic should be implemented`)
 
-        if (block !== undefined) {
-            if (this.blockTip === undefined || this.blockTip.height < dbBlock.height) {
-                const txs = await this.reorganize(newBlockHash, block, dbBlock.height, txCount)
-                this.blockTip = dbBlock // TODO: Reorganize first
-                await this.db.setBlockTip(newBlockHash)
-                utils.processBlock(dbBlock.header.difficulty)
-                this.createCandidateBlock(txs)
-            } else {
-                await this.db.setBlockStatus(newBlockHash, BlockStatus.Block)
+            if (this.headerTip === undefined || this.headerTip.height < dbBlock.height) {
+                this.headerTip = dbBlock
+                await this.db.setHeaderTip(newBlockHash)
             }
-        } else {
-            await this.db.setBlockStatus(newBlockHash, BlockStatus.Header)
-            this.graph.addToGraph(dbBlock.header, BlockStatus.Header)
+
+            if (block !== undefined) {
+                if (this.blockTip === undefined || this.blockTip.height < dbBlock.height) {
+                    const txs = await this.reorganize(newBlockHash, block, dbBlock.height, txCount)
+                    this.blockTip = dbBlock // TODO: Reorganize first
+                    await this.db.setBlockTip(newBlockHash)
+                    utils.processBlock(dbBlock.header.difficulty)
+                    this.createCandidateBlock(txs)
+                } else {
+                    await this.db.setBlockStatus(newBlockHash, BlockStatus.Block)
+                    this.graph.addToGraph(block.header, BlockStatus.Block)
+                }
+            } else {
+                await this.db.setBlockStatus(newBlockHash, BlockStatus.Header)
+                this.graph.addToGraph(block.header, BlockStatus.Header)
+            }
+        } catch (e) {
+            logger.error(`Fail to organizeChains : ${e}`)
+            return Promise.reject(e)
         }
     }
 
@@ -483,6 +465,7 @@ export class SingleChain implements IConsensus {
                 throw new Error("Error trying to reorganize past the genesis block")
             }
             await this.db.setBlockStatus(popHash, BlockStatus.Block)
+            this.graph.addToGraph(popBlock.header, BlockStatus.Block)
             this.server.txPool.putTxs(popBlock.txs)
             popHash = popBlock.header.previousHash[0]
             popHeight -= 1
@@ -496,10 +479,11 @@ export class SingleChain implements IConsensus {
         let pushHeight = popStopHeight
         while (newBlockHashes.length > 0) {
             hash = newBlockHashes.pop()
+            block = newBlocks.pop()
             await this.db.setBlockStatus(hash, BlockStatus.MainChain)
+            this.graph.addToGraph(block.header, BlockStatus.MainChain)
             await this.db.setHashAtHeight(pushHeight, hash)
             pushHeight += 1
-            block = newBlocks.pop()
             txs = this.server.txPool.updateTxs(block.txs, newBlockHashes.length > 0 ? 0 : txCount)
             this.newBlock(block)
         }
