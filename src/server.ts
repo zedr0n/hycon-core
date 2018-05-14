@@ -86,10 +86,10 @@ export class Server {
             }
         }
         await this.runSync()
-        if (this.options.api) {
+        if (Server.globalOptions.api) {
             logger.info("Test API")
-            logger.info(`API Port ${this.options.api_port}`)
-            this.httpServer = new HttpServer(this.rest, this.options.api_port)
+            logger.info(`API Port ${Server.globalOptions.api_port}`)
+            this.httpServer = new HttpServer(this.rest, Server.globalOptions.api_port)
         }
         this.miner.start()
     }
