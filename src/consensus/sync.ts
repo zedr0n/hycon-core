@@ -6,7 +6,11 @@ import { IPeer } from "../network/ipeer"
 import { Server } from "../server"
 import { Hash } from "../util/hash"
 import { IConsensus } from "./iconsensus"
+// tslint:disable-next-line:no-var-requires
+const assert = require("assert")
 const logger = getLogger("Sync")
+// tslint:disable-next-line:no-var-requires
+const delay = require("delay")
 
 export enum BlockStatus {
     Rejected = -1,
@@ -52,7 +56,6 @@ export class Sync {
     // when previous block is not found
     // if node is already syncing , it will be ignored
     public onPreviousNotFound(previousBlockHash: Hash) {
-        this.sync()
     }
 
     // in future, for dag
@@ -63,7 +66,15 @@ export class Sync {
         }
         logger.debug(`Start Syncing`)
 
+        // const testTip = this.consensus.getHeadersRange(0, 1)
+
         this.peer = this.network.getRandomPeer()
+        if (!this.peer) {
+            // we will replace with other alogrithm
+            await delay(4000)
+            return
+        }
+
         const remoteTip = await this.peer.getTip()
         const localTip = this.consensus.getBlocksTip()
         await this.findCommons(remoteTip, localTip)

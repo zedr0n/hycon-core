@@ -313,7 +313,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     private async respondPutBlock(reply: boolean, request: proto.IPutBlock): Promise<IResponse> {
         let relay = false
         try {
-            /*
+
             const promises: Array<Promise<boolean>> = []
             for (const iblock of request.blocks) {
                 const block = new Block(iblock)
@@ -321,13 +321,13 @@ export class RabbitPeer extends BasePeer implements IPeer {
             }
             const results = await Promise.all(promises)
             relay = results.every((value) => value)
-             */
-            relay = false
+
+            // relay = false
 
         } catch (e) {
             logger.info(`Failed to put block: ${e}`)
         }
-        logger.debug(`PutBlock`)
+        logger.debug(`PutBlock Relay=${relay}`)
         return { message: { putBlockReturn: { success: relay } }, relay }
     }
 

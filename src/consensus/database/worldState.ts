@@ -10,6 +10,7 @@ import { GenesisSignedTx } from "../../common/txGenesisSigned"
 import { SignedTx } from "../../common/txSigned"
 import { Server } from "../../server"
 import { Hash } from "../../util/hash"
+import * as mnemonic from "../../wallet/mnemonic"
 import { Wallet } from "../../wallet/wallet"
 import { verifyTx } from "../singleChain"
 import { Account } from "./account"
@@ -89,15 +90,30 @@ export class WorldState {
         const batch: DBState[] = []
         const changes: IChange[] = []
         const mapAccount: Map<string, DBState> = new Map<string, DBState>()
+        const mnemonics: string[] = [
+            "peanut neglect warm penalty lawn fall cat metal twelve dwarf fade mixed",
+            "visit cannon clay edit flavor donate velvet senior result crop safe cream",
+            "ball salt conduct accident dentist ritual funny waste stable install bone layer",
+            "super ill simple rate harsh exile timber stool holiday essay much leave",
+            "echo gloom brick garment banner else nurse conduct festival smile inflict chicken",
+
+            "canoe kiwi peasant dog tomorrow harsh curious snow frog output defy garden",
+            "ginger horn tunnel together better loop creek wild grab cliff consider payment",
+            "giraffe render project column remain mango need click silent talent yard exist",
+            "pave surprise before fox blush receive august myth basket session gentle traffic",
+            "rude rifle faith crater size fork survey yellow crime tackle off perfect",
+        ]
 
         if (Server.globalOptions.wallet) {
             logger.debug(`Create Wallets`)
             await Wallet.walletInit()
-            const maxCount = 100
+            const maxCount = mnemonics.length
             for (let i = 0; i < maxCount; i++) {
-                const testWallet = Wallet.generate()
-                const address = testWallet.pubKey.address()
+                const m = mnemonics[i]
+                const testWallet = Wallet.generate({ name: `test${i}`, password: "", mnemonic: m, language: "", hint: "" })
                 await testWallet.save(`test${i}`, "")
+                const address = testWallet.pubKey.address()
+
                 changes.push({ address, account: new Account({ balance: 12345000, nonce: 0 }) })
             }
         }

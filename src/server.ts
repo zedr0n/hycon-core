@@ -85,8 +85,19 @@ export class Server {
                 this.network.connect(ip, port, true).catch((e) => logger.error(`Failed to connect to client: ${e}`))
             }
         }
-
+        await this.runSync()
         this.miner.start()
+    }
+
+    public async runSync(): Promise<void> {
+        logger.debug(`begin sync`)
+        let sync = new Sync(this)
+        await sync.sync()
+        setImmediate(() => {
+            this.runSync()
+        })
+        sync = null
+        logger.debug(`end sync`)
     }
 
     private readOptions() {
