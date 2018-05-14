@@ -5,7 +5,7 @@ export class Account implements proto.IAccount {
         const account = proto.Account.decode(data)
         return new Account(account)
     }
-    public balance: number
+    public balance: Long
     public nonce: number
 
     constructor(account?: proto.IAccount) {
@@ -17,7 +17,7 @@ export class Account implements proto.IAccount {
     public set(account: proto.IAccount) {
         if (account.balance === undefined) { throw new Error("Balance is missing") }
         if (account.nonce === undefined) { throw new Error("Nonce is missing") }
-        this.balance = account.balance instanceof Long ? account.balance.toInt() : account.balance
+        this.balance = account.balance instanceof Long ? account.balance : Long.fromNumber(account.balance, true)
         this.nonce = account.nonce
     }
 

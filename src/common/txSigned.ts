@@ -13,8 +13,8 @@ export class SignedTx implements proto.ITx {
     }
     public from: Address
     public to: Address
-    public amount: number
-    public fee: number
+    public amount: Long
+    public fee: Long
     public nonce: number
     public signature: Buffer
     public recovery: number
@@ -53,8 +53,8 @@ export class SignedTx implements proto.ITx {
 
         this.from = new Address(stx.from)
         this.to = new Address(stx.to)
-        this.amount = stx.amount instanceof Long ? stx.amount.toInt() : stx.amount
-        this.fee = stx.fee instanceof Long ? stx.fee.toInt() : stx.fee
+        this.amount = stx.amount instanceof Long ? stx.amount : Long.fromNumber(stx.amount, true)
+        this.fee = stx.fee instanceof Long ? stx.fee : Long.fromNumber(stx.fee, true)
         this.nonce = stx.nonce
         this.signature = new Buffer(stx.signature)
         this.recovery = stx.recovery

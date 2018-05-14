@@ -102,7 +102,7 @@ describe("BlockHeader", () => {
     })
 
     it("blockHeader.nonce Nonce: Should get the nonce at 0", () => {
-        expect(blockHeader.nonce).toEqual(Long.fromNumber(0))
+        expect(blockHeader.nonce).toEqual(Long.fromNumber(0, true))
     })
 
     it("blockHeader.setHeader Nonce: Should set header to the block", () => {
@@ -126,7 +126,7 @@ describe("BlockHeader", () => {
         expect(blockHeader.previousHash.length).toBe(2)
         expect(blockHeader.merkleRoot).toEqual(rdByte2)
         expect(blockHeader.difficulty).toEqual(10)
-        expect(blockHeader.nonce).toEqual(Long.fromNumber(0))
+        expect(blockHeader.nonce).toEqual(Long.fromNumber(0, true))
         expect(blockHeader.timeStamp).not.toBeUndefined()
     })
 

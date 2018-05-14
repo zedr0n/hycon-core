@@ -38,18 +38,18 @@ export class TxPool implements ITxPool {
     }
 
     private insert(newTxs: SignedTx[]): { count: number, lowestIndex?: number } {
-        newTxs.sort((a, b) => b.fee - a.fee)
+        newTxs.sort((a, b) => b.fee.compare(a.fee))
         let lowestIndex
         let count = 0
         let i = 0
         let j = 0
         let k = 0
         while (i < newTxs.length) {
-            if (newTxs[i].fee < this.minFee) {
+            if (newTxs[i].fee.compare(this.minFee) === -1) {
                 return { count, lowestIndex }
             }
 
-            if (j + k >= this.txs.length || newTxs[i].fee > this.txs[j + k].fee) {
+            if (j + k >= this.txs.length || newTxs[i].fee.compare(this.txs[j + k].fee) === 1) {
                 this.txs.splice(j + k, 0, newTxs[i])
                 if (count === 0) {
                     lowestIndex = j + k
@@ -57,9 +57,9 @@ export class TxPool implements ITxPool {
                 count++
                 k = 0
                 i++
-            } else if (newTxs[i].fee < this.txs[j].fee) {
+            } else if (newTxs[i].fee.compare(this.txs[j].fee) === -1) {
                 j++
-            } else if (newTxs[i].fee === this.txs[j + k].fee) {
+            } else if (newTxs[i].fee.compare(this.txs[j + k].fee) === 0) {
                 if (this.txs[j + k].equals(newTxs[i])) {
                     i++
                     k = 0
@@ -75,25 +75,25 @@ export class TxPool implements ITxPool {
     }
 
     private remove(txs: SignedTx[]) {
-        txs.sort((a, b) => b.fee - a.fee)
+        txs.sort((a, b) => b.fee.compare(a.fee))
         let i = 0
         let j = 0
         let k = 0
         while (i < txs.length && j < this.txs.length) {
-            if (txs[i].fee < this.txs[j].fee) {
+            if (txs[i].fee.compare(this.txs[j].fee) === -1) {
                 j++
-            } else if (j + k >= this.txs.length || txs[i].fee > this.txs[j + k].fee) {
+            } else if (j + k >= this.txs.length || txs[i].fee.compare(this.txs[j + k].fee) === 1) {
                 i++
                 k = 0
             } else {
-                if (txs[i].fee === this.txs[j + k].fee) {
+                if (txs[i].fee.compare(this.txs[j + k].fee) === 0) {
                     if (this.txs[j + k].equals(txs[i])) {
                         this.txs.splice(j + k, 1)
                     } else {
                         k++
                     }
                 } else {
-                    logger.error(`TxPool insert error, it seems the data is not sorted correctly, skipping Tx and attempting to continue.`)
+                    logger.error(`TxPool remove error, it seems the data is not sorted correctly, skipping Tx and attempting to continue.`)
                 }
             }
         }

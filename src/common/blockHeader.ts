@@ -27,7 +27,7 @@ export class BlockHeader extends BaseBlockHeader {
             this.previousHash.push(new Hash(prev))
         }
 
-        this.nonce = header.nonce instanceof Long ? header.nonce : Long.fromNumber(header.nonce)
+        this.nonce = header.nonce instanceof Long ? header.nonce : Long.fromNumber(header.nonce, true)
     }
 
     public preHash(): Uint8Array {

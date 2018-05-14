@@ -6,8 +6,8 @@ message Txs {
 message Tx {
   bytes from = 1; //Address
   bytes to = 2; //Address
-  int64 amount = 3;
-  int64 fee = 4;
+  uint64 amount = 3;
+  uint64 fee = 4;
   int32 nonce = 5;
   bytes signature = 6;
   int32 recovery = 7;

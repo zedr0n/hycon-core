@@ -365,7 +365,7 @@ export class Wallet {
 
     }
 
-    public send(to: Address, amount: number, nonce: number, fee?: number): SignedTx {
+    public send(to: Address, amount: Long, nonce: number, fee?: Long): SignedTx {
         const from = this.pubKey.address()
         const tx = new Tx({ from, to, amount, fee, nonce })
         const stx = this.privKey.sign(tx)

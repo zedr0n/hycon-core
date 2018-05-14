@@ -12,7 +12,7 @@ export class GenesisSignedTx implements proto.ITx {
         return new GenesisSignedTx(genesisStx)
     }
     public to: Address
-    public amount: number
+    public amount: Long
     public signature: Buffer
     public recovery: number
 
@@ -46,7 +46,7 @@ export class GenesisSignedTx implements proto.ITx {
         if (stx.recovery === undefined) { throw (new Error("recovery not defined in input")) }
 
         this.to = new Address(stx.to)
-        this.amount = stx.amount instanceof Long ? stx.amount.toInt() : stx.amount
+        this.amount = stx.amount instanceof Long ? stx.amount : Long.fromNumber(stx.amount, true)
         this.signature = new Buffer(stx.signature)
         this.recovery = stx.recovery
     }

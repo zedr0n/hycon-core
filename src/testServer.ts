@@ -1,6 +1,7 @@
 import commandLineArgs = require("command-line-args")
 import { randomBytes } from "crypto"
 import { getLogger } from "log4js"
+import Long = require("long")
 import { IResponseError } from "./api/client/rest"
 import { HttpServer } from "./api/server/server"
 import { Address } from "./common/address"
@@ -62,7 +63,7 @@ export class TestServer {
             const w = this.wallets[i]
             const account = await this.server.consensus.getAccount(w.pubKey.address())
             assert(account)
-            assert(account.balance > 0)
+            assert(account.balance.compare(0) === 1)
             logger.debug(`Make Wallet=${name} Public=${w.pubKey.address().toString()} Balance=${account.balance}`)
             assert(w)
         }
@@ -74,7 +75,7 @@ export class TestServer {
             const w = await Wallet.loadKeys(name, password)
             const account = await this.server.consensus.getAccount(w.pubKey.address())
             assert(account)
-            assert(account.balance > 0)
+            assert(account.balance.compare(0) === 1)
             this.wallets.push(w)
         }
         await this.showWallets()
@@ -89,8 +90,8 @@ export class TestServer {
         }, 5000)
     }
     private async makeTx() {
-        const amt = 5
-        const fee = 10
+        const amt = Long.fromNumber(5.1)
+        const fee = Long.fromNumber(10.1)
         this.nonce = 0
 
         let n = randomInt(0, 90)
@@ -117,7 +118,7 @@ export class TestServer {
             }
             this.nonceTable.set(fromAddrString, nonce)
             if (!fromAddr.equals(toAddr)) {
-                const tx = fromWallet.send(toAddr, amt + randomInt(0, 200), nonce, fee + randomInt(0, 10) / 10)
+                const tx = fromWallet.send(toAddr, amt.add(randomInt(0, 200)), nonce, fee.add(randomInt(0, 10) / 10))
                 logger.debug(`TX ${i + 1} Amount=${tx.amount} Fee=${tx.fee} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
                 txList.push(tx)
             }

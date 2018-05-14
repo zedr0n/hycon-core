@@ -1,10 +1,10 @@
-import {randomBytes} from "crypto"
+import { randomBytes } from "crypto"
 import { } from "jasmine"
 import Long = require("long")
 import { Address } from "../src/common/address"
-import {Block} from "../src/common/block"
+import { Block } from "../src/common/block"
 import { GenesisBlock } from "../src/common/blockGenesis"
-import {SignedTx} from "../src/common/txSigned"
+import { SignedTx } from "../src/common/txSigned"
 import * as proto from "../src/serialization/proto"
 import { Hash } from "../src/util/hash"
 
@@ -16,11 +16,11 @@ describe("Block", () => {
     let block: Block
 
     beforeEach(() => {
-        const nonce = Long.fromNumber(1234)
+        const nonce = Long.fromNumber(1234, true)
         header = {
             difficulty: 5,
             merkleRoot: randomBytes(32),
-            nonce: Long.fromNumber(1234),
+            nonce: Long.fromNumber(1234, true),
             previousHash: [randomBytes(32)],
             stateRoot: randomBytes(32),
             timeStamp: Date.now(),
@@ -58,8 +58,8 @@ describe("Block", () => {
         const stx = new SignedTx({
             amount: 10000, fee: 100,
             from: new Address(randomBytes(20)),
-              nonce: 1234, recovery: 10, signature: randomBytes(32),
-              to: new Address(randomBytes(20)),
+            nonce: 1234, recovery: 10, signature: randomBytes(32),
+            to: new Address(randomBytes(20)),
         })
         const merkle1 = block.calculateMerkleRoot()
         block.txs.push(stx)
@@ -112,8 +112,8 @@ describe("Block", () => {
         const stx = {
             amount: 10000, fee: 100,
             from: new Address(randomBytes(20)),
-              nonce: 1234, recovery: 10, signature: randomBytes(32),
-              to: new Address(randomBytes(20)),
+            nonce: 1234, recovery: 10, signature: randomBytes(32),
+            to: new Address(randomBytes(20)),
         }
         block.set({ header, txs: [stx, stx], miner: new Address(randomBytes(20)) })
 
@@ -138,7 +138,7 @@ describe("Block", () => {
             header: {
                 difficulty: 5,
                 merkleRoot: randomBytes(32),
-                nonce: Long.fromNumber(1234),
+                nonce: Long.fromNumber(1234, true),
                 previousHash: [randomBytes(32)],
                 stateRoot: randomBytes(32),
                 timeStamp: Date.now(),
@@ -153,7 +153,7 @@ describe("Block", () => {
             header: {
                 difficulty: 0,
                 merkleRoot: randomBytes(32),
-                nonce: Long.fromNumber(1234),
+                nonce: Long.fromNumber(1234, true),
                 stateRoot: randomBytes(32),
                 timeStamp: Date.now(),
             }, miner: new Address(randomBytes(20)), txs: [],

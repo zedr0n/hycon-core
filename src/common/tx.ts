@@ -10,8 +10,8 @@ const logger = getLogger("Tx")
 export class Tx implements proto.ITx {
     public from: Address
     public to: Address
-    public amount: number
-    public fee: number
+    public amount: Long
+    public fee: Long
     public nonce: number
 
     constructor(tx?: proto.ITx) {
@@ -27,8 +27,8 @@ export class Tx implements proto.ITx {
 
         this.from = new Address(tx.from)
         this.to = new Address(tx.to)
-        this.amount = tx.amount instanceof Long ? tx.amount.toInt() : tx.amount
-        this.fee = tx.fee instanceof Long ? tx.fee.toInt() : tx.fee
+        this.amount = tx.amount instanceof Long ? tx.amount : Long.fromNumber(tx.amount, true)
+        this.fee = tx.fee instanceof Long ? tx.fee : Long.fromNumber(tx.fee, true)
         this.nonce = tx.nonce
     }
 

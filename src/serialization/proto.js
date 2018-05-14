@@ -7910,7 +7910,7 @@ $root.Tx = (function() {
      * @memberof Tx
      * @instance
      */
-    Tx.prototype.amount = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    Tx.prototype.amount = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
     /**
      * Tx fee.
@@ -7918,7 +7918,7 @@ $root.Tx = (function() {
      * @memberof Tx
      * @instance
      */
-    Tx.prototype.fee = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    Tx.prototype.fee = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
     /**
      * Tx nonce.
@@ -7973,9 +7973,9 @@ $root.Tx = (function() {
         if (message.to != null && message.hasOwnProperty("to"))
             writer.uint32(/* id 2, wireType 2 =*/18).bytes(message.to);
         if (message.amount != null && message.hasOwnProperty("amount"))
-            writer.uint32(/* id 3, wireType 0 =*/24).int64(message.amount);
+            writer.uint32(/* id 3, wireType 0 =*/24).uint64(message.amount);
         if (message.fee != null && message.hasOwnProperty("fee"))
-            writer.uint32(/* id 4, wireType 0 =*/32).int64(message.fee);
+            writer.uint32(/* id 4, wireType 0 =*/32).uint64(message.fee);
         if (message.nonce != null && message.hasOwnProperty("nonce"))
             writer.uint32(/* id 5, wireType 0 =*/40).int32(message.nonce);
         if (message.signature != null && message.hasOwnProperty("signature"))
@@ -8023,10 +8023,10 @@ $root.Tx = (function() {
                 message.to = reader.bytes();
                 break;
             case 3:
-                message.amount = reader.int64();
+                message.amount = reader.uint64();
                 break;
             case 4:
-                message.fee = reader.int64();
+                message.fee = reader.uint64();
                 break;
             case 5:
                 message.nonce = reader.int32();
@@ -8120,22 +8120,22 @@ $root.Tx = (function() {
                 message.to = object.to;
         if (object.amount != null)
             if ($util.Long)
-                (message.amount = $util.Long.fromValue(object.amount)).unsigned = false;
+                (message.amount = $util.Long.fromValue(object.amount)).unsigned = true;
             else if (typeof object.amount === "string")
                 message.amount = parseInt(object.amount, 10);
             else if (typeof object.amount === "number")
                 message.amount = object.amount;
             else if (typeof object.amount === "object")
-                message.amount = new $util.LongBits(object.amount.low >>> 0, object.amount.high >>> 0).toNumber();
+                message.amount = new $util.LongBits(object.amount.low >>> 0, object.amount.high >>> 0).toNumber(true);
         if (object.fee != null)
             if ($util.Long)
-                (message.fee = $util.Long.fromValue(object.fee)).unsigned = false;
+                (message.fee = $util.Long.fromValue(object.fee)).unsigned = true;
             else if (typeof object.fee === "string")
                 message.fee = parseInt(object.fee, 10);
             else if (typeof object.fee === "number")
                 message.fee = object.fee;
             else if (typeof object.fee === "object")
-                message.fee = new $util.LongBits(object.fee.low >>> 0, object.fee.high >>> 0).toNumber();
+                message.fee = new $util.LongBits(object.fee.low >>> 0, object.fee.high >>> 0).toNumber(true);
         if (object.nonce != null)
             message.nonce = object.nonce | 0;
         if (object.signature != null)
@@ -8165,12 +8165,12 @@ $root.Tx = (function() {
             object.from = options.bytes === String ? "" : [];
             object.to = options.bytes === String ? "" : [];
             if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
+                var long = new $util.Long(0, 0, true);
                 object.amount = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.amount = options.longs === String ? "0" : 0;
             if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
+                var long = new $util.Long(0, 0, true);
                 object.fee = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.fee = options.longs === String ? "0" : 0;
@@ -8186,12 +8186,12 @@ $root.Tx = (function() {
             if (typeof message.amount === "number")
                 object.amount = options.longs === String ? String(message.amount) : message.amount;
             else
-                object.amount = options.longs === String ? $util.Long.prototype.toString.call(message.amount) : options.longs === Number ? new $util.LongBits(message.amount.low >>> 0, message.amount.high >>> 0).toNumber() : message.amount;
+                object.amount = options.longs === String ? $util.Long.prototype.toString.call(message.amount) : options.longs === Number ? new $util.LongBits(message.amount.low >>> 0, message.amount.high >>> 0).toNumber(true) : message.amount;
         if (message.fee != null && message.hasOwnProperty("fee"))
             if (typeof message.fee === "number")
                 object.fee = options.longs === String ? String(message.fee) : message.fee;
             else
-                object.fee = options.longs === String ? $util.Long.prototype.toString.call(message.fee) : options.longs === Number ? new $util.LongBits(message.fee.low >>> 0, message.fee.high >>> 0).toNumber() : message.fee;
+                object.fee = options.longs === String ? $util.Long.prototype.toString.call(message.fee) : options.longs === Number ? new $util.LongBits(message.fee.low >>> 0, message.fee.high >>> 0).toNumber(true) : message.fee;
         if (message.nonce != null && message.hasOwnProperty("nonce"))
             object.nonce = message.nonce;
         if (message.signature != null && message.hasOwnProperty("signature"))
@@ -9898,7 +9898,7 @@ $root.Account = (function() {
      * @memberof Account
      * @instance
      */
-    Account.prototype.balance = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    Account.prototype.balance = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
     /**
      * Account nonce.
@@ -9933,7 +9933,7 @@ $root.Account = (function() {
         if (!writer)
             writer = $Writer.create();
         if (message.balance != null && message.hasOwnProperty("balance"))
-            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.balance);
+            writer.uint32(/* id 1, wireType 0 =*/8).uint64(message.balance);
         if (message.nonce != null && message.hasOwnProperty("nonce"))
             writer.uint32(/* id 2, wireType 0 =*/16).int32(message.nonce);
         return writer;
@@ -9971,7 +9971,7 @@ $root.Account = (function() {
             var tag = reader.uint32();
             switch (tag >>> 3) {
             case 1:
-                message.balance = reader.int64();
+                message.balance = reader.uint64();
                 break;
             case 2:
                 message.nonce = reader.int32();
@@ -10034,13 +10034,13 @@ $root.Account = (function() {
         var message = new $root.Account();
         if (object.balance != null)
             if ($util.Long)
-                (message.balance = $util.Long.fromValue(object.balance)).unsigned = false;
+                (message.balance = $util.Long.fromValue(object.balance)).unsigned = true;
             else if (typeof object.balance === "string")
                 message.balance = parseInt(object.balance, 10);
             else if (typeof object.balance === "number")
                 message.balance = object.balance;
             else if (typeof object.balance === "object")
-                message.balance = new $util.LongBits(object.balance.low >>> 0, object.balance.high >>> 0).toNumber();
+                message.balance = new $util.LongBits(object.balance.low >>> 0, object.balance.high >>> 0).toNumber(true);
         if (object.nonce != null)
             message.nonce = object.nonce | 0;
         return message;
@@ -10061,7 +10061,7 @@ $root.Account = (function() {
         var object = {};
         if (options.defaults) {
             if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
+                var long = new $util.Long(0, 0, true);
                 object.balance = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.balance = options.longs === String ? "0" : 0;
@@ -10071,7 +10071,7 @@ $root.Account = (function() {
             if (typeof message.balance === "number")
                 object.balance = options.longs === String ? String(message.balance) : message.balance;
             else
-                object.balance = options.longs === String ? $util.Long.prototype.toString.call(message.balance) : options.longs === Number ? new $util.LongBits(message.balance.low >>> 0, message.balance.high >>> 0).toNumber() : message.balance;
+                object.balance = options.longs === String ? $util.Long.prototype.toString.call(message.balance) : options.longs === Number ? new $util.LongBits(message.balance.low >>> 0, message.balance.high >>> 0).toNumber(true) : message.balance;
         if (message.nonce != null && message.hasOwnProperty("nonce"))
             object.nonce = message.nonce;
         return object;

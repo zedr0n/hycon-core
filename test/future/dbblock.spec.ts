@@ -17,7 +17,7 @@ describe("DBBlock Test", () => {
     let iBlockHeader: proto.IBlockHeader
     let iDBBlock: proto.IBlockDB
     beforeEach(() => {
-        const nonce = Long.fromNumber(83)
+        const nonce = Long.fromNumber(83, true)
         iBlockHeader = {
             difficulty: 1,
             merkleRoot: randomBytes(32),

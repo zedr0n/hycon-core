@@ -7,7 +7,7 @@ import * as levelup from "levelup"
 import * as Long from "long"
 import { setTimeout } from "timers"
 import { Address } from "../src/common/address"
-import { Block} from "../src/common/block"
+import { Block } from "../src/common/block"
 import { GenesisBlock } from "../src/common/blockGenesis"
 import { BlockHeader } from "../src/common/blockHeader"
 import { GenesisBlockHeader, setGenesisBlockHeader } from "../src/common/genesisHeader"
@@ -32,7 +32,7 @@ describe("Database", () => {
         header: {
             difficulty: 33,
             merkleRoot: new Hash("Merkle root"),
-            nonce: Long.fromNumber(1234),
+            nonce: Long.fromNumber(1234, true),
             previousHash: [new Hash("Previous Block")],
             timeStamp: Date.now(),
             stateRoot: new Hash("State root"),
@@ -208,7 +208,7 @@ describe("Database slowSearch tests", () => {
             block.height = i
             block.fileNumber = 0
             block.offset = 0
-            const nonce = Long.fromNumber(0)
+            const nonce = Long.fromNumber(0, true)
             block.header = new BlockHeader({
                 difficulty: 1,
                 timeStamp: Date.now() - 10000 + ((i % 2 === 0) ? i * i : -(i * i)),
@@ -261,7 +261,7 @@ describe("Database txSearch/blockSearch tests", () => {
             block.height = i
             block.fileNumber = 0
             block.offset = 0
-            const nonce = Long.fromNumber(0)
+            const nonce = Long.fromNumber(0, true)
             block.header = new BlockHeader({
                 difficulty: 1,
                 timeStamp: Date.now() - 10000 + ((i % 2 === 0) ? i * i : -(i * i)),

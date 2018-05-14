@@ -65,8 +65,9 @@ export class RestServer implements IRest {
                     message: "the resource cannot be found / currently unavailable",
                 })
             } else {
+                const a = account.balance
                 return Promise.resolve({
-                    balance: account ? account.balance : 0,
+                    balance: account ? account.balance.toInt() : 0,
                 })
             }
         } catch (e) {
@@ -103,8 +104,8 @@ export class RestServer implements IRest {
                     if (tx instanceof SignedTx && tx.nonce >= nonce) {
                         webTx = {
                             hash: tx.tx.unsignedHash().toString(),
-                            amount: tx.tx.amount,
-                            fee: tx.fee,
+                            amount: tx.tx.amount.toInt(),
+                            fee: tx.fee.toInt(),
                             from: tx.from.toString(),
                             to: tx.tx.to.toString(),
                             signature: tx.tx.signature.toString(),
@@ -244,8 +245,8 @@ export class RestServer implements IRest {
                     if (tx instanceof SignedTx) {
                         webTx = {
                             hash: tx.tx.unsignedHash().toString(),
-                            amount: tx.tx.amount,
-                            fee: tx.fee,
+                            amount: tx.tx.amount.toInt(),
+                            fee: tx.fee.toInt(),
                             from: tx.from.toString(),
                             to: tx.tx.to.toString(),
                             signature: tx.tx.signature.toString(),
@@ -257,7 +258,7 @@ export class RestServer implements IRest {
             }
             return Promise.resolve<IWalletAddress>({
                 hash: address,
-                balance: account ? account.balance : 0,
+                balance: account ? account.balance.toInt() : 0,
                 txs: webTxs,
             })
 

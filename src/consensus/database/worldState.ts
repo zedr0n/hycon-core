@@ -1,5 +1,6 @@
 import levelup = require("levelup")
 import { getLogger } from "log4js"
+import Long = require("long")
 import rocksdb = require("rocksdb")
 import { Address } from "../../common/address"
 import { AsyncLock } from "../../common/asyncLock"
@@ -149,7 +150,7 @@ export class WorldState {
         const changes: IChange[] = []
         const mapAccount: Map<string, DBState> = new Map<string, DBState>()
         const mapIndex: Map<string, number> = new Map<string, number>()
-        let fees = 0
+        let fees: Long = Long.fromNumber(0, true)
         const validTxs: SignedTx[] = []
         const invalidTxs: SignedTx[] = []
         return await this.accountLock.critical<{ stateTransition: IStateTransition, validTxs: SignedTx[], invalidTxs: SignedTx[] }>(async () => {
@@ -193,7 +194,7 @@ export class WorldState {
                     continue
                 }
 
-                if (fromAccount.balance < (tx.amount + tx.fee)) {
+                if (fromAccount.balance.compare(tx.amount.add(tx.fee)) === -1) {
                     invalidTxs.push(tx)
                     logger.info(`Tx ${new Hash(tx)} Rejected: The balance of the account is insufficient.`)
                     continue
@@ -201,9 +202,10 @@ export class WorldState {
 
                 validTxs.push(tx)
 
-                fees += tx.fee
-                fromAccount.balance -= (tx.amount + tx.fee)
-                toAccount.balance += tx.amount
+                const amtFee = tx.amount.add(tx.fee)
+                fees = fees.add(tx.fee)
+                fromAccount.balance = fromAccount.balance.sub(amtFee)
+                toAccount.balance = toAccount.balance.add(tx.amount)
                 fromAccount.nonce++
                 logger.info(`After tx : ${fromAccount.balance} / ${toAccount.balance} / ${tx.amount} / ${tx.fee}`)
                 if (fromIndex === undefined) {
@@ -229,7 +231,7 @@ export class WorldState {
                 }
                 if (minerAccount === undefined) { minerAccount = new Account({ balance: 0, nonce: 0 }) }
 
-                minerAccount.balance += fees
+                minerAccount.balance = minerAccount.balance.add(fees)
 
                 if (minerIndex === undefined) {
                     mapIndex.set(minerAddress.toString(), changes.push({ address: minerAddress, account: minerAccount }) - 1)

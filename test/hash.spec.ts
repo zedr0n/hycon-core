@@ -2,6 +2,7 @@ import * as Base58 from "base-58"
 import * as blake2b from "blake2b"
 import { randomBytes } from "crypto"
 import { } from "jasmine"
+import Long = require("long")
 import { Address } from "../src/common/address"
 import { Tx } from "../src/common/tx"
 import { SignedTx } from "../src/common/txSigned"
@@ -25,9 +26,13 @@ describe("Hash", () => {
     // TODO: Block, HeaderBlock, string, Uint8Array, proto.IHash, SignedTx
     it("new Hash(): should call Hash.hash()", () => {
         const tx = new Tx({
-            from: new Address(randomBytes(20)), to: new Address(randomBytes(20)),
-            amount: 10000, fee: 100, nonce: 1234,
-            signature: randomBytes(32), recovery: 10,
+            amount: 10000,
+            fee: 100,
+            from: new Address(randomBytes(20)),
+            nonce: 1234,
+            recovery: 10,
+            signature: randomBytes(32),
+            to: new Address(randomBytes(20)),
         })
         const encoding = randomBytes(128)
         const hashValue = new Uint8Array(randomBytes(32))
@@ -41,13 +46,17 @@ describe("Hash", () => {
 
     it("new Hash(): Should create two different hash for different txs", () => {
         const tx = new Tx({
-            from: new Address(randomBytes(20)), to: new Address(randomBytes(20)),
-            amount: 10000, fee: 100, nonce: 1234,
-            signature: randomBytes(32), recovery: 10,
+            amount: 10000,
+            fee: 100,
+            from: new Address(randomBytes(20)),
+            nonce: 1234,
+            recovery: 10,
+            signature: randomBytes(32),
+            to: new Address(randomBytes(20)),
         })
 
         const h1: Hash = new Hash(tx)
-        tx.amount = 47
+        tx.amount = Long.fromNumber(47)
         const h2: Hash = new Hash(tx)
 
         const isEqual = h1.equals(h2)
