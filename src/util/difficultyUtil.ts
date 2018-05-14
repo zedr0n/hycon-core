@@ -1,9 +1,9 @@
 import { getLogger } from "log4js"
 
-const lastDifficulty: number = 10000
+let lastDifficulty: number = 10000
 const timeArr: number[] = []
 const dTime: number[] = []
-const ema: number = 30000
+let ema: number = 30000
 const weight: number = 0.8
 const adjacent: number = 10
 const target: number = 30000
@@ -13,21 +13,41 @@ const upperLimit = 4
 const logger = getLogger("difficulty")
 
 // tslint:disable:no-bitwise
-
-export function difficulty(diff: number): string {
-    let str = ""
-    for (let i = 0; i < Math.floor(diff); i++) {
-        str += "0"
-    }
-    str += subHex(10000 * (diff - Math.floor(diff)))
-    while (str.length !== 64) {
-        str += "0"
-    }
-    return str
+export function processBlock(diff: number, timestamp: number = Date.now()): void {
+    if (diff <= 0) { diff = lastDifficulty }
+    updateDifficulty(diff)
+    updateTimes(timestamp)
 }
 
-function subHex(num: number): string {
-    return Math.round((0xFFFF - (num * 1e-4) * (0xFFFF - 0x1000))).toString(16)
+export function getTargetDifficulty(): number {
+    if (ema < target) {
+        return lastDifficulty + ((target - ema) * weight)
+    } else if (ema === target) {
+        return lastDifficulty
+    } else {
+        return lastDifficulty - ((ema - target) * weight)
+    }
+}
+
+export function updateDifficulty(newDifficulty: number): void {
+    lastDifficulty = newDifficulty
+    const float = unforcedInt(newDifficulty)
+    logger.debug(`Diff: ${float}`)
+    // plotDiff(float)
+}
+
+export function updateTimes(timestamp: number): void {
+    timeArr.length === 0 ? dTime.push(target) : dTime.push(timestamp - timeArr[timeArr.length - 1])
+    timeArr.push(timestamp)
+    if (timeArr.length > 10) {
+        timeArr.shift()
+        dTime.shift()
+    }
+    ema = calcEMA()
+}
+
+export function calcEMA(): number {
+    return 0
 }
 
 export function unforcedInt(intNum: number) {
