@@ -85,7 +85,7 @@ export class Server {
                 this.network.connect(ip, port, true).catch((e) => logger.error(`Failed to connect to client: ${e}`))
             }
         }
-        await this.sync.sync()
+
         this.miner.start()
     }
 
