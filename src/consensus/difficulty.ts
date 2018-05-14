@@ -48,6 +48,11 @@ export class Difficulty {
         return (this.e << 24) + this.m
     }
 
+    /**
+     * We can handle maximum 61 zeros in this function because a hash result is 256 bits (32 bytes, 64 characters in hex value).
+     * We don't have to handle all of the edge cases.
+     * It seems hard to make a block in a minute with more than 61 zeros in crypto-night.
+     */
     public greaterThan(byteArray: Uint8Array): boolean {
         let i = 31
         let offset = 32 - this.e
