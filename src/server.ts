@@ -9,6 +9,7 @@ import { Database } from "./consensus/database/database"
 import { WorldState } from "./consensus/database/worldState"
 import { IConsensus } from "./consensus/iconsensus"
 import { SingleChain } from "./consensus/singleChain"
+import { Sync } from "./consensus/sync"
 import { IMiner } from "./miner/iminer"
 import { MinerServer } from "./miner/minerSever"
 import { StratumServer } from "./miner/stratumServer"
@@ -45,11 +46,12 @@ export class Server {
     public readonly miner: IMiner = undefined // miner
     public readonly wallet: WalletManager = undefined
     public readonly txPool: ITxPool = undefined // tx pool
-    public readonly rest: RestManager = undefined // api server for hycon    
+    public readonly rest: RestManager = undefined // api server for hycon
     public db: Database
     public accountDB: WorldState
     public test: TestServer
     public httpServer: HttpServer
+    public sync: Sync
     constructor() {
         Server.globalOptions = commandLineArgs(optionDefinitions)
         Server.globalOptions = Server.globalOptions
@@ -67,6 +69,7 @@ export class Server {
         this.miner = new MinerServer(this, Server.globalOptions.str_port)
         this.txPool = new TxPool(this)
         this.rest = new RestManager(this)
+        this.sync = new Sync(this.network, this.consensus)
     }
     public async run() {
         this.readOptions()
@@ -80,6 +83,7 @@ export class Server {
                 this.network.connect(ip, port, true).catch((e) => logger.error(`Failed to connect to client: ${e}`))
             }
         }
+        await this.sync.sync()
         this.miner.start()
     }
 
