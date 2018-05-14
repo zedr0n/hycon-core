@@ -94,10 +94,11 @@ export class RabbitNetwork implements INetwork {
             // upnp
             this.upnpServer = new UpnpServer(this.port, this.hycon)
             this.upnpClient = new UpnpClient(this, this.hycon)
-            // nat
-            this.natUpnp = new NatUpnp(this.port, this)
-            await this.natUpnp.run()
         }
+
+        // nat
+        this.natUpnp = new NatUpnp(this.port, this)
+        await this.natUpnp.run()
 
         await this.connectPeersInDB()
 
