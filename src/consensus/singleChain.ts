@@ -29,7 +29,6 @@ import { BlockStatus } from "./sync"
 
 const logger = getLogger("SingleChain Consensus")
 export class SingleChain implements IConsensus {
-    public graph: Graph
     private server: Server
     private newBlockCallbacks: NewBlockCallback[]
     private db: Database
@@ -487,7 +486,6 @@ export class SingleChain implements IConsensus {
                 throw new Error("Error trying to reorganize past the genesis block")
             }
             await this.db.setBlockStatus(popHash, BlockStatus.Block)
-            this.graph.addToGraph(popBlock.header, BlockStatus.Block)
             this.server.txPool.putTxs(popBlock.txs)
             popHash = popBlock.header.previousHash[0]
             popHeight -= 1
