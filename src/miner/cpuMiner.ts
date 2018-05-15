@@ -42,7 +42,7 @@ export class CpuMiner {
                 this.nonce = Long.UZERO
 
                 while (this.nonce !== undefined && this.nonce.compare(this.lastNonce)) {
-                    const result = await CpuMiner.hash(this.prehash, this.nonce.toString(16))
+                    const result = new Hash(await CpuMiner.hash(this.prehash, this.nonce.toString(16)))
                     if (this.difficulty === undefined) {
                         logger.info(`Already mined block`)
                         break

@@ -1,29 +1,28 @@
 import { Difficulty } from "./../consensus/difficulty"
 
 export class DifficultyAdjuster {
+    private alpha: number
     private timeEMA: number
     private workEMA: Difficulty
-    private alpha: number
-    private timeDeltas: number[]
-    private workDeltas: Difficulty[]
+    private targetTime: number
 
-    constructor(alpha: number, defaultTimeDelta: number, defaultWorkDelta: Difficulty) {
-        this.timeEMA = defaultTimeDelta
-        this.workEMA = defaultWorkDelta
+    constructor(alpha: number, targetTimeDelta: number, defaultWorkDelta: Difficulty) {
         this.alpha = alpha
-        this.timeDeltas = [defaultTimeDelta]
-        this.workDeltas = [defaultWorkDelta]
+        this.timeEMA = targetTimeDelta
+        this.workEMA = defaultWorkDelta
+        this.targetTime = targetTimeDelta
     }
 
-    public calcEMA(newValue: number|Difficulty, prevEma: number|Difficulty, a: number): number|Difficulty {
-        if ((newValue instanceof Difficulty) && (prevEma instanceof Difficulty)) {
-            return newValue.multiply(a).add(prevEma.multiply(1 - a))
-        } else if ((typeof(newValue) === "number" && (typeof(prevEma) === "number"))) {
-            return a * newValue + (1 - a) * prevEma
-        } else {
-            throw Error("newValue and prevEma arguments must be the same type")
-        }
+    public calcNewDifficulty(timeEMA: number, workEMA: Difficulty, targetTime: number): Difficulty {
+        const timeRatio = targetTime / timeEMA
+        return workEMA.multiply(timeRatio)
+    }
 
+    public verifyDifficulty(prevTimeEMA: number, timeDelta: number, prevWorkEMA: Difficulty, workDelta: Difficulty, givenDifficulty: Difficulty) {
+        const timeEMA: number = this.calcTimeEMA(timeDelta, prevTimeEMA, this.alpha)
+        const workEMA: Difficulty = this.calcWorkEMA(workDelta, prevWorkEMA, this.alpha)
+        const computedDifficulty = this.calcNewDifficulty(timeEMA, workEMA, this.targetTime)
+        return (computedDifficulty.encode() === givenDifficulty.encode())
     }
 
     public getTimeEMA(): number {
@@ -32,5 +31,19 @@ export class DifficultyAdjuster {
 
     public getWorkEMA(): Difficulty {
         return this.workEMA
+    }
+
+    public calcTimeEMA(newValue: number, prevEma: number, a: number) {
+        const newEMA = a * newValue + (1 - a) * prevEma
+        this.timeEMA = newEMA
+        return newEMA
+    }
+
+    public calcWorkEMA(newValue: Difficulty, prevEma: Difficulty, a: number) {
+        const oldTerm = prevEma.multiply(1 - a)
+        let newEMA = newValue.multiply(a)
+        newEMA = newEMA.add(oldTerm)
+        this.workEMA = newEMA
+        return newEMA
     }
 }

@@ -1,3 +1,5 @@
+import { Hash } from "../util/hash"
+
 // tslint:disable:no-bitwise
 
 export class Difficulty {
@@ -8,11 +10,9 @@ export class Difficulty {
         return new Difficulty(mantissa, exponent)
     }
     private static normalize(mantissa: number, exponent: number) {
-        if (mantissa !== 0) {
-            while ((mantissa & 0xFF) === 0) {
-                mantissa = mantissa >> 8
-                exponent += 1
-            }
+        while ((mantissa & 0xFF) === 0 && exponent < 0x30) {
+            mantissa = mantissa >> 8
+            exponent += 1
         }
         return { mantissa, exponent }
     }
@@ -56,15 +56,10 @@ export class Difficulty {
         return (this.e << 24) + this.m
     }
 
-    /**
-     * We can handle maximum 61 zeros in this function because a hash result is 256 bits (32 bytes, 64 characters in hex value).
-     * We don't have to handle all of the edge cases.
-     * It seems hard to make a block in a minute with more than 61 zeros in crypto-night.
-     */
-    public greaterThan(byteArray: Uint8Array): boolean {
+    public greaterThan(byteArray: Hash): boolean {
         let i = 31
-        const exponetCount = 32 - this.e
-        while (i >= exponetCount) {
+        const exponentCount = 32 - this.e
+        while (i >= exponentCount) {
             if (byteArray[i] !== 0) {
                 return false
             }

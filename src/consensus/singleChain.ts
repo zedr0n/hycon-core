@@ -403,7 +403,7 @@ export class SingleChain implements IConsensus {
 
     private async verifyHeader(header: BlockHeader): Promise<boolean> {
         const preHash = header.preHash()
-        const cryptoHash = await CpuMiner.hash(preHash, header.nonce.toString(16))
+        const cryptoHash = new Hash(await CpuMiner.hash(preHash, header.nonce.toString(16)))
         // Todo need to check header.difficulty is a float or integer
         const difficulty: Difficulty = Difficulty.decode(header.difficulty)
 
