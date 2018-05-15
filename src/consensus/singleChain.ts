@@ -10,6 +10,7 @@ import { PublicKey } from "../common/publicKey"
 import { GenesisSignedTx } from "../common/txGenesisSigned"
 import { TxPool } from "../common/txPool"
 import { SignedTx } from "../common/txSigned"
+import { DifficultyAdjuster } from "../consensus/difficultyAdjuster"
 import { CpuMiner } from "../miner/cpuMiner"
 import { MinerServer } from "../miner/minerServer"
 import { Server } from "../server"
@@ -37,6 +38,12 @@ export class SingleChain implements IConsensus {
     private txUnit: number
     private forkHeight: number
     private txdb?: TxDatabase
+
+    // Load these from a constants file if possible
+    private alpha: number = .1
+    private targetTimeEMA: number = 30
+    private targetWorkEMA: Difficulty = new Difficulty(0x00_00_FF, 0x00)
+    private difficultyAdjuster: DifficultyAdjuster
     constructor(server: Server, dbPath: string, wsPath: string, filePath: string, txPath?: string) {
         this.server = server
         this.newBlockCallbacks = []
@@ -44,6 +51,7 @@ export class SingleChain implements IConsensus {
         this.worldState = new WorldState(wsPath)
         this.txUnit = 1000
         if (txPath) { this.txdb = new TxDatabase(txPath) }
+        this.difficultyAdjuster = new DifficultyAdjuster(this.alpha, this.targetTimeEMA, this.targetWorkEMA)
     }
     public async getNonce(address: Address): Promise<number> {
         const account = await this.worldState.getAccount(this.blockTip.header.stateRoot, address)

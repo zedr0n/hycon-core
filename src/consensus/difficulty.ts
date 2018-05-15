@@ -10,7 +10,7 @@ export class Difficulty {
         return new Difficulty(mantissa, exponent)
     }
     private static normalize(mantissa: number, exponent: number) {
-        while ((mantissa & 0xFF) === 0 && exponent < 0x30) {
+        while ((mantissa & 0xFF) === 0 && exponent < 0x20) {
             mantissa = mantissa >> 8
             exponent += 1
         }

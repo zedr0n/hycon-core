@@ -40,14 +40,14 @@ describe("Difficulty", () => {
     it("encode: should encode the exponent in the proper position", () => {
         difficulty = new Difficulty(0x00, 0x01)
         const encodedDifficulty = difficulty.encode()
-        const correctEncodedDifficulty = 0x30000000
+        const correctEncodedDifficulty = 0x20000000
         expect(encodedDifficulty).toEqual(correctEncodedDifficulty)
     })
 
     it("encode: should encode the exponent in the proper position", () => {
         difficulty = new Difficulty(0x00, 0x10)
         const encodedDifficulty = difficulty.encode()
-        const correctEncodedDifficulty = 0x30000000
+        const correctEncodedDifficulty = 0x20000000
         expect(encodedDifficulty).toEqual(correctEncodedDifficulty)
     })
 
