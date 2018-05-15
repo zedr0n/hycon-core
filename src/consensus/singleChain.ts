@@ -454,8 +454,8 @@ export class SingleChain implements IConsensus {
                 }
             } else {
                 await this.db.setBlockStatus(newBlockHash, BlockStatus.Header)
-                if (this.graph && block) {
-                    this.graph.addToGraph(block.header, BlockStatus.Header)
+                if (this.graph === undefined) {
+                    this.graph.addToGraph(dbBlock.header, BlockStatus.Header)
                 }
             }
         } catch (e) {
