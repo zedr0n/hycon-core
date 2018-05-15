@@ -1,3 +1,4 @@
+import { createCipher } from "crypto"
 import levelup = require("levelup")
 import { getLogger } from "log4js"
 import rocksdb = require("rocksdb")
@@ -51,6 +52,7 @@ export class Database {
     }
 
     public async init(): Promise<void> {
+        await this.database.open()
         const fileNumber = await this.getOrInitKey("fileNumber")
         const filePosition = await this.getOrInitKey("filePosition")
         this.fileNumber = +fileNumber
@@ -333,16 +335,17 @@ export class Database {
     }
 
     private async getOrInitKey(key: string, value: any = 0): Promise<any> {
-        return new Promise<any>((resolved, reject) => {
-            this.database.get(key).catch(async (e) => {
-                if (e.notFound) {
-                    await this.database.put(key, value)
-                    resolved(value)
-                } else { reject(`Could not intitialize '${key}' due to error: '${e}'`) }
-            }).then((data) => {
-                resolved(data)
-            })
-        })
+        try {
+            const p = this.database.get(key)
+            const v = await p
+            return v
+        } catch (e) {
+            if (e.notFound) {
+                await this.database.put(key, value)
+                return value
+            }
+            throw e
+        }
     }
 
     private async getTip(key: string): Promise<DBBlock | undefined> {
@@ -354,7 +357,7 @@ export class Database {
         } catch (e) {
             if (e.notFound) { return undefined }
             logger.error(`Fail to getTip : ${e}`)
-            return Promise.reject(e)
+            throw e
         }
     }
 }

@@ -66,19 +66,23 @@ export class Server {
         if (Server.globalOptions.postfix === undefined) {
             Server.globalOptions.postfix = ""
         }
+
         const postfix = Server.globalOptions.postfix
         this.consensus = new SingleChain(this, "blockdb" + postfix, "worldstate" + postfix, "rawblock" + postfix)
         this.network = new RabbitNetwork(this, Server.globalOptions.port, "deleteme.peer" + postfix)
 
         this.wallet = new WalletManager(this)
         this.miner = new MinerServer(this, Server.globalOptions.str_port)
+        if (Server.globalOptions.mine) {
+            MinerServer.useCpuMiner = true
+        }
         this.txPool = new TxPool(this)
         this.rest = new RestManager(this)
+
         // sync is now being coded
         // this.sync = new Sync(this)
     }
     public async run() {
-        this.readOptions()
         await this.consensus.init()
         logger.info("Starting server...")
         logger.debug(`API flag is ${Server.globalOptions.api}`)
@@ -96,6 +100,10 @@ export class Server {
                 this.network.connect(ip, port, true).catch((e) => logger.error(`Failed to connect to client: ${e}`))
             }
         }
+        if (Server.globalOptions.writing) {
+            logger.info("Test Writing")
+            this.test = new TestServer(this)
+        }
         await this.runSync()
         this.miner.start()
     }
@@ -109,19 +117,5 @@ export class Server {
         })
         sync = null
         logger.debug(`end sync`)
-    }
-
-    private readOptions() {
-        const options = commandLineArgs(optionDefinitions)
-        logger.info(`Options=${JSON.stringify(options)}`)
-        logger.info(`Verbose=${options.verbose}`)
-        logger.info(`Port=${options.port}`)
-        if (options.writing) {
-            logger.info("Test Writing")
-            this.test = new TestServer(this)
-        }
-        if (options.mine) {
-            MinerServer.useCpuMiner = true
-        }
     }
 }
