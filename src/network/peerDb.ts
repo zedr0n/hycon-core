@@ -13,9 +13,9 @@ export class PeerDb {
     public static ipeer2key(peer: proto.IPeer): number {
         const hash = new Hash(peer.host + peer.port.toString())
         let key = 0
-        for (let i = 0; i < 6; i--) {
+        for (let i = 0; i < 6; i++) {
             // tslint:disable-next-line:no-bitwise
-            key = (key << 8) + hash[i]
+            key = key * 256 + hash[i]
         }
         return key
     }
