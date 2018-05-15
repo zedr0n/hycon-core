@@ -33,25 +33,32 @@ export class SocketParser {
         // These buffers will be held for the duration of the connection, and does not need to be intialized
         this.scrapBuffer = Buffer.allocUnsafeSlow(scrapBufferLength)
         this.writeBuffer = Buffer.allocUnsafeSlow(writeBufferLength)
-        this.sendLock = new AsyncLock(false, 60000)
+        this.sendLock = new AsyncLock(false, 30000)
         this.parseReset()
         socket.on("data", (data) => this.receive(data))
-        socket.on("drain", () => this.sendLock.releaseLock())// TODO: Log
+        socket.on("drain", () => {
+            logger.warn("Resuming socket")
+            this.socket.resume()
+            this.sendLock.releaseLock()
+        })
     }
 
     public async send(route: number, buffer: Buffer): Promise<void> {
         if (buffer.length > defaultMaxPacketSize) {
             throw new Error("Buffer too large")
         }
-        await this.sendLock.getLock()
-        let kernal = true
-        kernal = kernal && this.socket.write(headerPrefix)
         this.writeBuffer.writeUInt32LE(route, 0)
         this.writeBuffer.writeUInt32LE(buffer.length, 4)
+        let kernal = true
+        await this.sendLock.getLock()
+        kernal = kernal && this.socket.write(headerPrefix)
         kernal = kernal && this.socket.write(this.writeBuffer)
         kernal = kernal && this.socket.write(buffer)
         if (kernal) {
             this.sendLock.releaseLock()
+        } else {
+            logger.warn("Pausing socket")
+            this.socket.pause()
         }
     }
 
