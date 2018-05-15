@@ -35,15 +35,15 @@ export class Difficulty {
         return this.e
     }
 
-    public getMinerParameters(): {offset: number, target: string} {
+    public getMinerParameters(): { offset: number, target: string } {
         let target: string = this.m.toString(16)
-        if ( target.length % 2 ) {
+        if (target.length % 2) {
             target = "0" + target
         }
-        while ( target.length < 6) {
+        while (target.length < 6) {
             target += "f"
         }
-        return { offset: this.e * 2, target}
+        return { offset: this.e * 2, target }
     }
 
     public inspect(value: number) {
@@ -65,12 +65,12 @@ export class Difficulty {
             }
             i--
         }
-        const mantisaByteCount = Math.ceil( Math.log2(this.m) / 8)
+        const mantisaByteCount = Math.ceil(Math.log2(this.m) / 8)
         let j = i - mantisaByteCount + 1
-        j  = j < 0 ? 0 : j
+        j = j < 0 ? 0 : j
 
         let mComp = 0
-        while (j <= i)  {
+        while (j <= i) {
             mComp <<= 8
             mComp += byteArray[j]
             ++j

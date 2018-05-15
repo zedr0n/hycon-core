@@ -132,7 +132,7 @@ export class MinerServer implements IMiner {
         }
         const result = new Hash(await CpuMiner.hash(this.prehash, nonce))
 
-        if ( this.difficulty.greaterThan(result) ) {
+        if (this.difficulty.greaterThan(result)) {
             logger.debug(`HASH Result : ${Buffer.from(result.buffer).toString("hex")}`)
             return true
         } else {
