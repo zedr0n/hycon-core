@@ -38,7 +38,11 @@ export class PublicKey {
 
     public address(): Address {
         const hash: Uint8Array = Hash.hash(this.pubKey)
-        const address = new Address(hash.slice(12))
+        const add = new Uint8Array(20)
+        for (let i = 12; i < 32; i++) {
+            add[i - 12] = hash[i]
+        }
+        const address = new Address(add)
         return address
     }
 }

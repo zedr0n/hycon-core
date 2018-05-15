@@ -17,6 +17,7 @@ import { INetwork } from "./network/inetwork"
 import { RabbitNetwork } from "./network/rabbit/rabbitNetwork" // for speed
 import { RestManager } from "./rest/restManager"
 import { TestServer } from "./testServer"
+import { Wallet } from "./wallet/wallet"
 import { WalletManager } from "./wallet/walletManager"
 const optionDefinitions = [
     { name: "api", alias: "a", type: Boolean },
@@ -77,7 +78,14 @@ export class Server {
         this.readOptions()
         await this.consensus.init()
         logger.info("Starting server...")
+        logger.debug(`API flag is ${Server.globalOptions.api}`)
+        if (Server.globalOptions.api) {
+            logger.info("Test API")
+            logger.info(`API Port ${Server.globalOptions.api_port}`)
+            this.httpServer = new HttpServer(this.rest, Server.globalOptions.api_port)
+        }
         await this.network.start()
+        await Wallet.walletInit()
         if (Server.globalOptions.peer) {
             for (const peer of Server.globalOptions.peer) {
                 const [ip, port] = peer.split(":")
@@ -86,11 +94,6 @@ export class Server {
             }
         }
         await this.runSync()
-        if (Server.globalOptions.api) {
-            logger.info("Test API")
-            logger.info(`API Port ${Server.globalOptions.api_port}`)
-            this.httpServer = new HttpServer(this.rest, Server.globalOptions.api_port)
-        }
         this.miner.start()
     }
 

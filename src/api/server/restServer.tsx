@@ -130,9 +130,9 @@ export class RestServer implements IRest {
     public async outgoingSignedTx(tx: { privateKey: string, from: string, to: string, amount: number, fee: number }, queueTx?: Function): Promise<{ txHash: string } | IResponseError> {
         try {
             const address = new Address(tx.to)
-            const wallet = new Wallet(Buffer.from(tx.privateKey))
+            const wallet = new Wallet(Buffer.from(tx.privateKey, "hex"))
             // TODO: Check balance
-            const signedTx = wallet.send(address, tx.amount, 0, tx.fee)
+            const signedTx = wallet.send(address, tx.amount, 1, tx.fee)
             if (queueTx) {
                 queueTx(signedTx)
             } else {

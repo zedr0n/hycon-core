@@ -1,7 +1,7 @@
 import { address } from "ip"
 import { IResponseError } from "../api/client/rest"
 import { Address } from "../common/address"
-import { TxPool } from "../common/txPool"
+import { ITxPool } from "../common/itxPool"
 import { Database } from "../consensus/database/database"
 import { WorldState } from "../consensus/database/worldState"
 import { IConsensus } from "../consensus/iconsensus"
@@ -10,15 +10,15 @@ export class RestManager {
     public useRabbit = true
     public subscription: Map<number, any> | undefined
 
-    public txQueue: TxPool
+    public txQueue: ITxPool
 
     public consensus: IConsensus
     private db: Database
     private accountDB: WorldState
     private server: Server
     constructor(server: Server) {
-        console.log(server.consensus)
         this.server = server
+        this.txQueue = server.txPool
         this.consensus = server.consensus
         this.db = server.db
         this.accountDB = server.accountDB

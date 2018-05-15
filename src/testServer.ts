@@ -1,9 +1,12 @@
 import commandLineArgs = require("command-line-args")
 import { randomBytes } from "crypto"
+import { getLogger } from "log4js"
 import { IResponseError } from "./api/client/rest"
 import { HttpServer } from "./api/server/server"
 import { Address } from "./common/address"
+import { ITxPool } from "./common/itxPool"
 import { TxPool } from "./common/txPool"
+import { SignedTx } from "./common/txSigned"
 import { Database } from "./consensus/database/database"
 import { WorldState } from "./consensus/database/worldState"
 import { IConsensus } from "./consensus/iconsensus"
@@ -13,15 +16,12 @@ import { MinerServer } from "./miner/minerSever"
 import { StratumServer } from "./miner/stratumServer"
 import { RabbitNetwork } from "./network/rabbit/rabbitNetwork" // for speed
 import { RestManager } from "./rest/restManager"
-import { Hash } from "./util/hash"
-import { WalletManager } from "./wallet/walletManager"
-import { getLogger } from "log4js"
-import { ITxPool } from "./common/itxPool"
-import { SignedTx } from "./common/txSigned"
 import { Block, INetwork, Tx } from "./serialization/proto"
 import * as proto from "./serialization/proto"
 import { Server } from "./server"
+import { Hash } from "./util/hash"
 import { Wallet } from "./wallet/wallet"
+import { WalletManager } from "./wallet/walletManager"
 // tslint:disable-next-line:no-var-requires
 const randomInt = require("random-int")
 // tslint:disable-next-line:no-var-requires
@@ -42,7 +42,6 @@ export class TestServer {
     private nonce: number = 0
     private txPool: ITxPool
     private consensus: IConsensus = undefined // the core
-
 
     private nonceTable: Map<string, number>
     constructor(server: Server) {
@@ -138,7 +137,6 @@ export class TestServer {
          const encoded: Uint8Array = proto.Network.encode({ putBlock: { blocks: [newBlock] } }).finish()
          this.server.network.broadcast(new Buffer(encoded), null)*/
     }
-
 
     // TODO : remove Wallet
     // tslint:disable-next-line:member-ordering

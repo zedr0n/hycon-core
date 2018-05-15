@@ -101,6 +101,7 @@ export class HttpServer {
             res.json(await this.hyconServer.deleteSubscription(req.params.address, req.params.id))
         })
         router.post("/signedtx", async (req: express.Request, res: express.Response) => {
+            logger.debug("Route triggered")
             res.json(
                 await this.rest.outgoingSignedTx({
                     privateKey: req.body.privateKey,
