@@ -19,7 +19,7 @@ export class BlockHeader extends BaseBlockHeader {
         super.set(header)
         if (header.previousHash === undefined) { throw new Error("Header missing previous hash") }
         if (header.nonce === undefined) { throw new Error("Header missing nonce") }
-        if (header.difficulty === undefined || header.difficulty == null || header.difficulty <= 0) {
+        if (header.difficulty === undefined || header.difficulty == null || header.difficulty < 0) {
             throw new Error("Header missing difficulty")
         }
 
