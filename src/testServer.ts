@@ -120,7 +120,7 @@ export class TestServer {
             this.nonceTable.set(fromAddrString, nonce)
             if (!fromAddr.equals(toAddr)) {
                 const a = amt.add(randomInt(0, 10))
-                const b = fee.add(randomInt(0, 10) / 10)
+                const b = fee.add(randomInt(0, 10))
                 logger.info(`Amount : ${hycontoString(a)} / Fee : ${hycontoString(b)}`)
                 // const tx = fromWallet.send(toAddr, hyconfromString(a), nonce, hyconfromString(b))
                 const tx = fromWallet.send(toAddr, a, nonce, b)
