@@ -18,9 +18,9 @@ export class BlockFile {
         const prefix = path + "/blk"
         const fileName = prefix + zeroPad(n.toString(), 5) + ".dat"
         this.n = n
-        if (! await fs.pathExists(path)) { fs.mkdir(path) }
+        if (!(await fs.pathExists(path))) { await fs.mkdir(path) }
 
-        if (! await fs.pathExists(fileName)) {
+        if (!(await fs.pathExists(fileName))) {
             this.fd = await fs.open(fileName, "w+")
         } else { this.fd = await fs.open(fileName, "r+") }
 

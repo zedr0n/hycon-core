@@ -56,14 +56,14 @@ export class RabbitNetwork implements INetwork {
     private upnpClient: UpnpClient
     private natUpnp: NatUpnp
 
-    constructor(hycon: Server, port: number = 8148) {
+    constructor(hycon: Server, port: number = 8148, peerDbPath: string = "deleteme.peer") {
         RabbitNetwork.failLimit = 10
         this.port = port
         this.targetPeerCount = 25
         this.hycon = hycon
         this.peerTable = new Map<string, RabbitPeer>()
         this.clientTable = new Map<string, RabbitPeer>()
-        this.peerDB = new PeerDb()
+        this.peerDB = new PeerDb(peerDbPath)
         logger.debug(`TcpNetwork Port=${port}`)
     }
 

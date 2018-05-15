@@ -22,8 +22,8 @@ export class PeerDb {
     public db: levelup.LevelUp // database
     public peers: proto.IPeer[]
 
-    constructor() {
-        this.db = levelup(rocksdb("./peerdb"))
+    constructor(peerDbPath: string = "deleteme.peer") {
+        this.db = levelup(rocksdb(peerDbPath))
         this.peers = []
         const db: any = this.db // TODO: Fix levelup type declarartion
         db.on("open", async () => {
@@ -41,21 +41,21 @@ export class PeerDb {
                 if (p.host === peer.host && p.port === peer.port) {
                     this.peers[cnt] = peer
                     break
-                 }
-                cnt ++
+                }
+                cnt++
             }
             if (cnt === this.peers.length) {
                 this.peers.push(peer)
             }
             logger.info(`Saved to db ${peer.host}:${peer.port}`)
             return
-        }  catch (e) {
+        } catch (e) {
             logger.info(`Failed to put peer ${peer.host}:${peer.port} into PeerDB: ${e}`)
             throw e
         }
     }
 
-    public async get(key: string): Promise < proto.IPeer > {
+    public async get(key: string): Promise<proto.IPeer> {
         try {
             const result = await this.db.get(key)
             const peer = proto.Peer.decode(result)
@@ -66,20 +66,20 @@ export class PeerDb {
         }
     }
 
-    public async listAll(): Promise < proto.IPeer[] > {
+    public async listAll(): Promise<proto.IPeer[]> {
         const peers: proto.IPeer[] = []
         try {
             this.db.createReadStream()
-            .on("data", (data: any) => {
-                const peer: proto.IPeer = proto.Peer.decode(data.value)
-                peers.push(peer)
-            })
-            .on("end", () => {
-                logger.info(`reload peers:${peers.length} from peer db`)
-                for ( const peer of peers) {
-                    logger.info(`${peer.host}:${peer.port}`)
-                }
-            })
+                .on("data", (data: any) => {
+                    const peer: proto.IPeer = proto.Peer.decode(data.value)
+                    peers.push(peer)
+                })
+                .on("end", () => {
+                    logger.info(`reload peers:${peers.length} from peer db`)
+                    for (const peer of peers) {
+                        logger.info(`${peer.host}:${peer.port}`)
+                    }
+                })
             return Promise.resolve(peers)
 
         } catch (e) {
@@ -99,32 +99,32 @@ export class PeerDb {
                     this.peers.splice(cnt, 1)
                     logger.info(`Remove ${peer.host}:${peer.port} from DB`)
                     break
-                 }
-                cnt ++
+                }
+                cnt++
             }
         } catch (e) {
             logger.info(`Could not delete from db: ${peer.host}:${peer.port}`)
         }
     }
 
-    public async clearAll(): Promise < void > {
+    public async clearAll(): Promise<void> {
         try {
             this.db.createKeyStream()
-            .on("data", async (key: string) => {
-                await this.db.del(key)
-            })
-            .on("end", () => {
-                logger.info("clear db")
-                this.peers = []
-                return
-            })
+                .on("data", async (key: string) => {
+                    await this.db.del(key)
+                })
+                .on("end", () => {
+                    logger.info("clear db")
+                    this.peers = []
+                    return
+                })
         } catch (e) {
             logger.info(`Could not clear all elements from DB: ${e}`)
             throw e
         }
     }
 
-    public async getRecentActivePeers(n: number): Promise < proto.IPeer[] > {
+    public async getRecentActivePeers(n: number): Promise<proto.IPeer[]> {
         try {
             await new Promise((resolve, reject) => {
                 if (n < this.peers.length) {
@@ -148,7 +148,7 @@ export class PeerDb {
         }
     }
 
-    public async maintainKeys(): Promise <void> {
+    public async maintainKeys(): Promise<void> {
         try {
             this.peers = await this.listAll()
         } catch (e) {

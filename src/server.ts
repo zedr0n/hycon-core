@@ -32,6 +32,7 @@ const optionDefinitions = [
     { name: "visDAG", alias: "d", type: Boolean },
     { name: "wallet", alias: "W", type: Boolean },
     { name: "disable_upnp", alias: "x", type: Boolean },
+    { name: "postfix", alias: "P", type: String },
 ]
 const logger = getLogger("Server")
 
@@ -62,9 +63,12 @@ export class Server {
         if (Server.globalOptions.api_port !== "") {
             logger.info(`API Port=${Server.globalOptions.api_port}`)
         }
-
-        this.consensus = new SingleChain(this, "./deleteme.db", "./deleteme.ws", "./deleteme.file")
-        this.network = new RabbitNetwork(this, Server.globalOptions.port)
+        if (Server.globalOptions.postfix === undefined) {
+            Server.globalOptions.postfix = ""
+        }
+        const postfix = Server.globalOptions.postfix
+        this.consensus = new SingleChain(this, "deleteme.db" + postfix, "deleteme.ws" + postfix, "deleteme.file" + postfix)
+        this.network = new RabbitNetwork(this, Server.globalOptions.port, "deleteme.peer" + postfix)
 
         this.wallet = new WalletManager(this)
         this.miner = new MinerServer(this, Server.globalOptions.str_port)
