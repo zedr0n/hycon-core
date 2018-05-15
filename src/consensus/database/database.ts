@@ -304,12 +304,14 @@ export class Database {
             const encodeBlock = await blockFile.get(dbBlock.offset, dbBlock.length)
             try {
                 const block = Block.decode(encodeBlock)
+                return block
             } catch (e) {
                 // TODO: Schedule redownload?
                 logger.fatal(`Could not decode block: ${e}`)
+                throw new Error("Corrupt block")
+            } finally {
+                await blockFile.close()
             }
-            await blockFile.close()
-            return block
         } else {
             logger.error(`Fail to dbBlock to block : Block file information is not found`)
             throw new Error("Block could not be found")

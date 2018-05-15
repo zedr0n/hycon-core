@@ -209,7 +209,7 @@ export class SingleChain implements IConsensus {
             return blockArray
         } catch (e) {
             logger.error(`Fail to getBlocksRange : ${e}`)
-            Promise.reject(e)
+            throw e
         }
     }
 
