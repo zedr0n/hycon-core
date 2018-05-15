@@ -1,42 +1,22 @@
 import * as bigInt from "big-integer"
 import Long = require("long")
-
-function toBigInt(num: Long) {
-    return bigInt(num.high.toString() + num.low.toString())
-}
-
 export function zeroPad(input: string, length: number) {
     return (Array(length + 1).join("0") + input).slice(-length)
 }
 
-export function rightPad(input: string, length: number) {
-    return (input + Array(length + 1 - input.length).join("0")).slice(-length)
-}
-
-export function longToString(value: Long) {
-    return value.high + "." + value.low
+export function printLong(value: Long): string {
+    return ""
 }
 
 export function toLong(num: number): Long {
-    const arr = num.toString().split(".")
-    let low = rightPad("", 9)
+    const str = num.toString()
+    const arr = str.split(".")
+    let value = Long.fromString(arr[0]).multiply(Math.pow(10, 9))
     if (arr.length > 1) {
-        arr[1] = arr[1].length > 9 ? arr[1].toString().slice(0, 9) : arr[1]
-        low = rightPad(arr[1].toString(), 9)
+        arr[1] = arr[1].length > 9 ? arr[1].slice(0, 9) : arr[1]
+        const length = 9 - arr[1].length
+        const b = Long.fromString(arr[1]).multiply(Math.pow(10, length))
+        value = value.add(b)
     }
-    return new Long(Number(low), Number(arr[0]), true)
-}
-
-export function add(a: Long, b: Long) {
-    const value = toBigInt(a).add(toBigInt(b))
-    return new Long(Number(value.mod(10 ** 9)), Number(value.divide(10 ** 9)), true)
-}
-
-export function sub(a: Long, b: Long) {
-    const value = toBigInt(a).subtract(toBigInt(b))
-    return new Long(Number(value.mod(10 ** 9)), Number(value.divide(10 ** 9)), true)
-}
-
-export function comp(a: Long, b: Long) {
-    return toBigInt(a).compare(toBigInt(b))
+    return value
 }

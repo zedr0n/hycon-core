@@ -92,7 +92,7 @@ export class TestServer {
     }
     private async makeTx() {
         const amt = 5.1
-        const fee = 10.1
+        const fee = 10.1234567
         this.nonce = 0
 
         let n = randomInt(0, 90)
@@ -119,8 +119,11 @@ export class TestServer {
             }
             this.nonceTable.set(fromAddrString, nonce)
             if (!fromAddr.equals(toAddr)) {
-                const tx = fromWallet.send(toAddr, toLong(amt + randomInt(0, 200)), nonce, toLong(fee + randomInt(0, 10) / 10))
-                logger.debug(`TX ${i + 1} Amount=${longToString(tx.amount)} Fee=${longToString(tx.fee)} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
+                const a = amt + randomInt(0, 200)
+                const b = fee + randomInt(0, 10) / 10
+                logger.info(`Amount : ${a} / Fee : ${b}`)
+                const tx = fromWallet.send(toAddr, toLong(a), nonce, toLong(b))
+                logger.debug(`TX ${i + 1} Amount=${(tx.amount).toString()} Fee=${(tx.fee).toString()} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
                 txList.push(tx)
             }
         }
