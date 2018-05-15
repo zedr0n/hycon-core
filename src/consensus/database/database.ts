@@ -218,6 +218,17 @@ export class Database {
         }
     }
 
+    public async getBlockHeight(hash: Hash): Promise<number | undefined> {
+        try {
+            const block = await this.getDBBlock(hash)
+            const height = (block !== undefined) ? block.height : undefined
+            return Promise.resolve(height)
+        } catch (e) {
+            logger.error(`getBlockHeight failed: ${e}`)
+            return Promise.reject(e)
+        }
+    }
+
     private async getDBBlock(hash: Hash): Promise<DBBlock | undefined> {
         let decodingDBEntry = false
         try {

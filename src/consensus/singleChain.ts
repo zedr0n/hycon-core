@@ -256,6 +256,10 @@ export class SingleChain implements IConsensus {
         return await this.db.getHashAtHeight(height)
     }
 
+    public async getBlockHeight(hash: Hash): Promise<number | undefined> {
+        return await this.db.getBlockHeight(hash)
+    }
+
     public async testMakeBlock(txs: SignedTx[]): Promise<Block> {
         return await this.createCandidateBlock(txs)
     }
