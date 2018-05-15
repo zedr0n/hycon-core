@@ -72,11 +72,11 @@ export class Difficulty {
         let mComp = 0
         while (j <= i) {
             mComp <<= 8
-            mComp += byteArray[j]
-            ++j
+            mComp += byteArray[i]
+            --i
         }
 
-        return (this.m >= mComp)
+        return (this.m > mComp)
     }
 
     public multiply(num: number): Difficulty {

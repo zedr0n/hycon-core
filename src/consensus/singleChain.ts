@@ -330,8 +330,8 @@ export class SingleChain implements IConsensus {
             txs.sort((txA, txB) => txA.nonce - txB.nonce)
             const worldStateResult = await this.worldState.next(txs, previousHeader.stateRoot, miner)
             const header = new BlockHeader({
-                difficulty: utils.getTargetDifficulty(),
-                // difficulty: 0x0001ffff,
+                // difficulty: utils.getTargetDifficulty(),
+                difficulty: 0x013203ff,
                 merkleRoot: new Hash(),
                 nonce: -1,
                 previousHash: [previousHash],
