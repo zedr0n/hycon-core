@@ -32,4 +32,5 @@ export interface IConsensus {
     getTx(hash: Hash): Promise<TxList | undefined>
     getHash(height: number): Promise<Hash>
     getNonce(address: Address): Promise<number>
+    getBlockHeight(hash: Hash): Promise<number> // TODO
 }
