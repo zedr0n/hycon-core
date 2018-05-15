@@ -44,7 +44,7 @@ export class SocketParser {
             throw new Error("Buffer too large")
         }
         await this.sendLock.getLock()
-        let kernal = false
+        let kernal = true
         kernal = kernal && this.socket.write(headerPrefix)
         this.writeBuffer.writeUInt32LE(route, 0)
         this.writeBuffer.writeUInt32LE(buffer.length, 4)
