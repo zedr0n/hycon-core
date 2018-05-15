@@ -93,14 +93,16 @@ export class SingleChain implements IConsensus {
 
     public async putBlock(block: Block): Promise<boolean> {
         try {
+            // TODO: Return block status
             const blockHash = new Hash(block.header)
             logger.info(`Put Block : ${blockHash}`)
 
             const blockStatus = await this.getBlockStatus(blockHash)
             if (blockStatus === BlockStatus.Rejected) {
                 logger.warn(`Already rejected Block : ${blockHash}`)
-                return false
-            } else if (blockStatus === BlockStatus.MainChain || blockStatus === BlockStatus.Block) {
+                throw new Error(`Rejecting Block : ${blockHash}`)
+            }
+            if (blockStatus === BlockStatus.MainChain || blockStatus === BlockStatus.Block) {
                 logger.warn(`Already exsited Header : ${blockHash}`)
                 return false
             }
@@ -114,9 +116,8 @@ export class SingleChain implements IConsensus {
             const verifyResult = await this.verifyBlock(block, previousHeader)
             if (!verifyResult.isVerified) {
                 logger.error(`Invalid Block Rejected : ${blockHash}`)
-                this.server.sync.onPreviousNotFound(new Hash(previousHeader))
                 await this.db.setBlockStatus(blockHash, BlockStatus.Rejected)
-                return false
+                throw new Error(`Rejecting Block : ${blockHash}`)
             }
 
             const transitionResult = verifyResult.stateTransition
@@ -126,6 +127,7 @@ export class SingleChain implements IConsensus {
 
             await this.organizeChains(blockHash, current, block, this.txUnit)
 
+            logger.info(`Put Block(${current.height}) HTip(${this.headerTip.height}) BTip(${this.blockTip.height})`)
             return true
         } catch (e) {
             logger.error(e)
@@ -135,12 +137,15 @@ export class SingleChain implements IConsensus {
 
     public async putHeader(header: BlockHeader): Promise<boolean> {
         try {
+            // TODO: Return block status
             const blockHash = new Hash(header)
             const blockStatus = await this.getBlockStatus(new Hash(header))
             if (blockStatus === BlockStatus.Rejected) {
                 logger.warn(`Already rejected Block : ${blockHash}`)
-                return false
-            } else if (blockStatus === BlockStatus.MainChain || blockStatus === BlockStatus.Block || blockStatus === BlockStatus.Header) {
+                throw new Error(`Rejecting Header : ${blockHash}`)
+            }
+
+            if (blockStatus === BlockStatus.MainChain || blockStatus === BlockStatus.Block || blockStatus === BlockStatus.Header) {
                 logger.warn(`Already exsited Header : ${blockHash}`)
                 return false
             }
@@ -148,12 +153,13 @@ export class SingleChain implements IConsensus {
             if (!await this.verifyHeader(header)) {
                 logger.error(`Invalid Header Rejected : ${blockHash}`)
                 await this.db.setBlockStatus(blockHash, BlockStatus.Rejected)
-                return false
+                throw new Error(`Rejecting Header : ${blockHash}`)
             }
 
             const { current, previous } = await this.db.putHeader(blockHash, header)
             await this.organizeChains(blockHash, current)
 
+            logger.info(`Put Header(${current.height}) HTip(${this.headerTip.height}) BTip(${this.blockTip.height})`)
             return true
         } catch (e) {
             logger.error(`Fail to putHeader in SingleChain : ${e}`)
@@ -394,7 +400,7 @@ export class SingleChain implements IConsensus {
         }
         const { stateTransition, validTxs, invalidTxs } = await this.worldState.next(block.txs, previousHeader.stateRoot, block.miner)
         if (!stateTransition.currentStateRoot.equals(block.header.stateRoot)) {
-            logger.warn(`State root is incorrect`)
+            logger.warn(`State root(${stateTransition.currentStateRoot.toString()}) is incorrect, previous: ${previousHeader.stateRoot.toString()}`)
             return { isVerified: false }
         }
         if (invalidTxs.length > 0) {
@@ -424,8 +430,6 @@ export class SingleChain implements IConsensus {
     }
 
     private async organizeChains(newBlockHash: Hash, dbBlock: DBBlock, block?: Block, txCount: number = 0): Promise<void> {
-        logger.info(`Reorg logic should be implemented`)
-
         if (this.headerTip === undefined || this.headerTip.height < dbBlock.height) {
             this.headerTip = dbBlock
             await this.db.setHeaderTip(newBlockHash)
@@ -443,6 +447,7 @@ export class SingleChain implements IConsensus {
             }
         } else {
             await this.db.setBlockStatus(newBlockHash, BlockStatus.Header)
+            this.graph.addToGraph(dbBlock.header, BlockStatus.Header)
         }
     }
 

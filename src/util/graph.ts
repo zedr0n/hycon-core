@@ -1,5 +1,5 @@
 import { cloneElement } from "react"
-import { BlockHeader } from "../common/blockHeader"
+import { BlockHeader, AnyBlockHeader } from "../common/blockHeader"
 import { GenesisBlockHeader } from "../common/genesisHeader"
 import { BlockStatus } from "../consensus/sync"
 import { Hash } from "./hash"
@@ -35,7 +35,7 @@ export class Graph {
         this.renderGraph()
     }
 
-    public addToGraph(header: BlockHeader, status: BlockStatus) {
+    public addToGraph(header: AnyBlockHeader, status: BlockStatus) {
         const blockHash = new Hash(header)
         const id = blockHash.toHex().slice(0, 6)
         let color
@@ -51,9 +51,11 @@ export class Graph {
                 break
         }
         this.addNode(id, color)
-        for (const prevHash of header.previousHash) {
-            const pid = prevHash.toHex().slice(0, 6)
-            this.addEdge(id, pid)
+        if (header instanceof BlockHeader) {
+            for (const prevHash of header.previousHash) {
+                const pid = prevHash.toHex().slice(0, 6)
+                this.addEdge(id, pid)
+            }
         }
         this.renderGraph()
     }

@@ -298,19 +298,22 @@ export class Database {
     }
 
     private async dbBlockToBlock(dbBlock: DBBlock): Promise<AnyBlock> {
-        return new Promise<AnyBlock>(async (resolved, reject) => {
-            if (dbBlock.offset !== undefined && dbBlock.length !== undefined && dbBlock.fileNumber !== undefined) {
-                const blockFile = new BlockFile()
-                await blockFile.fileInit(this.filePath, dbBlock.fileNumber)
-                const encodeBlock = await blockFile.get(dbBlock.offset, dbBlock.length)
+        if (dbBlock.offset !== undefined && dbBlock.length !== undefined && dbBlock.fileNumber !== undefined) {
+            const blockFile = new BlockFile()
+            await blockFile.fileInit(this.filePath, dbBlock.fileNumber)
+            const encodeBlock = await blockFile.get(dbBlock.offset, dbBlock.length)
+            try {
                 const block = Block.decode(encodeBlock)
-                await blockFile.close()
-                resolved(block)
-            } else {
-                logger.error(`Fail to dbBlock to block : Block file information is not found`)
-                reject("Block could not be found")
+            } catch (e) {
+                // TODO: Schedule redownload?
+                logger.fatal(`Could not decode block: ${e}`)
             }
-        })
+            await blockFile.close()
+            return block
+        } else {
+            logger.error(`Fail to dbBlock to block : Block file information is not found`)
+            throw new Error("Block could not be found")
+        }
     }
 
     private async getOrInitKey(key: string, value: any = 0): Promise<any> {

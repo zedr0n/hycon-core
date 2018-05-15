@@ -19,7 +19,8 @@ export enum BlockStatus {
     Block = 2,
     MainChain = 3,
 }
-const count = 10
+const blockCount = 1
+const headerCount = 100
 
 interface ITip {
     hash: Hash,
@@ -36,7 +37,7 @@ export class Sync {
     public peer: IPeer
     private consensus: IConsensus
 
-    private different: ISyncInfo
+    private differentHeight: number
     private commonMainChain: ISyncInfo
     private commonBlock: ISyncInfo
     private commonHeader: ISyncInfo
@@ -44,18 +45,12 @@ export class Sync {
     private network: INetwork
 
     constructor(server: Server) {
-        this.peer = undefined
         this.network = server.network
         this.consensus = server.consensus
         // start syncing after a little time
         setTimeout(() => {
             this.sync()
         }, 4000)
-    }
-
-    // when previous block is not found
-    // if node is already syncing , it will be ignored
-    public onPreviousNotFound(previousBlockHash: Hash) {
     }
 
     // in future, for dag
@@ -69,34 +64,40 @@ export class Sync {
         // const testTips = await this.consensus.getHeadersRange(0, 1)
         // const testHash = new Hash(testTips[0])
 
-        this.peer = this.network.getRandomPeer()
-        if (!this.peer) {
-            // we will replace with other alogrithm
-            await delay(4000)
-            return
-        }
+        try {
 
-        const remoteTip = await this.peer.getTip()
-        const localTip = this.consensus.getBlocksTip()
-        await this.findCommons(remoteTip, localTip)
-        const startHeaderHeight = await this.findStartHeader()
-        if (remoteTip.height > localTip.height) {
-            await this.getHeaders(startHeaderHeight)
-        } else {
-            await this.putHeaders(startHeaderHeight)
+            this.peer = this.network.getRandomPeer()
+            if (!this.peer) {
+                // we will replace with other alogrithm
+                await delay(4000)
+                return
+            }
+
+            const remoteTip = await this.peer.getTip()
+            const remoteTip2 = await this.peer.getHeadersByRange(0, 1)
+            const remoteTip3 = new Hash(remoteTip2[0])
+            const localTip = this.consensus.getBlocksTip()
+
+            await this.findCommons(localTip, remoteTip)
+            const startHeaderHeight = await this.findStartHeader()
+            if (remoteTip.height > localTip.height) {
+                await this.getHeaders(startHeaderHeight)
+            } else {
+                await this.putHeaders(startHeaderHeight)
+            }
+            const startBlockHeight = await this.findStartBlock(startHeaderHeight)
+            if (remoteTip.height > localTip.height) {
+                await this.getBlocks(startBlockHeight)
+            } else {
+                await this.putBlocks(startBlockHeight)
+            }
+            this.peer = undefined
+        } catch (e) {
+            logger.debug(`Syncing failed: ${e}`)
         }
-        const startBlockHeight = await this.findStartBlock(startHeaderHeight)
-        if (remoteTip.height > localTip.height) {
-            await this.getBlocks(startBlockHeight)
-        } else {
-            await this.putBlocks(startBlockHeight)
-        }
-        this.peer = undefined
     }
-
     private isSyncing() {
-        const ret = this.peer !== undefined
-        return ret
+        return this.peer !== undefined
     }
 
     private async findCommons(localTip: ITip, remoteTip: ITip) {
@@ -105,8 +106,10 @@ export class Sync {
             if (await this.updateCommons(remoteTip.height, remoteTip.hash)) {
                 return
             }
+            this.differentHeight = remoteTip.height
             startHeight = remoteTip.height - 1
         } else if (remoteTip.height > localTip.height) {
+            this.differentHeight = remoteTip.height
             startHeight = localTip.height
         }
 
@@ -120,12 +123,13 @@ export class Sync {
             i *= 2
         }
 
-        if (!await this.updateCommons(0)) {
+        if (!(await this.updateCommons(0))) {
             logger.fatal("Peer is different genesis block")
             throw new Error("Peer using different genesis block tried to sync")
         }
     }
 
+    // hash: peer hash of this height
     private async updateCommons(height: number, hash?: Hash) {
         if (hash === undefined) {
             hash = await this.peer.getHash(height)
@@ -147,10 +151,10 @@ export class Sync {
                 if (this.commonHeader === undefined) {
                     this.commonHeader = syncInfo
                 }
-                return (this.commonMainChain === undefined) && (this.commonBlock === undefined)
+                return (this.commonMainChain !== undefined) && (this.commonBlock !== undefined)
             case BlockStatus.Nothing:
-                this.different = syncInfo
-                return (this.commonMainChain === undefined) && (this.commonBlock === undefined) && (this.commonHeader === undefined)
+                this.differentHeight = syncInfo.height
+                return (this.commonMainChain !== undefined) && (this.commonBlock !== undefined) && (this.commonHeader !== undefined)
             case BlockStatus.Rejected:
                 logger.fatal("Peer is using rejected block")
                 throw new Error("Rejected block found during sync")
@@ -158,7 +162,7 @@ export class Sync {
     }
 
     private async findStartHeader(): Promise<number> {
-        let height = this.different.height
+        let height = this.differentHeight
         let min = this.commonHeader.height
         while (min + 1 < height) {
             // tslint:disable-next-line:no-bitwise
@@ -183,22 +187,32 @@ export class Sync {
 
     private async getHeaders(height: number) {
         let headers: AnyBlockHeader[]
-        do {
-            headers = await this.peer.getHeadersByRange(height, count)
-            for (const header of headers) {
-                if (header instanceof BlockHeader) {
-                    await this.consensus.putHeader(header)
+        try {
+            do {
+                headers = await this.peer.getHeadersByRange(height, headerCount)
+                for (const header of headers) {
+                    if (header instanceof BlockHeader) {
+                        await this.consensus.putHeader(header)
+                    }
                 }
-            }
-        } while (headers.length > 0)
+                height += headers.length
+            } while (headers.length > 0)
+        } catch (e) {
+            throw new Error(`Could not completely sync headers: ${e}`)
+        }
     }
 
     private async putHeaders(height: number) {
         let headers: AnyBlockHeader[]
-        do {
-            headers = await this.consensus.getHeadersRange(height, count)
-            await this.peer.putHeaders(headers)
-        } while (headers.length > 0)
+        try {
+            do {
+                headers = await this.consensus.getHeadersRange(height, headerCount)
+                await this.peer.putHeaders(headers)
+                height += headers.length
+            } while (headers.length > 0)
+        } catch (e) {
+            throw new Error(`Could not completely sync headers: ${e}`)
+        }
     }
 
     private async findStartBlock(height: number): Promise<number> {
@@ -226,21 +240,32 @@ export class Sync {
 
     private async getBlocks(height: number) {
         let blocks: AnyBlock[]
-        do {
-            blocks = await this.peer.getBlocksByRange(height, count)
-            for (const block of blocks) {
-                if (block instanceof Block) {
-                    await this.consensus.putBlock(block)
+
+        try {
+            do {
+                blocks = await this.peer.getBlocksByRange(height, blockCount)
+                for (const block of blocks) {
+                    if (block instanceof Block) {
+                        await this.consensus.putBlock(block)
+                    }
                 }
-            }
-        } while (blocks.length > 0)
+                height += blocks.length
+            } while (blocks.length > 0)
+        } catch (e) {
+            throw new Error(`Could not completely sync blocks: ${e}`)
+        }
     }
 
     private async putBlocks(height: number) {
         let blocks: AnyBlock[]
-        do {
-            blocks = await this.consensus.getBlocksRange(height, count)
-            await this.peer.putBlocks(blocks)
-        } while (blocks.length > 0)
+        try {
+            do {
+                blocks = await this.consensus.getBlocksRange(height, blockCount)
+                await this.peer.putBlocks(blocks)
+                height += blocks.length
+            } while (blocks.length > 0)
+        } catch (e) {
+            throw new Error(`Could not completely sync blocks: ${e}`)
+        }
     }
 }
