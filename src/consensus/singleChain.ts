@@ -30,6 +30,7 @@ import { BlockStatus } from "./sync"
 
 const logger = getLogger("SingleChain Concensus")
 export class SingleChain implements IConsensus {
+    public graph: Graph
     private server: Server
     private newBlockCallbacks: NewBlockCallback[]
     private db: Database
@@ -53,6 +54,7 @@ export class SingleChain implements IConsensus {
         this.txUnit = 1000
         if (txPath) { this.txdb = new TxDatabase(txPath) }
         this.difficultyAdjuster = new DifficultyAdjuster(this.alpha, this.targetTimeEMA, this.targetWorkEMA)
+        this.graph = new Graph()
     }
     public async getNonce(address: Address): Promise<number> {
         const account = await this.worldState.getAccount(this.blockTip.header.stateRoot, address)
