@@ -10,7 +10,7 @@
   },
   "scripts": {
     "start": "./node_modules/.bin/ts-node src/main.ts --networkid=3 --port=8148 --writing --str_port=9081 --mine  --disable_upnp",
-    "start2": "./node_modules/.bin/ts-node src/main.ts --networkid=3 --port=8149 --writing --str_port=9082 --peer localhost:8148 --mine --disable_upnp",
+    "start2": "./node_modules/.bin/ts-node src/main.ts --networkid=3 --port=8149 --str_port=9082 --peer localhost:8148 --mine --disable_upnp",
     "start3": "./node_modules/.bin/ts-node src/main.ts --networkid=3 --port=8148 --writing --str_port=9081 --api --api_port=2442 --mine",
     "protogen": "pbjs -t static-module -w commonjs -o src/serialization/proto.js proto/main.proto &&  pbts -o src/serialization/proto.d.ts src/serialization/proto.js && ./src/serialization/trim_null.sh",
     "debug": "./node_modules/.bin/ts-node --inspect=9231 --inspect-brk src/main.ts --port=8148  --networkid=3  --writing --str_port=9081 --mine --disable_upnp",
