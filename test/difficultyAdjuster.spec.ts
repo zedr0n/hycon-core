@@ -25,8 +25,8 @@ describe("DifficultyAdjuster", () => {
     it("calcWorkEMA: 2 should calculate the latest EMAs from a difficulty delta", () => {
         const prevWorkEMA = new Difficulty(0x00_00_FF, 0x15)
 
-        const newWork = new Difficulty(0x00_00_FF, 0x15)
-        const correctWorkEMA = new Difficulty(0x00_00_FF, 0x15)
+        const newWork = new Difficulty(0x0000FF, 0x15)
+        const correctWorkEMA = new Difficulty(0x0000FF, 0x15)
 
         const ema = DifficultyAdjuster.calcWorkEMA(newWork, prevWorkEMA)
 

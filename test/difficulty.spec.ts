@@ -88,9 +88,9 @@ describe("Difficulty", () => {
         difficulty = new Difficulty(0x0a00, 0x00)
         const equalHashBytes = new Uint8Array(
             [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x09, 0x00])
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x09, 0x00])
         const equalHash = new Hash(equalHashBytes)
         const compare = difficulty.greaterThan(equalHash)
         expect(compare).toEqual(true)
@@ -120,19 +120,19 @@ describe("Difficulty", () => {
     })
 
     it("getMinerParameters: offset should be 2 if an exponent is a 0x00 and mantisa is 0x012300", () => {
-        difficulty = new Difficulty( 0x012300, 0x00)
+        difficulty = new Difficulty(0x012300, 0x00)
         const params = difficulty.getMinerParameters()
         expect(params.offset).toEqual(2)
     })
 
     it("getMinerParameters: target should be '0111ff' if a mantisa is 0x000111", () => {
-        difficulty = new Difficulty( 0x000111, 0x00)
+        difficulty = new Difficulty(0x000111, 0x00)
         const params = difficulty.getMinerParameters()
         expect(params.target).toEqual("0111ff")
     })
 
     it("getMinerParameters: target should be '1000ff' if a mantisa is 0x1000ff", () => {
-        difficulty = new Difficulty( 0x1000ff, 0x00)
+        difficulty = new Difficulty(0x1000ff, 0x00)
         const params = difficulty.getMinerParameters()
         expect(params.target).toEqual("1000ff")
     })
@@ -145,7 +145,7 @@ describe("Difficulty", () => {
     // })
 
     it("getMinerParameters: offset === 2 && target should be '0123ff' if a mantisa is 0x012300", () => {
-        difficulty = new Difficulty( 0x012300, 0x00)
+        difficulty = new Difficulty(0x012300, 0x00)
         const params = difficulty.getMinerParameters()
         expect(params.offset).toEqual(2)
         expect(params.target).toEqual("0123ff")
@@ -236,9 +236,9 @@ describe("Difficulty", () => {
     })
 
     it("add: 1 should add two difficulty values together", () => {
-        const difficulty1 = new Difficulty(0x00_00_01, 0x00)
-        const difficulty2 = new Difficulty(0x00_00_01, 0x00)
-        const correctSum = 0x00_00_00_02
+        const difficulty1 = new Difficulty(0x000001, 0x00)
+        const difficulty2 = new Difficulty(0x000001, 0x00)
+        const correctSum = 0x00000002
 
         const sum = difficulty1.add(difficulty2)
 
@@ -246,9 +246,9 @@ describe("Difficulty", () => {
     })
 
     it("add: 2 should add two difficulty values that shift the exponent", () => {
-        const difficulty1 = new Difficulty(0xFF_FF_FF, 0x00)
-        const difficulty2 = new Difficulty(0x00_00_01, 0x00)
-        const correctSum = 0x03_00_00_01
+        const difficulty1 = new Difficulty(0xFFFFFF, 0x00)
+        const difficulty2 = new Difficulty(0x000001, 0x00)
+        const correctSum = 0x03000001
 
         const sum = difficulty1.add(difficulty2)
 
@@ -256,9 +256,9 @@ describe("Difficulty", () => {
     })
 
     it("add: 3 should add two difficulty values with non-overlapping mantissas", () => {
-        const difficulty1 = new Difficulty(0x00_00_01, 0x10)
-        const difficulty2 = new Difficulty(0x00_00_01, 0x00)
-        const correctSum = 0x10_01_00_01
+        const difficulty1 = new Difficulty(0x000001, 0x10)
+        const difficulty2 = new Difficulty(0x000001, 0x00)
+        const correctSum = 0x10010001
 
         const sum = difficulty1.add(difficulty2)
 
@@ -266,9 +266,9 @@ describe("Difficulty", () => {
     })
 
     it("add: 4 should remain the same value if the precision cannot capture the new value", () => {
-        const difficulty1 = new Difficulty(0x00_00_01, 0x24)
-        const difficulty2 = new Difficulty(0x00_00_01, 0x00)
-        const correctSum = 0x24_00_00_01
+        const difficulty1 = new Difficulty(0x000001, 0x24)
+        const difficulty2 = new Difficulty(0x000001, 0x00)
+        const correctSum = 0x24000001
 
         const sum = difficulty1.add(difficulty2)
 
