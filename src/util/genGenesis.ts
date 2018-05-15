@@ -81,8 +81,8 @@ async function editGenesis(genesis: GenesisBlock) {
     genesis.header.stateRoot = firstResult.currentStateRoot
     logger.info(`Genesis hash : ${new Hash(genesis.header)}`)
 
-    fs.writeFileSync("./data/genesis.dat", genesis.encode())
-    const editedGen = GenesisBlock.decode(fs.readFileSync("./data/genesis.dat"))
+    fs.writeFileSync("./data/genesisTest.dat", genesis.encode())
+    const editedGen = GenesisBlock.decode(fs.readFileSync("./data/genesisTest.dat"))
     logger.info(`Genesis : `, editedGen)
     for (const tx of editedGen.txs) {
         if (!verifyTx(tx)) { continue }
