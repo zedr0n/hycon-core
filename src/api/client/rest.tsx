@@ -15,8 +15,8 @@ export interface IUser {
 
 export interface ITxProp {
     hash: string
-    amount: number
-    fee?: number
+    amount: string
+    fee?: string
     from?: string
     to?: string
     signature?: string
@@ -74,11 +74,11 @@ export interface IRest {
     setLoading(loading: boolean): void
     setIsHyconWallet(isHyconWallet: boolean): void
     createNewWallet(meta: IHyconWallet): Promise<IHyconWallet | IResponseError>
-    getWalletBalance(address: string): Promise<{balance: number} | IResponseError>
+    getWalletBalance(address: string): Promise<{balance: string} | IResponseError>
     getWalletTransactions(address: string, nonce?: number): Promise<{ txs: ITxProp[]} | IResponseError>
 
-    outgoingSignedTx(tx: { privateKey: string, from: string, to: string, amount: number, fee: number }, queueTx?: Function): Promise<{txHash: string} | IResponseError>
-    outgoingTx(tx: { signature: string, from: string, to: string, amount: number, fee: number, nonce: number, recovery: number }, queueTx?: Function): Promise<{ txHash: string } | IResponseError>
+    outgoingSignedTx(tx: { privateKey: string, from: string, to: string, amount: string, fee: string }, queueTx?: Function): Promise<{txHash: string} | IResponseError>
+    outgoingTx(tx: { signature: string, from: string, to: string, amount: string, fee: string, nonce: number, recovery: number }, queueTx?: Function): Promise<{ txHash: string } | IResponseError>
 
     // tslint:disable:adjacent-overload-signatures
     getAddressInfo(address: string): Promise<IWalletAddress>

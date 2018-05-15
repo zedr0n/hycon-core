@@ -4,19 +4,22 @@ export function zeroPad(input: string, length: number) {
     return (Array(length + 1).join("0") + input).slice(-length)
 }
 
-export function printLong(value: Long): string {
-    return ""
+export function hycontoString(value: Long): string {
+    const str = value.toString()
+    const index = str.length - 9
+    let hycon = str.slice(0, index)
+    hycon = hycon.length === 0 ? "0" : hycon
+    const subCon = str.slice(index)
+    return hycon + "." + subCon
 }
 
-export function toLong(num: number): Long {
-    const str = num.toString()
-    const arr = str.split(".")
-    let value = Long.fromString(arr[0]).multiply(Math.pow(10, 9))
+export function hyconfromString(val: string): Long {
+    const arr = val.toString().split(".")
+    let hycon = Long.fromString(arr[0], true).multiply(Math.pow(10, 9))
     if (arr.length > 1) {
         arr[1] = arr[1].length > 9 ? arr[1].slice(0, 9) : arr[1]
-        const length = 9 - arr[1].length
-        const b = Long.fromString(arr[1]).multiply(Math.pow(10, length))
-        value = value.add(b)
+        const subCon = Long.fromString(arr[1], true).multiply(Math.pow(10, 9 - arr[1].length))
+        hycon = hycon.add(subCon)
     }
-    return value
+    return hycon
 }

@@ -10,6 +10,7 @@ import { PublicKey } from "../../common/publicKey"
 import { GenesisSignedTx } from "../../common/txGenesisSigned"
 import { SignedTx } from "../../common/txSigned"
 import { Server } from "../../server"
+import { hycontoString } from "../../util/commonUtil"
 import { Hash } from "../../util/hash"
 import * as mnemonic from "../../wallet/mnemonic"
 import { Wallet } from "../../wallet/wallet"
@@ -78,7 +79,7 @@ export class WorldState {
                     await this.print(node.child, n + 1, concat(prefix, node.address))
                 }
             } else if (object.account !== undefined) {
-                logger.info(`${indent}(${prefix.length})${new Address(prefix).toString()} --> ${object.account.balance} --> (${hash.toString()}) : count(${object.refCount})`)
+                logger.info(`${indent}(${prefix.length})${new Address(prefix).toString()} --> ${hycontoString(object.account.balance)} --> (${hash.toString()}) : count(${object.refCount})`)
             } else {
                 logger.info(`${indent}Could not find '${hash.toString()}'`)
             }
@@ -174,7 +175,7 @@ export class WorldState {
                     logger.error(`Tx ${new Hash(tx)} Rejected: ${tx.from.toString()} has not been seen before, so it has insufficient balance.`)
                     continue
                 }
-                logger.info(`From balance : ${fromAccount.balance}`)
+                logger.info(`From balance : ${hycontoString(fromAccount.balance)}`)
                 // TODO: Handle coin burn
                 let toAccount: Account | undefined
                 const toIndex = mapIndex.get(tx.to.toString())
@@ -186,7 +187,7 @@ export class WorldState {
                 if (toAccount === undefined) {
                     toAccount = new Account({ balance: 0, nonce: 0 })
                 }
-                logger.info(`toAccount balance : ${toAccount.balance}`)
+                logger.info(`toAccount balance : ${hycontoString(toAccount.balance)}`)
 
                 if (tx.nonce !== (fromAccount.nonce + 1)) {
                     invalidTxs.push(tx)
@@ -194,7 +195,8 @@ export class WorldState {
                     continue
                 }
 
-                if (fromAccount.balance.compare(tx.amount.add(tx.fee)) === -1) {
+                const total = tx.amount.add(tx.fee)
+                if (fromAccount.balance.lessThan(total)) {
                     invalidTxs.push(tx)
                     logger.info(`Tx ${new Hash(tx)} Rejected: The balance of the account is insufficient.`)
                     continue
@@ -202,12 +204,13 @@ export class WorldState {
 
                 validTxs.push(tx)
 
-                const amtFee = tx.amount.add(tx.fee)
                 fees = fees.add(tx.fee)
-                fromAccount.balance = fromAccount.balance.sub(amtFee)
+                fromAccount.balance = fromAccount.balance.sub(total)
                 toAccount.balance = toAccount.balance.add(tx.amount)
                 fromAccount.nonce++
-                logger.info(`After tx : ${fromAccount.balance} / ${toAccount.balance} / ${tx.amount} / ${tx.fee}`)
+
+                logger.info(`After tx : ${hycontoString(fromAccount.balance)} / ${hycontoString(toAccount.balance)} / ${hycontoString(tx.amount)} / ${hycontoString(tx.fee)}`)
+
                 if (fromIndex === undefined) {
                     mapIndex.set(tx.from.toString(), changes.push({ address: tx.from, account: fromAccount }) - 1)
                 } else {

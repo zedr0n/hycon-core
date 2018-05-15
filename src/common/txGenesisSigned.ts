@@ -1,10 +1,13 @@
 
+import { getLogger } from "log4js"
 import Long = require("long")
 import * as proto from "../serialization/proto"
+import { hyconfromString } from "../util/commonUtil"
 import { Hash } from "../util/hash"
 import { Address } from "./address"
 import { PublicKey } from "./publicKey"
 import { GenesisTx } from "./txGenesis"
+const logger = getLogger("TxGenesisSigned")
 
 export class GenesisSignedTx implements proto.ITx {
     public static decode(data: Uint8Array): GenesisSignedTx {
@@ -46,7 +49,8 @@ export class GenesisSignedTx implements proto.ITx {
         if (stx.recovery === undefined) { throw (new Error("recovery not defined in input")) }
 
         this.to = new Address(stx.to)
-        this.amount = stx.amount instanceof Long ? stx.amount : Long.fromNumber(stx.amount * 10 ** 9, true)
+        this.amount = stx.amount instanceof Long ? stx.amount : Long.fromNumber(stx.amount, true)
+        if (!this.amount.unsigned) {logger.fatal(`Protobuf problem with account balance`)}
         this.signature = new Buffer(stx.signature)
         this.recovery = stx.recovery
     }

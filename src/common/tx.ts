@@ -3,6 +3,7 @@ import * as Long from "long"
 import { Address } from "../common/address"
 import { PublicKey } from "../common/publicKey"
 import * as proto from "../serialization/proto"
+import { hyconfromString } from "../util/commonUtil"
 import { Hash } from "../util/hash"
 
 const logger = getLogger("Tx")
@@ -27,8 +28,9 @@ export class Tx implements proto.ITx {
 
         this.from = new Address(tx.from)
         this.to = new Address(tx.to)
-        this.amount = tx.amount instanceof Long ? tx.amount : Long.fromNumber(tx.amount * 10 ** 9, true)
-        this.fee = tx.fee instanceof Long ? tx.fee : Long.fromNumber(tx.fee * 10 ** 9, true)
+        this.amount = tx.amount instanceof Long ? tx.amount : Long.fromNumber(tx.amount, true)
+        this.fee = tx.fee instanceof Long ? tx.fee : Long.fromNumber(tx.fee, true)
+        if (!this.amount.unsigned || !this.fee.unsigned) { logger.fatal(`Protobuf problem with Tx amount|fee `) }
         this.nonce = tx.nonce
     }
 

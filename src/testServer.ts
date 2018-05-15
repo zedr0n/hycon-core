@@ -20,7 +20,7 @@ import { RestManager } from "./rest/restManager"
 import { Block, INetwork, Tx } from "./serialization/proto"
 import * as proto from "./serialization/proto"
 import { Server } from "./server"
-import { longToString, toLong } from "./util/commonUtil"
+import { hyconfromString, hycontoString } from "./util/commonUtil"
 import { Hash } from "./util/hash"
 import { Wallet } from "./wallet/wallet"
 import { WalletManager } from "./wallet/walletManager"
@@ -65,7 +65,7 @@ export class TestServer {
             const account = await this.server.consensus.getAccount(w.pubKey.address())
             assert(account)
             assert(account.balance.compare(0) === 1)
-            logger.debug(`Make Wallet=${name} Public=${w.pubKey.address().toString()} Balance=${account.balance}`)
+            logger.debug(`Make Wallet=${name} Public=${w.pubKey.address().toString()} Balance=${hycontoString(account.balance)}`)
             assert(w)
         }
     }
@@ -91,8 +91,8 @@ export class TestServer {
         }, 5000)
     }
     private async makeTx() {
-        const amt = 5.1
-        const fee = 10.1234567
+        const amt = hyconfromString("100.123")
+        const fee = hyconfromString("10.2")
         this.nonce = 0
 
         let n = randomInt(0, 90)
@@ -119,11 +119,12 @@ export class TestServer {
             }
             this.nonceTable.set(fromAddrString, nonce)
             if (!fromAddr.equals(toAddr)) {
-                const a = amt + randomInt(0, 200)
-                const b = fee + randomInt(0, 10) / 10
-                logger.info(`Amount : ${a} / Fee : ${b}`)
-                const tx = fromWallet.send(toAddr, toLong(a), nonce, toLong(b))
-                logger.debug(`TX ${i + 1} Amount=${(tx.amount).toString()} Fee=${(tx.fee).toString()} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
+                const a = amt.add(randomInt(0, 10))
+                const b = fee.add(randomInt(0, 10) / 10)
+                logger.info(`Amount : ${hycontoString(a)} / Fee : ${hycontoString(b)}`)
+                // const tx = fromWallet.send(toAddr, hyconfromString(a), nonce, hyconfromString(b))
+                const tx = fromWallet.send(toAddr, a, nonce, b)
+                logger.debug(`TX ${i + 1} Amount=${hycontoString(tx.amount)} Fee=${hycontoString(tx.fee)} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
                 txList.push(tx)
             }
         }

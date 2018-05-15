@@ -4,8 +4,10 @@ import { deprecate } from "util"
 import { Address } from "../common/address"
 import { PublicKey } from "../common/publicKey"
 import * as proto from "../serialization/proto"
+import { hyconfromString } from "../util/commonUtil"
 import { Hash } from "../util/hash"
 import { Tx } from "./tx"
+const logger = getLogger("TxSigned")
 export class SignedTx implements proto.ITx {
     public static decode(data: Uint8Array): SignedTx {
         const stx = proto.Tx.decode(data)
@@ -53,8 +55,9 @@ export class SignedTx implements proto.ITx {
 
         this.from = new Address(stx.from)
         this.to = new Address(stx.to)
-        this.amount = stx.amount instanceof Long ? stx.amount : Long.fromNumber(stx.amount * 10 ** 9, true)
-        this.fee = stx.fee instanceof Long ? stx.fee : Long.fromNumber(stx.fee * 10 ** 9, true)
+        this.amount = stx.amount instanceof Long ? stx.amount : Long.fromNumber(stx.amount, true)
+        this.fee = stx.fee instanceof Long ? stx.fee : Long.fromNumber(stx.fee, true)
+        if (!this.amount.unsigned || !this.fee.unsigned) { logger.fatal(`Protobuf problem with SignedTx amount|fee `) }
         this.nonce = stx.nonce
         this.signature = new Buffer(stx.signature)
         this.recovery = stx.recovery

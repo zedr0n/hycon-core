@@ -3,6 +3,8 @@ import * as Long from "long"
 import { Address } from "../common/address"
 import { PublicKey } from "../common/publicKey"
 import * as proto from "../serialization/proto"
+import {hyconfromString} from "../util/commonUtil"
+const logger = getLogger("TxGenesis")
 export class GenesisTx implements proto.ITx {
     public to: Address
     public amount: Long
@@ -20,7 +22,8 @@ export class GenesisTx implements proto.ITx {
         }
 
         this.to = new Address(tx.to)
-        this.amount = tx.amount instanceof Long ? tx.amount : Long.fromNumber(tx.amount * 10 ** 9, true)
+        this.amount = tx.amount instanceof Long ? tx.amount : Long.fromNumber(tx.amount, true)
+        if (!this.amount.unsigned) {logger.fatal(`Protobuf problem with account balance`)}
     }
 
     public equals(tx: GenesisTx): boolean {

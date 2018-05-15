@@ -5,6 +5,7 @@ import { Address } from "../../common/address"
 import { Tx } from "../../common/tx"
 import { SignedTx } from "../../common/txSigned"
 import { IConsensus } from "../../consensus/iconsensus"
+import { hyconfromString, hycontoString } from "../../util/commonUtil"
 import { Hash } from "../../util/hash"
 import { Wallet } from "../../wallet/wallet"
 import { IHyconWallet, IPeer, IResponseError, IRest, ITxProp, IUser, IWalletAddress } from "../client/rest"
@@ -53,7 +54,7 @@ export class RestServer implements IRest {
         }
     }
 
-    public async getWalletBalance(address: string): Promise<{ balance: number } | IResponseError> {
+    public async getWalletBalance(address: string): Promise<{ balance: string } | IResponseError> {
         try {
             const addressOfWallet = new Address(address)
             const account = await this.consensus.getAccount(addressOfWallet)
@@ -67,7 +68,7 @@ export class RestServer implements IRest {
             } else {
                 const a = account.balance
                 return Promise.resolve({
-                    balance: account ? account.balance.toInt() : 0,
+                    balance: account ? hycontoString(account.balance) : "0",
                 })
             }
         } catch (e) {
@@ -104,8 +105,8 @@ export class RestServer implements IRest {
                     if (tx instanceof SignedTx && tx.nonce >= nonce) {
                         webTx = {
                             hash: tx.tx.unsignedHash().toString(),
-                            amount: tx.tx.amount.toInt(),
-                            fee: tx.fee.toInt(),
+                            amount: hycontoString(tx.tx.amount),
+                            fee: hycontoString(tx.fee),
                             from: tx.from.toString(),
                             to: tx.tx.to.toString(),
                             signature: tx.tx.signature.toString(),
@@ -128,15 +129,16 @@ export class RestServer implements IRest {
         }
     }
 
-    public async outgoingSignedTx(tx: { privateKey: string, from: string, to: string, amount: number, fee: number }, queueTx?: Function): Promise<{ txHash: string } | IResponseError> {
+    public async outgoingSignedTx(tx: { privateKey: string, from: string, to: string, amount: string, fee: string }, queueTx?: Function): Promise<{ txHash: string } | IResponseError> {
         try {
             const address = new Address(tx.to)
             const wallet = new Wallet(Buffer.from(tx.privateKey, "hex"))
             const account = await this.consensus.getAccount(new Address(tx.from))
-            if ((tx.amount + tx.fee) > account.balance) {
+            const total = hyconfromString(tx.amount).add(hyconfromString(tx.fee))
+            if (account.balance.lessThan(total)) {
                 throw new Error("insufficient wallet balance to send transaction")
             }
-            const signedTx = wallet.send(address, tx.amount, account.nonce + 1, tx.fee)
+            const signedTx = wallet.send(address, hyconfromString(tx.amount), account.nonce + 1, hyconfromString(tx.fee))
             if (queueTx) {
                 queueTx(signedTx)
             } else {
@@ -155,13 +157,13 @@ export class RestServer implements IRest {
         }
     }
 
-    public async outgoingTx(tx: { signature: string, from: string, to: string, amount: number, fee: number, nonce: number, recovery: number }, queueTx?: Function): Promise<{ txHash: string } | IResponseError> {
+    public async outgoingTx(tx: { signature: string, from: string, to: string, amount: string, fee: string, nonce: number, recovery: number }, queueTx?: Function): Promise<{ txHash: string } | IResponseError> {
         try {
             const address = new Tx({
                 from: new Address(tx.from),
                 to: new Address(tx.to),
-                amount: tx.amount,
-                fee: tx.fee,
+                amount: hyconfromString(tx.amount),
+                fee: hyconfromString(tx.fee),
                 nonce: tx.nonce,
             })
 
@@ -173,7 +175,8 @@ export class RestServer implements IRest {
                 }
             }
             const account = await this.consensus.getAccount(new Address(tx.from))
-            if (tx.amount > account.balance) {
+            const total = hyconfromString(tx.amount).add(hyconfromString(tx.fee))
+            if (account.balance.lessThan(total)) {
                 throw new Error("insufficient wallet balance to send transaction")
             }
             if (queueTx) {
@@ -209,15 +212,15 @@ export class RestServer implements IRest {
             if (hyconBlockTx.tx instanceof SignedTx) {
                 tx = {
                     hash,
-                    amount: Number(hyconBlockTx.tx.amount),
-                    fee: Number(hyconBlockTx.tx.fee),
+                    amount: hycontoString(hyconBlockTx.tx.amount),
+                    fee: hycontoString(hyconBlockTx.tx.fee),
                     from: hyconBlockTx.tx.from.toString(),
                     to: hyconBlockTx.tx.to.toString(),
                 }
             } else {
                 tx = {
                     hash,
-                    amount: Number(hyconBlockTx.tx.amount),
+                    amount: hycontoString(hyconBlockTx.tx.amount),
                     to: hyconBlockTx.tx.to.toString(),
                 }
             }
@@ -245,8 +248,8 @@ export class RestServer implements IRest {
                     if (tx instanceof SignedTx) {
                         webTx = {
                             hash: tx.tx.unsignedHash().toString(),
-                            amount: tx.tx.amount.toInt(),
-                            fee: tx.fee.toInt(),
+                            amount: hycontoString(tx.tx.amount),
+                            fee: hycontoString(tx.fee),
                             from: tx.from.toString(),
                             to: tx.tx.to.toString(),
                             signature: tx.tx.signature.toString(),

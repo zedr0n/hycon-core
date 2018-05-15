@@ -56,7 +56,7 @@ describe("Hash", () => {
         })
 
         const h1: Hash = new Hash(tx)
-        tx.amount = Long.fromNumber(47)
+        tx.amount = Long.fromNumber(47, true)
         const h2: Hash = new Hash(tx)
 
         const isEqual = h1.equals(h2)
