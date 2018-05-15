@@ -47,10 +47,6 @@ export class Sync {
     constructor(server: Server) {
         this.network = server.network
         this.consensus = server.consensus
-        // start syncing after a little time
-        setTimeout(() => {
-            this.sync()
-        }, 4000)
     }
 
     // in future, for dag
@@ -69,8 +65,7 @@ export class Sync {
             this.peer = this.network.getRandomPeer()
             if (!this.peer) {
                 // we will replace with other alogrithm
-                await delay(4000)
-                return
+                return delay(4000)
             }
 
             const remoteTip = await this.peer.getTip()
@@ -103,10 +98,10 @@ export class Sync {
     private async findCommons(localTip: ITip, remoteTip: ITip) {
         let startHeight: number
         if (remoteTip.height <= localTip.height) {
+            this.differentHeight = remoteTip.height
             if (await this.updateCommons(remoteTip.height, remoteTip.hash)) {
                 return
             }
-            this.differentHeight = remoteTip.height
             startHeight = remoteTip.height - 1
         } else if (remoteTip.height > localTip.height) {
             this.differentHeight = remoteTip.height

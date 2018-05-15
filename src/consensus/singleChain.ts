@@ -400,7 +400,7 @@ export class SingleChain implements IConsensus {
         }
         const { stateTransition, validTxs, invalidTxs } = await this.worldState.next(block.txs, previousHeader.stateRoot, block.miner)
         if (!stateTransition.currentStateRoot.equals(block.header.stateRoot)) {
-            logger.warn(`State root(${stateTransition.currentStateRoot.toString()}) is incorrect, previous: ${previousHeader.stateRoot.toString()}`)
+            logger.warn(`State root(${stateTransition.currentStateRoot.toString()}) is incorrect, expected: ${block.header.stateRoot.toString()}, previous: ${previousHeader.stateRoot.toString()}`)
             return { isVerified: false }
         }
         if (invalidTxs.length > 0) {
@@ -412,6 +412,8 @@ export class SingleChain implements IConsensus {
             logger.warn(`Not all txs were valid`)
             return { isVerified: false }
         }
+
+        logger.fatal(`Verified stateRoot: ${block.header.stateRoot}, Block: ${block.header.merkleRoot.toString()}`)
 
         return { isVerified: true, stateTransition }
     }

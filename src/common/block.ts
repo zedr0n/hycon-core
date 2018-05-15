@@ -49,7 +49,11 @@ export class Block implements proto.IBlock {
         }
 
         if (block.miner !== undefined) {
-            this.miner = new Address(block.miner)
+            if (block.miner.length === 0) {
+                this.miner = undefined
+            } else {
+                this.miner = new Address(block.miner)
+            }
         }
     }
 
