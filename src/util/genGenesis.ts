@@ -52,6 +52,7 @@ const nameList = [
     { name: "ico", balance: 2e09 }, { name: "airdrop", balance: 4e08 },
     { name: "team", balance: 5e08 }, { name: "devfund", balance: 5e08 },
     { name: "bounty", balance: 5e08 }, { name: "csr", balance: 1e08 },
+    // Just for testGenesis
     { name: "test1", balance: 1e6 }, { name: "test2", balance: 2e6 },
     { name: "test3", balance: 3e6 }, { name: "test4", balance: 4e6 },
     { name: "test5", balance: 5e6 }, { name: "test6", balance: 6e6 },
@@ -80,8 +81,8 @@ async function editGenesis(genesis: GenesisBlock) {
     genesis.header.stateRoot = firstResult.currentStateRoot
     logger.info(`Genesis hash : ${new Hash(genesis.header)}`)
 
-    fs.writeFileSync("./data/genesisTest.dat", genesis.encode())
-    const editedGen = GenesisBlock.decode(fs.readFileSync("./data/genesisTest.dat"))
+    fs.writeFileSync("./data/genesis.dat", genesis.encode())
+    const editedGen = GenesisBlock.decode(fs.readFileSync("./data/genesis.dat"))
     logger.info(`Genesis : `, editedGen)
     for (const tx of editedGen.txs) {
         if (!verifyTx(tx)) { continue }
