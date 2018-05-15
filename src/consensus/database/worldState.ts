@@ -120,7 +120,6 @@ export class WorldState {
         const validTxs: SignedTx[] = []
         const invalidTxs: SignedTx[] = []
         return await this.accountLock.critical<{ stateTransition: IStateTransition, validTxs: SignedTx[], invalidTxs: SignedTx[] }>(async () => {
-            logger.info(`Next txs : ${txs.length}`)
             for (const tx of txs) {
                 if (tx.from.equals(tx.to)) {
                     // TODO: Remove this if function and test
