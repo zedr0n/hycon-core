@@ -1,13 +1,14 @@
 *.ts-e
 *.sw?
+.DS_Store
 build
 blockdb*
 coverage
+deleteme*/
+hycon-*
 logs
 node_modules
 package-lock.json
-deleteme*/
-.DS_Store
 peerdb*
 PeerList.db
 rawblock*
@@ -15,4 +16,3 @@ src/keys
 wallet/
 worldstate*
 *.png
-hycon-*
