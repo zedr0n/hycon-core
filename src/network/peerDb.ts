@@ -5,7 +5,6 @@ import rocksdb = require("rocksdb")
 import { AsyncLock } from "../common/asyncLock"
 import * as proto from "../serialization/proto"
 import { Hash } from "../util/hash"
-import { IPeer } from "./ipeer"
 
 const logger = getLogger("PeerDb")
 
