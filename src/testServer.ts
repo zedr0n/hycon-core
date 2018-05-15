@@ -36,7 +36,7 @@ test functions
 */
 export class TestServer {
 
-    public static walletNumber = 5
+    public static walletNumber = 12
     public server: Server
     private txs: Tx[] = []
     private index: number = 1
@@ -69,15 +69,16 @@ export class TestServer {
             assert(w)
         }
     }
+
     public async makeWallet() {
-        for (let i = 0; i < TestServer.walletNumber; i++) {
+        for (let i = 1; i <= TestServer.walletNumber; i++) {
             const name = `test${i}`
-            const password = ""
-            const w = await Wallet.loadKeys(name, password)
-            const account = await this.server.consensus.getAccount(w.pubKey.address())
-            assert(account)
-            assert(account.balance.compare(0) === 1)
-            this.wallets.push(w)
+            // const password = ""
+            // const w = await Wallet.loadKeys(name, password)
+            // const account = await this.server.consensus.getAccount(w.pubKey.address())
+            // assert(account)
+            // assert(account.balance.compare(0) === 1)
+            this.wallets.push(await Wallet.loadKeys(name, ""))
         }
         await this.showWallets()
         logger.debug(`done`)
@@ -95,8 +96,7 @@ export class TestServer {
         const fee = hyconfromString("10.2")
         this.nonce = 0
 
-        let n = randomInt(0, 90)
-        n = 1
+        const n = randomInt(0, 11)
         const txList: SignedTx[] = []
         for (let i = 0; i < n; i++) {
             // get nonce, increase 1

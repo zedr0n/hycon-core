@@ -50,7 +50,7 @@ export class GenesisSignedTx implements proto.ITx {
 
         this.to = new Address(stx.to)
         this.amount = stx.amount instanceof Long ? stx.amount : Long.fromNumber(stx.amount, true)
-        if (!this.amount.unsigned) {logger.fatal(`Protobuf problem with account balance`)}
+        if (!this.amount.unsigned) { logger.fatal(`Protobuf problem with GenesisSignedTx amount`) }
         this.signature = new Buffer(stx.signature)
         this.recovery = stx.recovery
     }

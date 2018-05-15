@@ -134,7 +134,7 @@ export class WorldState {
 
             for (const tx of genesis.txs) {
                 if (!verifyTx(tx)) { continue }
-                const toAccount = new Account({ balance: +tx.amount.multiply(Math.pow(10, 9)), nonce: 0 })
+                const toAccount = new Account({ balance: +tx.amount, nonce: 0 })
                 const toAccountHash = this.put(batch, mapAccount, toAccount)
                 const nodeRef = new NodeRef({ address: tx.to, child: toAccountHash })
                 stateNode.nodeRefs.push(nodeRef)
