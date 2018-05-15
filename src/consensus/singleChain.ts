@@ -1,4 +1,3 @@
-import * as bigInt from "big-integer"
 import { getLogger } from "log4js"
 import Long = require("long")
 import { Address } from "../common/address"
@@ -39,6 +38,12 @@ export class SingleChain implements IConsensus {
     private txUnit: number
     private forkHeight: number
     private txdb?: TxDatabase
+
+    // Load these from a constants file if possible
+    private alpha: number = .1
+    private targetTimeEMA: number = 30
+    private targetWorkEMA: Difficulty = new Difficulty(0x0000FF, 0x00)
+    private difficultyAdjuster: DifficultyAdjuster
 
     constructor(server: Server, dbPath: string, wsPath: string, filePath: string, txPath?: string) {
         this.server = server
