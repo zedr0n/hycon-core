@@ -116,7 +116,7 @@ export class WorldState {
                 await testWallet.save(`test${i}`, "")
                 const address = testWallet.pubKey.address()
 
-                changes.push({ address, account: new Account({ balance: 12345000, nonce: 0 }) })
+                changes.push({ address, account: new Account({ balance: 987654321000000, nonce: 0 }) })
             }
         }
 
@@ -134,7 +134,7 @@ export class WorldState {
 
             for (const tx of genesis.txs) {
                 if (!verifyTx(tx)) { continue }
-                const toAccount = new Account({ balance: +tx.amount, nonce: 0 })
+                const toAccount = new Account({ balance: +tx.amount.multiply(Math.pow(10, 9)), nonce: 0 })
                 const toAccountHash = this.put(batch, mapAccount, toAccount)
                 const nodeRef = new NodeRef({ address: tx.to, child: toAccountHash })
                 stateNode.nodeRefs.push(nodeRef)
