@@ -119,7 +119,6 @@ export class WorldState {
                 changes.push({ address, account: new Account({ balance: 987654321000000, nonce: 0 }) })
             }
         }
-
         const currentStateRoot = await this.putAccount(batch, mapAccount, changes, previousState)
         return Promise.resolve({ currentStateRoot, batch, mapAccount })
     }
