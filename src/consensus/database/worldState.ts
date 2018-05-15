@@ -1,3 +1,4 @@
+import { fstat } from "fs"
 import levelup = require("levelup")
 import { getLogger } from "log4js"
 import Long = require("long")

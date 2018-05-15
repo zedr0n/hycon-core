@@ -352,15 +352,15 @@ export class Wallet {
                     await fs.writeFile("./wallet/public", dataArray)
                 } catch (e) {
                     logger.error(`Address file not exsited : ${e}`)
-                    return Promise.reject(e)
+                    throw e
                 }
-                return Promise.resolve(undefined)
+                return
             } else {
-                return Promise.reject(`Wallet is already exist : name=${name}`)
+                throw new Error(`Wallet is already exist : name=${name}`)
             }
         } catch (e) {
             logger.error(`Fail to save wallet ${e}`)
-            return Promise.reject(e)
+            throw e
         }
 
     }

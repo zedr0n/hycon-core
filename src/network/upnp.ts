@@ -23,9 +23,7 @@ export class UpnpServer {
             UpnpServer.networkid = Server.globalOptions.networkid
         }
 
-        setTimeout(() => {
-            this.run()
-        }, 100)
+        this.run()
     }
 
     public run() {
@@ -50,9 +48,8 @@ export class UpnpClient {
     constructor(rabbitNetwork: INetwork, server: Server) {
         this.rabbitNetwork = rabbitNetwork
         this.server = server
-        setTimeout(() => {
-            this.run()
-        }, 100)
+
+        this.run()
     }
     public run() {
         logger.debug(`Upnp Client Start Looking up`)

@@ -9333,7 +9333,7 @@ $root.Peer = (function() {
      * @property {number|null} [port] Peer port
      * @property {number|Long|null} [lastSeen] Peer lastSeen
      * @property {number|null} [failCount] Peer failCount
-     * @property {number|Long|null} [lastAttemp] Peer lastAttemp
+     * @property {number|Long|null} [lastAttempt] Peer lastAttempt
      */
 
     /**
@@ -9384,12 +9384,12 @@ $root.Peer = (function() {
     Peer.prototype.failCount = 0;
 
     /**
-     * Peer lastAttemp.
-     * @member {number|Long} lastAttemp
+     * Peer lastAttempt.
+     * @member {number|Long} lastAttempt
      * @memberof Peer
      * @instance
      */
-    Peer.prototype.lastAttemp = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    Peer.prototype.lastAttempt = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
 
     /**
      * Creates a new Peer instance using the specified properties.
@@ -9423,8 +9423,8 @@ $root.Peer = (function() {
             writer.uint32(/* id 3, wireType 0 =*/24).int64(message.lastSeen);
         if (message.failCount != null && message.hasOwnProperty("failCount"))
             writer.uint32(/* id 4, wireType 0 =*/32).int32(message.failCount);
-        if (message.lastAttemp != null && message.hasOwnProperty("lastAttemp"))
-            writer.uint32(/* id 5, wireType 0 =*/40).int64(message.lastAttemp);
+        if (message.lastAttempt != null && message.hasOwnProperty("lastAttempt"))
+            writer.uint32(/* id 5, wireType 0 =*/40).int64(message.lastAttempt);
         return writer;
     };
 
@@ -9472,7 +9472,7 @@ $root.Peer = (function() {
                 message.failCount = reader.int32();
                 break;
             case 5:
-                message.lastAttemp = reader.int64();
+                message.lastAttempt = reader.int64();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -9521,9 +9521,9 @@ $root.Peer = (function() {
         if (message.failCount != null && message.hasOwnProperty("failCount"))
             if (!$util.isInteger(message.failCount))
                 return "failCount: integer expected";
-        if (message.lastAttemp != null && message.hasOwnProperty("lastAttemp"))
-            if (!$util.isInteger(message.lastAttemp) && !(message.lastAttemp && $util.isInteger(message.lastAttemp.low) && $util.isInteger(message.lastAttemp.high)))
-                return "lastAttemp: integer|Long expected";
+        if (message.lastAttempt != null && message.hasOwnProperty("lastAttempt"))
+            if (!$util.isInteger(message.lastAttempt) && !(message.lastAttempt && $util.isInteger(message.lastAttempt.low) && $util.isInteger(message.lastAttempt.high)))
+                return "lastAttempt: integer|Long expected";
         return null;
     };
 
@@ -9554,15 +9554,15 @@ $root.Peer = (function() {
                 message.lastSeen = new $util.LongBits(object.lastSeen.low >>> 0, object.lastSeen.high >>> 0).toNumber();
         if (object.failCount != null)
             message.failCount = object.failCount | 0;
-        if (object.lastAttemp != null)
+        if (object.lastAttempt != null)
             if ($util.Long)
-                (message.lastAttemp = $util.Long.fromValue(object.lastAttemp)).unsigned = false;
-            else if (typeof object.lastAttemp === "string")
-                message.lastAttemp = parseInt(object.lastAttemp, 10);
-            else if (typeof object.lastAttemp === "number")
-                message.lastAttemp = object.lastAttemp;
-            else if (typeof object.lastAttemp === "object")
-                message.lastAttemp = new $util.LongBits(object.lastAttemp.low >>> 0, object.lastAttemp.high >>> 0).toNumber();
+                (message.lastAttempt = $util.Long.fromValue(object.lastAttempt)).unsigned = false;
+            else if (typeof object.lastAttempt === "string")
+                message.lastAttempt = parseInt(object.lastAttempt, 10);
+            else if (typeof object.lastAttempt === "number")
+                message.lastAttempt = object.lastAttempt;
+            else if (typeof object.lastAttempt === "object")
+                message.lastAttempt = new $util.LongBits(object.lastAttempt.low >>> 0, object.lastAttempt.high >>> 0).toNumber();
         return message;
     };
 
@@ -9590,9 +9590,9 @@ $root.Peer = (function() {
             object.failCount = 0;
             if ($util.Long) {
                 var long = new $util.Long(0, 0, false);
-                object.lastAttemp = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                object.lastAttempt = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
-                object.lastAttemp = options.longs === String ? "0" : 0;
+                object.lastAttempt = options.longs === String ? "0" : 0;
         }
         if (message.host != null && message.hasOwnProperty("host"))
             object.host = message.host;
@@ -9605,11 +9605,11 @@ $root.Peer = (function() {
                 object.lastSeen = options.longs === String ? $util.Long.prototype.toString.call(message.lastSeen) : options.longs === Number ? new $util.LongBits(message.lastSeen.low >>> 0, message.lastSeen.high >>> 0).toNumber() : message.lastSeen;
         if (message.failCount != null && message.hasOwnProperty("failCount"))
             object.failCount = message.failCount;
-        if (message.lastAttemp != null && message.hasOwnProperty("lastAttemp"))
-            if (typeof message.lastAttemp === "number")
-                object.lastAttemp = options.longs === String ? String(message.lastAttemp) : message.lastAttemp;
+        if (message.lastAttempt != null && message.hasOwnProperty("lastAttempt"))
+            if (typeof message.lastAttempt === "number")
+                object.lastAttempt = options.longs === String ? String(message.lastAttempt) : message.lastAttempt;
             else
-                object.lastAttemp = options.longs === String ? $util.Long.prototype.toString.call(message.lastAttemp) : options.longs === Number ? new $util.LongBits(message.lastAttemp.low >>> 0, message.lastAttemp.high >>> 0).toNumber() : message.lastAttemp;
+                object.lastAttempt = options.longs === String ? $util.Long.prototype.toString.call(message.lastAttempt) : options.longs === Number ? new $util.LongBits(message.lastAttempt.low >>> 0, message.lastAttempt.high >>> 0).toNumber() : message.lastAttempt;
         return object;
     };
 

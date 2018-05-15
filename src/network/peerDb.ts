@@ -5,7 +5,6 @@ import rocksdb = require("rocksdb")
 import { AsyncLock } from "../common/asyncLock"
 import * as proto from "../serialization/proto"
 import { Hash } from "../util/hash"
-import { IPeer } from "./ipeer"
 
 const logger = getLogger("PeerDb")
 
@@ -47,22 +46,30 @@ export class PeerDb {
         const key = PeerDb.ipeer2key(peer)
         peer.lastSeen = Date.now()
         peer.failCount = 0
+        logger.info(`PeerDB saw ${peer.host}:${peer.port}`)
         return this.put(peer)
     }
 
     public async fail(peer: proto.IPeer, limit: number) {
         const key = PeerDb.ipeer2key(peer)
-        peer = await this.get(key)
-        if (peer.failCount === undefined) {
-            peer.failCount = 1
+        const dbpeer = await this.get(key)
+        if (dbpeer === undefined) {
+            return
+        }
+        dbpeer.lastAttempt = Date.now()
+        if (dbpeer.failCount === undefined) {
+            dbpeer.failCount = 1
         } else {
-            peer.failCount++
+            dbpeer.failCount++
         }
 
-        if (peer.failCount <= limit) {
-            await this.put(peer)
+        logger.info(`${peer.host}:${peer.port} failCount = ${dbpeer.failCount}`)
+
+        if (dbpeer.failCount <= limit) {
+            await this.put(dbpeer)
         } else {
-            await this.remove(peer)
+            logger.info(`${peer.host}:${peer.port} will be removed from the peerDB`)
+            await this.remove(dbpeer)
         }
 
     }
@@ -106,7 +113,7 @@ export class PeerDb {
         })
     }
 
-    public async getRandomPeer(connections: Map<number, IPeer>): Promise<proto.IPeer | undefined> {
+    public async getRandomPeer(connections: Map<number, proto.IPeer>): Promise<proto.IPeer | undefined> {
         return this.keyListLock.critical(async () => {
             let key: number
             if (connections.size < this.keys.length) {
@@ -146,7 +153,7 @@ export class PeerDb {
                     reject(e)
                 })
                 .on("end", () => {
-                    resolve()
+                    resolve(keys)
                 })
         })
     }

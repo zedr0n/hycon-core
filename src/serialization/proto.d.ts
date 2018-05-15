@@ -3738,8 +3738,8 @@ export interface IPeer {
     /** Peer failCount */
     failCount?: number;
 
-    /** Peer lastAttemp */
-    lastAttemp?: number|Long;
+    /** Peer lastAttempt */
+    lastAttempt?: number|Long;
 }
 
 /** Represents a Peer. */
@@ -3763,8 +3763,8 @@ export class Peer implements IPeer {
     /** Peer failCount. */
     public failCount: number;
 
-    /** Peer lastAttemp. */
-    public lastAttemp: (number|Long);
+    /** Peer lastAttempt. */
+    public lastAttempt: (number|Long);
 
     /**
      * Creates a new Peer instance using the specified properties.

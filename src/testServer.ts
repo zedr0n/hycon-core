@@ -52,10 +52,7 @@ export class TestServer {
         this.nonceTable = new Map<string, number>()
         this.consensus = server.consensus
         assert(this.txPool)
-        setTimeout(() => {
-            this.makeWallet()
-        }, 3000)
-
+        this.makeWallet()
     }
 
     public async showWallets() {
