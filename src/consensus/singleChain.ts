@@ -433,7 +433,7 @@ export class SingleChain implements IConsensus {
             }
         } catch (e) {
             logger.error(`Fail to organizeChains : ${e}`)
-            return Promise.reject(e)
+            throw e
         }
     }
 

@@ -90,6 +90,7 @@ export class Sync {
         } catch (e) {
             logger.debug(`Syncing failed: ${e}`)
         }
+        return delay(4000)
     }
     private isSyncing() {
         return this.peer !== undefined
@@ -102,6 +103,7 @@ export class Sync {
             if (await this.updateCommons(remoteTip.height, remoteTip.hash)) {
                 return
             }
+            this.differentHeight = remoteTip.height
             startHeight = remoteTip.height - 1
         } else if (remoteTip.height > localTip.height) {
             this.differentHeight = remoteTip.height
