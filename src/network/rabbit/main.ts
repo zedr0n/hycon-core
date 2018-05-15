@@ -1,5 +1,4 @@
 import { getLogger } from "log4js"
-import { setInterval } from "timers"
 import { Block } from "../../serialization/proto"
 import { Ping } from "../../serialization/proto"
 import { INetwork } from "../inetwork"

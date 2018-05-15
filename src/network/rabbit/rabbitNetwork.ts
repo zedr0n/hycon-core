@@ -69,7 +69,7 @@ export class RabbitNetwork implements INetwork {
         this.pendingConnections = new Map<number, proto.IPeer>()
         this.peerDB = new PeerDb(peerDbPath)
         this.seedPeerDB().catch(() => undefined)
-        // setInterval(() => this.seedPeerDB().catch(() => undefined), 1000 * 60 * 60 * 36)
+        setInterval(() => this.seedPeerDB().catch(() => undefined), 1000 * 60 * 60)
         logger.debug(`TcpNetwork Port=${port}`)
     }
 
@@ -244,7 +244,7 @@ export class RabbitNetwork implements INetwork {
         } catch (e) {
             logger.debug(`Could not connect: ${e}`)
         }
-        setInterval(() => this.connectToPeer(), 10000)
+        setTimeout(() => this.connectToPeer(), 10000)
     }
 
     private async seedPeerDB() {

@@ -1,7 +1,6 @@
 import { getLogger } from "log4js"
 import * as Long from "long"
 import { Socket } from "net"
-import { setInterval } from "timers"
 import { AsyncLock } from "../../common/asyncLock"
 import { AnyBlock, Block } from "../../common/block"
 import { AnyBlockHeader, BlockHeader } from "../../common/blockHeader"
