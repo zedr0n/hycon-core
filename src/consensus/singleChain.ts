@@ -403,7 +403,7 @@ export class SingleChain implements IConsensus {
         if (difficulty.greaterThan(cryptoHash)) {
             return true
         }
-        logger.warn(`Fail to verifyHeader with difficulty nonce.`)
+        logger.warn(`Fail to verifyHeader: ${cryptoHash.toString()}`)
         return false
     }
 

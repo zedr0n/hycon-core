@@ -37,7 +37,7 @@ export class CpuMiner {
     public async mine() {
         while (true) {
             if (this.prehash === undefined || this.difficulty === undefined || this.isMining === false) {
-                await new Promise<void>((resolve) => {this.wakeup = resolve})
+                await new Promise<void>((resolve) => { this.wakeup = resolve })
             } else {
                 this.nonce = Long.UZERO
 
@@ -74,11 +74,11 @@ export class CpuMiner {
 
             // run hash
             const ret = await Hash.hashCryptonight(bufBlock)
-            return Promise.resolve(ret)
+            return ret
 
         } catch (e) {
             logger.error(`Fail to hash in Miner : ${e}`)
-            return Promise.reject(e)
+            throw e
         }
     }
 

@@ -53,7 +53,7 @@ export class Sync {
     // if we keep storing order, maybe we can use this algorithm for dags, too.
     public async sync() {
         if (this.isSyncing()) {
-            return
+            return delay(4000)
         }
         logger.debug(`Start Syncing`)
 
