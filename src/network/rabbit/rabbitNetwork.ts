@@ -2,6 +2,7 @@ import { stat } from "fs"
 import { getLogger } from "log4js"
 import * as net from "net"
 import { createConnection, createServer, Socket } from "net"
+import * as netmask from "netmask"
 import { IConsensus } from "../../consensus/iconsensus"
 import * as proto from "../../serialization/proto"
 import { Server } from "../../server"
@@ -13,10 +14,7 @@ import { PeerDb } from "../peerDb"
 import { UpnpClient, UpnpServer } from "../upnp"
 import { RabbitPeer } from "./rabbitPeer"
 // tslint:disable-next-line:no-var-requires
-const delay = require("delay")
 const logger = getLogger("Network")
-// tslint:disable-next-line:no-var-requires
-const randomInt = require("random-int")
 export class RabbitNetwork implements INetwork {
     public static seeds: any[] = [
         { host: "rapid1.hycon.io", port: 8148 },
@@ -33,8 +31,38 @@ export class RabbitNetwork implements INetwork {
         // 127.0.0.0 - 127.255.255.255
         // 0.0.0.0
         // fd00::/8
-        if (socket.remoteFamily === "IPv4") { }
-        if (socket.remoteFamily === "IPv6") { }
+        // if (socket.remoteFamily === "IPv4") { }
+        // if (socket.remoteFamily === "IPv6") { }
+        let host = socket.remoteAddress
+        if (! net.isIP(host)) {
+            return true
+        }
+        if (net.isIPv6(host)) {
+            // fd00::/8
+            host = RabbitNetwork.ipv6Toipv4(host)
+        }
+        if (net.isIPv4(host)) {
+            // 10.0.0.0 – 10.255.255.255      10/8
+            const block1 = new netmask.Netmask("10.0.0.0/8")
+            if (block1.contains(host)) {
+                return false } else {
+                // 172.16.0.0 – 172.31.255.255    172.16/12
+                const block2 = new netmask.Netmask("172.16.0.0/12")
+                if (block2.contains(host)) {
+                    return false} else {
+                    // 192.168.0.0 – 192.168.255.255  192.168/16
+                    const block3 = new netmask.Netmask("192.168.0.0/16")
+                    if (block3.contains(host)) {
+                        return false} else {
+                        // 127.0.0.0 – 127.255.255.255    127/8
+                        const block4 = new netmask.Netmask("127.0.0.0/8")
+                        if (block4.contains(host)) {
+                            return false} else {
+                                return true}
+                    }
+                }
+            }
+        }
         return true
     }
 
@@ -247,14 +275,10 @@ export class RabbitNetwork implements INetwork {
         setTimeout(() => this.connectToPeer(), 10000)
     }
 
-    private async seedPeerDB() {
-        const len = RabbitNetwork.seeds.length
-        const index = Math.floor(Math.random() * len)
+    private async saveSeedstoDB() {
         try {
-            const rabbitPeer: RabbitPeer = await this.connect(RabbitNetwork.seeds[index].host, RabbitNetwork.seeds[index].port)
-            const peers: proto.IPeer[] = await rabbitPeer.getPeers()
-            for (const peer of peers) {
-                await this.peerDB.put({ host: peer.host, port: peer.port })
+            for (const seed of RabbitNetwork.seeds) {
+                await this.peerDB.put({host: seed.host, port: seed.port})
             }
         } catch (e) {
             logger.info(`Error occurred while connecting to seeds: ${e}`)
