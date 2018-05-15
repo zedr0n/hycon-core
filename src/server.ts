@@ -59,7 +59,17 @@ export class Server {
         Server.globalOptions = Server.globalOptions
         logger.info(`Options=${JSON.stringify(Server.globalOptions)}`)
         logger.info(`Verbose=${Server.globalOptions.verbose}`)
+
+        if (Server.globalOptions.port === undefined) {
+            Server.globalOptions.port = 20000 + Math.floor(40000 * Math.random())
+        }
         logger.info(`Port=${Server.globalOptions.port}`)
+
+        if (Server.globalOptions.str_port === undefined) {
+            Server.globalOptions.str_port = 20000 + Math.floor(40000 * Math.random())
+        }
+        logger.info(`Stratum Port=${Server.globalOptions.str_port}`)
+
         if (Server.globalOptions.api_port !== "") {
             logger.info(`API Port=${Server.globalOptions.api_port}`)
         }
@@ -69,7 +79,7 @@ export class Server {
 
         const postfix = Server.globalOptions.postfix
         this.consensus = new SingleChain(this, "blockdb" + postfix, "worldstate" + postfix, "rawblock" + postfix)
-        this.network = new RabbitNetwork(this, Server.globalOptions.port, "deleteme.peer" + postfix)
+        this.network = new RabbitNetwork(this, Server.globalOptions.port, "peerdb" + postfix)
 
         this.wallet = new WalletManager(this)
         this.miner = new MinerServer(this, Server.globalOptions.str_port)
