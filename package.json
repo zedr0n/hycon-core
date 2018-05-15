@@ -24,8 +24,8 @@
     "testNetwork1": "./node_modules/.bin/ts-node src/main.ts --port=8151 --networkid=3 --str_port=9081 --writing",
     "testNetwork2": "./node_modules/.bin/ts-node src/main.ts --port=8152 --networkid=3 --str_port=9082 --writing",
     "testNetwork3": "./node_modules/.bin/ts-node src/main.ts --port=8153 --networkid=3 --str_port=9083 --writing",
-    "clear": "rm -rf deleteme* peerdb",
-    "wallet": "./node_modules/.bin/ts-node src/util/genWallet.ts",
+    "clear": "rm -rf blockdb* worldstate* rawblock* peerdb*",
+    "wallet": "./node_modules/.bin/ts-node src/main.ts --wallet",
     "visTest": "./node_modules/.bin/ts-node src/util/visTest.ts",
     "package": "tsc && pkg package.json"
   },
