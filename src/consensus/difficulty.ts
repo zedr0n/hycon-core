@@ -29,8 +29,11 @@ export class Difficulty {
 
     public getMinerParameters(): {offset: number, target: string} {
         let target: string = this.m.toString(16)
-        while ( target.length < 6 ) {
+        if ( target.length % 2 ) {
             target = "0" + target
+        }
+        while ( target.length < 6) {
+            target += "f"
         }
         return { offset: this.e * 2, target}
     }
@@ -52,21 +55,22 @@ export class Difficulty {
      */
     public greaterThan(byteArray: Uint8Array): boolean {
         let i = 31
-        let offset = 32 - this.e
-        while (i >= offset) {
+        const exponetCount = 32 - this.e
+        while (i >= exponetCount) {
             if (byteArray[i] !== 0) {
                 return false
             }
             i--
         }
-        offset = i - 3
+        const mantisaByteCount = Math.ceil( Math.log2(this.m) / 8)
+        let j = i - mantisaByteCount + 1
+        j  = j < 0 ? 0 : j
+
         let mComp = 0
-        while (i > offset)  {
+        while (j <= i)  {
             mComp <<= 8
-            if (i >= 0) {
-                mComp += byteArray[i]
-            }
-            i--
+            mComp += byteArray[j]
+            ++j
         }
 
         return (this.m > mComp)

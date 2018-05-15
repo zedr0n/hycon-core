@@ -19,7 +19,7 @@ export class StratumServer {
     private socketsId: any[] = []
     private mapSocket: Map<string, any> = new Map<string, any>()
 
-    constructor(minerServer: MinerServer, port: number) {
+    constructor(minerServer: MinerServer, port: number = 9081) {
         logger.debug(`Stratum Server`)
         this.minerServer = minerServer
         this.port = port

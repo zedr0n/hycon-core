@@ -51,37 +51,49 @@ describe("Difficulty", () => {
         expect(encodedDifficulty).toEqual(correctEncodedDifficulty)
     })
 
-    it("greaterThan: should return true if the difficulty value is greater than the given hash", () => {
-        difficulty = new Difficulty(0x0a, 0x00)
-        const littleHashBytes = new Uint8Array([0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
-        const littleHash = new Hash(littleHashBytes)
-        const compare = difficulty.greaterThan(littleHash)
-        expect(compare).toEqual(true)
-    })
-
-    it("greaterThan: should return false if the difficulty is less than the given hash", () => {
+    it("greaterThan: 12 should return false if the difficulty(0x0a, 0x00) and the last two-byte are 0xff, 0x0a", () => {
         difficulty = new Difficulty(0x0a, 0x00)
         const bigHashBytes = new Uint8Array([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09])
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x0a])
         const bigHash = new Hash(bigHashBytes)
         const compare = difficulty.greaterThan(bigHash)
         expect(compare).toEqual(false)
     })
 
-    it("greaterThan: should return false if the difficulty is equal to the given hash", () => {
-        difficulty = new Difficulty(0x0a, 0x00)
+    it("greaterThan: should return false if difficulty(0x0a00, 0x00) and the last two-byte are 0xff, 0x0a", () => {
+        difficulty = new Difficulty(0x0a00, 0x00)
         const equalHashBytes = new Uint8Array([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0a])
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x0a])
         const equalHash = new Hash(equalHashBytes)
         const compare = difficulty.greaterThan(equalHash)
+        expect(compare).toEqual(false)
+    })
 
+    it("greaterThan: should return true if difficulty(0x0a00, 0x00) and the last three-byte are 0xff, 0x09, 0x00", () => {
+        difficulty = new Difficulty(0x0a00, 0x00)
+        const equalHashBytes = new Uint8Array(
+            [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x09, 0x00])
+        const equalHash = new Hash(equalHashBytes)
+        const compare = difficulty.greaterThan(equalHash)
+        expect(compare).toEqual(true)
+    })
+
+    it("greaterThan: should true if difficulty(0x0120, 0x02) and the last five-byte are 0xff, 0x01, 0x1f, 0x00, 0x00", () => {
+        difficulty = new Difficulty(0x0120, 0x02)
+        const equalHashBytes = new Uint8Array([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0xff, 0xff, 0x01, 0x1f, 0x00, 0x00])
+        const equalHash = new Hash(equalHashBytes)
+        const compare = difficulty.greaterThan(equalHash)
+        expect(compare).toEqual(true)
     })
 
     it("getMinerParameters: offset should be 32 if exponent is 0x10 and a mantisa is 0x010203", () => {
@@ -102,10 +114,10 @@ describe("Difficulty", () => {
         expect(params.offset).toEqual(2)
     })
 
-    it("getMinerParameters: target should be '000111' if a mantisa is 0x000111", () => {
+    it("getMinerParameters: target should be '0111ff' if a mantisa is 0x000111", () => {
         difficulty = new Difficulty( 0x000111, 0x00)
         const params = difficulty.getMinerParameters()
-        expect(params.target).toEqual("000111")
+        expect(params.target).toEqual("0111ff")
     })
 
     it("getMinerParameters: target should be '1000ff' if a mantisa is 0x1000ff", () => {
@@ -114,18 +126,18 @@ describe("Difficulty", () => {
         expect(params.target).toEqual("1000ff")
     })
 
-    it("getMinerParameters: offset === 0 and target should be '000000' if a mantisa is 0x000000", () => {
-        difficulty = new Difficulty( 0x000000, 0x00)
-        const params = difficulty.getMinerParameters()
-        expect(params.offset).toEqual(0)
-        expect(params.target).toEqual("000000")
-    })
+    // it("getMinerParameters: offset === 0 and target should be '000000' if a mantisa is 0x000000", () => {
+    //     difficulty = new Difficulty( 0x000000, 0x00)
+    //     const params = difficulty.getMinerParameters()
+    //     expect(params.offset).toEqual(0)
+    //     expect(params.target).toEqual("000000")
+    // })
 
-    it("getMinerParameters: offset === 2 && target should be '000123' if a mantisa is 0x012300", () => {
+    it("getMinerParameters: offset === 2 && target should be '0123ff' if a mantisa is 0x012300", () => {
         difficulty = new Difficulty( 0x012300, 0x00)
         const params = difficulty.getMinerParameters()
         expect(params.offset).toEqual(2)
-        expect(params.target).toEqual("000123")
+        expect(params.target).toEqual("0123ff")
     })
 
     it("multiply: should return the product of the difficulty value and the number", () => {
