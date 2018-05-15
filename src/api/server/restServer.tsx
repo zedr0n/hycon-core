@@ -131,8 +131,11 @@ export class RestServer implements IRest {
         try {
             const address = new Address(tx.to)
             const wallet = new Wallet(Buffer.from(tx.privateKey, "hex"))
-            // TODO: Check balance
-            const signedTx = wallet.send(address, tx.amount, 1, tx.fee)
+            const account = await this.consensus.getAccount(new Address(tx.from))
+            if ((tx.amount + tx.fee) > account.balance) {
+                throw new Error("insufficient wallet balance to send transaction")
+            }
+            const signedTx = wallet.send(address, tx.amount, account.nonce + 1, tx.fee)
             if (queueTx) {
                 queueTx(signedTx)
             } else {
@@ -168,7 +171,10 @@ export class RestServer implements IRest {
                     throw new Error("transaction information or signature is incorrect")
                 }
             }
-            // TODO: Check balance
+            const account = await this.consensus.getAccount(new Address(tx.from))
+            if (tx.amount > account.balance) {
+                throw new Error("insufficient wallet balance to send transaction")
+            }
             if (queueTx) {
                 queueTx(signedTx)
             } else {
