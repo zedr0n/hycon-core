@@ -139,7 +139,6 @@ export class WorldState {
                     logger.error(`Tx ${new Hash(tx)} Rejected: ${tx.from.toString()} has not been seen before, so it has insufficient balance.`)
                     continue
                 }
-                logger.info(`From balance : ${hycontoString(fromAccount.balance)}`)
                 // TODO: Handle coin burn
                 let toAccount: Account | undefined
                 const toIndex = mapIndex.get(tx.to.toString())
@@ -151,7 +150,6 @@ export class WorldState {
                 if (toAccount === undefined) {
                     toAccount = new Account({ balance: 0, nonce: 0 })
                 }
-                logger.info(`toAccount balance : ${hycontoString(toAccount.balance)}`)
 
                 if (tx.nonce !== (fromAccount.nonce + 1)) {
                     invalidTxs.push(tx)
@@ -172,9 +170,6 @@ export class WorldState {
                 fromAccount.balance = fromAccount.balance.sub(total)
                 toAccount.balance = toAccount.balance.add(tx.amount)
                 fromAccount.nonce++
-
-                logger.info(`After tx : ${hycontoString(fromAccount.balance)} / ${hycontoString(toAccount.balance)} / ${hycontoString(tx.amount)} / ${hycontoString(tx.fee)}`)
-
                 if (fromIndex === undefined) {
                     mapIndex.set(tx.from.toString(), changes.push({ address: tx.from, account: fromAccount }) - 1)
                 } else {
