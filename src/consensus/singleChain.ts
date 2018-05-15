@@ -373,9 +373,10 @@ export class SingleChain implements IConsensus {
         const txVerify = block.txs.every((tx) => verifyTx(tx))
         if (!txVerify) { return { isVerified: false } }
 
-        const merkleRootVerify = block.calculateMerkleRoot().equals(block.header.merkleRoot)
+        const merkleRoot = block.calculateMerkleRoot()
+        const merkleRootVerify = merkleRoot.equals(block.header.merkleRoot)
         if (!merkleRootVerify) {
-            logger.warn(`Invalid merkleRoot`)
+            logger.warn(`Invalid merkleRoot expected ${block.header.merkleRoot}, got ${merkleRoot}`)
             return { isVerified: false }
         }
         const { stateTransition, validTxs, invalidTxs } = await this.worldState.next(block.txs, previousHeader.stateRoot, block.miner)
@@ -435,7 +436,7 @@ export class SingleChain implements IConsensus {
             if (block !== undefined) {
                 if (this.blockTip === undefined || this.blockTip.height < dbBlock.height) {
                     const txs = await this.reorganize(newBlockHash, block, dbBlock.height, txCount)
-                    this.blockTip = dbBlock // TODO: Reorganize first
+                    this.blockTip = dbBlock
                     await this.db.setBlockTip(newBlockHash)
                     this.createCandidateBlock(txs)
                 } else {

@@ -53,9 +53,9 @@ export class Sync {
     // if we keep storing order, maybe we can use this algorithm for dags, too.
     public async sync() {
         if (this.isSyncing()) {
-            return delay(4000)
+            return
         }
-        logger.debug(`Start Syncing`)
+        logger.info(`Start Syncing`)
 
         // const testTips = await this.consensus.getHeadersRange(0, 1)
         // const testHash = new Hash(testTips[0])
@@ -64,33 +64,42 @@ export class Sync {
 
             this.peer = this.network.getRandomPeer()
             if (!this.peer) {
+                logger.debug(`No peer to sync with`)
                 // we will replace with other alogrithm
-                return delay(4000)
+                return
             }
 
+            logger.debug(`Get remote tip`)
             const remoteTip = await this.peer.getTip()
-            const remoteTip2 = await this.peer.getHeadersByRange(0, 1)
-            const remoteTip3 = new Hash(remoteTip2[0])
             const localTip = this.consensus.getBlocksTip()
 
+            logger.info(`Finding Commons`)
             await this.findCommons(localTip, remoteTip)
+
+            logger.info(`Find start Header`)
             const startHeaderHeight = await this.findStartHeader()
             if (remoteTip.height > localTip.height) {
+                logger.info(`Getting Headers`)
                 await this.getHeaders(startHeaderHeight)
             } else {
+                logger.info(`Putting Headers`)
                 await this.putHeaders(startHeaderHeight)
             }
+
+            logger.info(`Find start block`)
             const startBlockHeight = await this.findStartBlock(startHeaderHeight)
             if (remoteTip.height > localTip.height) {
+                logger.info(`Getting Blocks`)
                 await this.getBlocks(startBlockHeight)
             } else {
+                logger.info(`Putting Blocks`)
                 await this.putBlocks(startBlockHeight)
             }
             this.peer = undefined
         } catch (e) {
             logger.error(`Syncing failed: ${e}`)
         }
-        return delay(4000)
+        return
     }
     private isSyncing() {
         return this.peer !== undefined

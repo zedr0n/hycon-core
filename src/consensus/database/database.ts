@@ -93,7 +93,7 @@ export class Database {
                 }
                 return Promise.resolve({ current: currentBlock, previous: previousBlock })
             }
-            const { current, previous } = await this.makeDBBlock(header).catch((err) => Promise.reject(err))
+            const { current, previous } = await this.makeDBBlock(header)
             await this.database.put("b" + hash, current.encode())
             return Promise.resolve({ current, previous })
         })

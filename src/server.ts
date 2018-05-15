@@ -89,7 +89,6 @@ export class Server {
         this.txPool = new TxPool(this)
         this.rest = new RestManager(this)
 
-        // sync is now being coded
         // this.sync = new Sync(this)
     }
     public async run() {
@@ -122,9 +121,9 @@ export class Server {
         logger.debug(`begin sync`)
         let sync = new Sync(this)
         await sync.sync()
-        setImmediate(() => {
+        setTimeout(() => {
             this.runSync()
-        })
+        }, 5000)
         sync = null
         logger.debug(`end sync`)
     }
