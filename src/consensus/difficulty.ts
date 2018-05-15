@@ -76,7 +76,7 @@ export class Difficulty {
             ++j
         }
 
-        return (this.m > mComp)
+        return (this.m >= mComp)
     }
 
     public multiply(num: number): Difficulty {

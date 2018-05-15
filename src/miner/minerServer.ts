@@ -3,7 +3,6 @@ import Long = require("long")
 import { Block } from "../common/block"
 import { Server } from "../server"
 import { zeroPad } from "../util/commonUtil"
-import * as util from "../util/difficultyUtil"
 import { Hash } from "../util/hash"
 import { Difficulty } from "./../consensus/difficulty"
 import { CpuMiner } from "./cpuMiner"
@@ -133,7 +132,7 @@ export class MinerServer implements IMiner {
         }
         const result = new Hash(await CpuMiner.hash(this.prehash, nonce))
 
-        if ( !(this.difficulty.greaterThan(result) ) ) {
+        if ( this.difficulty.greaterThan(result) ) {
             logger.debug(`HASH Result : ${Buffer.from(result.buffer).toString("hex")}`)
             return true
         } else {

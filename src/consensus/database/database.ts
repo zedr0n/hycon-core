@@ -167,7 +167,7 @@ export class Database {
             if (dbBlock === undefined) { return undefined }
             return dbBlock.header
         } catch (e) {
-            logger.error(`getBlockHeader failed : Hash=${Hash}\n${e}`)
+            logger.error(`getBlockHeader failed : Hash=${hash}\n${e}`)
             return Promise.reject(e)
         }
     }
