@@ -1,38 +1,45 @@
-type lockCallBack = () => void
+interface ILockCallBack { resolve: () => void, reject: (e: any) => void, timeoutTimer: NodeJS.Timer }
 export class AsyncLock {
     private locked: boolean
-    private lockTransferQueue: lockCallBack[]
-    constructor(locked: boolean = false) {
-        this.locked = false
-        this.lockTransferQueue = []
-    }
-    public async getLock(): Promise<boolean> {
-        try {
-            if (this.locked) {
-                await new Promise((resolved, _) => {
-                    this.lockTransferQueue.push(resolved)
-                })
-            }
-            this.locked = true
-            return this.locked
-        } catch (e) {
-            return false
-        }
+    private lockTransferQueue: ILockCallBack[]
+    private timeoutTime: number | undefined
 
+    constructor(locked: boolean = false, timeoutTime?: number) {
+        this.locked = locked
+        this.lockTransferQueue = []
+        this.timeoutTime = timeoutTime
     }
-    public transferLock() {
-        if (this.locked && this.lockTransferQueue.length > 0) {
-            const transfer = this.lockTransferQueue.splice(0, 1)[0]
-            transfer()
-        } else {
-            this.locked = false
+
+    public queueLength(): number {
+        return this.lockTransferQueue.length
+    }
+
+    public rejectAll(error?: any): void {
+        for (const { reject, timeoutTimer } of this.lockTransferQueue) {
+            clearTimeout(timeoutTimer)
+            setImmediate(reject, error)
         }
+    }
+
+    public async getLock(): Promise<boolean> {
+        if (this.locked) {
+            await new Promise((resolve, reject) => {
+                let timeoutTimer: NodeJS.Timer
+                if (this.timeoutTime !== undefined) {
+                    timeoutTimer = setTimeout(() => reject("Timeout"), this.timeoutTime)
+                }
+                this.lockTransferQueue.push({ resolve, reject, timeoutTimer })
+            })
+        }
+        this.locked = true
+        return this.locked
     }
 
     public releaseLock() {
         if (this.locked && this.lockTransferQueue.length > 0) {
-            const transfer = this.lockTransferQueue.splice(0, 1)[0]
-            setImmediate(transfer)
+            const { resolve, timeoutTimer } = this.lockTransferQueue.splice(0, 1)[0]
+            clearTimeout(timeoutTimer)
+            setImmediate(resolve)
         } else {
             this.locked = false
         }
@@ -41,12 +48,9 @@ export class AsyncLock {
     public async critical<T>(f: () => Promise<T>): Promise<T> {
         await this.getLock()
         try {
-            const result = await f()
+            return await f()
+        } finally {
             this.releaseLock()
-            return result
-        } catch (e) {
-            this.releaseLock()
-            throw e
         }
     }
 }

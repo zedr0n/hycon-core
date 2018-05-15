@@ -71,18 +71,18 @@ export class UpnpClient {
             const match = regex.exec(headers.LOCATION)
             if (match) {
                 const [product, localIP, localPort] = match.slice(1, 4)
-                const isLocal = ipaddress === localIP && Number(localPort) === UpnpServer.port
+                const isMe = ipaddress === localIP && Number(localPort) === UpnpServer.port
                 const fullProduct = UpnpServer.product + UpnpServer.networkid
                 const isSameProduct = product === fullProduct
                 const date = headers.DATE
 
-                if (!isLocal && isSameProduct) {
+                if (!isMe && isSameProduct) {
                     // logger.debug(`debug = ${JSON.stringify(headers)}`)
                     // logger.debug("IP ADDRESS:", ipaddress)
                     // logger.debug("LOCAL ADDRESS:", localIP)
                     // logger.debug("IS LOCAL:", isLocal)
                     // logger.debug("DATE:", date)
-                    logger.info(`DETECT IP Local=${isLocal} Product=${product} IP=${localIP} Port=${localPort}`)
+                    logger.info(`DETECT IP ME=${isMe} Product=${product} IP=${localIP} Port=${localPort}`)
                     try {
                         await this.rabbitNetwork.connect(localIP, Number(localPort), true)
                     } catch (e) {

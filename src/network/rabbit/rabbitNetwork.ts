@@ -27,10 +27,14 @@ export class RabbitNetwork implements INetwork {
     public static isRemoteSocket(socket: net.Socket) {
         // TODO:
         // Local Ranges:
-        // 10.0.0.0 – 10.255.255.255
         // 172.16.0.0 – 172.31.255.255
+        // 10.0.0.0 – 10.255.255.255
         // 192.168.0.0 – 192.168.255.255
+        // 127.0.0.0 - 127.255.255.255
+        // 0.0.0.0
         // fd00::/8
+        if (socket.remoteFamily === "IPv4") { }
+        if (socket.remoteFamily === "IPv6") { }
         return true
     }
 
@@ -74,7 +78,7 @@ export class RabbitNetwork implements INetwork {
     public broadcast(packet: Buffer, exempt: RabbitPeer): void {
         for (const [key, peer] of this.peers) {
             if (exempt !== peer) {
-                peer.sendPacket(packet)
+                peer.sendPacket(packet).catch((e) => { logger.info(e) })
             }
         }
     }

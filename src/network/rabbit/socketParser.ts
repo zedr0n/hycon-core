@@ -1,5 +1,6 @@
 import { getLogger } from "log4js"
 import { Socket } from "net"
+import { AsyncLock } from "../../common/asyncLock"
 
 const logger = getLogger("SocketBuffer")
 const defaultMaxPacketSize = 10 * 1024 * 1024
@@ -24,6 +25,7 @@ export class SocketParser {
     private route: number
     private parseIndex: number
     private packetCallback: (route: number, buffer: Buffer) => void
+    private sendLock: AsyncLock
 
     constructor(socket: Socket, onPacket: (route: number, buffer: Buffer) => void, bufferSize: number = 1024) {
         this.socket = socket
@@ -31,24 +33,30 @@ export class SocketParser {
         // These buffers will be held for the duration of the connection, and does not need to be intialized
         this.scrapBuffer = Buffer.allocUnsafeSlow(scrapBufferLength)
         this.writeBuffer = Buffer.allocUnsafeSlow(writeBufferLength)
+        this.sendLock = new AsyncLock(false, 60000)
         this.parseReset()
         socket.on("data", (data) => this.receive(data))
+        socket.on("drain", () => this.sendLock.releaseLock())// TODO: Log
     }
 
-    public send(route: number, buffer: Buffer): void {
+    public async send(route: number, buffer: Buffer): Promise<void> {
         if (buffer.length > defaultMaxPacketSize) {
             throw new Error("Buffer too large")
         }
-        // tslint:disable-next-line:max-line-length
-        // logger.info(`Sending ${buffer.length} bytes from ${this.socket.localAddress}:${this.socket.localPort} --> ${this.socket.remoteAddress}:${this.socket.remotePort}`)
-        this.socket.write(headerPrefix)
+        await this.sendLock.getLock()
+        let kernal = false
+        kernal = kernal && this.socket.write(headerPrefix)
         this.writeBuffer.writeUInt32LE(route, 0)
         this.writeBuffer.writeUInt32LE(buffer.length, 4)
-        this.socket.write(this.writeBuffer)
-        this.socket.write(buffer)
+        kernal = kernal && this.socket.write(this.writeBuffer)
+        kernal = kernal && this.socket.write(buffer)
+        if (kernal) {
+            this.sendLock.releaseLock()
+        }
     }
 
     public destroy(): void {
+        this.sendLock.rejectAll()
         if (this.socket) {
             this.socket.unref()
             this.socket.destroy()

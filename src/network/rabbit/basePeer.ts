@@ -21,16 +21,15 @@ export abstract class BasePeer {
         this.socketBuffer = new SocketParser(socket, (route, buffer) => this.onPacket(route, buffer))
         socket.on("close", () => this.close())
     }
-    public sendPacket(buffer: Buffer): void {
-        this.socketBuffer.send(0, buffer)
+    public async sendPacket(buffer: Buffer): Promise<void> {
+        return this.socketBuffer.send(0, buffer)
     }
 
     public disconnect() {
-        // disconnect
         this.socketBuffer.destroy()
     }
 
-    protected async onPacket(route: number, packet: Buffer): Promise<void> {
+    protected onPacket(route: number, packet: Buffer): void {
         // logger.info(` route ${route}, ${packet.length} bytes`)
         try {
             const res = proto.Network.decode(packet)
@@ -87,18 +86,19 @@ export abstract class BasePeer {
 
     protected async sendRequest(request: proto.INetwork): Promise<ReplyAndPacket> {
         const id = this.newReplyID()
-        const reply = await new Promise<ReplyAndPacket>((resolved, reject) => {
-            this.replyMap.set(id, { resolved, reject })
-            this.send(id, request)
-        })
-        this.replyMap.delete(id)
-        return reply
+        try {
+            return await new Promise<ReplyAndPacket>((resolved, reject) => {
+                this.replyMap.set(id, { resolved, reject })
+                this.send(id, request).catch(reject)
+            })
+        } finally {
+            this.replyMap.delete(id)
+        }
     }
 
-    protected send(route: number, data: proto.INetwork): void {
+    protected async send(route: number, data: proto.INetwork): Promise<void> {
         const buffer: any = proto.Network.encode(data).finish()
-        // logger.info(`Sending ${buffer.length} bytes`)
-        this.socketBuffer.send(route, buffer)
+        return this.socketBuffer.send(route, buffer)
     }
 
     protected protocolError() {

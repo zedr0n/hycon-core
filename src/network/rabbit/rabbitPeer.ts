@@ -2,6 +2,7 @@ import { getLogger } from "log4js"
 import * as Long from "long"
 import { Socket } from "net"
 import { setInterval } from "timers"
+import { AsyncLock } from "../../common/asyncLock"
 import { AnyBlock, Block } from "../../common/block"
 import { AnyBlockHeader, BlockHeader } from "../../common/blockHeader"
 import { ITxPool } from "../../common/itxPool"
@@ -231,7 +232,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
         }
         if (reply) { // i'm replying for the request
             if (response.message !== undefined) {
-                this.send(id, response.message)
+                this.send(id, response.message).catch((e) => logger.warn(`Message response could not be delived: ${e}`))
             }
         } else {
             // broadcast mode
