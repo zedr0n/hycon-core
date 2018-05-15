@@ -168,7 +168,7 @@ export class RabbitNetwork implements INetwork {
                 reject(`Already connected to ${host}:${port} `)
                 return
             }
-
+            this.pendingConnections.set(key, ipeer)
             logger.info(`Attempting to connect to ${host}:${port}...`)
             const socket = new Socket()
             socket.once("error", async () => {

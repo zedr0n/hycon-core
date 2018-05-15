@@ -1,3 +1,7 @@
+import { getLogger } from "log4js"
+
+const logger = getLogger("Network")
+
 interface ILockCallBack { resolve: () => void, reject: (e: any) => void, timeoutTimer: NodeJS.Timer }
 export class AsyncLock {
     private locked: boolean
@@ -23,6 +27,15 @@ export class AsyncLock {
 
     public async getLock(): Promise<boolean> {
         if (this.locked) {
+            if (this.lockTransferQueue.length > 1024) {
+                logger.fatal("Lock queue very high, rejecting all lock requests")
+                this.rejectAll()
+            }
+
+            if (this.lockTransferQueue.length > 512) {
+                throw new Error("Lock queue high")
+            }
+
             await new Promise((resolve, reject) => {
                 let timeoutTimer: NodeJS.Timer
                 if (this.timeoutTime !== undefined) {
