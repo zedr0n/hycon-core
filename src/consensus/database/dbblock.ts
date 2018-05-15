@@ -1,6 +1,7 @@
 import { AnyBlockHeader, BlockHeader } from "../../common/blockHeader"
 import { setGenesisBlockHeader } from "../../common/genesisHeader"
 import * as proto from "../../serialization/proto"
+import { Difficulty } from "../difficulty"
 
 export class DBBlock implements proto.IBlockDB {
     public static decode(data: Uint8Array): DBBlock {
@@ -12,7 +13,8 @@ export class DBBlock implements proto.IBlockDB {
     public fileNumber?: number = undefined
     public offset?: number = undefined
     public length?: number = undefined
-
+    public timeEMA: number = undefined
+    public workEMA: Difficulty = undefined
     constructor(dbBlock: proto.IBlockDB) {
         this.set(dbBlock)
     }

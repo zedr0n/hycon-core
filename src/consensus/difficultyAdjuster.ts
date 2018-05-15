@@ -1,3 +1,5 @@
+import { BaseBlockHeader } from "../common/genesisHeader"
+import { Hash } from "../util/hash"
 import { Difficulty } from "./../consensus/difficulty"
 
 export class DifficultyAdjuster {
@@ -5,6 +7,10 @@ export class DifficultyAdjuster {
     private timeEMA: number
     private workEMA: Difficulty
     private targetTime: number
+    private maxDifficulty = new Hash(new Uint8Array([0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                                    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                                    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                                    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]))
 
     constructor(alpha: number, targetTimeDelta: number, defaultWorkDelta: Difficulty) {
         this.alpha = alpha
@@ -13,15 +19,20 @@ export class DifficultyAdjuster {
         this.targetTime = targetTimeDelta
     }
 
-    public calcNewDifficulty(timeEMA: number, workEMA: Difficulty, targetTime: number): Difficulty {
-        const timeRatio = targetTime / timeEMA
-        return workEMA.multiply(timeRatio)
+    public calcNewDifficulty(): Difficulty {
+        const timeRatio = this.targetTime / this.timeEMA
+        const newDifficulty = this.workEMA.multiply(timeRatio)
+        if (newDifficulty.greaterThan(this.maxDifficulty)) {
+            return new Difficulty(0xFF_FF_FF, 0x1d)
+        }
+
+        return newDifficulty
     }
 
     public verifyDifficulty(prevTimeEMA: number, timeDelta: number, prevWorkEMA: Difficulty, workDelta: Difficulty, givenDifficulty: Difficulty) {
-        const timeEMA: number = this.calcTimeEMA(timeDelta, prevTimeEMA, this.alpha)
-        const workEMA: Difficulty = this.calcWorkEMA(workDelta, prevWorkEMA, this.alpha)
-        const computedDifficulty = this.calcNewDifficulty(timeEMA, workEMA, this.targetTime)
+        const timeEMA: number = this.calcTimeEMA(timeDelta)
+        const workEMA: Difficulty = this.calcWorkEMA(workDelta)
+        const computedDifficulty = this.calcNewDifficulty()
         return (computedDifficulty.encode() === givenDifficulty.encode())
     }
 
@@ -33,17 +44,35 @@ export class DifficultyAdjuster {
         return this.workEMA
     }
 
-    public calcTimeEMA(newValue: number, prevEma: number, a: number) {
-        const newEMA = a * newValue + (1 - a) * prevEma
+    public calcTimeEMA(newValue: number) {
+        const newEMA = this.alpha * newValue + (1 - this.alpha) * this.timeEMA
         this.timeEMA = newEMA
         return newEMA
     }
 
-    public calcWorkEMA(newValue: Difficulty, prevEma: Difficulty, a: number) {
-        const oldTerm = prevEma.multiply(1 - a)
-        let newEMA = newValue.multiply(a)
+    public calcWorkEMA(newValue: Difficulty) {
+        const oldTerm = this.workEMA.multiply(1 - this.alpha)
+        let newEMA = newValue.multiply(this.alpha)
         newEMA = newEMA.add(oldTerm)
         this.workEMA = newEMA
         return newEMA
+    }
+
+    public updateEMAs(header: BaseBlockHeader, timeStamp: number) {
+        if (typeof(header.timeStamp) === "number") {
+            const newTime = timeStamp - header.timeStamp
+            this.calcTimeEMA(newTime)
+            this.calcWorkEMA(Difficulty.decode(header.difficulty))
+        } else {
+            throw new Error("header timestamp is not a number")
+        }
+    }
+
+    public resetTimeEMA(timeEMA: number) {
+        this.timeEMA = timeEMA
+    }
+
+    public resetWorkEMA(workEMA: Difficulty) {
+        this.workEMA = workEMA
     }
 }

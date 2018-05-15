@@ -15,7 +15,7 @@ import { CpuMiner } from "../miner/cpuMiner"
 import { MinerServer } from "../miner/minerServer"
 import * as proto from "../serialization/proto"
 import { Server } from "../server"
-import * as utils from "../util/difficultyUtil"
+// import * as utils from "../util/difficultyUtil"
 import { Graph } from "../util/graph"
 import { Hash } from "../util/hash"
 import { Difficulty } from "./../consensus/difficulty"
@@ -325,19 +325,21 @@ export class SingleChain implements IConsensus {
             if (previous) {
                 previousHash = new Hash(previous.header)
             }
+            const timeStamp = Date.now()
             // TODO : get Miner address -> If miner is undefined, occur error
             const miner: Address = undefined
             const previousHeader = await this.db.getBlockHeader(previousHash)
+            this.difficultyAdjuster.updateEMAs(previousHeader, timeStamp)
             txs.sort((txA, txB) => txA.nonce - txB.nonce)
             const worldStateResult = await this.worldState.next(txs, previousHeader.stateRoot, miner)
             const header = new BlockHeader({
-                // difficulty: utils.getTargetDifficulty(),
-                difficulty: 0x013203ff,
+                difficulty: this.difficultyAdjuster.calcNewDifficulty().encode(),
+                // difficulty: 0x0001ffff,
                 merkleRoot: new Hash(),
                 nonce: -1,
                 previousHash: [previousHash],
                 stateRoot: worldStateResult.stateTransition.currentStateRoot,
-                timeStamp: Date.now(),
+                timeStamp,
             })
             const newBlock = new Block({ header, txs: worldStateResult.validTxs, miner })
             newBlock.updateMerkleRoot()
