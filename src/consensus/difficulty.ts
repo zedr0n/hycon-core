@@ -76,7 +76,7 @@ export class Difficulty {
             --i
         }
 
-        return (this.mantissa >= mComp)
+        return (this.mantissa > mComp)
     }
 
     public multiply(num: number): Difficulty {
