@@ -21,18 +21,18 @@ import { WalletManager } from "./wallet/walletManager"
 const optionDefinitions = [
     { name: "api", alias: "a", type: Boolean },
     { name: "api_port", alias: "A", type: Number },
-    { name: "writing", alias: "w", type: Boolean },
-    { name: "verbose", alias: "v", type: Boolean, defaultOption: false },
-    { name: "plot", alias: "g", type: Boolean },
-    { name: "peer", type: String, multiple: true, defaultOption: true },
-    { name: "port", alias: "p", type: Number },
-    { name: "str_port", alias: "s", type: Number },
-    { name: "networkid", alias: "n", type: Number },
-    { name: "mine", alias: "m", type: Boolean },
-    { name: "visDAG", alias: "d", type: Boolean },
-    { name: "wallet", alias: "W", type: Boolean },
     { name: "disable_upnp", alias: "x", type: Boolean },
+    { name: "mine", alias: "m", type: Boolean },
+    { name: "networkid", alias: "n", type: Number },
+    { name: "peer", type: String, multiple: true, defaultOption: true },
+    { name: "plot", alias: "g", type: Boolean },
+    { name: "port", alias: "p", type: Number },
     { name: "postfix", alias: "P", type: String },
+    { name: "str_port", alias: "s", type: Number },
+    { name: "verbose", alias: "v", type: Boolean, defaultOption: false },
+    { name: "visualize", alias: "V", type: Boolean, defaultOption: false },
+    { name: "wallet", alias: "W", type: Boolean },
+    { name: "writing", alias: "w", type: Boolean },
 ]
 const logger = getLogger("Server")
 

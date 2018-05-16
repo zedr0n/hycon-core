@@ -448,15 +448,11 @@ export class SingleChain implements IConsensus {
                     this.createCandidateBlock(txs)
                 } else {
                     await this.db.setBlockStatus(newBlockHash, BlockStatus.Block)
-                    if (this.graph && block) {
-                        this.graph.addToGraph(block.header, BlockStatus.Block)
-                    }
+                    this.graph.addToGraph(dbBlock.header, BlockStatus.Block)
                 }
             } else {
                 await this.db.setBlockStatus(newBlockHash, BlockStatus.Header)
-                if (this.graph === undefined) {
-                    this.graph.addToGraph(dbBlock.header, BlockStatus.Header)
-                }
+                this.graph.addToGraph(dbBlock.header, BlockStatus.Header)
             }
         } catch (e) {
             logger.error(`Fail to organizeChains : ${e}`)

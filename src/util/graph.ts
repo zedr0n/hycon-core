@@ -3,12 +3,10 @@ import { cloneElement } from "react"
 import { AnyBlockHeader, BlockHeader } from "../common/blockHeader"
 import { GenesisBlockHeader } from "../common/genesisHeader"
 import { BlockStatus } from "../consensus/sync"
+import { Server } from "../server"
 import { Hash } from "./hash"
-const logger = getLogger("Graph")
 
-// tslint:disable-next-line:no-var-requires
-const tryRequire = require("try-require")
-const graphviz = tryRequire("graphviz")
+const logger = getLogger("Graph")
 
 export class Graph {
     public gmap: any
@@ -17,7 +15,9 @@ export class Graph {
     public outFile: string
 
     constructor() {
-        this.gviz = graphviz.digraph("hycon")
+        if (Server.globalOptions.visualize) {
+            this.gviz = require("graphviz").graphviz.digraph("hycon")
+        }
         this.gmap = {
             edges: new Map<string, number>(),
             nodes: new Map<string, boolean>(),
@@ -74,40 +74,50 @@ export class Graph {
     }
 
     public renderGraph() {
-        this.gviz.output("png", this.outFile)
+        if (this.gviz !== undefined) {
+            this.gviz.output("png", this.outFile)
+        }
     }
 
     private addNode(id: string, color: string) {
-        this.gviz.addNode(id, { color, style: "filled" })
-        this.gmap.nodes.set(id, true)
+        if (this.gviz !== undefined) {
+            this.gviz.addNode(id, { color, style: "filled" })
+            this.gmap.nodes.set(id, true)
+        }
     }
 
     private removeNode(id: string) {
-        delete this.gviz.nodes.items[id]
-        this.gviz.nodes.length--
+        if (this.gviz !== undefined) {
+            delete this.gviz.nodes.items[id]
+            this.gviz.nodes.length--
+        }
     }
 
     private addEdge(id: string, pid: string) {
-        const key = id + "_" + pid
-        if (this.gmap.edges.get(key) === undefined) {
-            this.gviz.addEdge(id, pid)
-            this.gmap.edges.set(key, this.gviz.edges.length - 1)
+        if (this.gviz !== undefined) {
+            const key = id + "_" + pid
+            if (this.gmap.edges.get(key) === undefined) {
+                this.gviz.addEdge(id, pid)
+                this.gmap.edges.set(key, this.gviz.edges.length - 1)
+            }
         }
     }
 
     private removeEdge(id: string, pid: string) {
-        const key = id + "_" + pid
-        const idx = this.gmap.edges.get(key)
-        if (idx !== undefined) {
-            this.gviz.edges.splice(idx, 1)
-            this.gmap.edges.delete(key)
-            const edgesSize = this.gviz.edges.length
-            if (idx !== edgesSize) {
-                const keys = Array.from(this.gmap.edges.keys())
-                for (let i = idx; i < edgesSize; i++) {
-                    const k = keys[i]
-                    let v = this.gmap.edges.get(k)
-                    this.gmap.edges.set(k, --v)
+        if (this.gviz !== undefined) {
+            const key = id + "_" + pid
+            const idx = this.gmap.edges.get(key)
+            if (idx !== undefined) {
+                this.gviz.edges.splice(idx, 1)
+                this.gmap.edges.delete(key)
+                const edgesSize = this.gviz.edges.length
+                if (idx !== edgesSize) {
+                    const keys = Array.from(this.gmap.edges.keys())
+                    for (let i = idx; i < edgesSize; i++) {
+                        const k = keys[i]
+                        let v = this.gmap.edges.get(k)
+                        this.gmap.edges.set(k, --v)
+                    }
                 }
             }
         }
