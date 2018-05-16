@@ -290,16 +290,16 @@ export class SingleChain implements IConsensus {
     private async initGenesisBlock(): Promise<GenesisBlock> {
         try {
             const genesis = GenesisBlock.loadFromFile()
-            let genesisHash = new Hash(genesis.header)
+            const genesisHash = new Hash(genesis.header)
             const transition = await this.worldState.first(genesis)
             await this.worldState.putPending(transition.batch, transition.mapAccount)
             genesis.header.stateRoot = transition.currentStateRoot
             // Test wallets
-            const testWalletTransition = await this.worldState.createTestAddresses(transition.currentStateRoot)
-            await this.worldState.putPending(testWalletTransition.batch, testWalletTransition.mapAccount)
-            genesis.header.stateRoot = testWalletTransition.currentStateRoot
-            await this.worldState.print(testWalletTransition.currentStateRoot)
-            genesisHash = new Hash(genesis.header)
+            // const testWalletTransition = await this.worldState.createTestAddresses(transition.currentStateRoot)
+            // await this.worldState.putPending(testWalletTransition.batch, testWalletTransition.mapAccount)
+            // genesis.header.stateRoot = testWalletTransition.currentStateRoot
+            // await this.worldState.print(testWalletTransition.currentStateRoot)
+            // genesisHash = new Hash(genesis.header)
             const { current } = await this.db.putBlock(genesisHash, genesis)
             const block = await this.db.getBlockHeader(genesisHash)
             this.headerTip = current
