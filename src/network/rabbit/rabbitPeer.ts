@@ -284,7 +284,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
             const relay = false
             return { message, relay }
         } catch (e) {
-            logger.info(`Could not get recent active Peers: ${e}`)
+            logger.error(`Could not get recent active Peers: ${e}`)
         }
     }
 
@@ -296,7 +296,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 const n = await this.txPool.putTxs(txs)
                 success = (n === request.txs.length)
             } catch (e) {
-                logger.info(`Failed to putTx: ${e}`)
+                logger.error(`Failed to putTx: ${e}`)
             }
         }
 
@@ -325,7 +325,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
             // relay = false
 
         } catch (e) {
-            logger.info(`Failed to put block: ${e}`)
+            logger.error(`Failed to put block: ${e}`)
         }
         logger.debug(`PutBlock Relay=${relay}`)
         return { message: { putBlockReturn: { success: relay } }, relay }
@@ -342,7 +342,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
             const blocks = await Promise.all(blockPromise)
             message = { getBlocksByHashReturn: { success: true, blocks } }
         } catch (e) {
-            logger.info(`Failed to getBlockByHash: ${e}`)
+            logger.error(`Failed to getBlockByHash: ${e}`)
             message = { getBlocksByHashReturn: { success: false } }
         }
         return { message, relay: false }
@@ -359,7 +359,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
             const headers = await Promise.all(headerPromise)
             message = { getHeadersByHashReturn: { success: true, headers } }
         } catch (e) {
-            logger.info(`Failed to getHeaderByHash: ${e}`)
+            logger.error(`Failed to getHeaderByHash: ${e}`)
             message = { getBlocksByHashReturn: { success: false } }
         }
         return { message, relay: false }
@@ -373,7 +373,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
             const blocks = await this.consensus.getBlocksRange(fromHeight, count)
             message = { getBlocksByRangeReturn: { success: true, blocks } }
         } catch (e) {
-            logger.info(`Failed to getBlocksByRange: ${e}`)
+            logger.error(`Failed to getBlocksByRange: ${e}`)
             message = { getBlocksByRangeReturn: { success: false } }
         }
         return { message, relay: false }
@@ -387,7 +387,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
             const headers = await this.consensus.getHeadersRange(fromHeight, count)
             message = { getHeadersByRangeReturn: { success: true, headers } }
         } catch (e) {
-            logger.info(`Failed to getHeadersByRange: ${e}`)
+            logger.error(`Failed to getHeadersByRange: ${e}`)
             message = { getHeadersByRangeReturn: { success: false } }
         }
         return { message, relay: false }
@@ -399,7 +399,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
             const tip = await this.consensus.getBlocksTip()
             message = { getTipReturn: { success: true, hash: tip.hash, height: tip.height } }
         } catch (e) {
-            logger.info(`Failed to getBlockTip: ${e}`)
+            logger.error(`Failed to getBlockTip: ${e}`)
             message = { getTipReturn: { success: false } }
         }
         return { message, relay: false }
@@ -416,7 +416,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
             const results = await Promise.all(promises)
             relay = results.every((value) => value)
         } catch (e) {
-            logger.info(`Failed to put header: ${e}`)
+            logger.error(`Failed to put header: ${e}`)
         }
         logger.debug(`PutHeader`)
         return { message: { putHeadersReturn: { success: relay } }, relay }
@@ -429,7 +429,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
             const hash = await this.consensus.getHash(height)
             message = { getHashReturn: { success: true, hash } }
         } catch (e) {
-            logger.info(`Failed to getHash: ${e}`)
+            logger.error(`Failed to getHash: ${e}`)
             message = { getHashReturn: { success: false } }
         }
         return { message, relay: false }

@@ -47,8 +47,8 @@ export class Address extends Uint8Array {
     public toString(): string {
         try {
             return "H" + Base58.encode(this) + checkSum(this)
-        } catch (err) {
-            logger.error(err)
+        } catch (e) {
+            logger.error(e)
         }
     }
 

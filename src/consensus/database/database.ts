@@ -154,7 +154,7 @@ export class Database {
             }
             if (e instanceof DecodeError) {
                 // TODO: Schedule rerequest or file lookup
-                logger.debug(`Could not decode block ${hash}`)
+                logger.error(`Could not decode block ${hash}`)
                 throw e
             }
             return Promise.reject(e)
@@ -249,7 +249,7 @@ export class Database {
             if (e.notFound) { return undefined }
             if (decodingDBEntry) {
                 // TODO: Schedule rerequest or file lookup
-                logger.debug(`Could not decode block ${hash}`)
+                logger.error(`Could not decode block ${hash}`)
                 const decodeError = new DecodeError()
                 decodeError.hash = hash
                 throw decodeError
@@ -307,7 +307,7 @@ export class Database {
                 return block
             } catch (e) {
                 // TODO: Schedule redownload?
-                logger.fatal(`Could not decode block: ${e}`)
+                logger.error(`Could not decode block: ${e}`)
                 throw new Error("Corrupt block")
             } finally {
                 await blockFile.close()

@@ -186,14 +186,14 @@ export class RabbitNetwork implements INetwork {
             this.peerTable.set(key, peer)
             logger.info(`${ipeer.host}:${ipeer.port} has been saved to All Peers`)
         } catch (e) {
-            logger.info(`e`)
+            logger.error(`e`)
         }
         socket.on("close", async (error) => {
             try {
                 this.peerTable.delete(key)
                 logger.info(`${key}:${this.peerTable.size}, ${ipeer.host}:${ipeer.port} has been removed from All Peers`)
             } catch (e) {
-                logger.info(`e`)
+                logger.error(`e`)
             }
         })
         socket.on("error", async (error) => {
@@ -214,7 +214,7 @@ export class RabbitNetwork implements INetwork {
             }
             logger.info(`peer ${ipeer.host}:${ipeer.port} has been saved to both Peers`)
         } catch (e) {
-            logger.info(`e`)
+            logger.error(`e`)
         }
         socket.on("close", async (error) => {
             try {
@@ -225,7 +225,7 @@ export class RabbitNetwork implements INetwork {
                 }
                 logger.info(`peer ${key}:${this.peerTable.size}, ${ipeer.host}:${ipeer.port} has been removed from both Peers`)
             } catch (e) {
-                logger.info(`e`)
+                logger.error(`e`)
             }
         })
         socket.on("error", async (error) => {
@@ -256,7 +256,7 @@ export class RabbitNetwork implements INetwork {
                     await this.connect(peer.host, peer.port, false)
                 }
             } catch (e) {
-                logger.info(`occurred error when connect seeds: ${e}`)
+                logger.error(`occurred error when connect seeds: ${e}`)
             }
 
         }
@@ -274,10 +274,10 @@ export class RabbitNetwork implements INetwork {
                     index++
                 } catch (e) {
                     try {
-                        logger.info(`fail to connect to ${peer.host}:${peer.port} : ${e}`)
+                        logger.error(`fail to connect to ${peer.host}:${peer.port} : ${e}`)
                         await this.peerDB.remove(peer)
                     } catch (e) {
-                        logger.debug(e)
+                        logger.error(e)
                     }
                 }
             }

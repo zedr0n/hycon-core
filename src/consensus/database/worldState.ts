@@ -81,13 +81,12 @@ export class WorldState {
             } else if (object.account !== undefined) {
                 logger.info(`${indent}(${prefix.length})${new Address(prefix).toString()} --> ${hycontoString(object.account.balance)} --> (${hash.toString()}) : count(${object.refCount})`)
             } else {
-                logger.info(`${indent}Could not find '${hash.toString()}'`)
+                logger.error(`${indent}Could not find '${hash.toString()}'`)
             }
         } catch (e) {
             return Promise.reject("Print Error : " + e)
         }
     }
-
 
     public async first(genesis: GenesisBlock): Promise<IStateTransition> {
         try {
@@ -415,7 +414,7 @@ export class WorldState {
             return Promise.resolve(dbState)
         } catch (e) {
             if (e.notFound) {
-                logger.warn(`DBState not found in getDBState`)
+                logger.error(`DBState not found in getDBState`)
             } else if (decodeingDBState) {
                 logger.error(`Fail to decode DBState in getDBState`)
             } else {

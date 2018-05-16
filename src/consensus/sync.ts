@@ -88,7 +88,7 @@ export class Sync {
             }
             this.peer = undefined
         } catch (e) {
-            logger.debug(`Syncing failed: ${e}`)
+            logger.error(`Syncing failed: ${e}`)
         }
         return delay(4000)
     }

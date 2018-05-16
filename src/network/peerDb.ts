@@ -61,7 +61,7 @@ export class PeerDb {
             const peer = proto.Peer.decode(result)
             return peer
         } catch (e) {
-            logger.info(`Could not get key '${key}': ${e}`)
+            logger.error(`Could not get key '${key}': ${e}`)
             throw e
         }
     }
@@ -83,7 +83,7 @@ export class PeerDb {
             return Promise.resolve(peers)
 
         } catch (e) {
-            logger.info(`Could not get all keys from DB: ${e}`)
+            logger.error(`Could not get all keys from DB: ${e}`)
             throw e
         }
 
@@ -103,7 +103,7 @@ export class PeerDb {
                 cnt++
             }
         } catch (e) {
-            logger.info(`Could not delete from db: ${peer.host}:${peer.port}`)
+            logger.error(`Could not delete from db: ${peer.host}:${peer.port}`)
         }
     }
 
@@ -119,7 +119,7 @@ export class PeerDb {
                     return
                 })
         } catch (e) {
-            logger.info(`Could not clear all elements from DB: ${e}`)
+            logger.error(`Could not clear all elements from DB: ${e}`)
             throw e
         }
     }
@@ -143,7 +143,7 @@ export class PeerDb {
                 }
             })
         } catch (e) {
-            logger.info(`Could not get recent active Peers: ${e}`)
+            logger.error(`Could not get recent active Peers: ${e}`)
             return Promise.reject(e)
         }
     }
@@ -152,7 +152,7 @@ export class PeerDb {
         try {
             this.peers = await this.listAll()
         } catch (e) {
-            logger.info(`Could not get all keys from DB: ${e}`)
+            logger.error(`Could not get all keys from DB: ${e}`)
         }
     }
 }
