@@ -14,7 +14,7 @@ export class BlockFile {
     private fileSize: number
     private prefix: string
 
-    public async fileInit(path: string, n: number, filePosition: number = 0): Promise<void> {
+    public async fileInit(path: string, n: number, filePosition: number): Promise<void> {
         const prefix = path + "/blk"
         const fileName = prefix + zeroPad(n.toString(), 5) + ".dat"
         this.n = n

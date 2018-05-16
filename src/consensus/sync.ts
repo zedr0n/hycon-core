@@ -1,4 +1,4 @@
-import { configure, getLogger } from "log4js"
+import { getLogger } from "log4js"
 import { AnyBlock, Block } from "../common/block"
 import { AnyBlockHeader, BlockHeader } from "../common/blockHeader"
 import { INetwork } from "../network/inetwork"
@@ -88,7 +88,9 @@ export class Sync {
 
             logger.info(`Find start block`)
             const startBlockHeight = await this.findStartBlock(startHeaderHeight)
-            if (remoteTip.height > localTip.height) {
+            if (remoteTip.height === localTip.height) {
+                logger.debug(`synchronized`)
+            } else if (remoteTip.height > localTip.height) {
                 logger.info(`Getting Blocks`)
                 await this.getBlocks(startBlockHeight)
             } else {

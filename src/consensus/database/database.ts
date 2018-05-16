@@ -57,7 +57,7 @@ export class Database {
         const filePosition = await this.getOrInitKey("filePosition")
         this.fileNumber = +fileNumber
         this.filePosition = +filePosition
-        await this.blockFile.fileInit(this.filePath, this.fileNumber)
+        await this.blockFile.fileInit(this.filePath, this.fileNumber, this.filePosition)
     }
 
     public async putBlock(hash: Hash, block: AnyBlock): Promise<{ current: DBBlock, previous: DBBlock }> {
@@ -74,9 +74,8 @@ export class Database {
 
             if (this.blockFile.size() > 134217728) {
                 await this.nextFile()
-            } else {
-                await this.database.put("filePosition", this.filePosition)
             }
+            await this.database.put("filePosition", this.filePosition)
             await this.database.put("b" + hash, current.encode())
             return { current, previous }
         })
@@ -310,14 +309,14 @@ export class Database {
         this.fileNumber++
         await this.filePositionInit()
         this.blockFile = new BlockFile()
-        await this.blockFile.fileInit(this.filePath, this.fileNumber)
+        await this.blockFile.fileInit(this.filePath, this.fileNumber, this.filePosition)
         return await this.database.put("fileNumber", this.fileNumber)
     }
 
     private async dbBlockToBlock(dbBlock: DBBlock): Promise<AnyBlock> {
         if (dbBlock.offset !== undefined && dbBlock.length !== undefined && dbBlock.fileNumber !== undefined) {
             const blockFile = new BlockFile()
-            await blockFile.fileInit(this.filePath, dbBlock.fileNumber)
+            await blockFile.fileInit(this.filePath, dbBlock.fileNumber, 0)
             const encodeBlock = await blockFile.get(dbBlock.offset, dbBlock.length)
             try {
                 const block = Block.decode(encodeBlock)
