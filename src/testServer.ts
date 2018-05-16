@@ -22,6 +22,7 @@ import * as proto from "./serialization/proto"
 import { Block, INetwork, Tx } from "./serialization/proto"
 import { Server } from "./server"
 import { hyconfromString, hycontoString } from "./util/commonUtil"
+import { TestWalletMnemonics } from "./util/genWallet"
 import { Hash } from "./util/hash"
 import { Wallet } from "./wallet/wallet"
 import { WalletManager } from "./wallet/walletManager"
@@ -59,20 +60,18 @@ export class TestServer {
 
     public async showWallets() {
         for (let i = 0; i < TestServer.walletNumber; i++) {
-            const name = `test${i}`
             const w = this.wallets[i]
             const account = await this.server.consensus.getAccount(w.pubKey.address())
             assert(account)
             assert(account.balance.compare(0) === 1)
-            logger.debug(`Make Wallet=${name} Public=${w.pubKey.address().toString()} Balance=${hycontoString(account.balance)}`)
+            logger.debug(`Wallet${i} Public=${w.pubKey.address().toString()} Balance=${hycontoString(account.balance)}`)
             assert(w)
         }
     }
 
     public async makeWallet() {
-        for (let i = 1; i <= TestServer.walletNumber; i++) {
-            const name = `test${i}`
-            this.wallets.push(await Wallet.loadKeys(name, ""))
+        for (const { mnemonic } of TestWalletMnemonics) {
+            this.wallets.push(Wallet.generate({ mnemonic, language: "english" }))
         }
         await this.showWallets()
         logger.debug(`done`)

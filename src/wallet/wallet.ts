@@ -47,11 +47,11 @@ export class Wallet {
     }
 
     public static generate(wallet?: {
-        name: string,
-        password: string,
+        name?: string,
+        password?: string,
         mnemonic: string,
-        language: string,
-        hint: string,
+        language?: string,
+        hint?: string,
     }): Wallet {
         if (wallet && wallet.mnemonic) {
             let language = ""

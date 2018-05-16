@@ -21,7 +21,7 @@ configure({
 })
 
 const logger = getLogger("GenWallet")
-const nameList = [
+export const TestWalletMnemonics = [
     { name: "ico", mnemonic: "coach situate canyon dentist impulse topic cave ten clown glass increase proud" },
     { name: "airdrop", mnemonic: "unusual spray oven couch sustain gap cream join situate ginger bus metal" },
     { name: "team", mnemonic: "drift royal sight admit gasp city bread tomorrow consider mushroom dwarf enact" },
@@ -49,8 +49,8 @@ async function recoverWallet() {
         const address = await Wallet.recoverWallet({
             hint: "",
             language: "english",
-            mnemonic: nameList[i].mnemonic,
-            name: nameList[i].name,
+            mnemonic: TestWalletMnemonics[i].mnemonic,
+            name: TestWalletMnemonics[i].name,
             password: "",
         })
         addressList.push(address)
