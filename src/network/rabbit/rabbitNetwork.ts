@@ -82,7 +82,7 @@ export class RabbitNetwork implements INetwork {
     }
     public readonly networkid: string = "hycon"
     public readonly version: number = 3
-    public port: number // TODO: Set after portmap
+    public port: number
     private hycon: Server
     private server: net.Server
     private peerDB: PeerDb
@@ -146,6 +146,9 @@ export class RabbitNetwork implements INetwork {
             // nat
             this.natUpnp = new NatUpnp(this.port, this)
             await this.natUpnp.run()
+            if (!isNaN(this.natUpnp.publicPort)) {
+                this.port = this.natUpnp.publicPort
+            }
         }
 
         this.connectLoop()

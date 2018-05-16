@@ -72,14 +72,14 @@ export class NatUpnp {
         try {
             this.publicPort = await NatUpnp.mapPort(this.privatePort)
         } catch (e) {
-            this.publicPort = this.privatePort
+            this.publicPort = NaN
             logger.warn(`Upnp Warning: ${e}, please confirm your router supports UPNP and that UPNP is enabled or you just not behind the NAT, Hycon will use your local port:${this.privatePort}`)
         }
         try {
             this.publicIp = await NatUpnp._externalIp()
             logger.info(`External Ip=${this.publicIp}`)
         } catch (e) {
-            this.publicIp = ip.address()
+            this.publicIp = ""
             logger.warn(`Get external IP failed, hycon will use your local IP:${this.publicIp} if you are not behind NAT`)
         }
     }
