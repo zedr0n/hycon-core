@@ -28,7 +28,7 @@ import { IStateTransition, WorldState } from "./database/worldState"
 import { AnySignedTx, IConsensus, NewBlockCallback } from "./iconsensus"
 import { BlockStatus } from "./sync"
 
-const logger = getLogger("SingleChain Concensus")
+const logger = getLogger("SingleChain Consensus")
 export class SingleChain implements IConsensus {
     public graph: Graph
     private server: Server
