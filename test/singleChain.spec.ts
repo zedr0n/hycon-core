@@ -1,4 +1,5 @@
 import { SingleChain } from "../src/consensus/singleChain"
+import { Server } from "../src/server"
 
 describe("SingleChain", () => {
     xit("getNonce: should get the nonce", () => {
@@ -70,6 +71,12 @@ describe("SingleChain", () => {
     })
 
     xit("getBlockHeight: should get the block height", () => {
+
+    })
+
+    xit("testMakeBlock: should create a new candidate block", () => {
+        const serverSpy: jasmine.SpyObj<Server> = jasmine.createSpyObj("Server", [])
+        const consensus = new SingleChain(serverSpy, "./garbage", "./otherGarbage", "./otherOtherGarbage")
 
     })
 
