@@ -29,7 +29,7 @@ export class TxPool implements ITxPool {
     }
 
     public updateTxs(old: SignedTx[], maxReturn?: number): SignedTx[] {
-        this.remove(old)
+        this.remove(old.slice(0, old.length))
         return this.txs.slice(0, maxReturn)
     }
 

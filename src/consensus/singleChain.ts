@@ -339,17 +339,17 @@ export class SingleChain implements IConsensus {
 
             const difficulty = DifficultyAdjuster.calcNewDifficulty(newTimeEMA, newWorkEMA).encode()
             txs.sort((txA, txB) => txA.nonce - txB.nonce)
-            const worldStateResult = await this.worldState.next(txs, previousHeader.stateRoot, miner)
+            const { invalidTxs, validTxs, stateTransition: { currentStateRoot } } = await this.worldState.next(txs, previousHeader.stateRoot, miner)
             const header = new BlockHeader({
                 difficulty,
                 // difficulty: 0x0001ffff,
                 merkleRoot: new Hash(),
                 nonce: -1,
                 previousHash: [previousHash],
-                stateRoot: worldStateResult.stateTransition.currentStateRoot,
+                stateRoot: currentStateRoot,
                 timeStamp,
             })
-            const newBlock = new Block({ header, txs: worldStateResult.validTxs, miner })
+            const newBlock = new Block({ header, txs: validTxs, miner })
             newBlock.updateMerkleRoot()
 
             if (!await this.verifyPreBlock(newBlock, previousHeader)) { throw new Error("Not verified.") }
