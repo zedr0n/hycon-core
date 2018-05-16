@@ -41,11 +41,6 @@ export class SingleChain implements IConsensus {
     private forkHeight: number
     private txdb?: TxDatabase
 
-    // Load these from a constants file if possible
-    private alpha: number = .1
-    private targetTimeEMA: number = 30
-    private initWorkEMA: Difficulty = new Difficulty(0x00_00_FF, 0x00)
-    private difficultyAdjuster: DifficultyAdjuster
     constructor(server: Server, dbPath: string, wsPath: string, filePath: string, txPath?: string) {
         this.server = server
         this.newBlockCallbacks = []
@@ -53,7 +48,6 @@ export class SingleChain implements IConsensus {
         this.worldState = new WorldState(wsPath)
         this.txUnit = 1000
         if (txPath) { this.txdb = new TxDatabase(txPath) }
-        this.difficultyAdjuster = new DifficultyAdjuster(this.alpha, this.targetTimeEMA, this.initWorkEMA)
         this.graph = new Graph()
     }
     public async getNonce(address: Address): Promise<number> {
@@ -325,13 +319,19 @@ export class SingleChain implements IConsensus {
             if (previous) {
                 previousHash = new Hash(previous.header)
             }
+            const previousDBBlock = await this.db.getDBBlock(previousHash)
             const timeStamp = Date.now()
             // TODO : get Miner address -> If miner is undefined, occur error
             const miner: Address = undefined
             const previousHeader = await this.db.getBlockHeader(previousHash)
-            this.difficultyAdjuster.calcTimeEMA(timeStamp - previousHeader.timeStamp)
-            this.difficultyAdjuster.calcWorkEMA(Difficulty.decode(previousHeader.difficulty))
-            const difficulty = this.difficultyAdjuster.calcNewDifficulty().encode()
+
+            const prevTimeEMA = previousDBBlock.timeEMA
+            const prevWorkEMA = previousDBBlock.workEMA
+
+            const newTimeEMA = DifficultyAdjuster.calcTimeEMA(timeStamp - previousHeader.timeStamp, prevTimeEMA)
+            const newWorkEMA = DifficultyAdjuster.calcWorkEMA(Difficulty.decode(previousHeader.difficulty), prevWorkEMA)
+
+            const difficulty = DifficultyAdjuster.calcNewDifficulty(newTimeEMA, newWorkEMA).encode()
             txs.sort((txA, txB) => txA.nonce - txB.nonce)
             const worldStateResult = await this.worldState.next(txs, previousHeader.stateRoot, miner)
             const header = new BlockHeader({
@@ -394,11 +394,16 @@ export class SingleChain implements IConsensus {
             return { isVerified: false }
         }
 
+        const prevHash = new Hash(previousHeader)
+        const prevDBBlock = await this.db.getDBBlock(prevHash)
+        const prevTimeEMA = prevDBBlock.timeEMA
+        const prevWorkEMA = prevDBBlock.workEMA
+
         const blockDifficulty = Difficulty.decode(block.header.difficulty)
         const timeDelta = block.header.timeStamp - previousHeader.timeStamp
-        const workDelta = blockDifficulty
+        const workDelta = Difficulty.decode(previousHeader.difficulty)
 
-        if ( ! (this.difficultyAdjuster.verifyDifficulty(timeDelta, workDelta, blockDifficulty))) {
+        if ( ! (DifficultyAdjuster.verifyDifficulty(timeDelta, prevTimeEMA, workDelta, prevWorkEMA, blockDifficulty))) {
             logger.warn(`Invalid block difficulty`)
             return { isVerified: false}
         }
@@ -504,8 +509,6 @@ export class SingleChain implements IConsensus {
             txs = this.server.txPool.updateTxs(block.txs, newBlockHashes.length > 0 ? 0 : txCount)
             this.newBlock(block)
         }
-        this.difficultyAdjuster.loadTimeEMA(this.blockTip.timeEMA)
-        this.difficultyAdjuster.loadWorkEMA(this.blockTip.workEMA)
         return txs
     }
 

@@ -229,7 +229,7 @@ export class Database {
         }
     }
 
-    private async getDBBlock(hash: Hash): Promise<DBBlock | undefined> {
+    public async getDBBlock(hash: Hash): Promise<DBBlock | undefined> {
         let decodingDBEntry = false
         try {
             const key = "b" + hash

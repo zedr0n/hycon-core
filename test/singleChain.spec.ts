@@ -1,13 +1,47 @@
+import { randomBytes } from "crypto"
+import Long = require("long")
+import { Block } from "../src/common/block"
+import { GenesisBlock } from "../src/common/blockGenesis"
+import { Database } from "../src/consensus/database/database"
 import { SingleChain } from "../src/consensus/singleChain"
 import { Server } from "../src/server"
 
 describe("SingleChain", () => {
+    let serverSpy: jasmine.SpyObj<Server> = jasmine.createSpyObj("Server", ["run"])
+    let consensus = new SingleChain(serverSpy, "./garbage", "./garbage", "./garbage")
+    let dbSpy: jasmine.SpyObj<Database> = jasmine.createSpyObj("Database", ["init"])
+    let header = {}
+
+    beforeEach((() => {
+        header = {
+            difficulty: 0x00_00_00_FF,
+            merkleRoot: randomBytes(32),
+            nonce: Long.fromNumber(1234, true),
+            previousHash: [randomBytes(32)],
+            stateRoot: randomBytes(32),
+            timeStamp: Date.now(),
+        }
+        serverSpy = jasmine.createSpyObj("Server", ["run"])
+        dbSpy = jasmine.createSpyObj("Database", ["init", "getBlockTip", "getHeaderTip"])
+
+        dbSpy.getBlockTip.and.callFake(() => {
+            const genesisBlock = new GenesisBlock(header)
+            return genesisBlock
+        })
+        consensus = new SingleChain(serverSpy, "./garbage", "./garbage", "./garbage")
+        // Dirty trick to prevent an actual DB from forming
+        // tslint:disable-next-line:no-string-literal
+        consensus["db"] = dbSpy
+        consensus.init()
+
+    }))
+
     xit("getNonce: should get the nonce", () => {
 
     })
 
-    xit("init: should initialize", () => {
-
+    it("init: should initialize", () => {
+        expect(dbSpy.init).toHaveBeenCalled()
     })
 
     xit("putBlock: should put a block into the database", () => {
@@ -75,8 +109,6 @@ describe("SingleChain", () => {
     })
 
     xit("testMakeBlock: should create a new candidate block", () => {
-        const serverSpy: jasmine.SpyObj<Server> = jasmine.createSpyObj("Server", [])
-        const consensus = new SingleChain(serverSpy, "./garbage", "./otherGarbage", "./otherOtherGarbage")
 
     })
 
