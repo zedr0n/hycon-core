@@ -350,6 +350,7 @@ export class SingleChain implements IConsensus {
                 timeStamp,
             })
             const newBlock = new Block({ header, txs: validTxs, miner })
+            this.server.txPool.updateTxs(validTxs, 0)
             newBlock.updateMerkleRoot()
 
             if (!await this.verifyPreBlock(newBlock, previousHeader)) { throw new Error("Not verified.") }

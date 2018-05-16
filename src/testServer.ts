@@ -43,7 +43,6 @@ export class TestServer {
     private txs: Tx[] = []
     private index: number = 1
     private wallets: Wallet[] = []
-    private nonce: number = 0
     private txPool: ITxPool
     private consensus: IConsensus = undefined // the core
     private txdb: TxDatabase
@@ -83,7 +82,6 @@ export class TestServer {
     private async makeTx() {
         const amt = hyconfromString("100.123")
         const fee = hyconfromString("10.2")
-        this.nonce = 0
 
         const n = 1
         const lastWalletIndex = this.wallets.length - 1
@@ -97,12 +95,9 @@ export class TestServer {
             assert(fromWallet)
             const fromAddr = fromWallet.pubKey.address()
             const fromAddrString = fromAddr.toString()
-            let nonce
-            if (this.nonceTable.has(fromAddrString)) {
-                nonce = this.nonceTable.get(fromAddrString) + 1
-            } else {
-                nonce = await this.server.consensus.getNonce(fromAddr) + 1
-            }
+
+            const nonce = await this.server.consensus.getNonce(fromAddr) + 1
+
             this.nonceTable.set(fromAddrString, nonce)
             if (!fromAddr.equals(toAddr)) {
                 const a = amt.add(randomInt(0, 10))
