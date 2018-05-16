@@ -241,7 +241,7 @@ export class RabbitNetwork implements INetwork {
             const peer = await this.newConnection(socket)
             if (RabbitNetwork.isRemoteSocket(socket)) {
                 const status = await peer.status()
-                const ipeer = { host: socket.remoteAddress, port: status.port }
+                const ipeer = { host: RabbitNetwork.ipv6Toipv4(socket.remoteAddress), port: status.port }
                 const key = PeerDb.ipeer2key(ipeer)
                 this.endPoints.set(key, ipeer)
                 socket.on("close", () => this.endPoints.delete(key))
