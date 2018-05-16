@@ -9,7 +9,7 @@ export class DifficultyAdjuster {
         timeRatio = timeRatio < 0.25 ? 0.25 : timeRatio
         const newDifficulty = workEMA.multiply(timeRatio)
         if (newDifficulty.greaterThan(DifficultyAdjuster.maxDifficulty)) {
-            return new Difficulty(0xFF_FF_FF, 0x1d)
+            return new Difficulty(0xFFFFFF, 0x1d)
         } else if (Difficulty.defaultDifficulty.greaterThan(newDifficulty)) {
             return Difficulty.defaultDifficulty
         }

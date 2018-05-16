@@ -14,7 +14,7 @@ xdescribe("SingleChain", () => {
 
     beforeEach((() => {
         header = {
-            difficulty: 0x00_00_00_FF,
+            difficulty: 0x000000FF,
             merkleRoot: randomBytes(32),
             nonce: Long.fromNumber(1234, true),
             previousHash: [randomBytes(32)],

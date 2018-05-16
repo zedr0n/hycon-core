@@ -35,7 +35,7 @@ describe("DBBlock Test", () => {
             length: 0,
             offset: 0,
             timeEMA: 30,
-            workEMA: new Difficulty(0x00_00_FF, 0x10).encode(),
+            workEMA: new Difficulty(0x0000FF, 0x10).encode(),
         }
         dbBlock = new DBBlock(iDBBlock)
     })
@@ -49,7 +49,7 @@ describe("DBBlock Test", () => {
         expect(block.header).toBeDefined()
         expect(block.length).toEqual(0)
         expect(block.timeEMA).toEqual(30)
-        expect(block.workEMA).toEqual(0x10_00_00_FF)
+        expect(block.workEMA).toEqual(0x100000FF)
     })
 
     it("set(block) : if set method set property", () => {

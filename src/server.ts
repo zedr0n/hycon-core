@@ -30,7 +30,7 @@ const optionDefinitions = [
     { name: "postfix", alias: "P", type: String },
     { name: "str_port", alias: "s", type: Number },
     { name: "verbose", alias: "v", type: Boolean, defaultOption: false },
-    { name: "visualize", alias: "V", type: Boolean, defaultOption: false },
+    { name: "visualize", alias: "V", type: Boolean },
     { name: "wallet", alias: "W", type: Boolean },
     { name: "writing", alias: "w", type: Boolean },
 ]
