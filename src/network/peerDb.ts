@@ -43,6 +43,7 @@ export class PeerDb {
     }
     public async run() {
         this.keys = await this.getKeys()
+        this.keyListLock.releaseLock()
     }
 
     public async seen(peer: proto.IPeer) {
