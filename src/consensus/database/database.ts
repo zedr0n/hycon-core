@@ -8,6 +8,8 @@ import { AnyBlockHeader, BlockHeader } from "../../common/blockHeader"
 import { GenesisSignedTx } from "../../common/txGenesisSigned"
 import { SignedTx } from "../../common/txSigned"
 import { Hash } from "../../util/hash"
+import { Difficulty } from "../difficulty"
+import { DifficultyAdjuster } from "../difficultyAdjuster"
 import { BlockStatus } from "../sync"
 import { BlockFile } from "./blockFile"
 import { DBBlock } from "./dbblock"
@@ -263,15 +265,27 @@ export class Database {
         try {
             let height = 0
             let previous: DBBlock
+            let workEMA = 0
+            let timeEMA = DifficultyAdjuster.getTargetTime()
+
             if (header instanceof BlockHeader) {
                 if (header.previousHash.length <= 0) {
                     return Promise.reject(`Block has no previous hashes`)
                 }
                 // Async safe, previousBlock's height will not change
                 previous = await this.getDBBlock(header.previousHash[0])
+                const prevTimeEMA = previous.timeEMA
+                const prevWorkEMA = Difficulty.decode(previous.workEMA)
+
+                const timeDelta = header.timeStamp - previous.header.timeStamp
+                const workDelta = Difficulty.decode(header.difficulty)
+
+                timeEMA = DifficultyAdjuster.calcTimeEMA(timeDelta, prevTimeEMA)
+                workEMA = DifficultyAdjuster.calcWorkEMA(workDelta, prevWorkEMA).encode()
+
                 height = previous.height + 1
             }
-            return { current: new DBBlock({ header, height }), previous }
+            return { current: new DBBlock({ header, height, timeEMA, workEMA }), previous }
         } catch (e) {
             logger.error(`fail to make DBBlock : ${e}`)
             return Promise.reject(e)

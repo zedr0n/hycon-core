@@ -4,10 +4,14 @@ import { Difficulty } from "./../consensus/difficulty"
 
 export class DifficultyAdjuster {
     public static calcNewDifficulty(timeEMA: number, workEMA: Difficulty): Difficulty {
-        const timeRatio = DifficultyAdjuster.targetTime / timeEMA
+        let timeRatio = DifficultyAdjuster.targetTime / timeEMA
+        timeRatio = timeRatio > 3 ? 3 : timeRatio
+        timeRatio = timeRatio < 0.25 ? 0.25 : timeRatio
         const newDifficulty = workEMA.multiply(timeRatio)
         if (newDifficulty.greaterThan(DifficultyAdjuster.maxDifficulty)) {
             return new Difficulty(0xFF_FF_FF, 0x1d)
+        } else if (Difficulty.defaultDifficulty.greaterThan(newDifficulty)) {
+            return Difficulty.defaultDifficulty
         }
         return newDifficulty
     }
@@ -31,11 +35,15 @@ export class DifficultyAdjuster {
 
         return (computedDifficulty.encode() === givenDifficulty.encode())
     }
+
+    public static getTargetTime(): number {
+        return this.targetTime
+    }
     private static maxDifficulty = new Hash(new Uint8Array([0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]))
-    private static alpha: number = 0.1
-    private static targetTime: number = 30
+    private static alpha: number = 0.3
+    private static targetTime: number = 5000
 
 }

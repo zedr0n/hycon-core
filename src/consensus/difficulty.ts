@@ -3,8 +3,12 @@ import { Hash } from "../util/hash"
 // tslint:disable:no-bitwise
 
 export class Difficulty {
+
     public static minimumMantissa: number = 0xFF
-    public static minimumExponent: number = 1
+    public static minimumExponent: number = 0
+
+    public static readonly defaultDifficulty = new Difficulty(Difficulty.minimumMantissa, Difficulty.minimumExponent)
+
     public static decode(num: number): Difficulty {
         const exponent = num >> 24
         const mantissa = num & 0xFFFFFF
@@ -49,7 +53,8 @@ export class Difficulty {
         while (target.length < 6) {
             target += "f"
         }
-        return { offset: this.exponent * 2, target }
+
+        return { offset: this.exponent * 2, target : this.reverseByte(target) }
     }
 
     public inspect(value: number) {
@@ -62,11 +67,16 @@ export class Difficulty {
         return (this.exponent << 24) + this.mantissa
     }
 
-    public greaterThan(byteArray: Hash): boolean {
+    public greaterThan(targetInput: Hash | Difficulty): boolean {
+        if ( targetInput instanceof Difficulty) {
+            return this.exponent > targetInput.getExponent() ? true
+            : this.exponent === targetInput.getExponent() && this.mantissa > targetInput.getMantissa()
+        }
+
         let i = 31
         const exponentCount = 32 - this.exponent
         while (i >= exponentCount) {
-            if (byteArray[i] !== 0) {
+            if (targetInput[i] !== 0) {
                 return false
             }
             i--
@@ -78,7 +88,7 @@ export class Difficulty {
         let mComp = 0
         while (j <= i) {
             mComp <<= 8
-            mComp += byteArray[i]
+            mComp += targetInput[i]
             --i
         }
 
@@ -96,7 +106,7 @@ export class Difficulty {
             newExponent = 0
         }
 
-        if (shift !== 0) {
+        if (shift !== 0 && newExponent !== 0) {
             newMantissa = Math.round(newMantissa / Math.pow(2, shift * 8))
         }
         newMantissa = Math.round(newMantissa)
@@ -140,4 +150,9 @@ export class Difficulty {
         const { mantissa, exponent } = Difficulty.normalize(newMantissa, newExponent)
         return new Difficulty(mantissa, exponent)
     }
+
+    private reverseByte(target: string) {
+        return target.substr(4, 2) + target.substr(2, 2 ) + target.substr(0, 2 )
+    }
+
 }
