@@ -3,6 +3,8 @@ import { Hash } from "../util/hash"
 // tslint:disable:no-bitwise
 
 export class Difficulty {
+    public static minimumMantissa: number = 0xFF
+    public static minimumExponent: number = 1
     public static decode(num: number): Difficulty {
         const exponent = num >> 24
         const mantissa = num & 0xFFFFFF
@@ -11,7 +13,7 @@ export class Difficulty {
     }
     private static normalize(mantissa: number, exponent: number) {
         if ( mantissa === 0 ) {
-            return { mantissa : 0xff, exponent: 1 }
+            return { mantissa : Difficulty.minimumMantissa, exponent: Difficulty.minimumExponent }
         }
 
         while ((mantissa & 0xFF) === 0 && exponent < 0x20) {

@@ -28,6 +28,7 @@ export class DifficultyAdjuster {
         const timeEMA: number = DifficultyAdjuster.calcTimeEMA(timeDelta, prevTimeEMA)
         const workEMA: Difficulty = DifficultyAdjuster.calcWorkEMA(workDelta, prevWorkEMA)
         const computedDifficulty = DifficultyAdjuster.calcNewDifficulty(timeEMA, workEMA)
+
         return (computedDifficulty.encode() === givenDifficulty.encode())
     }
     private static maxDifficulty = new Hash(new Uint8Array([0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
