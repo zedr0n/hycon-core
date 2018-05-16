@@ -12,13 +12,10 @@ import { Database } from "../src/consensus/database/database"
 import { DBBlock } from "../src/consensus/database/dbblock"
 import { DBState } from "../src/consensus/database/dbState"
 import { TxList } from "../src/consensus/database/txList"
-import { PeerList } from "../src/network/rabbit/peerList"
-import { Packet } from "../src/network/turtle/packet"
 import { UpnpClient } from "../src/network/upnp"
 import { UpnpServer } from "../src/network/upnp"
 import * as proto from "../src/serialization/proto"
 import { Server } from "../src/server"
-import * as utils from "../src/util/difficulty"
 import { Hash } from "../src/util/hash"
 import { testAsync } from "./async"
 
@@ -72,9 +69,6 @@ describe("Server", () => {
     })
     it("Should create a server to listen for sockets", () => {
         expect(net.createServer).toHaveBeenCalled()
-    })
-    it("Should assign the port to the default port if not specified", () => {
-        expect(server.options.port).toBe(8148)
     })
     it("Should start the server listening", () => {
         expect(netServer.listen).toHaveBeenCalled()
