@@ -70,7 +70,6 @@ export class SingleChain implements IConsensus {
                 const genesis = await this.initGenesisBlock()
             }
 
-            this.headerTip = await this.db.getHeaderTip()
             if (this.headerTip === undefined || this.blockTip === undefined) {
                 throw new Error("Could not initialize DB with genesis block")
             }
@@ -301,6 +300,7 @@ export class SingleChain implements IConsensus {
             await this.worldState.putPending(transition.batch, transition.mapAccount)
             genesis.header.stateRoot = transition.currentStateRoot
             const { current } = await this.db.putBlock(genesisHash, genesis)
+            const debug = await this.db.getBlock(genesisHash)
             const block = await this.db.getBlockHeader(genesisHash)
             this.headerTip = current
             this.blockTip = current

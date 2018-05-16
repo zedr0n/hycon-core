@@ -40,8 +40,12 @@ export class BlockFile {
         }
         const writePosition = this.filePosition
         this.filePosition += data.length
-        await fs.write(this.fd, new Buffer(data), 0, data.length, writePosition)
-        return Promise.resolve({ filePosition: writePosition, blockOffset: writePosition })
+        const uint8array: any = data // Typescript's type definition is wrong
+        const { bytesWritten } = await fs.write(this.fd, uint8array, 0, data.length, writePosition)
+        if (bytesWritten !== data.length) {
+            throw new Error("Only part of the block was written to disk")
+        }
+        return { filePosition: this.filePosition, blockOffset: writePosition }
     }
 
     public async close(): Promise<void> {

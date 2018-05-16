@@ -66,9 +66,9 @@ export class Database {
             const { current, previous } = await this.putHeader(hash, block.header)
             // Put block info into blockFile and update header in DB using fileResult.
             const encodeBlock = block.encode()
-            const fileResult = await this.blockFile.put(encodeBlock)
-            this.filePosition = fileResult.filePosition
-            current.offset = fileResult.blockOffset
+            const { filePosition, blockOffset } = await this.blockFile.put(encodeBlock)
+            this.filePosition = filePosition
+            current.offset = blockOffset
             current.length = encodeBlock.length
             current.fileNumber = this.blockFile.n
 
