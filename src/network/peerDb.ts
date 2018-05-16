@@ -33,7 +33,7 @@ export class PeerDb {
         this.db = levelup(rocksDB)
         this.keyListLock = new AsyncLock(true) // Locked until this.keys is initialized
         const db: any = this.db // TODO: Fix levelup type declarartion
-        db.on("open", async () => {
+        db.on("open", () => {
             logger.debug("peer db is open")
         })
     }
