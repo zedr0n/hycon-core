@@ -15,7 +15,6 @@ import { CpuMiner } from "../miner/cpuMiner"
 import { MinerServer } from "../miner/minerServer"
 import * as proto from "../serialization/proto"
 import { Server } from "../server"
-// import * as utils from "../util/difficultyUtil"
 import { Graph } from "../util/graph"
 import { Hash } from "../util/hash"
 import { Difficulty } from "./../consensus/difficulty"
@@ -326,7 +325,7 @@ export class SingleChain implements IConsensus {
             const previousHeader = await this.db.getBlockHeader(previousHash)
 
             const prevTimeEMA = previousDBBlock.timeEMA
-            const prevWorkEMA = previousDBBlock.workEMA
+            const prevWorkEMA = Difficulty.decode(previousDBBlock.workEMA)
 
             const newTimeEMA = DifficultyAdjuster.calcTimeEMA(timeStamp - previousHeader.timeStamp, prevTimeEMA)
             const newWorkEMA = DifficultyAdjuster.calcWorkEMA(Difficulty.decode(previousHeader.difficulty), prevWorkEMA)
@@ -397,7 +396,7 @@ export class SingleChain implements IConsensus {
         const prevHash = new Hash(previousHeader)
         const prevDBBlock = await this.db.getDBBlock(prevHash)
         const prevTimeEMA = prevDBBlock.timeEMA
-        const prevWorkEMA = prevDBBlock.workEMA
+        const prevWorkEMA = Difficulty.decode(prevDBBlock.workEMA)
 
         const blockDifficulty = Difficulty.decode(block.header.difficulty)
         const timeDelta = block.header.timeStamp - previousHeader.timeStamp
@@ -513,6 +512,7 @@ export class SingleChain implements IConsensus {
     }
 
     private async onMinedBlock(block: Block) {
+        logger.info("New block mined")
         await this.putBlock(block)
         // start network propagation
         const encoded: Uint8Array = proto.Network.encode({ putBlock: { blocks: [block] } }).finish()
