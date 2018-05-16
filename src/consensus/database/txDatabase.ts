@@ -1,4 +1,5 @@
 
+import { getHashes } from "crypto"
 import { ADDRGETNETWORKPARAMS } from "dns"
 import levelup = require("levelup")
 import { getLogger } from "log4js"
@@ -15,15 +16,41 @@ import { TxList } from "./txList"
 const logger = getLogger("TxDB")
 
 export class TxDatabase {
+    public sc: SingleChain
+
     private database: levelup.LevelUp
     constructor(path: string) {
         const rocks: any = rocksdb(path)
         this.database = levelup(rocks)
         logger.info(`Now, you can use txDB.`)
-        // TODO : Init txDB info from file.
     }
     public async init(blocks: AnyBlock[]) {
-        // TODO : Init logic in txDB
+        await this.database.init()
+        let txs: AnySignedTx[] = []
+        let newTxs: AnySignedTx[] = []
+        for (const block of blocks) {
+            txs = txs.concat(block.txs)
+        }
+        logger.debug(` < initTxDB > Txs result : ${txs.length} / ${txs}`)
+
+        const lastBlkHash = await this.database.getLastBlock(txs)
+        const height = await this.sc.getBlockHeight(lastBlkHash)
+        logger.debug(` < initTxDB > last block height, last block : ${lastBlkHash}, ${height}`)
+
+        const newBlocks = await this.sc.getBlocksRange(height)
+        for (const newBlock of newBlocks) {
+            newTxs = newTxs.concat(newBlock.txs)
+        }
+        const n = newBlocks.length
+        logger.debug(` < initTxDB > newBlocks.length, newBlocks : ${n}, ${newBlocks}`)
+
+        if (n > 1) {
+            for (let h = 1; h < n; h++) {
+                logger.debug(` < initTxDB > h : ${h}`)
+                const hash = await this.sc.getHash(height + h)
+                this.putTxs(hash, newTxs)
+            }
+        }
     }
 
     public async getLastBlock(txs: AnySignedTx[]): Promise<Hash> {
