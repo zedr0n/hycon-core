@@ -24,18 +24,18 @@ describe("DBBlock Test", () => {
             merkleRoot: randomBytes(32),
             nonce: 83,
             previousHash: [randomBytes(32)],
-            timeStamp: Date.now(),
             stateRoot: randomBytes(32),
+            timeStamp: Date.now(),
         }
 
         iDBBlock = {
             fileNumber: 0,
+            header: new BlockHeader(iBlockHeader),
             height: 0,
             length: 0,
             offset: 0,
-            header: new BlockHeader(iBlockHeader),
             timeEMA: 30,
-            workEMA: new Difficulty(0x00_00_FF, 0x10),
+            workEMA: new Difficulty(0x00_00_FF, 0x10).encode(),
         }
         dbBlock = new DBBlock(iDBBlock)
     })
@@ -49,7 +49,7 @@ describe("DBBlock Test", () => {
         expect(block.header).toBeDefined()
         expect(block.length).toEqual(0)
         expect(block.timeEMA).toEqual(30)
-        expect(block.workEMA.encode()).toEqual(0x10_00_00_FF)
+        expect(block.workEMA).toEqual(0x10_00_00_FF)
     })
 
     it("set(block) : if set method set property", () => {
@@ -65,18 +65,18 @@ describe("DBBlock Test", () => {
     it("set(block) : if set method set property, if header is not instance of BlockHeader", () => {
         const setSpy = jasmine.createSpy("setGenesisBlockHeader", setGenesisBlockHeader).and.returnValue({
             difficulty: iBlockHeader.difficulty,
-            timeStamp: iBlockHeader.timeStamp,
             merkleRoot: new Hash(),
+            timeStamp: iBlockHeader.timeStamp,
         })
 
         delete iBlockHeader.previousHash
 
         dbBlock.set({
             fileNumber: 6,
+            header: iBlockHeader,
             height: 7,
             length: 9,
             offset: 8,
-            header: iBlockHeader,
         })
 
         expect(dbBlock.height).toEqual(7)

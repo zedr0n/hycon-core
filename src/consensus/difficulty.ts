@@ -1,9 +1,8 @@
-import { IDifficulty } from "../serialization/proto"
 import { Hash } from "../util/hash"
 
 // tslint:disable:no-bitwise
 
-export class Difficulty implements IDifficulty {
+export class Difficulty {
     public static decode(num: number): Difficulty {
         const exponent = num >> 24
         const mantissa = num & 0xFFFFFF
@@ -18,7 +17,6 @@ export class Difficulty implements IDifficulty {
         return { mantissa, exponent }
     }
 
-    public serialized: number
     private mantissa: number
 
     private exponent: number
@@ -27,7 +25,6 @@ export class Difficulty implements IDifficulty {
         const normalized = Difficulty.normalize(mantissa, exponent)
         this.mantissa = normalized.mantissa
         this.exponent = normalized.exponent
-        this.serialized = this.encode()
     }
 
     public getMantissa(): number {
@@ -38,15 +35,15 @@ export class Difficulty implements IDifficulty {
         return this.exponent
     }
 
-    public getMinerParameters(): {offset: number, target: string} {
+    public getMinerParameters(): { offset: number, target: string } {
         let target: string = this.mantissa.toString(16)
-        if ( target.length % 2 ) {
+        if (target.length % 2) {
             target = "0" + target
         }
         while (target.length < 6) {
             target += "f"
         }
-        return { offset: this.exponent * 2, target}
+        return { offset: this.exponent * 2, target }
     }
 
     public inspect(value: number) {
@@ -68,7 +65,7 @@ export class Difficulty implements IDifficulty {
             }
             i--
         }
-        const mantisaByteCount = Math.ceil( Math.log2(this.mantissa) / 8)
+        const mantisaByteCount = Math.ceil(Math.log2(this.mantissa) / 8)
         let j = i - mantisaByteCount + 1
         j = j < 0 ? 0 : j
 

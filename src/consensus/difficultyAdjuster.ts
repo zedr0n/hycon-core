@@ -8,9 +8,9 @@ export class DifficultyAdjuster {
     private workEMA: Difficulty
     private targetTime: number
     private maxDifficulty = new Hash(new Uint8Array([0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-                                                    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-                                                    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-                                                    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]))
+        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]))
 
     constructor(alpha: number, targetTimeDelta: number, defaultWorkDelta: Difficulty) {
         this.alpha = alpha
@@ -59,16 +59,16 @@ export class DifficultyAdjuster {
     }
 
     public updateEMAs(prevHeader: BaseBlockHeader, newHeader: BaseBlockHeader) {
-            const newTime = newHeader.timeStamp - prevHeader.timeStamp
-            this.calcTimeEMA(newTime)
-            this.calcWorkEMA(Difficulty.decode(newHeader.difficulty))
+        const newTime = newHeader.timeStamp - prevHeader.timeStamp
+        this.calcTimeEMA(newTime)
+        this.calcWorkEMA(Difficulty.decode(newHeader.difficulty))
     }
 
     public loadTimeEMA(timeEMA: number) {
         this.timeEMA = timeEMA
     }
 
-    public loadWorkEMA(workEMA: Difficulty) {
-        this.workEMA = workEMA
+    public loadWorkEMA(workEMA: number) {
+        this.workEMA = Difficulty.decode(workEMA)
     }
 }

@@ -7381,7 +7381,7 @@ $root.BlockDB = (function() {
      * @property {number|null} [offset] BlockDB offset
      * @property {number|null} [length] BlockDB length
      * @property {number|null} [timeEMA] BlockDB timeEMA
-     * @property {IDifficulty|null} [workEMA] BlockDB workEMA
+     * @property {number|null} [workEMA] BlockDB workEMA
      */
 
     /**
@@ -7449,11 +7449,11 @@ $root.BlockDB = (function() {
 
     /**
      * BlockDB workEMA.
-     * @member {IDifficulty|null|undefined} workEMA
+     * @member {number} workEMA
      * @memberof BlockDB
      * @instance
      */
-    BlockDB.prototype.workEMA = null;
+    BlockDB.prototype.workEMA = 0;
 
     /**
      * Creates a new BlockDB instance using the specified properties.
@@ -7492,7 +7492,7 @@ $root.BlockDB = (function() {
         if (message.timeEMA != null && message.hasOwnProperty("timeEMA"))
             writer.uint32(/* id 6, wireType 0 =*/48).int32(message.timeEMA);
         if (message.workEMA != null && message.hasOwnProperty("workEMA"))
-            $root.Difficulty.encode(message.workEMA, writer.uint32(/* id 7, wireType 2 =*/58).fork()).ldelim();
+            writer.uint32(/* id 7, wireType 0 =*/56).int32(message.workEMA);
         return writer;
     };
 
@@ -7546,7 +7546,7 @@ $root.BlockDB = (function() {
                 message.timeEMA = reader.int32();
                 break;
             case 7:
-                message.workEMA = $root.Difficulty.decode(reader, reader.uint32());
+                message.workEMA = reader.int32();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -7603,11 +7603,9 @@ $root.BlockDB = (function() {
         if (message.timeEMA != null && message.hasOwnProperty("timeEMA"))
             if (!$util.isInteger(message.timeEMA))
                 return "timeEMA: integer expected";
-        if (message.workEMA != null && message.hasOwnProperty("workEMA")) {
-            var error = $root.Difficulty.verify(message.workEMA);
-            if (error)
-                return "workEMA." + error;
-        }
+        if (message.workEMA != null && message.hasOwnProperty("workEMA"))
+            if (!$util.isInteger(message.workEMA))
+                return "workEMA: integer expected";
         return null;
     };
 
@@ -7638,11 +7636,8 @@ $root.BlockDB = (function() {
             message.length = object.length | 0;
         if (object.timeEMA != null)
             message.timeEMA = object.timeEMA | 0;
-        if (object.workEMA != null) {
-            if (typeof object.workEMA !== "object")
-                throw TypeError(".BlockDB.workEMA: object expected");
-            message.workEMA = $root.Difficulty.fromObject(object.workEMA);
-        }
+        if (object.workEMA != null)
+            message.workEMA = object.workEMA | 0;
         return message;
     };
 
@@ -7666,7 +7661,7 @@ $root.BlockDB = (function() {
             object.offset = 0;
             object.length = 0;
             object.timeEMA = 0;
-            object.workEMA = null;
+            object.workEMA = 0;
         }
         if (message.height != null && message.hasOwnProperty("height"))
             object.height = message.height;
@@ -7681,7 +7676,7 @@ $root.BlockDB = (function() {
         if (message.timeEMA != null && message.hasOwnProperty("timeEMA"))
             object.timeEMA = message.timeEMA;
         if (message.workEMA != null && message.hasOwnProperty("workEMA"))
-            object.workEMA = $root.Difficulty.toObject(message.workEMA, options);
+            object.workEMA = message.workEMA;
         return object;
     };
 
@@ -9373,193 +9368,6 @@ $root.BlockHeaders = (function() {
     };
 
     return BlockHeaders;
-})();
-
-$root.Difficulty = (function() {
-
-    /**
-     * Properties of a Difficulty.
-     * @exports IDifficulty
-     * @interface IDifficulty
-     * @property {number|null} [serialized] Difficulty serialized
-     */
-
-    /**
-     * Constructs a new Difficulty.
-     * @exports Difficulty
-     * @classdesc Represents a Difficulty.
-     * @implements IDifficulty
-     * @constructor
-     * @param {IDifficulty=} [properties] Properties to set
-     */
-    function Difficulty(properties) {
-        if (properties)
-            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                if (properties[keys[i]] != null)
-                    this[keys[i]] = properties[keys[i]];
-    }
-
-    /**
-     * Difficulty serialized.
-     * @member {number} serialized
-     * @memberof Difficulty
-     * @instance
-     */
-    Difficulty.prototype.serialized = 0;
-
-    /**
-     * Creates a new Difficulty instance using the specified properties.
-     * @function create
-     * @memberof Difficulty
-     * @static
-     * @param {IDifficulty=} [properties] Properties to set
-     * @returns {Difficulty} Difficulty instance
-     */
-    Difficulty.create = function create(properties) {
-        return new Difficulty(properties);
-    };
-
-    /**
-     * Encodes the specified Difficulty message. Does not implicitly {@link Difficulty.verify|verify} messages.
-     * @function encode
-     * @memberof Difficulty
-     * @static
-     * @param {IDifficulty} message Difficulty message or plain object to encode
-     * @param {$protobuf.Writer} [writer] Writer to encode to
-     * @returns {$protobuf.Writer} Writer
-     */
-    Difficulty.encode = function encode(message, writer) {
-        if (!writer)
-            writer = $Writer.create();
-        if (message.serialized != null && message.hasOwnProperty("serialized"))
-            writer.uint32(/* id 1, wireType 0 =*/8).int32(message.serialized);
-        return writer;
-    };
-
-    /**
-     * Encodes the specified Difficulty message, length delimited. Does not implicitly {@link Difficulty.verify|verify} messages.
-     * @function encodeDelimited
-     * @memberof Difficulty
-     * @static
-     * @param {IDifficulty} message Difficulty message or plain object to encode
-     * @param {$protobuf.Writer} [writer] Writer to encode to
-     * @returns {$protobuf.Writer} Writer
-     */
-    Difficulty.encodeDelimited = function encodeDelimited(message, writer) {
-        return this.encode(message, writer).ldelim();
-    };
-
-    /**
-     * Decodes a Difficulty message from the specified reader or buffer.
-     * @function decode
-     * @memberof Difficulty
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @param {number} [length] Message length if known beforehand
-     * @returns {Difficulty} Difficulty
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    Difficulty.decode = function decode(reader, length) {
-        if (!(reader instanceof $Reader))
-            reader = $Reader.create(reader);
-        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.Difficulty();
-        while (reader.pos < end) {
-            var tag = reader.uint32();
-            switch (tag >>> 3) {
-            case 1:
-                message.serialized = reader.int32();
-                break;
-            default:
-                reader.skipType(tag & 7);
-                break;
-            }
-        }
-        return message;
-    };
-
-    /**
-     * Decodes a Difficulty message from the specified reader or buffer, length delimited.
-     * @function decodeDelimited
-     * @memberof Difficulty
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @returns {Difficulty} Difficulty
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    Difficulty.decodeDelimited = function decodeDelimited(reader) {
-        if (!(reader instanceof $Reader))
-            reader = new $Reader(reader);
-        return this.decode(reader, reader.uint32());
-    };
-
-    /**
-     * Verifies a Difficulty message.
-     * @function verify
-     * @memberof Difficulty
-     * @static
-     * @param {Object.<string,*>} message Plain object to verify
-     * @returns {string|null} `null` if valid, otherwise the reason why it is not
-     */
-    Difficulty.verify = function verify(message) {
-        if (typeof message !== "object" || message === null)
-            return "object expected";
-        if (message.serialized != null && message.hasOwnProperty("serialized"))
-            if (!$util.isInteger(message.serialized))
-                return "serialized: integer expected";
-        return null;
-    };
-
-    /**
-     * Creates a Difficulty message from a plain object. Also converts values to their respective internal types.
-     * @function fromObject
-     * @memberof Difficulty
-     * @static
-     * @param {Object.<string,*>} object Plain object
-     * @returns {Difficulty} Difficulty
-     */
-    Difficulty.fromObject = function fromObject(object) {
-        if (object instanceof $root.Difficulty)
-            return object;
-        var message = new $root.Difficulty();
-        if (object.serialized != null)
-            message.serialized = object.serialized | 0;
-        return message;
-    };
-
-    /**
-     * Creates a plain object from a Difficulty message. Also converts values to other types if specified.
-     * @function toObject
-     * @memberof Difficulty
-     * @static
-     * @param {Difficulty} message Difficulty
-     * @param {$protobuf.IConversionOptions} [options] Conversion options
-     * @returns {Object.<string,*>} Plain object
-     */
-    Difficulty.toObject = function toObject(message, options) {
-        if (!options)
-            options = {};
-        var object = {};
-        if (options.defaults)
-            object.serialized = 0;
-        if (message.serialized != null && message.hasOwnProperty("serialized"))
-            object.serialized = message.serialized;
-        return object;
-    };
-
-    /**
-     * Converts this Difficulty to JSON.
-     * @function toJSON
-     * @memberof Difficulty
-     * @instance
-     * @returns {Object.<string,*>} JSON object
-     */
-    Difficulty.prototype.toJSON = function toJSON() {
-        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-    };
-
-    return Difficulty;
 })();
 
 $root.Peer = (function() {
