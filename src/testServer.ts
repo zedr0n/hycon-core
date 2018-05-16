@@ -85,7 +85,7 @@ export class TestServer {
         const fee = hyconfromString("10.2")
         this.nonce = 0
 
-        const n = 100
+        const n = 1
         const lastWalletIndex = this.wallets.length - 1
         const txList: SignedTx[] = []
         for (let i = 0; i < n; i++) {
@@ -107,9 +107,9 @@ export class TestServer {
             if (!fromAddr.equals(toAddr)) {
                 const a = amt.add(randomInt(0, 10))
                 const b = fee.add(randomInt(0, 10))
-                logger.info(`Amount : ${hycontoString(a)} / Fee : ${hycontoString(b)}`)
+                // logger.info(`Amount : ${hycontoString(a)} / Fee : ${hycontoString(b)}`)
                 const tx = fromWallet.send(toAddr, a, nonce, b)
-                logger.debug(`TX ${i + 1} Amount=${hycontoString(tx.amount)} Fee=${hycontoString(tx.fee)} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
+                // logger.debug(`TX ${i + 1} Amount=${hycontoString(tx.amount)} Fee=${hycontoString(tx.fee)} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
                 txList.push(tx)
             }
         }

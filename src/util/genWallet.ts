@@ -58,6 +58,6 @@ async function recoverWallet() {
     }
 }
 
-recoverWallet().then(() => {
-    logger.info(`End of Recover Wallet`)
-})
+// recoverWallet().then(() => {
+//     logger.info(`End of Recover Wallet`)
+// })

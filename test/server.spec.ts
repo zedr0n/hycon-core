@@ -40,20 +40,24 @@ describe("Server", () => {
             merkleRoot: new Hash("Merkle root"),
             nonce: 1234,
             previousHash: [new Hash("Previous Block")],
-            timeStamp: Date.now(),
             stateRoot: new Hash("State root"),
+            timeStamp: Date.now(),
         }
         iDBBlock = {
-            header: iBlockHeader,
             fileNumber: 0,
+            header: iBlockHeader,
             height: 1,
             length: 100,
             offset: 10,
         }
         itx = {
-            from: new Address(randomBytes(20)), to: new Address(randomBytes(20)),
-            amount: 10000, fee: 100, nonce: 1234,
-            signature: randomBytes(32), recovery: 10,
+            amount: 10000,
+            fee: 100,
+            from: new Address(randomBytes(20)),
+            nonce: 1234,
+            recovery: 10,
+            signature: randomBytes(32),
+            to: new Address(randomBytes(20)),
         }
         testPrevious = new DBBlock(iDBBlock)
     })

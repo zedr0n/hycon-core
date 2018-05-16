@@ -40,7 +40,7 @@ export class Graph {
     public addToGraph(header: AnyBlockHeader, status: BlockStatus) {
         const blockHash = new Hash(header)
         const id = blockHash.toString().slice(0, 6)
-        logger.info(`ID : ${id} / status : ${status}`)
+        // logger.info(`ID : ${id} / status : ${status}`)
         let color
         switch (status) {
             case BlockStatus.Block:
