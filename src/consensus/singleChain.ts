@@ -311,6 +311,7 @@ export class SingleChain implements IConsensus {
             if (this.txdb) {
                 await this.txdb.putTxs(genesisHash, genesis.txs)
             }
+            this.graph.initGraph(genesis.header)
             return genesis
         } catch (e) {
             logger.error(`Fail to initGenesisBlock : ${e}`)
@@ -409,8 +410,6 @@ export class SingleChain implements IConsensus {
 
     private async organizeChains(newBlockHash: Hash, dbBlock: DBBlock, block?: Block, txCount: number = 0): Promise<void> {
         try {
-            logger.info(`Reorg logic should be implemented`)
-
             if (this.headerTip === undefined || this.headerTip.height < dbBlock.height) {
                 this.headerTip = dbBlock
                 await this.db.setHeaderTip(newBlockHash)
@@ -483,6 +482,7 @@ export class SingleChain implements IConsensus {
             hash = newBlockHashes.pop()
             block = newBlocks.pop()
             await this.db.setBlockStatus(hash, BlockStatus.MainChain)
+            this.graph.addToGraph(block.header, BlockStatus.MainChain)
             await this.db.setHashAtHeight(pushHeight, hash)
             pushHeight += 1
             txs = this.server.txPool.updateTxs(block.txs, newBlockHashes.length > 0 ? 0 : txCount)

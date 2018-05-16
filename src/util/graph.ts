@@ -56,7 +56,7 @@ export class Graph {
         this.addNode(id, color)
         if (header instanceof BlockHeader) {
             for (const prevHash of header.previousHash) {
-                const pid = prevHash.toHex().slice(0, 6)
+                const pid = prevHash.toString().slice(0, 6)
                 this.addEdge(id, pid)
             }
         }
@@ -65,10 +65,10 @@ export class Graph {
 
     public removeFromGraph(header: BlockHeader) {
         const blockHash = new Hash(header)
-        const id = blockHash.toHex().slice(0, 6)
+        const id = blockHash.toString().slice(0, 6)
         this.removeNode(id)
         for (const prevHash of header.previousHash) {
-            const pid = prevHash.toHex().slice(0, 6)
+            const pid = prevHash.toString().slice(0, 6)
             this.removeEdge(id, pid)
         }
     }
