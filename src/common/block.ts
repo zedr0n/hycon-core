@@ -14,11 +14,9 @@ export type AnyBlock = (Block | GenesisBlock)
 export class Block implements proto.IBlock {
     public static decode(data: Uint8Array): AnyBlock {
         const block = proto.Block.decode(data)
-        let genesis
-        if (block && block.header) {
-            if (block.header.difficulty === 0 && (block.header.previousHash.length === 0 || block.header.previousHash === undefined)) {
-                genesis = new GenesisBlock(block)
-                return genesis
+        if (block.header !== undefined) {
+            if (block.header.previousHash === undefined || block.header.previousHash.length === 0) {
+                return new GenesisBlock(block)
             }
         }
         return new Block(block)
