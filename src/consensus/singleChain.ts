@@ -237,8 +237,8 @@ export class SingleChain implements IConsensus {
         }
     }
 
-    public getBlockStatus(hash: Hash): Promise<BlockStatus> {
-        return this.db.getBlockStatus(hash)
+    public async getBlockStatus(hash: Hash): Promise<BlockStatus> {
+        return await this.db.getBlockStatus(hash)
     }
     public getHeaderTip(): { hash: Hash; height: number } {
         const block = this.headerTip
@@ -402,9 +402,9 @@ export class SingleChain implements IConsensus {
         const timeDelta = block.header.timeStamp - previousHeader.timeStamp
         const workDelta = Difficulty.decode(previousHeader.difficulty)
 
-        if ( ! (DifficultyAdjuster.verifyDifficulty(timeDelta, prevTimeEMA, workDelta, prevWorkEMA, blockDifficulty))) {
+        if (!(DifficultyAdjuster.verifyDifficulty(timeDelta, prevTimeEMA, workDelta, prevWorkEMA, blockDifficulty))) {
             logger.warn(`Invalid block difficulty`)
-            return { isVerified: false}
+            return { isVerified: false }
         }
 
         logger.fatal(`Verified stateRoot: ${block.header.stateRoot}, Block: ${block.header.merkleRoot.toString()}`)

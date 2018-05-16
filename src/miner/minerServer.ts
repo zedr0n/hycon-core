@@ -92,7 +92,7 @@ export class MinerServer implements IMiner {
 
                 this.stop()
             } else {
-                logger.info(`Fail to search nonce !!! - PREHASH : ${Buffer.from(this.prehash.buffer).toString("hex")} /  NONCE : ${zeroPad(nonce, MinerServer.LEN_HEX_NONCE)}`)
+                logger.info(`Fail to search nonce !!!`)
                 resolve(false)
             }
         })
