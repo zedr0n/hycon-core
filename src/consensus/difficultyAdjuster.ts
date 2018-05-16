@@ -29,7 +29,7 @@ export class DifficultyAdjuster {
         return newDifficulty
     }
 
-    public verifyDifficulty(prevTimeEMA: number, timeDelta: number, prevWorkEMA: Difficulty, workDelta: Difficulty, givenDifficulty: Difficulty) {
+    public verifyDifficulty(timeDelta: number, workDelta: Difficulty, givenDifficulty: Difficulty) {
         const timeEMA: number = this.calcTimeEMA(timeDelta)
         const workEMA: Difficulty = this.calcWorkEMA(workDelta)
         const computedDifficulty = this.calcNewDifficulty()
@@ -58,21 +58,17 @@ export class DifficultyAdjuster {
         return newEMA
     }
 
-    public updateEMAs(header: BaseBlockHeader, timeStamp: number) {
-        if (typeof(header.timeStamp) === "number") {
-            const newTime = timeStamp - header.timeStamp
+    public updateEMAs(prevHeader: BaseBlockHeader, newHeader: BaseBlockHeader) {
+            const newTime = newHeader.timeStamp - prevHeader.timeStamp
             this.calcTimeEMA(newTime)
-            this.calcWorkEMA(Difficulty.decode(header.difficulty))
-        } else {
-            throw new Error("header timestamp is not a number")
-        }
+            this.calcWorkEMA(Difficulty.decode(newHeader.difficulty))
     }
 
-    public resetTimeEMA(timeEMA: number) {
+    public loadTimeEMA(timeEMA: number) {
         this.timeEMA = timeEMA
     }
 
-    public resetWorkEMA(workEMA: Difficulty) {
+    public loadWorkEMA(workEMA: Difficulty) {
         this.workEMA = workEMA
     }
 }

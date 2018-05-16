@@ -8,6 +8,7 @@ import { BlockHeader } from "../src/common/blockHeader"
 import * as HeaderBlock from "../src/common/blockHeader"
 import { setGenesisBlockHeader } from "../src/common/genesisHeader"
 import { DBBlock } from "../src/consensus/database/dbblock"
+import { Difficulty } from "../src/consensus/difficulty"
 import * as proto from "../src/serialization/proto"
 import { BlockDB } from "../src/serialization/proto"
 import { Hash } from "../src/util/hash"
@@ -33,6 +34,8 @@ describe("DBBlock Test", () => {
             length: 0,
             offset: 0,
             header: new BlockHeader(iBlockHeader),
+            timeEMA: 30,
+            workEMA: new Difficulty(0x00_00_FF, 0x10),
         }
         dbBlock = new DBBlock(iDBBlock)
     })
@@ -45,6 +48,8 @@ describe("DBBlock Test", () => {
         expect(block.offset).toEqual(0)
         expect(block.header).toBeDefined()
         expect(block.length).toEqual(0)
+        expect(block.timeEMA).toEqual(30)
+        expect(block.workEMA.encode()).toEqual(0x10_00_00_FF)
     })
 
     it("set(block) : if set method set property", () => {

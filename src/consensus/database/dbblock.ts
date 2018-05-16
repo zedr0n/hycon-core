@@ -15,6 +15,7 @@ export class DBBlock implements proto.IBlockDB {
     public length?: number = undefined
     public timeEMA: number = undefined
     public workEMA: Difficulty = undefined
+
     constructor(dbBlock: proto.IBlockDB) {
         this.set(dbBlock)
     }
@@ -35,6 +36,12 @@ export class DBBlock implements proto.IBlockDB {
         }
         if (block.length !== undefined) {
             this.length = block.length
+        }
+        if (block.timeEMA !== undefined) {
+            this.timeEMA = block.timeEMA
+        }
+        if (block.workEMA !== undefined) {
+            this.workEMA = Difficulty.decode(block.workEMA.serialized)
         }
 
         this.height = block.height

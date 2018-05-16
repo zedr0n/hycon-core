@@ -52,7 +52,7 @@ describe("DifficultyAdjuster", () => {
 
         const newTimeEMA = 15
         const correctDifficulty = new Difficulty(0x00_01_FE, 0x15)
-        adjuster.resetTimeEMA(newTimeEMA)
+        adjuster.loadTimeEMA(newTimeEMA)
         const newDifficulty = adjuster.calcNewDifficulty()
 
         expect(newDifficulty.encode()).toEqual(correctDifficulty.encode())
@@ -66,7 +66,7 @@ describe("DifficultyAdjuster", () => {
 
         const newTimeEMA = 60
         const correctDifficulty = new Difficulty(0x00_00_FF, 0x15)
-        adjuster.resetTimeEMA(newTimeEMA)
+        adjuster.loadTimeEMA(newTimeEMA)
         const newDifficulty = adjuster.calcNewDifficulty()
 
         expect(newDifficulty.encode()).toEqual(correctDifficulty.encode())
@@ -78,12 +78,10 @@ describe("DifficultyAdjuster", () => {
         const defaultWorkDelta = new Difficulty(0x00_00_FF, 0x15)
         const adjuster = new DifficultyAdjuster(alpha, targetTimeDelta, defaultWorkDelta)
 
-        const prevTimeEMA = 30
         const timeDelta = 30
-        const prevWorkEMA = new Difficulty(0x00_00_FF, 0x15)
         const workDelta = new Difficulty(0x00_00_FF, 0x15)
         const givenDifficulty = new Difficulty(0x00_00_FF, 0x15)
-        const verifyResult = adjuster.verifyDifficulty(prevTimeEMA, timeDelta, prevWorkEMA, workDelta, givenDifficulty)
+        const verifyResult = adjuster.verifyDifficulty(timeDelta, workDelta, givenDifficulty)
 
         expect(verifyResult).toEqual(true)
     })

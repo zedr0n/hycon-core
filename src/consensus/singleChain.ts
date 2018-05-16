@@ -44,7 +44,7 @@ export class SingleChain implements IConsensus {
     // Load these from a constants file if possible
     private alpha: number = .1
     private targetTimeEMA: number = 30
-    private targetWorkEMA: Difficulty = new Difficulty(0x00_00_FF, 0x00)
+    private initWorkEMA: Difficulty = new Difficulty(0x00_00_FF, 0x00)
     private difficultyAdjuster: DifficultyAdjuster
     constructor(server: Server, dbPath: string, wsPath: string, filePath: string, txPath?: string) {
         this.server = server
@@ -53,7 +53,7 @@ export class SingleChain implements IConsensus {
         this.worldState = new WorldState(wsPath)
         this.txUnit = 1000
         if (txPath) { this.txdb = new TxDatabase(txPath) }
-        this.difficultyAdjuster = new DifficultyAdjuster(this.alpha, this.targetTimeEMA, this.targetWorkEMA)
+        this.difficultyAdjuster = new DifficultyAdjuster(this.alpha, this.targetTimeEMA, this.initWorkEMA)
         this.graph = new Graph()
     }
     public async getNonce(address: Address): Promise<number> {
@@ -329,7 +329,7 @@ export class SingleChain implements IConsensus {
             // TODO : get Miner address -> If miner is undefined, occur error
             const miner: Address = undefined
             const previousHeader = await this.db.getBlockHeader(previousHash)
-            this.difficultyAdjuster.updateEMAs(previousHeader, timeStamp)
+            this.difficultyAdjuster.calcTimeEMA(timeStamp - previousHeader.timeStamp)
             txs.sort((txA, txB) => txA.nonce - txB.nonce)
             const worldStateResult = await this.worldState.next(txs, previousHeader.stateRoot, miner)
             const header = new BlockHeader({
@@ -392,6 +392,15 @@ export class SingleChain implements IConsensus {
             return { isVerified: false }
         }
 
+        const blockDifficulty = Difficulty.decode(block.header.difficulty)
+        const timeDelta = block.header.timeStamp - previousHeader.timeStamp
+        const workDelta = blockDifficulty
+
+        if ( ! (this.difficultyAdjuster.verifyDifficulty(timeDelta, workDelta, blockDifficulty))) {
+            logger.warn(`Invalid block difficulty`)
+            return { isVerified: false}
+        }
+
         logger.fatal(`Verified stateRoot: ${block.header.stateRoot}, Block: ${block.header.merkleRoot.toString()}`)
 
         return { isVerified: true, stateTransition }
@@ -422,7 +431,6 @@ export class SingleChain implements IConsensus {
                     const txs = await this.reorganize(newBlockHash, block, dbBlock.height, txCount)
                     this.blockTip = dbBlock // TODO: Reorganize first
                     await this.db.setBlockTip(newBlockHash)
-                    utils.processBlock(dbBlock.header.difficulty)
                     this.createCandidateBlock(txs)
                 } else {
                     await this.db.setBlockStatus(newBlockHash, BlockStatus.Block)
@@ -494,6 +502,8 @@ export class SingleChain implements IConsensus {
             txs = this.server.txPool.updateTxs(block.txs, newBlockHashes.length > 0 ? 0 : txCount)
             this.newBlock(block)
         }
+        this.difficultyAdjuster.loadTimeEMA(this.blockTip.timeEMA)
+        this.difficultyAdjuster.loadWorkEMA(this.blockTip.workEMA)
         return txs
     }
 
