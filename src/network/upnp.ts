@@ -60,7 +60,7 @@ export class UpnpClient {
 
         setInterval(() => {
             client.search("ssdp:all")
-        }, 20 * 1000)
+        }, 10 * 1000)
 
         client.on("response", async (headers: any, code: any, rdebug: any) => {
             const ipaddress = rdebug.address
@@ -81,9 +81,9 @@ export class UpnpClient {
                     // logger.debug("DATE:", date)
                     logger.info(`DETECT IP ME=${isMe} Product=${product} IP=${localIP} Port=${localPort}`)
                     try {
-                        await this.rabbitNetwork.connect(localIP, Number(localPort), true)
+                        await this.rabbitNetwork.connect(localIP, Number(localPort))
                     } catch (e) {
-                        logger.warn(`${e}`)
+                        logger.info(`Connecting to local peer: ${e}`)
                     }
                 }
             } else {

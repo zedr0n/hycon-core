@@ -34,13 +34,15 @@ export class PeerDb {
         this.keyListLock = new AsyncLock(true) // Locked until this.keys is initialized
         const db: any = this.db // TODO: Fix levelup type declarartion
         db.on("open", async () => {
-            this.keys = await this.getKeys()
-            this.keyListLock.releaseLock()
+            logger.debug("peer db is open")
         })
     }
 
     public peerCount(): number {
         return this.keys.length
+    }
+    public async run() {
+        this.keys = await this.getKeys()
     }
 
     public async seen(peer: proto.IPeer) {
@@ -72,19 +74,22 @@ export class PeerDb {
             logger.info(`${peer.host}:${peer.port} will be removed from the peerDB`)
             await this.remove(dbpeer)
         }
-
     }
 
     public async put(peer: proto.IPeer): Promise<proto.IPeer> {
         const key = PeerDb.ipeer2key(peer)
         const value = PeerDb.ipeer2value(peer)
         return this.keyListLock.critical<proto.IPeer>(async () => {
-            await this.db.put(key, value)
-            logger.info(`Saved to db ${peer.host}:${peer.port}`)
-            if (this.keys.indexOf(key) === -1) {
-                this.keys.push(key)
+            try {
+                await this.db.put(key, value)
+                logger.info(`Saved to db ${peer.host}:${peer.port}`)
+                if (this.keys.indexOf(key) === -1) {
+                    this.keys.push(key)
+                }
+                return peer
+            } catch (e) {
+                logger.info(`Saving to db ${e}`)
             }
-            return peer
         })
     }
 
@@ -132,8 +137,7 @@ export class PeerDb {
                 const index = Math.floor(filtered.length * Math.random())
                 key = filtered[index]
             }
-            const buffer = await this.db.get(key)
-            return proto.Peer.decode(buffer)
+            return await this.get(key)
         })
     }
 

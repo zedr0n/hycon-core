@@ -4,5 +4,5 @@ export interface INetwork {
     start(): Promise<boolean>
     getRandomPeer(): IPeer
     getRandomPeers(count: number): IPeer[]
-    connect(ip: string, port: number, local: boolean): Promise<IPeer>
+    connect(ip: string, port: number): Promise<IPeer>
 }

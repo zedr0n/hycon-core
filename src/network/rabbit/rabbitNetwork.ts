@@ -113,6 +113,7 @@ export class RabbitNetwork implements INetwork {
         }
     }
     public async start(): Promise<boolean> {
+        await this.peerDB.run()
         logger.debug(`Tcp Network Started`)
         this.server = createServer((socket) => this.accept(socket).catch(() => undefined))
         await new Promise<boolean>((resolve, reject) => {
@@ -202,9 +203,8 @@ export class RabbitNetwork implements INetwork {
             socket.once("error", async () => {
                 try {
                     this.pendingConnections.delete(key)
-                    logger.info(`Failed to connect to ${key}: ${host}:${port}`)
                     await this.peerDB.fail(ipeer, RabbitNetwork.failLimit)
-                    reject()
+                    reject(`Failed to connect to ${key}: ${host}:${port}`)
                 } catch (e) {
                     logger.debug(e)
                 }
@@ -258,6 +258,11 @@ export class RabbitNetwork implements INetwork {
             logger.error(`Connection error ${key} ${ipeer.host}:${ipeer.port} : ${error}`)
         })
         return peer
+    }
+
+    private async connectLoop() {
+        await this.connectToPeer()
+        setTimeout(() => this.connectLoop(), 100)
     }
 
     private async connectToPeer(): Promise<void> {
