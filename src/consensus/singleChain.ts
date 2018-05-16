@@ -330,10 +330,12 @@ export class SingleChain implements IConsensus {
             const miner: Address = undefined
             const previousHeader = await this.db.getBlockHeader(previousHash)
             this.difficultyAdjuster.calcTimeEMA(timeStamp - previousHeader.timeStamp)
+            this.difficultyAdjuster.calcWorkEMA(Difficulty.decode(previousHeader.difficulty))
+            const difficulty = this.difficultyAdjuster.calcNewDifficulty().encode()
             txs.sort((txA, txB) => txA.nonce - txB.nonce)
             const worldStateResult = await this.worldState.next(txs, previousHeader.stateRoot, miner)
             const header = new BlockHeader({
-                difficulty: this.difficultyAdjuster.calcNewDifficulty().encode(),
+                difficulty,
                 // difficulty: 0x0001ffff,
                 merkleRoot: new Hash(),
                 nonce: -1,
