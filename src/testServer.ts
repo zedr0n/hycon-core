@@ -73,41 +73,29 @@ export class TestServer {
     public async makeWallet() {
         for (let i = 1; i <= TestServer.walletNumber; i++) {
             const name = `test${i}`
-            // const password = ""
-            // const w = await Wallet.loadKeys(name, password)
-            // const account = await this.server.consensus.getAccount(w.pubKey.address())
-            // assert(account)
-            // assert(account.balance.compare(0) === 1)
             this.wallets.push(await Wallet.loadKeys(name, ""))
         }
         await this.showWallets()
         logger.debug(`done`)
 
         setInterval(() => {
-            // this.showWallets()
             this.makeTx()
         }, 3000)
-        setInterval(() => {
-            this.makeBlock()
-        }, 5000)
     }
     private async makeTx() {
         const amt = hyconfromString("100.123")
         const fee = hyconfromString("10.2")
         this.nonce = 0
 
-        const n = randomInt(0, 11)
+        const n = 100
+        const lastWalletIndex = this.wallets.length - 1
         const txList: SignedTx[] = []
         for (let i = 0; i < n; i++) {
             // get nonce, increase 1
-            // const toWallet = this.wallets[randomInt(0, this.wallets.length - 1)]
-            const toWallet = this.wallets[i]
-            assert(0 <= i && i < this.wallets.length)
+            const toWallet = this.wallets[randomInt(0, lastWalletIndex)]
             assert(toWallet)
             const toAddr = toWallet.pubKey.address()
-            // const fromWallet = this.wallets[randomInt(0, this.wallets.length - 1)]
-            const fromWallet = this.wallets[i + 1]
-            assert(0 <= i + 1 && i + 1 < this.wallets.length)
+            const fromWallet = this.wallets[randomInt(0, lastWalletIndex)]
             assert(fromWallet)
             const fromAddr = fromWallet.pubKey.address()
             const fromAddrString = fromAddr.toString()
@@ -122,7 +110,6 @@ export class TestServer {
                 const a = amt.add(randomInt(0, 10))
                 const b = fee.add(randomInt(0, 10))
                 logger.info(`Amount : ${hycontoString(a)} / Fee : ${hycontoString(b)}`)
-                // const tx = fromWallet.send(toAddr, hyconfromString(a), nonce, hyconfromString(b))
                 const tx = fromWallet.send(toAddr, a, nonce, b)
                 logger.debug(`TX ${i + 1} Amount=${hycontoString(tx.amount)} Fee=${hycontoString(tx.fee)} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
                 txList.push(tx)
@@ -130,18 +117,6 @@ export class TestServer {
         }
 
         const added = await this.txPool.putTxs(txList)
-        /* const encoded: Uint8Array = proto.Network.encode({ putTx: { txs: txList } }).finish()
-         this.server.network.broadcast(new Buffer(encoded), null)*/
-
-    }
-
-    private async makeBlock() {
-        // logger.debug(`Make Block`)
-        /* const newBlock = new Block({ txs: this.txs })
-         this.txs = []
-
-         const encoded: Uint8Array = proto.Network.encode({ putBlock: { blocks: [newBlock] } }).finish()
-         this.server.network.broadcast(new Buffer(encoded), null)*/
     }
 
     // TODO : Block, hash, SignedTx, randomBytes import, and testMakeBlock(db, consensus) remove
