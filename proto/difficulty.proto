@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+message Difficulty {
+    int32 serialized = 1;
+}

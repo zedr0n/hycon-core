@@ -1,8 +1,9 @@
+import { IDifficulty } from "../serialization/proto"
 import { Hash } from "../util/hash"
 
 // tslint:disable:no-bitwise
 
-export class Difficulty {
+export class Difficulty implements IDifficulty {
     public static decode(num: number): Difficulty {
         const exponent = num >> 24
         const mantissa = num & 0xFFFFFF
@@ -17,33 +18,35 @@ export class Difficulty {
         return { mantissa, exponent }
     }
 
-    private m: number
+    public serialized: number
+    private mantissa: number
 
-    private e: number
+    private exponent: number
 
     constructor(mantissa: number, exponent: number) {
         const normalized = Difficulty.normalize(mantissa, exponent)
-        this.m = normalized.mantissa
-        this.e = normalized.exponent
+        this.mantissa = normalized.mantissa
+        this.exponent = normalized.exponent
+        this.serialized = this.encode()
     }
 
     public getMantissa(): number {
-        return this.m
+        return this.mantissa
     }
 
     public getExponent(): number {
-        return this.e
+        return this.exponent
     }
 
-    public getMinerParameters(): { offset: number, target: string } {
-        let target: string = this.m.toString(16)
-        if (target.length % 2) {
+    public getMinerParameters(): {offset: number, target: string} {
+        let target: string = this.mantissa.toString(16)
+        if ( target.length % 2 ) {
             target = "0" + target
         }
         while (target.length < 6) {
             target += "f"
         }
-        return { offset: this.e * 2, target }
+        return { offset: this.exponent * 2, target}
     }
 
     public inspect(value: number) {
@@ -53,19 +56,19 @@ export class Difficulty {
     }
 
     public encode(): number {
-        return (this.e << 24) + this.m
+        return (this.exponent << 24) + this.mantissa
     }
 
     public greaterThan(byteArray: Hash): boolean {
         let i = 31
-        const exponentCount = 32 - this.e
+        const exponentCount = 32 - this.exponent
         while (i >= exponentCount) {
             if (byteArray[i] !== 0) {
                 return false
             }
             i--
         }
-        const mantisaByteCount = Math.ceil(Math.log2(this.m) / 8)
+        const mantisaByteCount = Math.ceil( Math.log2(this.mantissa) / 8)
         let j = i - mantisaByteCount + 1
         j = j < 0 ? 0 : j
 
@@ -76,15 +79,15 @@ export class Difficulty {
             --i
         }
 
-        return (this.m > mComp)
+        return (this.mantissa >= mComp)
     }
 
     public multiply(num: number): Difficulty {
-        let newMantissa = num * this.m
-        let newExponent = this.e
+        let newMantissa = num * this.mantissa
+        let newExponent = this.exponent
         const mBits = Math.ceil(Math.log2(newMantissa))
         const shift = Math.ceil((mBits - 24) / 8)
-        newExponent = this.e + shift
+        newExponent = this.exponent + shift
 
         if (newExponent < 0) {
             newExponent = 0
@@ -101,24 +104,24 @@ export class Difficulty {
     }
 
     public add(diff: Difficulty) {
-        const expDiff = this.e - diff.getExponent()
-        let newExponent = this.e
+        const expDiff = this.exponent - diff.getExponent()
+        let newExponent = this.exponent
         let newMantissa = 0
         let shift = 0
         if (expDiff > 0 && expDiff < 24) {
-            newMantissa = ((this.m * Math.pow(2, expDiff)) + diff.getMantissa())
+            newMantissa = ((this.mantissa * Math.pow(2, expDiff)) + diff.getMantissa())
             const mBits = Math.ceil(Math.log2(newMantissa))
             shift = Math.ceil((mBits - 24) / 8)
-            newExponent = this.e + shift
+            newExponent = this.exponent + shift
         } else if (expDiff > -24 && expDiff < 0) {
-            newMantissa = ((diff.getMantissa() * Math.pow(2, -expDiff)) + this.m)
+            newMantissa = ((diff.getMantissa() * Math.pow(2, -expDiff)) + this.mantissa)
             const mBits = Math.ceil(Math.log2(newMantissa))
             shift = Math.ceil((mBits - 24) / 8)
             newExponent = diff.getExponent() + shift
         } else if (expDiff === 0) {
-            newMantissa = this.m + diff.getMantissa()
+            newMantissa = this.mantissa + diff.getMantissa()
         } else {
-            return new Difficulty(this.m, this.e)
+            return new Difficulty(this.mantissa, this.exponent)
         }
 
         if (newExponent < 0) {

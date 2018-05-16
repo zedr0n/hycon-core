@@ -2978,6 +2978,12 @@ export interface IBlockDB {
 
     /** BlockDB length */
     length?: number;
+
+    /** BlockDB timeEMA */
+    timeEMA?: number;
+
+    /** BlockDB workEMA */
+    workEMA?: IDifficulty;
 }
 
 /** Represents a BlockDB. */
@@ -3003,6 +3009,12 @@ export class BlockDB implements IBlockDB {
 
     /** BlockDB length. */
     public length: number;
+
+    /** BlockDB timeEMA. */
+    public timeEMA: number;
+
+    /** BlockDB workEMA. */
+    public workEMA?: IDifficulty;
 
     /**
      * Creates a new BlockDB instance using the specified properties.
@@ -3718,6 +3730,96 @@ export class BlockHeaders implements IBlockHeaders {
 
     /**
      * Converts this BlockHeaders to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a Difficulty. */
+export interface IDifficulty {
+
+    /** Difficulty serialized */
+    serialized?: number;
+}
+
+/** Represents a Difficulty. */
+export class Difficulty implements IDifficulty {
+
+    /**
+     * Constructs a new Difficulty.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IDifficulty);
+
+    /** Difficulty serialized. */
+    public serialized: number;
+
+    /**
+     * Creates a new Difficulty instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns Difficulty instance
+     */
+    public static create(properties?: IDifficulty): Difficulty;
+
+    /**
+     * Encodes the specified Difficulty message. Does not implicitly {@link Difficulty.verify|verify} messages.
+     * @param message Difficulty message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: IDifficulty, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified Difficulty message, length delimited. Does not implicitly {@link Difficulty.verify|verify} messages.
+     * @param message Difficulty message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: IDifficulty, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a Difficulty message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns Difficulty
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): Difficulty;
+
+    /**
+     * Decodes a Difficulty message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns Difficulty
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): Difficulty;
+
+    /**
+     * Verifies a Difficulty message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a Difficulty message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns Difficulty
+     */
+    public static fromObject(object: { [k: string]: any }): Difficulty;
+
+    /**
+     * Creates a plain object from a Difficulty message. Also converts values to other types if specified.
+     * @param message Difficulty
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: Difficulty, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this Difficulty to JSON.
      * @returns JSON object
      */
     public toJSON(): { [k: string]: any };
