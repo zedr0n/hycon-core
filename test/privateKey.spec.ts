@@ -7,6 +7,7 @@ import { PrivateKey } from "../src/common/privateKey"
 import { Tx } from "../src/common/tx"
 import { SignedTx } from "../src/common/txSigned"
 import * as proto from "../src/serialization/proto"
+import { hyconfromString } from "../src/util/commonUtil"
 import { Wallet } from "../src/wallet/wallet"
 
 describe("PrivateKey", () => {
@@ -14,9 +15,11 @@ describe("PrivateKey", () => {
     let tx: Tx
     beforeEach(() => {
         tx = new Tx({
-            from: new Address(randomBytes(20)), to: new Address(randomBytes(20)),
-            amount: 10000, fee: 100, nonce: 1234,
-            signature: randomBytes(32), recovery: 10,
+            amount: hyconfromString("10000"), fee: hyconfromString("100"),
+            from: new Address(randomBytes(20)), nonce: 1234,
+            recovery: 10,
+            signature: randomBytes(32),
+            to: new Address(randomBytes(20)),
         })
         privKey = new PrivateKey(randomBytes(32))
     })

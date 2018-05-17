@@ -83,10 +83,10 @@ describe("BlockHeader", () => {
         blk.merkleRoot = new Hash(randomBytes(32))
         blk.stateRoot = new Hash(randomBytes(32))
         blk.timeStamp = iBlock.timeStamp
+        blk.difficulty = undefined
         let str: string = ""
         try {
             const header = new BlockHeader(blk)
-
         } catch (e) {
             if (e) { str = e.message }
         }

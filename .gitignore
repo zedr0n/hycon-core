@@ -16,3 +16,4 @@ src/keys
 wallet/
 worldstate*
 *.png
+garbage/

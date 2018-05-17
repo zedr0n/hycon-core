@@ -125,7 +125,7 @@ describe("Difficulty", () => {
         expect(params.offset).toEqual(2)
     })
 
-    it("getMinerParameters: target should be '0111ff' if a mantisa is 0x000111", () => {
+    fit("getMinerParameters: target should be '0111ff' if a mantisa is 0x000111", () => {
         difficulty = new Difficulty(0x000111, 0x00)
         const params = difficulty.getMinerParameters()
         expect(params.target).toEqual("0111ff")

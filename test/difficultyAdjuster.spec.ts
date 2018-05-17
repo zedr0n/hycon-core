@@ -23,7 +23,7 @@ describe("DifficultyAdjuster", () => {
     })
 
     it("calcWorkEMA: 2 should calculate the latest EMAs from a difficulty delta", () => {
-        const prevWorkEMA = new Difficulty(0x00_00_FF, 0x15)
+        const prevWorkEMA = new Difficulty(0x0000FF, 0x15)
 
         const newWork = new Difficulty(0x0000FF, 0x15)
         const correctWorkEMA = new Difficulty(0x0000FF, 0x15)
@@ -34,19 +34,19 @@ describe("DifficultyAdjuster", () => {
     })
 
     it("calcNewDifficulty: 1 should correctly calculate a new difficulty value", () => {
-        const prevWorkEMA = new Difficulty(0x00_00_FF, 0x15)
+        const prevWorkEMA = new Difficulty(0x0000FF, 0x15)
         const prevTimeEMA = 15
-        const correctDifficulty = new Difficulty(0x00_01_FE, 0x15)
+        const correctDifficulty = new Difficulty(0x0001FE, 0x15)
         const newDifficulty = DifficultyAdjuster.calcNewDifficulty(prevTimeEMA, prevWorkEMA)
 
         expect(newDifficulty.encode()).toEqual(correctDifficulty.encode())
     })
 
     it("calcNewDifficulty: 2 should correctly calculate a new difficulty value", () => {
-        const prevWorkEMA = new Difficulty(0x00_01_FE, 0x15)
+        const prevWorkEMA = new Difficulty(0x0001FE, 0x15)
 
         const prevTimeEMA = 60
-        const correctDifficulty = new Difficulty(0x00_00_FF, 0x15)
+        const correctDifficulty = new Difficulty(0x0000FF, 0x15)
         const newDifficulty = DifficultyAdjuster.calcNewDifficulty(prevTimeEMA, prevWorkEMA)
 
         expect(newDifficulty.encode()).toEqual(correctDifficulty.encode())
@@ -55,10 +55,10 @@ describe("DifficultyAdjuster", () => {
     it("verifyDifficulty: 1 should return true when a valid difficulty is presented", () => {
 
         const timeDelta = 30
-        const workDelta = new Difficulty(0x00_00_FF, 0x15)
+        const workDelta = new Difficulty(0x0000FF, 0x15)
         const prevTimeEMA = 30
-        const prevWorkEMA = new Difficulty(0x00_00_FF, 0x15)
-        const givenDifficulty = new Difficulty(0x00_00_FF, 0x15)
+        const prevWorkEMA = new Difficulty(0x0000FF, 0x15)
+        const givenDifficulty = new Difficulty(0x0000FF, 0x15)
         const verifyResult = DifficultyAdjuster.verifyDifficulty(timeDelta, prevTimeEMA, workDelta, prevWorkEMA, givenDifficulty)
 
         expect(verifyResult).toEqual(true)
