@@ -1,4 +1,5 @@
 import { stat } from "fs"
+import * as ip from "ip"
 import { getLogger } from "log4js"
 import * as net from "net"
 import { createConnection, createServer, Socket } from "net"
@@ -75,14 +76,15 @@ export class RabbitNetwork implements INetwork {
     }
 
     public static ipv6Toipv4(ipv6: string): string {
-        const ip: string[] = ipv6.split(":")
-        if (ip.length === 4) {
-            return ip[3]
-        } else { return ip[0] }
+        const ipTemp: string[] = ipv6.split(":")
+        if (ipTemp.length === 4) {
+            return ipTemp[3]
+        } else { return ipTemp[0] }
     }
     public readonly networkid: string = "hycon"
     public readonly version: number = 3
     public port: number
+    public localPort: number
     private hycon: Server
     private server: net.Server
     private peerDB: PeerDb
@@ -98,6 +100,7 @@ export class RabbitNetwork implements INetwork {
     constructor(hycon: Server, port: number = 8148, peerDbPath: string = "peerdb") {
         RabbitNetwork.failLimit = 10
         this.port = port
+        this.localPort = port
         this.targetConnectedPeers = 5
         this.hycon = hycon
         this.peers = new Map<number, RabbitPeer>()
@@ -155,6 +158,7 @@ export class RabbitNetwork implements INetwork {
 
         setInterval(() => {
             logger.info(`Peers Count=${this.peers.size}  PeerDB Size= ${this.peerDB.peerCount()}`)
+            this.peerDB.printDB()
         }, 10 * 1000)
 
         // if (useUpnp) {
@@ -286,7 +290,9 @@ export class RabbitNetwork implements INetwork {
                     const peers = await rabbitPeer.getPeers()
                     if (peers.length !== 0) {
                         for (const peer of peers) {
-                            await this.peerDB.put({ host: peer.host, port: peer.port })
+                            if (!(peer.host === ip.address() && (peer.port === this.localPort || peer.port === this.port))) {
+                                await this.peerDB.put({ host: peer.host, port: peer.port })
+                            }
                         }
                     }
                 }

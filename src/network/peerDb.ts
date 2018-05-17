@@ -44,7 +44,12 @@ export class PeerDb {
         this.keys = await this.getKeys()
         this.keyListLock.releaseLock()
     }
-
+    public async printDB() {
+        for (const key of this.keys) {
+            const peer = await this.get(key)
+            logger.info(`host: ${peer.host}, port: ${peer.port}, failCount: ${peer.failCount}`)
+        }
+    }
     public async seen(peer: proto.IPeer) {
         const key = PeerDb.ipeer2key(peer)
         peer.lastSeen = Date.now()
