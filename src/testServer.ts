@@ -9,6 +9,7 @@ import { ITxPool } from "./common/itxPool"
 import { TxPool } from "./common/txPool"
 import { SignedTx } from "./common/txSigned"
 import { Database } from "./consensus/database/database"
+import { TxDatabase } from "./consensus/database/txDatabase"
 import { WorldState } from "./consensus/database/worldState"
 import { IConsensus } from "./consensus/iconsensus"
 import { SingleChain } from "./consensus/singleChain"
@@ -17,8 +18,8 @@ import { MinerServer } from "./miner/minerServer"
 import { StratumServer } from "./miner/stratumServer"
 import { RabbitNetwork } from "./network/rabbit/rabbitNetwork" // for speed
 import { RestManager } from "./rest/restManager"
-import { Block, INetwork, Tx } from "./serialization/proto"
 import * as proto from "./serialization/proto"
+import { Block, INetwork, Tx } from "./serialization/proto"
 import { Server } from "./server"
 import { hyconfromString, hycontoString } from "./util/commonUtil"
 import { Hash } from "./util/hash"
@@ -44,6 +45,7 @@ export class TestServer {
     private nonce: number = 0
     private txPool: ITxPool
     private consensus: IConsensus = undefined // the core
+    private txdb: TxDatabase
 
     private nonceTable: Map<string, number>
     constructor(server: Server) {
