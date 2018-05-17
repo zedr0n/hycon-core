@@ -38,13 +38,16 @@ export class TxPool implements ITxPool {
                 newTxs.push(oneTx)
             }
         }
+        // nothing to do
+        if (newTxs.length <= 0) {
+            return 0
+        }
 
         // insert
         const { count, lowestIndex } = this.insert(newTxs)
         for (const oneTx of newTxs) {
             const key = new Hash(oneTx).toString()
             this.txMap.set(key, oneTx)
-
         }
 
         // check same size
