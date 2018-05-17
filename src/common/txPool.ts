@@ -1,9 +1,11 @@
 import { getLogger } from "log4js"
 import { NewTx } from "../serialization/proto"
 import { Server } from "../server"
+import { Hash } from "../util/hash"
 import { ITxPool } from "./itxPool"
 import { SignedTx } from "./txSigned"
-
+// tslint:disable-next-line:no-var-requires
+const assert = require("assert")
 const logger = getLogger("AppTxPool")
 interface ITxCallback {
     callback: (txs: SignedTx[]) => void,
@@ -12,6 +14,7 @@ interface ITxCallback {
 export class TxPool implements ITxPool {
     private server: Server
     private txs: SignedTx[]
+    private txMap: Map<string, SignedTx>
     private callbacks: ITxCallback[]
     private minFee: number
 
@@ -20,10 +23,38 @@ export class TxPool implements ITxPool {
         this.txs = []
         this.callbacks = []
         this.minFee = minFee === undefined ? 0 : minFee
+        this.txMap = new Map<string, SignedTx>()
     }
 
-    public putTxs(newTxs: SignedTx[]): number {
+    public putTxs(newTxsOriginal: SignedTx[]): number {
+        const newTxs: SignedTx[] = []
+
+        // drop it, if we already has it
+        for (const oneTx of newTxsOriginal) {
+            const key = new Hash(oneTx).toString()
+            if (this.txMap.has(key)) {
+                continue
+            } else {
+                newTxs.push(oneTx)
+            }
+        }
+
+        // insert
         const { count, lowestIndex } = this.insert(newTxs)
+        for (const oneTx of newTxs) {
+            const key = new Hash(oneTx).toString()
+            this.txMap.set(key, oneTx)
+
+        }
+
+        if (this.txMap.size !== this.txs.length) {
+            const a = 5
+        }
+
+        // check same size
+        assert(this.txMap.size === this.txs.length)
+
+        // notify
         this.callback(lowestIndex)
         return count
     }
@@ -74,7 +105,22 @@ export class TxPool implements ITxPool {
         return { count, lowestIndex }
     }
 
-    private remove(txs: SignedTx[]) {
+    private remove(txsOriginal: SignedTx[]) {
+        const txs: SignedTx[] = []
+
+        // proceed only if we has it!
+        for (const oneTx of txsOriginal) {
+            const key = new Hash(oneTx).toString()
+            if (this.txMap.has(key)) {
+                txs.push(oneTx)
+            }
+        }
+
+        // nothing to process
+        if (txs.length <= 0) {
+            return
+        }
+
         txs.sort((a, b) => b.fee.compare(a.fee))
         let i = 0
         let j = 0
@@ -97,6 +143,15 @@ export class TxPool implements ITxPool {
                 }
             }
         }
+
+        // remove from map
+        for (const oneTx of txs) {
+            const key = new Hash(oneTx).toString()
+            const deleteResult = this.txMap.delete(key)
+            assert(deleteResult)
+        }
+        assert(this.txMap.size === this.txs.length)
+
     }
 
     private callback(lowestIndex: number): void {

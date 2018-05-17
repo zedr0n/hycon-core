@@ -283,6 +283,20 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 const txs = request.txs.map((tx) => new SignedTx(tx))
                 const n = await this.txPool.putTxs(txs)
                 success = (n === request.txs.length)
+                if (n === 0) {
+                    logger.debug(`Invalid PutTx Zero Length`)
+                    // do not relay
+                    success = false
+                }
+                if (n > 0) {
+                    if (txs.length > 0) {
+                        logger.debug(`Receive PutTx Count=${txs.length} FirstOne=${new Hash(txs[0]).toHex()}`)
+                    }
+                } else {
+                    if (txs.length > 0) {
+                        logger.debug(`Already HasTx In PutTx Count=${txs.length} FirstOne=${new Hash(txs[0]).toHex()}`)
+                    }
+                }
             } catch (e) {
                 logger.error(`Failed to putTx: ${e}`)
             }
