@@ -72,29 +72,27 @@ export class TxDatabase {
                 mapLastTx.set(fromAddress, txHash)
             }
             batch.push({ type: "put", key: txHash.toString(), value: txList.encode() })
-            logger.warn(`Put to TxDB : ${txHash.toString()} / ${txList.encode()}`)
         }
         for (const key of mapLastTx.keys()) {
             const txListHash = mapLastTx.get(key)
-            logger.warn(`Put to TxDB : ${key} / ${txListHash}`)
             batch.push({ type: "put", key, value: txListHash.toBuffer() })
         }
         batch.push({ type: "put", key: "lastBlock", value: blockHash.toBuffer() })
 
         await this.database.batch(batch)
-        logger.error(`After put to TxDB Check Using Address!!!!`)
-        for (const tx of txs) {
-            if (!verifyTx(tx)) { continue }
-            const toLastTxList = await this.getLastTxs(tx.to, 1)
-            logger.warn(`${tx.to} last Tx's previous Hashes : ${toLastTxList[0].previousTo} / ${toLastTxList[0].previousFrom}`)
-            if (tx instanceof SignedTx) {
-                const fromLastTxList = await this.getLastTxs(tx.from, 1)
-                const fTx = fromLastTxList[0].tx
-                if (fTx instanceof SignedTx) {
-                    logger.warn(`${tx.from} last Tx :  ${fTx.from}`)
-                }
-            }
-        }
+        // logger.error(`After put to TxDB Check Using Address!!!!`)
+        // for (const tx of txs) {
+        //     if (!verifyTx(tx)) { continue }
+        //     const toLastTxList = await this.getLastTxs(tx.to, 1)
+        //     logger.warn(`${tx.to} last Tx's previous Hashes : ${toLastTxList[0].previousTo} / ${toLastTxList[0].previousFrom}`)
+        //     if (tx instanceof SignedTx) {
+        //         const fromLastTxList = await this.getLastTxs(tx.from, 1)
+        //         const fTx = fromLastTxList[0].tx
+        //         if (fTx instanceof SignedTx) {
+        //             logger.warn(`${tx.from} last Tx :  ${fTx.from}`)
+        //         }
+        //     }
+        // }
     }
 
     public async getLastTxs(address: Address, count?: number): Promise<TxList[]> {
