@@ -427,7 +427,7 @@ export class SingleChain implements IConsensus {
         // Todo need to check header.difficulty is a float or integer
         const difficulty: Difficulty = Difficulty.decode(header.difficulty)
 
-        if (difficulty.greaterThan(cryptoHash)) {
+        if (difficulty.acceptable(cryptoHash)) {
             return true
         }
         logger.warn(`Fail to verifyHeader: ${cryptoHash.toString()}`)

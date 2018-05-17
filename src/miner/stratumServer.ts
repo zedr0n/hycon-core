@@ -46,7 +46,7 @@ export class StratumServer {
         logger.info(`>>>>>>>>>Put Work in stratumServer : ${Buffer.from(prehash.buffer).toString("hex")}`)
         this.prehash = prehash
         this.difficulty = difficulty
-        const {offset, target} = difficulty.getMinerParameters()
+        const target = difficulty.getMinerTarget()
 
         for (let index = 0; index < this.socketsId.length; index++) {
             const socket = this.mapSocket.get(this.socketsId[index])
@@ -55,7 +55,6 @@ export class StratumServer {
                     index + (MinerServer.useCpuMiner ? 1 : 0),      // job_id
                     new Buffer(this.prehash).toString("hex"),       // prehash
                     target,                                         // difficulty (2byte hex)
-                    offset,                                         // difficulty (zero count)
                     minersCount,                                    // job_unit
                     "0", // empty
                     "0", // empty

@@ -48,8 +48,8 @@ export class CpuMiner {
                         break
                     }
 
-                    if (this.difficulty.greaterThan(result)) {
-                        logger.debug(`>>>>>>>>Submit - nonce : ${zeroPad(this.nonce.toString(16), MinerServer.LEN_HEX_NONCE)} / hash : ${Buffer.from(result.buffer).toString("hex")}`)
+                    if (this.difficulty.acceptable(result)) {
+                        // logger.debug(`>>>>>>>>Submit - nonce : ${zeroPad(this.nonce.toString(16), MinerServer.LEN_HEX_NONCE)} / hash : ${Buffer.from(result.buffer).toString("hex")}`)
                         this.minerServer.submitNonce(this.nonce.toString(16))
                     }
                     this.nonce = this.nonce.add(Long.UONE)

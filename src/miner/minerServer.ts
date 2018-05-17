@@ -57,13 +57,12 @@ export class MinerServer implements IMiner {
         this.prehash = hash
 
         // set Target
-        const target = candidateBlock.header.difficulty
-        this.difficulty = Difficulty.decode(target)
-        const params = this.difficulty.getMinerParameters()
+        this.difficulty = Difficulty.decode(candidateBlock.header.difficulty)
+        const target = this.difficulty.getMinerTarget()
         // check miner count
         const minersCount = this.getMinersCount()
 
-        logger.info(`Send candidate block to miner - prehash : ${Buffer.from(candidateBlock.header.preHash().buffer).toString("hex")} / offset : ${params.offset} target : ${params.target}`)
+        logger.info(`Send candidate block to miner - prehash : ${Buffer.from(candidateBlock.header.preHash().buffer).toString("hex")} /  target : ${target}`)
 
         // notify cpuminer and stratum server
         if (MinerServer.useCpuMiner) {
@@ -134,7 +133,7 @@ export class MinerServer implements IMiner {
 
         if (this.difficulty === undefined) {
             return false
-        } else if (this.difficulty.greaterThan(result)) {
+        } else if (this.difficulty.acceptable(result)) {
             logger.debug(`HASH Result : ${Buffer.from(result.buffer).toString("hex")}`)
             return true
         } else {

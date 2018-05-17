@@ -35,7 +35,7 @@ describe("DBBlock Test", () => {
             length: 0,
             offset: 0,
             timeEMA: 30,
-            workEMA: new Difficulty(0x0000FF, 0x10).encode(),
+            workEMA: new Difficulty(0x0000FF, 0x00).encode(),
         }
         dbBlock = new DBBlock(iDBBlock)
     })

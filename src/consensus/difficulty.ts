@@ -7,8 +7,6 @@ export class Difficulty {
     public static minimumMantissa: number = 0xFF
     public static minimumExponent: number = 0
 
-    public static readonly defaultDifficulty = new Difficulty(Difficulty.minimumMantissa, Difficulty.minimumExponent)
-
     public static decode(num: number): Difficulty {
         const exponent = num >> 24
         const mantissa = num & 0xFFFFFF
@@ -20,7 +18,11 @@ export class Difficulty {
             return { mantissa : Difficulty.minimumMantissa, exponent: Difficulty.minimumExponent }
         }
 
-        while ((mantissa & 0xFF) === 0 && exponent < 0x20) {
+        if ( exponent > 28 ) {
+            return { mantissa , exponent: 28 }
+        }
+
+        while ((mantissa & 0xFF) === 0 && exponent < 29) {
             mantissa = mantissa >> 8
             exponent += 1
         }
@@ -45,16 +47,19 @@ export class Difficulty {
         return this.exponent
     }
 
-    public getMinerParameters(): { offset: number, target: string } {
-        let target: string = this.mantissa.toString(16)
-        if (target.length % 2) {
-            target = "0" + target
+    public getTarget(): Buffer {
+        const target = new Buffer(32)
+        target.fill(0x00)
+        const index = 32 - (this.exponent + 3)
+        target.writeUIntBE(Math.pow(2, 24) - 1 - this.mantissa, index, 3)
+        if ( this.exponent + 3 !== 31) {
+            target.fill(0xFF, 0, index)
         }
-        while (target.length < 6) {
-            target += "f"
-        }
+        return target
+    }
 
-        return { offset: this.exponent * 2, target : this.reverseByte(target) }
+    public getMinerTarget(): string {
+        return this.getTarget().slice(24, 32).toString("hex")
     }
 
     public inspect(value: number) {
@@ -67,32 +72,18 @@ export class Difficulty {
         return (this.exponent << 24) + this.mantissa
     }
 
-    public greaterThan(targetInput: Hash | Difficulty): boolean {
-        if ( targetInput instanceof Difficulty) {
-            return this.exponent > targetInput.getExponent() ? true
-            : this.exponent === targetInput.getExponent() && this.mantissa > targetInput.getMantissa()
-        }
+    public acceptable(hash: Hash): boolean {
+        const target = this.getTarget()
 
-        let i = 31
-        const exponentCount = 32 - this.exponent
-        while (i >= exponentCount) {
-            if (targetInput[i] !== 0) {
+        for (let i = 31; i >= 0; i--) {
+            if (hash[i] < target[i]) {
+                return true
+            }
+            if (hash[i] > target[i]) {
                 return false
             }
-            i--
         }
-        const mantisaByteCount = Math.ceil(Math.log2(this.mantissa) / 8)
-        let j = i - mantisaByteCount + 1
-        j = j < 0 ? 0 : j
-
-        let mComp = 0
-        while (j <= i) {
-            mComp <<= 8
-            mComp += targetInput[i]
-            --i
-        }
-
-        return (this.mantissa > mComp)
+        return true
     }
 
     public multiply(num: number): Difficulty {
