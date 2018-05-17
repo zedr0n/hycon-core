@@ -45,16 +45,17 @@ export class PeerDb {
         this.keyListLock.releaseLock()
     }
     public async printDB() {
+        let i = 1
         for (const key of this.keys) {
             const peer = await this.get(key)
-            logger.info(`host: ${peer.host}, port: ${peer.port}, failCount: ${peer.failCount}`)
+            logger.info(`${i++}/${this.keys.length} host: ${peer.host}, port: ${peer.port}, failCount: ${peer.failCount}`)
         }
     }
     public async seen(peer: proto.IPeer) {
         const key = PeerDb.ipeer2key(peer)
         peer.lastSeen = Date.now()
         peer.failCount = 0
-        logger.info(`PeerDB saw ${peer.host}:${peer.port}`)
+        logger.debug(`PeerDB saw ${peer.host}:${peer.port}`)
         return this.put(peer)
     }
 
@@ -71,12 +72,12 @@ export class PeerDb {
             dbpeer.failCount++
         }
 
-        logger.info(`${peer.host}:${peer.port} failCount = ${dbpeer.failCount}`)
+        logger.debug(`${peer.host}:${peer.port} failCount = ${dbpeer.failCount}`)
 
         if (dbpeer.failCount <= limit) {
             await this.put(dbpeer)
         } else {
-            logger.info(`${peer.host}:${peer.port} will be removed from the peerDB`)
+            logger.debug(`${peer.host}:${peer.port} will be removed from the peerDB`)
             await this.remove(dbpeer)
         }
     }
@@ -87,7 +88,7 @@ export class PeerDb {
         return this.keyListLock.critical<proto.IPeer>(async () => {
             try {
                 await this.db.put(key, value)
-                logger.info(`Saved to db ${peer.host}:${peer.port}`)
+                logger.debug(`Saved to db ${peer.host}:${peer.port}`)
                 if (this.keys.indexOf(key) === -1) {
                     this.keys.push(key)
                 }

@@ -23,7 +23,7 @@ export class StratumServer {
         logger.debug(`Stratum Server`)
         this.minerServer = minerServer
         this.port = port
-        this.net = new LibStratum({settings: {port: this.port}})
+        this.net = new LibStratum({ settings: { port: this.port } })
 
         this.initialize()
     }
@@ -43,7 +43,7 @@ export class StratumServer {
     }
 
     public putWork(prehash: Uint8Array, difficulty: Difficulty, minersCount: number) {
-        logger.info(`>>>>>>>>>Put Work in stratumServer : ${Buffer.from(prehash.buffer).toString("hex")}`)
+        logger.debug(`>>>>>>>>>Put Work in stratumServer : ${Buffer.from(prehash.buffer).toString("hex")}`)
         this.prehash = prehash
         this.difficulty = difficulty
         const target = difficulty.getMinerTarget()
@@ -93,7 +93,7 @@ export class StratumServer {
                 case "authorize":
                     logger.info(`Authorizing worker id : ${req.params[0]} /  pw : ${req.params[1]}`)
                     deferred.resolve([true])
-                    deferred.promise.then( () => { })
+                    deferred.promise.then(() => { })
                     break
                 case "submit":
                     logger.debug(`Submit id : ${req.id} / nonce : ${req.params.nonce} / result : ${req.params.result}`)

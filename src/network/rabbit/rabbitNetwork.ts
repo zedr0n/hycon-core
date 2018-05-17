@@ -214,7 +214,7 @@ export class RabbitNetwork implements INetwork {
                 return
             }
             this.pendingConnections.set(key, ipeer)
-            logger.info(`Attempting to connect to ${host}:${port}...`)
+            logger.debug(`Attempting to connect to ${host}:${port}...`)
             const socket = new Socket()
             socket.once("error", async () => {
                 try {
@@ -244,7 +244,7 @@ export class RabbitNetwork implements INetwork {
 
     private async accept(socket: Socket): Promise<void> {
         try {
-            logger.info(`Detect a incoming peer ${RabbitNetwork.ipv6Toipv4(socket.remoteAddress)}:${socket.remotePort}`)
+            logger.debug(`Detect a incoming peer ${RabbitNetwork.ipv6Toipv4(socket.remoteAddress)}:${socket.remotePort}`)
             const peer = await this.newConnection(socket)
             if (RabbitNetwork.isRemoteSocket(socket)) {
                 const status = await peer.status()
@@ -267,11 +267,11 @@ export class RabbitNetwork implements INetwork {
         this.peers.set(key, peer)
         socket.on("close", async (error) => {
             this.peers.delete(key)
-            logger.error(`disconnected from ${key} ${ipeer.host}:${ipeer.port}`)
+            logger.debug(`disconnected from ${key} ${ipeer.host}:${ipeer.port}`)
 
         })
         socket.on("error", async (error) => {
-            logger.error(`Connection error ${key} ${ipeer.host}:${ipeer.port} : ${error}`)
+            logger.debug(`Connection error ${key} ${ipeer.host}:${ipeer.port} : ${error}`)
         })
         return peer
     }

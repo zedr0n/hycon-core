@@ -61,24 +61,25 @@ export class Sync {
         // const testHash = new Hash(testTips[0])
 
         try {
+            const localTip = this.consensus.getBlocksTip()
 
             this.peer = this.network.getRandomPeer()
             if (!this.peer) {
-                logger.debug(`No peer to sync with`)
+                logger.info(`No peer to sync with, Local=${localTip.height} `)
                 // we will replace with other alogrithm
                 return
             }
 
             logger.debug(`Get remote tip`)
             const remoteTip = await this.peer.getTip()
-            const localTip = this.consensus.getBlocksTip()
-            logger.debug(`Local=${localTip.height}  Remote=${remoteTip.height}`)
 
-            logger.info(`Finding Commons`)
+            logger.info(`Local=${localTip.height}  Remote=${remoteTip.height}`)
+
+            logger.debug(`Finding Commons`)
             await this.findCommons(localTip, remoteTip)
 
-            logger.info(`Find start Header`)
             const startHeaderHeight = await this.findStartHeader()
+            logger.info(`Find Start Header=${startHeaderHeight}`)
             if (remoteTip.height > localTip.height) {
                 logger.info(`Getting Headers`)
                 await this.getHeaders(startHeaderHeight)
@@ -87,8 +88,9 @@ export class Sync {
                 await this.putHeaders(startHeaderHeight)
             }
 
-            logger.info(`Find start block`)
+
             const startBlockHeight = await this.findStartBlock(startHeaderHeight)
+            logger.info(`Find Start Block=${startBlockHeight}`)
             if (remoteTip.height === localTip.height) {
                 logger.debug(`synchronized`)
             } else if (remoteTip.height > localTip.height) {

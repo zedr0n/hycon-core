@@ -79,11 +79,11 @@ export class UpnpClient {
                     // logger.debug("LOCAL ADDRESS:", localIP)
                     // logger.debug("IS LOCAL:", isLocal)
                     // logger.debug("DATE:", date)
-                    logger.info(`DETECT IP ME=${isMe} Product=${product} IP=${localIP} Port=${localPort}`)
+                    logger.debug(`DETECT IP ME=${isMe} Product=${product} IP=${localIP} Port=${localPort}`)
                     try {
                         await this.rabbitNetwork.connect(localIP, Number(localPort))
                     } catch (e) {
-                        logger.info(`Connecting to local peer: ${e}`)
+                        logger.debug(`Connecting to local peer: ${e}`)
                     }
                 }
             } else {

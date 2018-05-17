@@ -27,7 +27,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     constructor(socket: Socket, network: RabbitNetwork, consensus: IConsensus, txPool: ITxPool, peerDB: PeerDb) {
         super(socket)
         // tslint:disable-next-line:max-line-length
-        logger.info(`New Netpeer Local=${RabbitNetwork.ipv6Toipv4(socket.localAddress)}:${socket.localPort} --> Remote=${RabbitNetwork.ipv6Toipv4(socket.remoteAddress)}:${socket.remotePort}`)
+        logger.debug(`New Netpeer Local=${RabbitNetwork.ipv6Toipv4(socket.localAddress)}:${socket.localPort} --> Remote=${RabbitNetwork.ipv6Toipv4(socket.remoteAddress)}:${socket.remotePort}`)
         this.network = network
         this.consensus = consensus
         this.txPool = txPool

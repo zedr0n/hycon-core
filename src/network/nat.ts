@@ -35,7 +35,7 @@ export class NatUpnp {
                 publicPort = (1 << 15) + (1 << 14) + Math.floor(Math.random() * ((1 << 14) - 1))
             }
         }
-        logger.info(`Upnp Port mapping failed`)
+        logger.debug(`Upnp Port mapping failed`)
         throw new Error("Upnp Port mapping failed")
     }
     private static async _externalIp(): Promise<any> {
@@ -73,14 +73,14 @@ export class NatUpnp {
             this.publicPort = await NatUpnp.mapPort(this.privatePort)
         } catch (e) {
             this.publicPort = NaN
-            logger.warn(`Upnp Warning: ${e}, please confirm your router supports UPNP and that UPNP is enabled or you just not behind the NAT, Hycon will use your local port:${this.privatePort}`)
+            logger.debug(`Upnp Warning: ${e}, please confirm your router supports UPNP and that UPNP is enabled or you just not behind the NAT, Hycon will use your local port:${this.privatePort}`)
         }
         try {
             this.publicIp = await NatUpnp._externalIp()
             logger.info(`External Ip=${this.publicIp}`)
         } catch (e) {
             this.publicIp = ""
-            logger.warn(`Get external IP failed, hycon will use your local IP:${this.publicIp} if you are not behind NAT`)
+            logger.debug(`Get external IP failed, hycon will use your local IP:${this.publicIp} if you are not behind NAT`)
         }
     }
 }

@@ -416,7 +416,7 @@ export class SingleChain implements IConsensus {
             return { isVerified: false }
         }
 
-        logger.info(`Verified stateRoot: ${block.header.stateRoot}, Block: ${block.header.merkleRoot.toString()}`)
+        logger.debug(`Verified stateRoot: ${block.header.stateRoot}, Block: ${block.header.merkleRoot.toString()}`)
 
         return { isVerified: true, stateTransition }
     }

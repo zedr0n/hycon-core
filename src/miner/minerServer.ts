@@ -62,7 +62,7 @@ export class MinerServer implements IMiner {
         // check miner count
         const minersCount = this.getMinersCount()
 
-        logger.info(`Send candidate block to miner - prehash : ${Buffer.from(candidateBlock.header.preHash().buffer).toString("hex")} /  target : ${target}`)
+        logger.debug(`Send candidate block to miner - prehash : ${Buffer.from(candidateBlock.header.preHash().buffer).toString("hex")} /  target : ${target}`)
 
         // notify cpuminer and stratum server
         if (MinerServer.useCpuMiner) {
