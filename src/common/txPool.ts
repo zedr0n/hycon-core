@@ -152,9 +152,10 @@ export class TxPool implements ITxPool {
             const deleteResult = this.txMap.delete(key)
             if (!deleteResult) {
                 logger.fatal("TX Pool error In Deleting, resetting TX Pool")
-                this.txs = Array.from(this.txMap.values())
             }
         }
+
+        // the size should be always the same        
         if (this.txMap.size !== this.txs.length) {
             logger.fatal("TX Pool error In Removing, resetting TX Pool")
             this.txs = Array.from(this.txMap.values())

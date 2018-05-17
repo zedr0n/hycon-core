@@ -238,6 +238,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
             if (response.relay) {
                 // only request was successfully processed
                 // we will relay
+                // exclude the peer itself
                 this.network.broadcast(packet, this)
             }
         }
@@ -284,18 +285,8 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 const n = await this.txPool.putTxs(txs)
                 success = (n === request.txs.length)
                 if (n === 0) {
-                    logger.debug(`Invalid PutTx Zero Length`)
                     // do not relay
                     success = false
-                }
-                if (n > 0) {
-                    if (txs.length > 0) {
-                        logger.debug(`Receive PutTx Count=${txs.length} FirstOne=${new Hash(txs[0]).toHex()}`)
-                    }
-                } else {
-                    if (txs.length > 0) {
-                        logger.debug(`Already HasTx In PutTx Count=${txs.length} FirstOne=${new Hash(txs[0]).toHex()}`)
-                    }
                 }
             } catch (e) {
                 logger.error(`Failed to putTx: ${e}`)
@@ -323,9 +314,6 @@ export class RabbitPeer extends BasePeer implements IPeer {
             }
             const results = await Promise.all(promises)
             relay = results.every((value) => value)
-
-            // relay = false
-
         } catch (e) {
             logger.error(`Failed to put block: ${e}`)
         }
