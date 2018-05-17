@@ -27,11 +27,12 @@ export class TxDatabase {
     }
 
     public async getLastBlock(txs: AnySignedTx[]): Promise<Hash> {
-        const hashData = await this.database.get("lastBlock")
-        return Hash.decode(hashData.toString())
+        const hashData = new Uint8Array(await this.database.get("lastBlock"))
+        return new Hash(hashData)
     }
 
     public async putTxs(blockHash: Hash, txs: AnySignedTx[]): Promise<void> {
+        logger.error(`PutTxs length : ${txs.length}`)
         const batch: levelup.Batch[] = []
         const mapLastTx: Map<string, Hash> = new Map<string, Hash>()
         for (const tx of txs) {
@@ -62,13 +63,33 @@ export class TxDatabase {
                 mapLastTx.set(fromAddress, txHash)
             }
             batch.push({ type: "put", key: txHash.toString(), value: txList.encode() })
+            // logger.warn(`Put to TxDB : ${txHash.toString()} / ${txList.encode()}`)
         }
         for (const key of mapLastTx.keys()) {
             const txListHash = mapLastTx.get(key)
-            batch.push({ type: "put", key, value: txListHash.toString() })
+            // logger.warn(`Put to TxDB : ${key} / ${txListHash}`)
+            batch.push({ type: "put", key, value: txListHash.toBuffer() })
         }
-        batch.push({ type: "put", key: "lastBlock", value: blockHash.toString() })
+        batch.push({ type: "put", key: "lastBlock", value: blockHash.toBuffer() })
+
         await this.database.batch(batch)
+        // logger.error(`After put to TxDB Check Using Address!!!!`)
+        // for (const tx of txs) {
+        //     if (!verifyTx(tx)) { continue }
+        //     const toLastTxList = await this.getLastTxs(tx.to, 1)
+        //     logger.warn(`${tx.to} last Tx's previous Hashes : ${toLastTxList[0].previousTo} / ${toLastTxList[0].previousFrom}`)
+        //     if (tx instanceof SignedTx) {
+        //         const fromLastTxList = await this.getLastTxs(tx.from, 1)
+        //         const fTx = fromLastTxList[0].tx
+        //         if (fTx instanceof SignedTx) {
+        //             logger.warn(`${tx.from} last Tx :  ${fTx.from}`)
+        //         }
+        //     }
+        // }
+        // logger.error(`After put to TxDB Check Using TxHash!!!!`)
+        // for (const tx of txs) {
+        //     logger.warn(` Tx in DB : `, await this.getTx(new Hash(tx)))
+        // }
     }
 
     public async getLastTxs(address: Address, count?: number): Promise<TxList[]> {
@@ -98,10 +119,8 @@ export class TxDatabase {
         try {
             let dbKey = key
             if (key instanceof Address) {
-                const dbData = await this.database.get(key.toString())
-                decodingDBEntry = true
-                dbKey = Hash.decode(dbData.toString())
-                decodingDBEntry = false
+                const hashData = new Uint8Array(await this.database.get(key.toString()))
+                dbKey = new Hash(hashData)
             }
             const value = await this.database.get(dbKey.toString())
             decodingDBEntry = true

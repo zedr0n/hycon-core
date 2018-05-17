@@ -100,13 +100,13 @@ export class Database {
     }
 
     public async setHashAtHeight(height: number, hash: Hash): Promise<void> {
-        await this.database.put(height, hash.toString())
+        await this.database.put(height, hash.toBuffer())
     }
 
     public async getHashAtHeight(height: number): Promise<Hash> {
         try {
-            const hashData = await this.database.get(height)
-            const hash = Hash.decode(hashData.toString())
+            const hashData = new Uint8Array(await this.database.get(height))
+            const hash = new Hash(hashData)
             return hash
         } catch (e) {
             if (e.notFound) { return undefined }
@@ -132,7 +132,7 @@ export class Database {
     }
 
     public async setBlockTip(hash: Hash) {
-        await this.database.put("__blockTip", hash.toString())
+        await this.database.put("__blockTip", hash.toBuffer())
     }
 
     public async getBlockTip(): Promise<DBBlock | undefined> {
@@ -140,7 +140,7 @@ export class Database {
     }
 
     public async setHeaderTip(hash: Hash) {
-        await this.database.put("__headerTip", hash.toString())
+        await this.database.put("__headerTip", hash.toBuffer())
     }
 
     public async getHeaderTip(): Promise<DBBlock | undefined> {
@@ -350,8 +350,8 @@ export class Database {
 
     private async getTip(key: string): Promise<DBBlock | undefined> {
         try {
-            const hashData = await this.database.get(key)
-            const hash = Hash.decode(hashData.toString())
+            const hashData = new Uint8Array(await this.database.get(key))
+            const hash = new Hash(hashData)
             const block = await this.getDBBlock(hash)
             return block
         } catch (e) {
