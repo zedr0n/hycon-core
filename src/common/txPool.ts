@@ -47,12 +47,11 @@ export class TxPool implements ITxPool {
 
         }
 
-        if (this.txMap.size !== this.txs.length) {
-            const a = 5
-        }
-
         // check same size
-        assert(this.txMap.size === this.txs.length)
+        if (this.txMap.size === this.txs.length) {
+            logger.fatal("TX Pool error, resetting TX Pool")
+            this.txs = Array.from(this.txMap.values())
+        }
 
         // notify
         this.callback(lowestIndex)

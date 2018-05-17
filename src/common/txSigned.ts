@@ -64,10 +64,10 @@ export class SignedTx implements proto.ITx {
     }
 
     public equals(tx: SignedTx): boolean {
-        if (this.amount !== tx.amount) {
+        if (!this.amount.equals(tx.amount)) {
             return false
         }
-        if (this.fee !== tx.fee) {
+        if (!this.fee.equals(tx.fee)) {
             return false
         }
         if (this.nonce !== tx.nonce) {
