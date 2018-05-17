@@ -72,6 +72,7 @@ export class Sync {
             logger.debug(`Get remote tip`)
             const remoteTip = await this.peer.getTip()
             const localTip = this.consensus.getBlocksTip()
+            logger.debug(`Local=${localTip.height}  Remote=${remoteTip.height}`)
 
             logger.info(`Finding Commons`)
             await this.findCommons(localTip, remoteTip)
