@@ -48,7 +48,7 @@ export class PeerDb {
         let i = 1
         for (const key of this.keys) {
             const peer = await this.get(key)
-            logger.info(`${i++}/${this.keys.length} host: ${peer.host}, port: ${peer.port}, failCount: ${peer.failCount}`)
+            logger.debug(`${i++}/${this.keys.length} host: ${peer.host}, port: ${peer.port}, failCount: ${peer.failCount}`)
         }
     }
     public async seen(peer: proto.IPeer) {

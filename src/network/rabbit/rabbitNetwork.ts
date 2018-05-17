@@ -158,6 +158,7 @@ export class RabbitNetwork implements INetwork {
 
         setInterval(() => {
             logger.info(`Peers Count=${this.peers.size}  PeerDB Size= ${this.peerDB.peerCount()}`)
+            this.showInfo()
             this.peerDB.printDB()
         }, 10 * 1000)
 
@@ -166,6 +167,15 @@ export class RabbitNetwork implements INetwork {
         // }
 
         return true
+    }
+
+    public showInfo() {
+        let i = 1
+        logger.info(`All Peers ${this.peers.size}`)
+        for (const [key, value] of this.peers) {
+            logger.info(`${i}/${this.peers.size} ${value.socketBuffer.getInfo()}`)
+            i++
+        }
     }
 
     public getRandomPeer(): IPeer {

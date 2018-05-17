@@ -71,6 +71,11 @@ export class SocketParser {
         }
     }
 
+    public getInfo() {
+        const socket = this.socket
+        const ret = `Local=${socket.localAddress}:${socket.localPort}  Remote=${socket.remoteAddress}:${socket.remotePort}`
+        return ret
+    }
     private receive(src: Buffer): void {
         // tslint:disable-next-line:max-line-length
         // logger.info(`Recieving ${src.length} bytes ${this.socket.localAddress}:${this.socket.localPort} <-- ${this.socket.localAddress}:${this.socket.localPort}`)
