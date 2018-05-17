@@ -495,6 +495,7 @@ export class RestServer implements IRest {
     }
 
     public async sendTx(tx: { name: string, password: string, address: string, amount: number, minerFee: number }, queueTx?: Function): Promise<boolean> {
+        tx.password === undefined ? tx.password = "" : tx.password = tx.password
         try {
             await Wallet.walletInit()
             const wallet = await Wallet.loadKeys(tx.name, tx.password)

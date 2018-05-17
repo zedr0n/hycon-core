@@ -9,7 +9,7 @@
     "assets": "mnemonic/*"
   },
   "scripts": {
-    "start": "./node_modules/.bin/ts-node src/main.ts --networkid=3 --port=8148 --str_port=9081 --writing  --mine",
+    "start": "./node_modules/.bin/ts-node src/main.ts --networkid=3 --port=8148 --str_port=9081 --writing  --mine --api --api_port=2442",
     "start2": "./node_modules/.bin/ts-node src/main.ts --networkid=3 --port=8149 --str_port=9082 --writing --mine",
     "start3": "./node_modules/.bin/ts-node src/main.ts --networkid=3 --port=8148 --writing --str_port=9081 --api --api_port=2442 --mine",
     "start4": "./node_modules/.bin/ts-node src/main.ts --networkid=3 --wallet --disable_upnp",

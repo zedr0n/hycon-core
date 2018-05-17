@@ -95,7 +95,7 @@ export class BlockList extends React.Component<any, any> {
                         </tr>
                     </thead>
                     <tbody>
-                        {this.state.blocks.map((block: IBlock) => {
+                        {this.state.blocks.reverse().map((block: IBlock) => {
                             return <BlockLine key={blockIndex++} block={block} />
                         })}
                     </tbody>
