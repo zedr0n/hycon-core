@@ -1,4 +1,3 @@
-//Clientside Config used by webpack
 {
     "compilerOptions": {
         "outDir": "./dist/",

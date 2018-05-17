@@ -1,15 +1,19 @@
-import * as jwt from "jsonwebtoken"
 import { getLogger } from "log4js"
 import * as Long from "long"
 import { Address } from "../../common/address"
+import { BlockHeader } from "../../common/blockHeader"
 import { Tx } from "../../common/tx"
 import { SignedTx } from "../../common/txSigned"
 import { IConsensus } from "../../consensus/iconsensus"
 import { hyconfromString, hycontoString } from "../../util/commonUtil"
 import { Hash } from "../../util/hash"
 import { Wallet } from "../../wallet/wallet"
-import { IHyconWallet, IPeer, IResponseError, IRest, ITxProp, IUser, IWalletAddress } from "../client/rest"
+import { IBlock, IHyconWallet, IPeer, IResponseError, IRest, ITxProp, IUser, IWalletAddress } from "../client/rest"
 const logger = getLogger("RestServer")
+// tslint:disable-next-line:no-var-requires
+const googleMapsClient = require("@google/maps").createClient({
+    key: "AIzaSyAp-2W8_T6dZjq71yOhxW1kRkbY6E1iyuk",
+})
 
 // tslint:disable:object-literal-sort-keys
 // tslint:disable:ban-types
@@ -135,10 +139,13 @@ export class RestServer implements IRest {
             const wallet = new Wallet(Buffer.from(tx.privateKey, "hex"))
             const account = await this.consensus.getAccount(new Address(tx.from))
             const total = hyconfromString(tx.amount).add(hyconfromString(tx.fee))
+            logger.debug(`Total HYC: ${hycontoString(total)}`)
+            logger.debug(`Account Balance: ${hycontoString(account.balance)}`)
+            logger.debug(`Boolean: ${account.balance.lessThan(total)}`)
             if (account.balance.lessThan(total)) {
                 throw new Error("insufficient wallet balance to send transaction")
             }
-            const signedTx = wallet.send(address, hyconfromString(tx.amount), account.nonce + 1, hyconfromString(tx.fee))
+            const signedTx = wallet.send(address, hyconfromString(tx.amount.toString()), account.nonce + 1, hyconfromString(tx.fee.toString()))
             if (queueTx) {
                 queueTx(signedTx)
             } else {
@@ -197,6 +204,179 @@ export class RestServer implements IRest {
         }
     }
 
+    public async deleteWallet(name: string): Promise<boolean> {
+        try {
+            await Wallet.walletInit()
+            const resultBool = await Wallet.delete(name)
+            return Promise.resolve(resultBool)
+        } catch (e) {
+            return Promise.resolve(false)
+        }
+    }
+
+    public async generateWallet(Hwallet: IHyconWallet): Promise<string> {
+        await Wallet.walletInit()
+        if (Hwallet.name !== undefined && Hwallet.password !== undefined && Hwallet.hint !== undefined && Hwallet.mnemonic !== undefined && Hwallet.language !== undefined) {
+            const wallet = Wallet.generate({ name: Hwallet.name, password: Hwallet.password, mnemonic: Hwallet.mnemonic, language: Hwallet.language, hint: Hwallet.hint })
+            await wallet.save(Hwallet.name, Hwallet.password)
+            // TODO : save other information in wallet class
+            const address = await Wallet.getAddress(Hwallet.name)
+            return Promise.resolve(address.toString())
+        } else {
+            return Promise.reject("Information is missing.")
+        }
+    }
+
+    public async getAddressInfo(address: string): Promise<IWalletAddress> {
+        try {
+            const addressOfWallet = new Address(address)
+            const n = 10
+            const account = await this.consensus.getAccount(addressOfWallet)
+            const txList = await this.consensus.getLastTxs(addressOfWallet, n)
+            const webTxs: ITxProp[] = []
+            for (const tx of txList) {
+                let webTx: ITxProp
+                if (tx !== undefined) {
+                    if (tx.tx instanceof SignedTx) {
+                        webTx = {
+                            hash: tx.tx.unsignedHash().toString(),
+                            amount: hycontoString(tx.tx.amount),
+                            fee: hycontoString(tx.tx.fee),
+                            from: tx.tx.from.toString(),
+                            to: tx.tx.to.toString(),
+                            signature: tx.tx.signature.toString(),
+                        }
+                        // unsigned Txs are unlisted
+                        webTxs.push(webTx)
+                    }
+                }
+            }
+            return Promise.resolve<IWalletAddress>({
+                hash: address,
+                balance: account ? account.balance.toInt() : 0,
+                txs: webTxs,
+            })
+
+        } catch (e) {
+            return Promise.reject(e)
+        }
+    }
+
+    public async getAllAccounts(name: string): Promise<{ represent: number, accounts: Array<{ address: string, balance: string }> } | boolean> {
+        try {
+            await Wallet.walletInit()
+            const account = await Wallet.getAddress(name)
+            const result: Array<{ address: string, balance: string }> = []
+            const acctFromWS = await this.consensus.getAccount(new Address(account))
+            const acctElement = { address: account, balance: "0" }
+            if (acctFromWS !== undefined) {
+                acctElement.balance = hycontoString(acctFromWS.balance)
+            }
+            result.push(acctElement)
+            return Promise.resolve({ represent: 0, accounts: result }) // TODO: Remove repressent
+        } catch (e) {
+            return Promise.resolve(false)
+        }
+    }
+
+    public async getBlock(hash: string): Promise<IBlock> {
+        try {
+            // const dbBlock = await this.db.getDBBlock(Hash.decode(hash))
+            const hyconBlock = await this.consensus.getBlockByHash(Hash.decode(hash))
+            const txs: ITxProp[] = []
+            for (const hyconTx of hyconBlock.txs) {
+                if (hyconTx instanceof SignedTx) {
+                    txs.push({
+                        amount: hycontoString(hyconTx.amount),
+                        hash: new Hash(hyconTx).toString(),
+                        fee: hycontoString(hyconTx.fee),
+                        from: hyconTx.from.toString(),
+                        to: hyconTx.to.toString(),
+                    })
+                } else {
+                    txs.push({
+                        amount: hycontoString(hyconTx.amount),
+                        hash: new Hash(hyconTx).toString(),
+                        to: hyconTx.to.toString(),
+                    })
+                }
+            }
+
+            const webBlock = {
+                hash,
+                difficulty: hyconBlock.header.difficulty,
+                // height: hyconBlock.height,
+                txs,
+                timeStamp: Number(hyconBlock.header.timeStamp),
+            }
+
+            if (hyconBlock.header instanceof BlockHeader) {
+                Object.assign(webBlock, {
+                    prevBlock: hyconBlock.header.previousHash,
+                    nonce: hyconBlock.header.nonce,
+                })
+            }
+            return Promise.resolve(webBlock)
+        } catch (e) {
+            return Promise.reject("Error while getting block information from server : " + e)
+        }
+    }
+    public async getBlockList(): Promise<IBlock[]> {
+        const n = 10
+        const blockList: IBlock[] = []
+        try {
+            const dbblocks = await this.consensus.getBlocksRange(0)
+
+            for (const dbblock of dbblocks) {
+                const txs: ITxProp[] = []
+                for (const tx of dbblock.txs) {
+                    if (tx instanceof SignedTx) {
+                        txs.push({
+                            amount: hycontoString(tx.amount),
+                            hash: new Hash(tx).toString(),
+                            fee: hycontoString(tx.fee),
+                            from: tx.from.toString(),
+                            to: tx.to.toString(),
+                        })
+                    } else {
+                        txs.push({
+                            amount: hycontoString(tx.amount),
+                            hash: new Hash(tx).toString(),
+                            to: tx.to.toString(),
+                        })
+                    }
+                }
+                const webBlock = {
+                    hash: new Hash(dbblock.header).toString(),
+                    difficulty: dbblock.header.difficulty,
+                    // height: dbblock.height,
+                    txs,
+                    timeStamp: Number(dbblock.header.timeStamp),
+                }
+                if (dbblock.header instanceof BlockHeader) {
+                    Object.assign(webBlock, {
+                        prevBlock: dbblock.header.previousHash,
+                        nonce: dbblock.header.nonce,
+                    })
+                }
+                blockList.push(webBlock)
+            }
+        } catch (e) {
+            logger.error(e)
+        }
+        return blockList
+    }
+    public async getLanguage(): Promise<string[]> {
+        await Wallet.walletInit()
+        let languages: string[] = []
+        languages = await Wallet.getLang()
+        return Promise.resolve(languages)
+    }
+    public async getMnemonic(lang: string): Promise<string> {
+        await Wallet.walletInit()
+        logger.debug(lang)
+        return Wallet.getRandomMnemonic(lang)
+    }
     public async getTx(hash: string): Promise<ITxProp | IResponseError> {
         try {
             const hyconBlockTx = await this.consensus.getTx(new Hash(Hash.decode(hash)))
@@ -234,23 +414,25 @@ export class RestServer implements IRest {
             })
         }
     }
-
-    public async getAddressInfo(address: string): Promise<IWalletAddress> {
+    public async getWalletDetail(name: string): Promise<IHyconWallet> {
+        const mapHashTx: Map<Hash, SignedTx> = new Map<Hash, SignedTx>()
+        await Wallet.walletInit()
+        const addrOfWallet = new Address(await Wallet.getAddress(name))
+        const n = 10
         try {
-            const addressOfWallet = new Address(address)
-            const n = 10
-            const account = await this.consensus.getAccount(addressOfWallet)
-            const txList = await this.consensus.getLastTxs(addressOfWallet, n)
+            const account = await this.consensus.getAccount(addrOfWallet)
+            const txList = await this.consensus.getLastTxs(addrOfWallet, n)
+            logger.debug(`Tx List = ${txList.length}`)
             const webTxs: ITxProp[] = []
             for (const tx of txList) {
                 let webTx: ITxProp
                 if (tx !== undefined) {
-                    if (tx instanceof SignedTx) {
+                    if (tx.tx instanceof SignedTx) {
                         webTx = {
-                            hash: tx.tx.unsignedHash().toString(),
+                            hash: new Hash(tx.tx).toString(),
                             amount: hycontoString(tx.tx.amount),
-                            fee: hycontoString(tx.fee),
-                            from: tx.from.toString(),
+                            fee: hycontoString(tx.tx.fee),
+                            from: tx.tx.from.toString(),
                             to: tx.tx.to.toString(),
                             signature: tx.tx.signature.toString(),
                         }
@@ -259,14 +441,79 @@ export class RestServer implements IRest {
                     webTxs.push(webTx)
                 }
             }
-            return Promise.resolve<IWalletAddress>({
-                hash: address,
-                balance: account ? account.balance.toInt() : 0,
+            const hyconWallet: IHyconWallet = {
+                name,
+                address: addrOfWallet.toString(),
+                balance: account ? hycontoString(account.balance) : "0",
                 txs: webTxs,
-            })
-
+            }
+            return Promise.resolve(hyconWallet)
         } catch (e) {
-            return Promise.reject(e)
+            return Promise.reject("Error while getTxsOfAddress : " + e)
+        }
+    }
+
+    public async getWalletList(): Promise<IHyconWallet[]> {
+        try {
+            await Wallet.walletInit()
+            const walletList = new Array<IHyconWallet>()
+            const walletArray = await Wallet.walletList()
+            for (const wallet of walletArray) {
+                const address = new Address(wallet.address)
+                const name = wallet.name
+                const account = await this.consensus.getAccount(address)
+                const tmpHwallet: IHyconWallet = {
+                    address: address.toString(),
+                    name,
+                    balance: account ? hycontoString(account.balance) : "0",
+                }
+                walletList.push(tmpHwallet)
+            }
+            return Promise.resolve(walletList)
+        } catch (e) {
+            return Promise.reject("Error get wallet list : " + e)
+        }
+    }
+
+    public async recoverWallet(Hwallet: IHyconWallet): Promise<string | boolean> {
+        await Wallet.walletInit()
+        if (Hwallet.name !== undefined && Hwallet.password !== undefined && Hwallet.mnemonic !== undefined && Hwallet.language !== undefined && Hwallet.hint !== undefined) {
+            const isValid = Wallet.validateMnemonic(Hwallet.mnemonic, Hwallet.language)
+            if (isValid) {
+                try {
+                    const addressString = await Wallet.recoverWallet({ name: Hwallet.name, password: Hwallet.password, mnemonic: Hwallet.mnemonic, language: Hwallet.language, hint: Hwallet.hint })
+                    return Promise.resolve(addressString)
+                } catch (e) {
+                    return Promise.resolve(false)
+                }
+            } else {
+                return Promise.resolve(false)
+            }
+        } else {
+            return Promise.resolve(false)
+        }
+    }
+
+    public async sendTx(tx: { name: string, password: string, address: string, amount: number, minerFee: number }, queueTx?: Function): Promise<boolean> {
+        try {
+            await Wallet.walletInit()
+            const wallet = await Wallet.loadKeys(tx.name, tx.password)
+            const address = new Address(tx.address)
+            const account = await this.consensus.getAccount(wallet.pubKey.address())
+            logger.warn(`Account Balance: ${account.balance}`)
+            logger.warn(`TX Amount: ${tx.amount}`)
+            logger.warn(`TX Miner Fee: ${tx.minerFee}`)
+            const amt = parseInt(tx.amount.toString(), 10) + parseInt(tx.minerFee.toString(), 10)
+            logger.warn(`TX Total: ${amt}`)
+            if (hyconfromString(amt.toString()).greaterThan(account.balance)) {
+                throw new Error("insufficient wallet balance to send transaction")
+            }
+            const signedTx = wallet.send(address, hyconfromString(tx.amount.toString()), account.nonce + 1, hyconfromString(tx.minerFee.toString()))
+            if (queueTx) { queueTx(signedTx) } else { return Promise.reject(false) }
+            return Promise.resolve(true)
+        } catch (e) {
+            logger.warn(e)
+            return Promise.resolve(false)
         }
     }
 }

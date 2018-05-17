@@ -1,19 +1,22 @@
+import getMuiTheme from "material-ui/styles/getMuiTheme"
+import MuiThemeProvider from "material-ui/styles/MuiThemeProvider"
 import * as React from "react"
 import { ReactElement } from "react"
 import { renderToString } from "react-dom/server"
 import { StaticRouter } from "react-router"
 import { App } from "../client/app"
 import { RestServer } from "./restServer"
-
 export function indexRender(
     rest: RestServer,
     url: string,
     context: any,
 ): string {
     const render = renderToString(
-        <StaticRouter location={url} context={context}>
-            <App rest={rest} />
-        </StaticRouter>,
+        <MuiThemeProvider muiTheme={getMuiTheme({ userAgent: (typeof navigator !== "undefined" && navigator.userAgent) || "all" })}>
+            <StaticRouter location={url} context={context}>
+                <App rest={rest} />
+            </StaticRouter>
+        </MuiThemeProvider>,
     )
     const html = `
         <!doctype html>
@@ -29,9 +32,7 @@ export function indexRender(
                 <link rel="stylesheet" href="/styles.css" type="text/css">
             </head>
             <body>
-                <div id="blockexplorer">
-                    ${render}
-                </div>
+                <div id="blockexplorer">${render}</div>
                 <script src="/bundle.js"></script>
             </body>
         </html>

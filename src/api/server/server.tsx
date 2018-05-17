@@ -7,6 +7,7 @@ import { matchPath } from "react-router"
 import { matchRoutes, renderRoutes } from "react-router-config"
 import { SignedTx } from "../../common/txSigned"
 import { IConsensus } from "../../consensus/iconsensus"
+import { IPeer } from "../../network/ipeer"
 import { RestManager } from "../../rest/restManager"
 import * as Hycon from "../../server"
 import { App, routes } from "../client/app"
@@ -35,6 +36,7 @@ export class HttpServer {
             }
         })
         this.app.use((req: express.Request, res: express.Response, next: express.NextFunction) => this.reactRoute(req, res, next))
+        this.app.use(express.static("src/api/clientDist"))
         this.app.use(express.static("node_modules"))
         this.routeRest()
         this.rest = new RestServer(hyconServer.consensus)
@@ -129,11 +131,70 @@ export class HttpServer {
                 }),
             )
         })
-        router.get("/tx/:hash", async (req: express.Request, res: express.Response) => {
-            res.json(await this.rest.getTx(req.params.hash))
+        router.get("/deleteWallet/:name", async (req: express.Request, res: express.Response) => {
+            res.json(await this.rest.deleteWallet(req.params.name))
+        })
+        router.post("/generateWallet", async (req: express.Request, res: express.Response) => {
+            res.json(
+                await this.rest.generateWallet({
+                    name: req.body.name,
+                    password: req.body.password,
+                    hint: req.body.hint,
+                    mnemonic: req.body.mnemonic,
+                    language: req.body.language,
+                }),
+            )
         })
         router.get("/address/:address", async (req: express.Request, res: express.Response) => {
             res.json(await this.rest.getAddressInfo(req.params.address))
+        })
+        router.get("/getAllAccounts/:name", async (req: express.Request, res: express.Response) => {
+            res.json(await this.rest.getAllAccounts(req.params.name))
+        })
+        router.get("/block/:hash", async (req: express.Request, res: express.Response) => {
+            res.json(await this.rest.getBlock(req.params.hash))
+        })
+        router.get("/blockList", async (req: express.Request, res: express.Response) => {
+            res.json(await this.rest.getBlockList())
+        })
+        router.get("/language", async (req: express.Request, res: express.Response) => {
+            res.json(await this.rest.getLanguage())
+        })
+        router.get("/getMnemonic/:lang", async (req: express.Request, res: express.Response) => {
+            res.json(await this.rest.getMnemonic(req.params.lang))
+        })
+        router.get("/tx/:hash", async (req: express.Request, res: express.Response) => {
+            res.json(await this.rest.getTx(req.params.hash))
+        })
+        router.get("/wallet/:name", async (req: express.Request, res: express.Response) => {
+            res.json(await this.rest.getWalletDetail(req.params.name))
+        })
+        router.get("/wallet", async (req: express.Request, res: express.Response) => {
+            res.json(await this.rest.getWalletList())
+        })
+        router.post("/recoverWallet", async (req: express.Request, res: express.Response) => {
+            res.json(
+                await this.rest.recoverWallet({
+                    name: req.body.name,
+                    password: req.body.password,
+                    hint: req.body.hint,
+                    mnemonic: req.body.mnemonic,
+                    language: req.body.language,
+                }),
+            )
+        })
+        router.post("/transaction", async (req: express.Request, res: express.Response) => {
+            res.json(
+                await this.rest.sendTx({
+                    name: req.body.name,
+                    password: req.body.password,
+                    address: req.body.address,
+                    amount: req.body.amount,
+                    minerFee: req.body.minerFee,
+                }, (tx: SignedTx) => {
+                    this.hyconServer.txQueue.putTxs([tx])
+                }),
+            )
         })
 
         this.app.use(`/api/${apiVersion}`, router)

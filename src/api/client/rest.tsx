@@ -23,13 +23,13 @@ export interface ITxProp {
 }
 export interface IBlock {
     hash: string
-    height: number
+    height?: number
     txs: ITxProp[]
     timeStamp: number
     difficulty: number
     prevBlock?: string
     nonce?: number
-    txSummary?: number,
+    txSummary?: string,
 }
 export interface IWalletAddress {
     hash: string
@@ -64,7 +64,7 @@ export interface IHyconWallet {
     hint?: string
     mnemonic?: string
     address?: string
-    balance?: number
+    balance?: string
     txs?: ITxProp[]
     language?: string
 }
@@ -73,15 +73,31 @@ export interface IRest {
     hyconWalletListener(callback: (isHyconWallet: boolean) => void): void
     setLoading(loading: boolean): void
     setIsHyconWallet(isHyconWallet: boolean): void
+    // Exchange Featured
     createNewWallet(meta: IHyconWallet): Promise<IHyconWallet | IResponseError>
-    getWalletBalance(address: string): Promise<{balance: string} | IResponseError>
-    getWalletTransactions(address: string, nonce?: number): Promise<{ txs: ITxProp[]} | IResponseError>
+    getWalletBalance(address: string): Promise<{ balance: string } | IResponseError>
+    getWalletTransactions(address: string, nonce?: number): Promise<{ txs: ITxProp[] } | IResponseError>
 
-    outgoingSignedTx(tx: { privateKey: string, from: string, to: string, amount: string, fee: string }, queueTx?: Function): Promise<{txHash: string} | IResponseError>
+    outgoingSignedTx(tx: { privateKey: string, from: string, to: string, amount: string, fee: string }, queueTx?: Function): Promise<{ txHash: string } | IResponseError>
     outgoingTx(tx: { signature: string, from: string, to: string, amount: string, fee: string, nonce: number, recovery: number }, queueTx?: Function): Promise<{ txHash: string } | IResponseError>
 
     // tslint:disable:adjacent-overload-signatures
+    // BlockExplorer
+    // [Depreciated] changeAccount(name: string, represent: number): Promise<boolean>
+    deleteWallet(name: string): Promise<boolean>
+    generateWallet(Hwallet: IHyconWallet): Promise<string>
     getAddressInfo(address: string): Promise<IWalletAddress>
-    loadingListener(callback: (loading: boolean) => void): void
-    setLoading(loading: boolean): void
+    getAllAccounts(name: string): Promise<{ represent: number, accounts: Array<{ address: string, balance: string }> } | boolean>
+    getBlock(hash: string): Promise<IBlock>
+    getBlockList(): Promise<IBlock[]>
+    getLanguage(): Promise<string[]>
+    getMnemonic(lang: string): Promise<string>
+    // [ipeer.ts not implemented] getPeerDetails(hash: string): Promise<IPeer>
+    // [ipeer.ts not implemented] getPeersList(hash: string): Promise<IPeer[]>
+    getTx(hash: string): Promise<ITxProp | IResponseError>
+    getWalletDetail(name: string): Promise<IHyconWallet>
+    getWalletList(): Promise<IHyconWallet[]>
+    recoverWallet(Hwallet: IHyconWallet): Promise<string | boolean>
+    // [Depreciated: Use above] recoverWalletForce(Hwallet: IHyconWallet): Promise<string | boolean>
+    sendTx(tx: { name: string, password: string, address: string, amount: number, minerFee: number }, queueTx?: Function): Promise<boolean>
 }

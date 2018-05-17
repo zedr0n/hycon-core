@@ -17,3 +17,5 @@ wallet/
 worldstate*
 *.png
 garbage/
+tx.db/*
+tx/
