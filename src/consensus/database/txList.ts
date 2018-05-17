@@ -33,7 +33,7 @@ export class TxList implements proto.ITxList {
             } else { this.previousFrom = new Hash(txList.previousFrom) }
         }
 
-        if (txList.previousTo !== undefined && txList.previousFrom.length > 0) {
+        if (txList.previousTo !== undefined && txList.previousTo.length > 0) {
             if (this.previousTo) {
                 this.previousTo.set(txList.previousTo)
             } else { this.previousTo = new Hash(txList.previousTo) }

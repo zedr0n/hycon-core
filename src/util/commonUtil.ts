@@ -20,5 +20,5 @@ export function hyconfromString(val: string): Long {
         const subCon = Long.fromString(arr[1], true).multiply(Math.pow(10, 9 - arr[1].length))
         hycon = hycon.add(subCon)
     }
-    return hycon
+    return hycon.toUnsigned()
 }
