@@ -30,7 +30,7 @@ export class NatUpnp {
                 logger.info(`Mapped port ${privatePort} --> ${publicPort} succesfully`)
                 return publicPort
             } catch (e) {
-                logger.error(`Failed to map port ${privatePort} --> ${publicPort}, Attempt ${i} of ${maxAttempts}`)
+                logger.debug(`Failed to map port ${privatePort} --> ${publicPort}, Attempt ${i} of ${maxAttempts}`)
                 // tslint:disable-next-line:no-bitwise
                 publicPort = (1 << 15) + (1 << 14) + Math.floor(Math.random() * ((1 << 14) - 1))
             }
