@@ -71,7 +71,15 @@ export class SingleChain implements IConsensus {
             }
 
             if (this.txdb) {
-                // TODO : TxDB Init
+                const lastHash = await this.txdb.getLastBlock()
+                let lastHeight = 0
+                if (lastHash !== undefined) { lastHeight = await this.db.getBlockHeight(lastHash) }
+                if (lastHeight < this.blockTip.height) {
+                    logger.debug(` < initTxDB > Tip Height : ${this.blockTip.height}, lastHeight : ${lastHeight}`)
+                    const blocks = await this.db.getBlocksRange(lastHeight)
+                    // TODO : Have to divide blocks?
+                    await this.txdb.init(blocks)
+                }
             }
 
             this.server.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock(txs))
@@ -287,12 +295,6 @@ export class SingleChain implements IConsensus {
             const transition = await this.worldState.first(genesis)
             await this.worldState.putPending(transition.batch, transition.mapAccount)
             genesis.header.stateRoot = transition.currentStateRoot
-            // Test wallets
-            // const testWalletTransition = await this.worldState.createTestAddresses(transition.currentStateRoot)
-            // await this.worldState.putPending(testWalletTransition.batch, testWalletTransition.mapAccount)
-            // genesis.header.stateRoot = testWalletTransition.currentStateRoot
-            // await this.worldState.print(testWalletTransition.currentStateRoot)
-            // genesisHash = new Hash(genesis.header)
             const { current } = await this.db.putBlock(genesisHash, genesis)
             const block = await this.db.getBlockHeader(genesisHash)
             this.headerTip = current

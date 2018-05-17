@@ -208,12 +208,13 @@ export class Database {
         try {
             const dbBlockArray: DBBlock[] = []
             let height = fromHeight
-            for (let i = 0; i < count; i++) {
-                const hash = await this.getHashAtHeight(height)
-                if (hash === undefined) { break }
+            let hash = await this.getHashAtHeight(height)
+            while (hash) {
+                if (dbBlockArray.length === count) { break }
                 const dbBlock = await this.getDBBlock(hash)
                 dbBlockArray.push(dbBlock)
                 height++
+                hash = await this.getHashAtHeight(height)
             }
             return dbBlockArray
         } catch (e) {

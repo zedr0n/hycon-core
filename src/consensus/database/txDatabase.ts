@@ -16,46 +16,28 @@ import { TxList } from "./txList"
 const logger = getLogger("TxDB")
 
 export class TxDatabase {
-    public sc: SingleChain
 
     private database: levelup.LevelUp
     constructor(path: string) {
         const rocks: any = rocksdb(path)
         this.database = levelup(rocks)
-        logger.info(`Now, you can use txDB.`)
     }
     public async init(blocks: AnyBlock[]) {
-        await this.database.init()
-        let txs: AnySignedTx[] = []
-        let newTxs: AnySignedTx[] = []
+        const newTxs: AnySignedTx[] = []
         for (const block of blocks) {
-            txs = txs.concat(block.txs)
-        }
-        logger.debug(` < initTxDB > Txs result : ${txs.length} / ${txs}`)
-
-        const lastBlkHash = await this.database.getLastBlock(txs)
-        const height = await this.sc.getBlockHeight(lastBlkHash)
-        logger.debug(` < initTxDB > last block height, last block : ${lastBlkHash}, ${height}`)
-
-        const newBlocks = await this.sc.getBlocksRange(height)
-        for (const newBlock of newBlocks) {
-            newTxs = newTxs.concat(newBlock.txs)
-        }
-        const n = newBlocks.length
-        logger.debug(` < initTxDB > newBlocks.length, newBlocks : ${n}, ${newBlocks}`)
-
-        if (n > 1) {
-            for (let h = 1; h < n; h++) {
-                logger.debug(` < initTxDB > h : ${h}`)
-                const hash = await this.sc.getHash(height + h)
-                this.putTxs(hash, newTxs)
-            }
+            await this.putTxs(new Hash(block.header), block.txs)
         }
     }
 
-    public async getLastBlock(txs: AnySignedTx[]): Promise<Hash> {
-        const hashData = new Uint8Array(await this.database.get("lastBlock"))
-        return new Hash(hashData)
+    public async getLastBlock(): Promise<Hash> {
+        try {
+            const hashData = new Uint8Array(await this.database.get("lastBlock"))
+            return new Hash(hashData)
+        } catch (e) {
+            if (e.notFound) { return undefined }
+            logger.error(`Fail to getlastBlock : ${e}`)
+            throw e
+        }
     }
 
     public async putTxs(blockHash: Hash, txs: AnySignedTx[]): Promise<void> {
@@ -90,33 +72,29 @@ export class TxDatabase {
                 mapLastTx.set(fromAddress, txHash)
             }
             batch.push({ type: "put", key: txHash.toString(), value: txList.encode() })
-            // logger.warn(`Put to TxDB : ${txHash.toString()} / ${txList.encode()}`)
+            logger.warn(`Put to TxDB : ${txHash.toString()} / ${txList.encode()}`)
         }
         for (const key of mapLastTx.keys()) {
             const txListHash = mapLastTx.get(key)
-            // logger.warn(`Put to TxDB : ${key} / ${txListHash}`)
+            logger.warn(`Put to TxDB : ${key} / ${txListHash}`)
             batch.push({ type: "put", key, value: txListHash.toBuffer() })
         }
         batch.push({ type: "put", key: "lastBlock", value: blockHash.toBuffer() })
 
         await this.database.batch(batch)
-        // logger.error(`After put to TxDB Check Using Address!!!!`)
-        // for (const tx of txs) {
-        //     if (!verifyTx(tx)) { continue }
-        //     const toLastTxList = await this.getLastTxs(tx.to, 1)
-        //     logger.warn(`${tx.to} last Tx's previous Hashes : ${toLastTxList[0].previousTo} / ${toLastTxList[0].previousFrom}`)
-        //     if (tx instanceof SignedTx) {
-        //         const fromLastTxList = await this.getLastTxs(tx.from, 1)
-        //         const fTx = fromLastTxList[0].tx
-        //         if (fTx instanceof SignedTx) {
-        //             logger.warn(`${tx.from} last Tx :  ${fTx.from}`)
-        //         }
-        //     }
-        // }
-        // logger.error(`After put to TxDB Check Using TxHash!!!!`)
-        // for (const tx of txs) {
-        //     logger.warn(` Tx in DB : `, await this.getTx(new Hash(tx)))
-        // }
+        logger.error(`After put to TxDB Check Using Address!!!!`)
+        for (const tx of txs) {
+            if (!verifyTx(tx)) { continue }
+            const toLastTxList = await this.getLastTxs(tx.to, 1)
+            logger.warn(`${tx.to} last Tx's previous Hashes : ${toLastTxList[0].previousTo} / ${toLastTxList[0].previousFrom}`)
+            if (tx instanceof SignedTx) {
+                const fromLastTxList = await this.getLastTxs(tx.from, 1)
+                const fTx = fromLastTxList[0].tx
+                if (fTx instanceof SignedTx) {
+                    logger.warn(`${tx.from} last Tx :  ${fTx.from}`)
+                }
+            }
+        }
     }
 
     public async getLastTxs(address: Address, count?: number): Promise<TxList[]> {
