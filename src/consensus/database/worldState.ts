@@ -409,7 +409,7 @@ export class WorldState {
             return Promise.resolve(dbState)
         } catch (e) {
             if (e.notFound) {
-                logger.error(`DBState not found in getDBState`)
+                logger.debug(`DBState not found in getDBState`)
             } else if (decodeingDBState) {
                 logger.error(`Fail to decode DBState in getDBState`)
             } else {
