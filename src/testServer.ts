@@ -110,6 +110,9 @@ export class TestServer {
         }
 
         const added = await this.txPool.putTxs(txList)
+        // broadcast txs to hycon nework
+        const encoded: Uint8Array = proto.Network.encode({ putTx: { txs: txList } }).finish()
+        this.server.network.broadcast(new Buffer(encoded), null)
     }
 
     // TODO : Block, hash, SignedTx, randomBytes import, and testMakeBlock(db, consensus) remove
