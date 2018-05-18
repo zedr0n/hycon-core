@@ -34,6 +34,12 @@ export class RabbitPeer extends BasePeer implements IPeer {
         this.peerDB = peerDB
     }
 
+    public polling() {
+        if (this.socketBuffer.isSendLockOverflow()) {
+            logger.info(`SocketBuffer Overflow ${this.socketBuffer.getInfo()}`)
+            this.disconnect()
+        }
+    }
     public async getTip(): Promise<{ hash: Hash, height: number }> {
         const { reply, packet } = await this.sendRequest({ getTip: { dummy: 0 } })
         if (reply.getTipReturn === undefined) {

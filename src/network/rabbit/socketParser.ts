@@ -16,6 +16,7 @@ const headerRouteLength = 4
 const headerPostfixLength = 4
 const scrapBufferLength = Math.max(headerPrefix.length, headerRouteLength, headerPostfixLength)
 const writeBufferLength = headerRouteLength + headerPostfixLength
+const MaximumSendQueueLength = 100
 export class SocketParser {
     private socket: Socket
     private parseState: ParseState
@@ -42,7 +43,10 @@ export class SocketParser {
             this.sendLock.releaseLock()
         })
     }
-
+    public isSendLockOverflow() {
+        const ret = this.sendLock.queueLength() > MaximumSendQueueLength
+        return ret
+    }
     public async send(route: number, buffer: Buffer): Promise<void> {
         if (buffer.length > defaultMaxPacketSize) {
             throw new Error("Buffer too large")
@@ -51,12 +55,17 @@ export class SocketParser {
         this.writeBuffer.writeUInt32LE(buffer.length, 4)
         let kernal = true
         await this.sendLock.getLock()
+
+        // true: all queued to kernel buffer
+        // false: user memory is used
         kernal = kernal && this.socket.write(headerPrefix)
         kernal = kernal && this.socket.write(this.writeBuffer)
         kernal = kernal && this.socket.write(buffer)
         if (kernal) {
             this.sendLock.releaseLock()
         } else {
+            // for this case, user memory is used
+            // it will be released in "drain" event
             logger.warn("Pausing socket")
             this.socket.pause()
         }
@@ -73,7 +82,7 @@ export class SocketParser {
 
     public getInfo() {
         const socket = this.socket
-        const ret = `Local=${socket.localAddress}:${socket.localPort}  Remote=${socket.remoteAddress}:${socket.remotePort}`
+        const ret = `Local=${socket.localAddress}:${socket.localPort}  Remote=${socket.remoteAddress}:${socket.remotePort} CurrentQueue=${this.sendLock.queueLength()} MaxQueue=${MaximumSendQueueLength}`
         return ret
     }
     private receive(src: Buffer): void {

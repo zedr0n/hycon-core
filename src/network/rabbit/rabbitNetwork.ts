@@ -162,11 +162,8 @@ export class RabbitNetwork implements INetwork {
             logger.info(`Peers Count=${this.peers.size}  PeerDB Size= ${this.peerDB.peerCount()}`)
             this.showInfo()
             this.peerDB.printDB()
+            this.polling()
         }, 10 * 1000)
-
-        // if (useUpnp) {
-        //     setInterval(() => { this.findPeers() }, 10 * 1000)
-        // }
 
         return true
     }
@@ -326,6 +323,13 @@ export class RabbitNetwork implements INetwork {
             }
         } catch (e) {
             logger.debug(`Error occurred while connecting to seeds: ${e}`)
+        }
+    }
+
+    // check peer periodically
+    private polling() {
+        for (const [key, peer] of this.peers) {
+            peer.polling()
         }
     }
 }
