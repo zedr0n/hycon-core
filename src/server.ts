@@ -79,8 +79,7 @@ export class Server {
 
         const postfix = Server.globalOptions.postfix
         this.consensus = new SingleChain(this, "blockdb" + postfix, "worldstate" + postfix, "rawblock" + postfix, "txDB" + postfix)
-        this.network = new RabbitNetwork(this, Server.globalOptions.port, "peerdb" + postfix,
-            Server.globalOptions.networkid)
+        this.network = new RabbitNetwork(this, Server.globalOptions.port, "peerdb" + postfix, Server.globalOptions.networkid)
 
         this.wallet = new WalletManager(this)
         this.miner = new MinerServer(this, Server.globalOptions.str_port)
