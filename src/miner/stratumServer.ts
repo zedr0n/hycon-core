@@ -59,6 +59,7 @@ export class StratumServer {
                     "0", // empty
                     "0", // empty
                     "0", // empty
+                    "0", // empty
                     true, // empty
                 ]).then(
                     () => {
