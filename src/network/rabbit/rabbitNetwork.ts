@@ -23,9 +23,9 @@ const logger = getLogger("Network")
 
 export class RabbitNetwork implements INetwork {
     public static seeds: any[] = [
-        { host: "rapid1.hycon.iO", port: 8148 },
-        { host: "rapid1.hycon.iO", port: 8148 },
-        { host: "rapid1.hycon.iO", port: 8148 },
+        { host: "rapid1.hycon.io", port: 8148 },
+        { host: "rapid2.hycon.io", port: 8148 },
+        { host: "rapid3.hycon.io", port: 8148 },
     ]
     public static failLimit: number
     public static isRemoteSocket(socket: net.Socket) {
