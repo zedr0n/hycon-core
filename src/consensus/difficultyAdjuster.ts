@@ -24,8 +24,8 @@ export class DifficultyAdjuster {
     }
 
     public static verifyDifficulty(timeDelta: number, prevTimeEMA: number, workDelta: Difficulty, prevWorkEMA: Difficulty, givenDifficulty: Difficulty) {
-        const timeEMA: number = DifficultyAdjuster.calcTimeEMA(timeDelta, prevTimeEMA)
-        const workEMA: Difficulty = DifficultyAdjuster.calcWorkEMA(workDelta, prevWorkEMA)
+        const timeEMA = DifficultyAdjuster.calcTimeEMA(timeDelta, prevTimeEMA)
+        const workEMA = DifficultyAdjuster.calcWorkEMA(workDelta, prevWorkEMA)
         const computedDifficulty = DifficultyAdjuster.calcNewDifficulty(timeEMA, workEMA)
 
         return (computedDifficulty.encode() === givenDifficulty.encode())

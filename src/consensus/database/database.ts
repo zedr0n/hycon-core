@@ -90,11 +90,11 @@ export class Database {
                 if (header instanceof BlockHeader) {
                     previousBlock = await this.getDBBlock(header.previousHash[0])
                 }
-                return Promise.resolve({ current: currentBlock, previous: previousBlock })
+                return { current: currentBlock, previous: previousBlock }
             }
             const { current, previous } = await this.makeDBBlock(header)
             await this.database.put("b" + hash, current.encode())
-            return Promise.resolve({ current, previous })
+            return { current, previous }
         })
     }
 
@@ -287,10 +287,11 @@ export class Database {
 
                 height = previous.height + 1
             }
+
             return { current: new DBBlock({ header, height, timeEMA, workEMA }), previous }
         } catch (e) {
-            logger.error(`fail to make DBBlock : ${e}`)
-            return Promise.reject(e)
+            logger.error(`failed to make DBBlock : ${e}`)
+            throw e
         }
     }
 

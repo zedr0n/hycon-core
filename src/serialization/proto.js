@@ -7443,7 +7443,7 @@ $root.BlockDB = (function() {
         if (message.length != null && message.hasOwnProperty("length"))
             writer.uint32(/* id 5, wireType 0 =*/40).int32(message.length);
         if (message.timeEMA != null && message.hasOwnProperty("timeEMA"))
-            writer.uint32(/* id 6, wireType 0 =*/48).int32(message.timeEMA);
+            writer.uint32(/* id 6, wireType 1 =*/49).double(message.timeEMA);
         if (message.workEMA != null && message.hasOwnProperty("workEMA"))
             writer.uint32(/* id 7, wireType 0 =*/56).int32(message.workEMA);
         return writer;
@@ -7496,7 +7496,7 @@ $root.BlockDB = (function() {
                 message.length = reader.int32();
                 break;
             case 6:
-                message.timeEMA = reader.int32();
+                message.timeEMA = reader.double();
                 break;
             case 7:
                 message.workEMA = reader.int32();
@@ -7554,8 +7554,8 @@ $root.BlockDB = (function() {
             if (!$util.isInteger(message.length))
                 return "length: integer expected";
         if (message.timeEMA != null && message.hasOwnProperty("timeEMA"))
-            if (!$util.isInteger(message.timeEMA))
-                return "timeEMA: integer expected";
+            if (typeof message.timeEMA !== "number")
+                return "timeEMA: number expected";
         if (message.workEMA != null && message.hasOwnProperty("workEMA"))
             if (!$util.isInteger(message.workEMA))
                 return "workEMA: integer expected";
@@ -7588,7 +7588,7 @@ $root.BlockDB = (function() {
         if (object.length != null)
             message.length = object.length | 0;
         if (object.timeEMA != null)
-            message.timeEMA = object.timeEMA | 0;
+            message.timeEMA = Number(object.timeEMA);
         if (object.workEMA != null)
             message.workEMA = object.workEMA | 0;
         return message;
@@ -7627,7 +7627,7 @@ $root.BlockDB = (function() {
         if (message.length != null && message.hasOwnProperty("length"))
             object.length = message.length;
         if (message.timeEMA != null && message.hasOwnProperty("timeEMA"))
-            object.timeEMA = message.timeEMA;
+            object.timeEMA = options.json && !isFinite(message.timeEMA) ? String(message.timeEMA) : message.timeEMA;
         if (message.workEMA != null && message.hasOwnProperty("workEMA"))
             object.workEMA = message.workEMA;
         return object;

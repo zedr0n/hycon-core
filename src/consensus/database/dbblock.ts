@@ -10,11 +10,11 @@ export class DBBlock implements proto.IBlockDB {
     }
     public height: number
     public header: AnyBlockHeader
-    public fileNumber?: number = undefined
-    public offset?: number = undefined
-    public length?: number = undefined
-    public timeEMA: number = undefined
-    public workEMA: number = undefined
+    public fileNumber?: number
+    public offset?: number
+    public length?: number
+    public timeEMA: number
+    public workEMA: number
 
     constructor(dbBlock: proto.IBlockDB) {
         this.set(dbBlock)

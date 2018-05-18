@@ -15,6 +15,6 @@ message BlockDB {
     int32 fileNumber = 3;
     int32 offset = 4;
     int32 length = 5;
-    int32 timeEMA = 6;
+    double timeEMA = 6;
     int32 workEMA = 7;
 }

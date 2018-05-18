@@ -1,5 +1,6 @@
 import { getLogger } from "log4js"
 import Long = require("long")
+import { setInterval } from "timers"
 import { Address } from "../common/address"
 import { AsyncLock } from "../common/asyncLock"
 import { AnyBlock, Block } from "../common/block"
@@ -37,12 +38,6 @@ export class SingleChain implements IConsensus {
     private txUnit: number
     private forkHeight: number
     private txdb?: TxDatabase
-
-    // Load these from a constants file if possible
-    private alpha: number = .1
-    private targetTimeEMA: number = 30
-    private targetWorkEMA: Difficulty = new Difficulty(0x0000FF, 0x00)
-    private difficultyAdjuster: DifficultyAdjuster
     private blockLock: AsyncLock
     private headerLock: AsyncLock
 
@@ -104,6 +99,7 @@ export class SingleChain implements IConsensus {
                 (block: Block) => {
                     this.onMinedBlock(block)
                 })
+            setInterval(() => this.createCandidateBlock(this.server.txPool.getPending().slice(0, 10)), 5000)
             logger.info(`Initialization of singlechain is over.`)
         } catch (e) {
             logger.error(`Initialization fail in singleChain : ${e}`)
@@ -338,15 +334,16 @@ export class SingleChain implements IConsensus {
 
     private async createCandidateBlock(txs: SignedTx[], previous?: Block): Promise<Block> {
         try {
+            let previousDBBlock = this.blockTip
             let previousHash = new Hash(this.blockTip.header)
-            if (previous) {
+            if (previous !== undefined) {
                 previousHash = new Hash(previous.header)
+                previousDBBlock = await this.db.getDBBlock(previousHash)
             }
-            const previousDBBlock = await this.db.getDBBlock(previousHash)
             const timeStamp = Date.now()
             // TODO : get Miner address -> If miner is undefined, occur error
             const miner: Address = undefined
-            const previousHeader = await this.db.getBlockHeader(previousHash)
+            const previousHeader = previousDBBlock.header
 
             const prevTimeEMA = previousDBBlock.timeEMA
             const prevWorkEMA = Difficulty.decode(previousDBBlock.workEMA)
@@ -359,7 +356,6 @@ export class SingleChain implements IConsensus {
             const { invalidTxs, validTxs, stateTransition: { currentStateRoot } } = await this.worldState.next(txs, previousHeader.stateRoot, miner)
             const header = new BlockHeader({
                 difficulty,
-                // difficulty: 0x0001ffff,
                 merkleRoot: new Hash(),
                 nonce: -1,
                 previousHash: [previousHash],
@@ -370,11 +366,10 @@ export class SingleChain implements IConsensus {
             this.server.txPool.updateTxs(validTxs, 0)
             newBlock.updateMerkleRoot()
 
-            if (!await this.verifyPreBlock(newBlock, previousHeader)) { throw new Error("Not verified.") }
             this.server.miner.newCandidateBlock(newBlock)
             return newBlock
         } catch (e) {
-            logger.error(`Fail to createCandidateBlock : ${e}`)
+            logger.error(`Fail to createCandidateBlock: ${e}`)
             return Promise.reject(e)
         }
     }
@@ -421,6 +416,7 @@ export class SingleChain implements IConsensus {
 
         const prevHash = new Hash(previousHeader)
         const prevDBBlock = await this.db.getDBBlock(prevHash)
+
         const prevTimeEMA = prevDBBlock.timeEMA
         const prevWorkEMA = Difficulty.decode(prevDBBlock.workEMA)
 
