@@ -13,7 +13,7 @@ export class RecoverWallet extends React.Component<any, any> {
         this.state = {
             isUnValid: false,
             language: "english",
-            languages: [],
+            languages: ["english", "chinese_simplified", "chinese_traditional", "korean", "french", "italian", "japanese", "spanish"],
             mnemonic: "",
             redirect: false,
             rest: props.rest,
@@ -26,7 +26,7 @@ export class RecoverWallet extends React.Component<any, any> {
         this.state.rest.setIsHyconWallet(true)
         this.state.rest.setLoading(true)
         this.state.rest.getLanguage().then((data: string[]) => {
-            this.setState({ languages: data })
+            // this.setState({ languages: data })
             this.state.rest.setLoading(false)
         })
     }
@@ -277,7 +277,7 @@ export class RecoverWallet extends React.Component<any, any> {
           </button>
                     <button
                         onClick={() => {
-                            this.recoverWalletForce()
+                            this.recoverWallet()
                         }}
                         className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored addAccountBtn"
                     >
