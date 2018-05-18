@@ -268,6 +268,9 @@ export class RabbitNetwork implements INetwork {
     }
 
     private async newConnection(socket: Socket): Promise<RabbitPeer> {
+        if (this === undefined) {
+            logger.fatal(`This is undefined: ${new Error().stack} `)
+        }
         const peer = new RabbitPeer(socket, this, this.hycon.consensus, this.hycon.txPool, this.peerDB)
         const ipeer = { host: socket.remoteAddress, port: socket.remotePort }
         const key = PeerDb.ipeer2key(ipeer)

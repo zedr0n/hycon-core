@@ -242,6 +242,10 @@ export class RabbitPeer extends BasePeer implements IPeer {
             case "getHash":
                 response = await this.respondGetHash(reply, request[request.request])
                 break
+            default:
+                logger.fatal(`Unknown network message ${request.request}`)
+                this.protocolError()
+                break
         }
         if (reply) { // i'm replying for the request
             if (response.message !== undefined) {

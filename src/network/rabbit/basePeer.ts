@@ -102,6 +102,7 @@ export abstract class BasePeer {
     }
 
     protected protocolError() {
+        logger.fatal("Disconnecting due to protocol error")
         this.socketBuffer.destroy()
     }
 
