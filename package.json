@@ -103,6 +103,7 @@
     "network": "^0.4.1",
     "node-cryptonight": "git://github.com/dev-jbam/node-cryptonight.git",
     "node-ssdp": "^3.3.0",
+    "public-ip": "^2.4.0",
     "random-int": "^1.0.0",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",

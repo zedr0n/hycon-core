@@ -17,6 +17,8 @@ import { UpnpClient, UpnpServer } from "../upnp"
 import { RabbitPeer } from "./rabbitPeer"
 // tslint:disable-next-line:no-var-requires
 const hostToIp = require("host-to-ip")
+// tslint:disable-next-line:no-var-requires
+const publicIp = require("public-ip")
 const logger = getLogger("Network")
 
 export class RabbitNetwork implements INetwork {
@@ -96,6 +98,7 @@ export class RabbitNetwork implements INetwork {
     public readonly version: number = 3
     public port: number
     public localPort: number
+    public publicIp: string
     private hycon: Server
     private server: net.Server
     private peerDB: PeerDb
@@ -135,6 +138,7 @@ export class RabbitNetwork implements INetwork {
     public async start(): Promise<boolean> {
         logger.debug(`Tcp Network Started`)
         // initial peerDB
+        this.publicIp = await publicIp.v4()
         await this.peerDB.run()
         await this.saveSeedstoDB()
 
@@ -222,7 +226,7 @@ export class RabbitNetwork implements INetwork {
         return new Promise<RabbitPeer>((resolve, reject) => {
             const ipeer = { host, port }
             const key = PeerDb.ipeer2key(ipeer)
-            if ( host === ip.address() && (port === this.localPort || port === this.port) ) {
+            if ( (host === ip.address() || host === this.publicIp) && (port === this.localPort || port === this.port) ) {
                 this.peerDB.remove(ipeer)
                 reject(`Don't connect self`)
                 return
