@@ -63,12 +63,12 @@ export class UpnpClient {
         }, 20 * 1000)
 
         client.on("response", async (headers: any, code: any, rdebug: any) => {
-            const ipaddress = rdebug.address
+            // const ipaddress = rdebug.address
             const regex = /(\S+):\/\/([\.\d]+):(\d+)/g
             const match = regex.exec(headers.LOCATION)
             if (match) {
                 const [product, localIP, localPort] = match.slice(1, 4)
-                const isMe = ipaddress === localIP && Number(localPort) === UpnpServer.port
+                const isMe = ip.address() === localIP && Number(localPort) === UpnpServer.port
                 const fullProduct = UpnpServer.product + UpnpServer.networkid
                 const isSameProduct = product === fullProduct
                 const date = headers.DATE

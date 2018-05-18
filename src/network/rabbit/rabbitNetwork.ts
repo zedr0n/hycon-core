@@ -99,10 +99,10 @@ export class RabbitNetwork implements INetwork {
     public port: number
     public localPort: number
     public publicIp: string
+
     private hycon: Server
     private server: net.Server
     private peerDB: PeerDb
-
     private targetConnectedPeers: number
     private peers: Map<number, RabbitPeer>
     private endPoints: Map<number, proto.IPeer>
@@ -252,7 +252,7 @@ export class RabbitNetwork implements INetwork {
                     socket.on("close", () => this.endPoints.delete(key))
                     resolve(peer)
                     await this.peerDB.seen(ipeer)
-                    await peer.detectStatus()
+                    await peer.detectStatus(ipeer)
                     // logger.info(`Peer ${key} ${socket.remoteAddress}:${socket.remotePort} Status=${JSON.stringify(await peer.status())}`)
                 } catch (e) {
                     logger.debug(e)
@@ -272,7 +272,7 @@ export class RabbitNetwork implements INetwork {
                 this.endPoints.set(key, ipeer)
                 socket.on("close", () => this.endPoints.delete(key))
                 await this.peerDB.seen(ipeer)
-                await peer.detectStatus()
+                await peer.detectStatus(ipeer)
             }
         } catch (e) {
             logger.debug(e)

@@ -34,7 +34,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
         this.peerDB = peerDB
     }
 
-    public async  detectStatus(): Promise<boolean> {
+    public async  detectStatus(peer: proto.IPeer): Promise<boolean> {
         const status = await this.status()
         const otherStatus = new proto.Status(status)
         const remoteNetworkId = otherStatus.networkid
@@ -45,6 +45,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
         } else {
             logger.info(`Different NetworkID LocalNetworkID=${myNetworkId} RemoteNetworkID=${remoteNetworkId}`)
             this.disconnect()
+            await this.peerDB.remove(peer)
             return false
         }
         return true
