@@ -11,18 +11,18 @@ import { SingleChain } from "./consensus/singleChain"
 import { Sync } from "./consensus/sync"
 import { IMiner } from "./miner/iminer"
 import { MinerServer } from "./miner/minerServer"
-import { StratumServer } from "./miner/stratumServer"
 import { INetwork } from "./network/inetwork"
 import { RabbitNetwork } from "./network/rabbit/rabbitNetwork" // for speed
 import { RestManager } from "./rest/restManager"
 import { TestServer } from "./testServer"
 import { Wallet } from "./wallet/wallet"
 import { WalletManager } from "./wallet/walletManager"
+
 const optionDefinitions = [
     { name: "api", alias: "a", type: Boolean },
     { name: "api_port", alias: "A", type: Number },
+    { name: "cpuMiners", alias: "m", type: Number },
     { name: "disable_upnp", alias: "x", type: Boolean },
-    { name: "mine", alias: "m", type: Boolean },
     { name: "networkid", alias: "n", type: String },
     { name: "peer", type: String, multiple: true, defaultOption: true },
     { name: "plot", alias: "g", type: Boolean },
@@ -84,9 +84,6 @@ export class Server {
 
         this.wallet = new WalletManager(this)
         this.miner = new MinerServer(this, Server.globalOptions.str_port)
-        if (Server.globalOptions.mine) {
-            MinerServer.useCpuMiner = true
-        }
         this.txPool = new TxPool(this)
         this.rest = new RestManager(this)
 
@@ -115,7 +112,6 @@ export class Server {
             this.test = new TestServer(this)
         }
         await this.runSync()
-        this.miner.start()
     }
 
     public async runSync(): Promise<void> {

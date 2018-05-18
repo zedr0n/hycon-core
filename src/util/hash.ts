@@ -50,16 +50,13 @@ export class Hash extends Uint8Array {
     }
 
     public static async hashCryptonight(ob: Uint8Array | string): Promise<Uint8Array> {
-        return new Promise<Uint8Array>((resolve: any, reject: any) => {
-            if (typeof ob === "string") {
-                cryptonight(Buffer.from(ob), (hash: any) => {
-                    return resolve(new Uint8Array(hash))
-                })
-            } else {
-                cryptonight(ob, (hash: any) => {
-                    return resolve(new Uint8Array(hash))
-                })
-            }
+        if (typeof ob === "string") {
+            ob = Buffer.from(ob)
+        }
+        return new Promise<Uint8Array>((resolve, reject) => {
+            cryptonight(ob, (hash: any) => {
+                return resolve(new Uint8Array(hash))
+            })
         })
     }
 

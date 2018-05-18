@@ -1,6 +1,7 @@
 
 import { getLogger } from "log4js"
-import { zeroPad } from "../util/commonUtil"
+import Long = require("long")
+import { Block } from "../common/block"
 import { Difficulty } from "./../consensus/difficulty"
 import { MinerServer } from "./minerServer"
 
@@ -16,6 +17,7 @@ export class StratumServer {
 
     private prehash: Uint8Array | undefined
     private difficulty: Difficulty | undefined
+    private block: Block | undefined
     private socketsId: any[] = []
     private mapSocket: Map<string, any> = new Map<string, any>()
 
@@ -32,30 +34,24 @@ export class StratumServer {
         return this.socketsId.length
 
     }
-
-    public start() {
-        this.prehash = undefined
-        this.difficulty = undefined
-    }
     public stop() {
         this.prehash = undefined
         this.difficulty = undefined
     }
 
-    public putWork(prehash: Uint8Array, difficulty: Difficulty, minersCount: number) {
-        logger.debug(`>>>>>>>>>Put Work in stratumServer : ${Buffer.from(prehash.buffer).toString("hex")}`)
+    public putWork(block: Block, prehash: Uint8Array, difficulty: Difficulty, minerOffset: number) {
         this.prehash = prehash
         this.difficulty = difficulty
+        this.block = block
         const target = difficulty.getMinerTarget()
 
         for (let index = 0; index < this.socketsId.length; index++) {
             const socket = this.mapSocket.get(this.socketsId[index])
             if (socket !== undefined) {
                 socket.notify([
-                    index + (MinerServer.useCpuMiner ? 1 : 0),      // job_id
+                    index + minerOffset,      // job_id
                     new Buffer(this.prehash).toString("hex"),       // prehash
                     target,                                         // difficulty (2byte hex)
-                    minersCount,                                    // job_unit
                     "0", // empty
                     "0", // empty
                     "0", // empty
@@ -74,12 +70,11 @@ export class StratumServer {
     }
 
     private initialize() {
-        const self = this
         this.net.on("mining", async (req: any, deferred: any, socket: any) => {
-            if (self.socketsId.indexOf(socket.id) === -1) {
+            if (this.socketsId.indexOf(socket.id) === -1) {
                 logger.info(`New miner socket(${socket.id}) connected`)
-                self.socketsId.push(socket.id)
-                self.mapSocket.set(socket.id, socket)
+                this.socketsId.push(socket.id)
+                this.mapSocket.set(socket.id, socket)
             }
             logger.debug(req)
             switch (req.method) {
@@ -98,7 +93,7 @@ export class StratumServer {
                     break
                 case "submit":
                     logger.debug(`Submit id : ${req.id} / nonce : ${req.params.nonce} / result : ${req.params.result}`)
-                    const result = await self.completeWork(req.params.nonce)
+                    const result = await this.completeWork(req.params.nonce)
                     deferred.resolve([result])
                     break
                 default:
@@ -116,21 +111,30 @@ export class StratumServer {
 
         this.net.on("close", (socketId: any) => {
             logger.info(`Miner socket(${socketId}) closed `)
-            self.mapSocket.delete(socketId)
-            self.socketsId.splice(self.socketsId.indexOf(socketId), 1)
+            this.mapSocket.delete(socketId)
+            this.socketsId.splice(this.socketsId.indexOf(socketId), 1)
         })
     }
 
-    private async completeWork(nonce: string): Promise<boolean> {
+    private completeWork(nonce: Long): boolean {
         try {
             if (this.prehash === undefined || this.difficulty === undefined) {
                 logger.debug(`This Block is already confirm (NONCE : ${nonce})`)
-                return Promise.resolve(false)
+                return false
             } else {
-                return await this.minerServer.submitNonce(nonce)
+                if (MinerServer.checkNonce(this.prehash, nonce, this.difficulty)) {
+                    this.block.header.nonce = nonce
+                    this.minerServer.submitBlock(this.block)
+                    this.block = undefined
+                    this.prehash = undefined
+                    this.difficulty = undefined
+                    return true
+                } else {
+                    return false
+                }
             }
         } catch (e) {
-            return Promise.reject(`Fail to submit nonce : ${e}`)
+            throw new Error(`Fail to submit nonce : ${e}`)
         }
     }
 

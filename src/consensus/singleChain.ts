@@ -9,7 +9,6 @@ import { PublicKey } from "../common/publicKey"
 import { GenesisSignedTx } from "../common/txGenesisSigned"
 import { TxPool } from "../common/txPool"
 import { SignedTx } from "../common/txSigned"
-import { CpuMiner } from "../miner/cpuMiner"
 import { MinerServer } from "../miner/minerServer"
 import * as proto from "../serialization/proto"
 import { Server } from "../server"
@@ -433,14 +432,10 @@ export class SingleChain implements IConsensus {
 
     private async verifyHeader(header: BlockHeader): Promise<boolean> {
         const preHash = header.preHash()
-        const cryptoHash = new Hash(await CpuMiner.hash(preHash, header.nonce.toString(16)))
-        // Todo need to check header.difficulty is a float or integer
-        const difficulty: Difficulty = Difficulty.decode(header.difficulty)
 
-        if (difficulty.acceptable(cryptoHash)) {
+        if (MinerServer.checkNonce(preHash, header.nonce, Difficulty.decode(header.difficulty))) {
             return true
         }
-        logger.warn(`Fail to verifyHeader: ${cryptoHash.toString()}`)
         return false
     }
 

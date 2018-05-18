@@ -1,99 +1,104 @@
 import { getLogger } from "log4js"
 import Long = require("long")
+import { Block } from "../common/block"
 import { Difficulty } from "../consensus/difficulty"
-import { zeroPad } from "../util/commonUtil"
 import { Hash } from "../util/hash"
 import { MinerServer } from "./minerServer"
 const logger = getLogger("CpuMiner")
 
+interface IAsyncCpuMiner {
+    nonce: Promise<Long>
+    inspect: () => number
+    stop: () => Promise<void | number>
+}
+
 export class CpuMiner {
+    public static mine(preHash: Uint8Array, difficulty: Difficulty, prefix: number, currentNonce: number = 0, maxNonce: number = 0xFFFFFFFF): IAsyncCpuMiner {
+        let calculate = true
+        const nonce = new Promise<Long>(async (resolve, reject) => {
+            try {
+                const buffer = new Buffer(72)
+                const preHashBuf: any = preHash // Typescript's type defs are out of date
+                buffer.copy(preHashBuf, 0, 0, 64)
+                buffer.writeUInt32LE(prefix, 64)
+
+                while (currentNonce < maxNonce && calculate) {
+                    buffer.writeUInt32LE(currentNonce, 68)
+                    if (difficulty.acceptable(await Hash.hashCryptonight(buffer))) {
+                        const low = buffer.readInt32LE(64)
+                        const high = buffer.readInt32LE(68)
+                        resolve(Long.fromBits(low, high, true))
+                        return
+                    }
+                    currentNonce++
+                }
+                reject(currentNonce)
+            } catch (e) {
+                reject(new Error(`CPU Miner failed: ${e}`))
+            }
+        })
+
+        return {
+            inspect: () => currentNonce,
+            nonce,
+            stop: async () => {
+                calculate = false
+                try {
+                    await nonce
+                    return currentNonce
+                } catch (e) {
+                    if (typeof e === "number" && e < 0xFFFFFFFF) {
+                        return e
+                    }
+                }
+            },
+        }
+    }
+
+    public minerCount: number
+    private miners: IAsyncCpuMiner[]
     private minerServer: MinerServer
-    private prehash: Uint8Array | undefined
-    private difficulty: Difficulty | undefined
-    private nonce: Long | undefined
-    private lastNonce: Long | undefined
-    private isMining: boolean
 
-    private wakeup: () => void
-
-    constructor(minerServer: MinerServer) {
+    constructor(minerServer: MinerServer, minerCount: number = 0) {
         logger.debug(`CPU Miner`)
         this.minerServer = minerServer
-        this.isMining = false
-
-        this.mine()
+        this.minerCount = minerCount
+        this.miners = []
+        setInterval(() => this.hashRate(), 10000)
     }
 
-    public start() {
-        this.init()
-        this.isMining = true
-    }
-
-    public stop() {
-        this.init()
-        this.isMining = false
-    }
-
-    public async mine() {
-        while (true) {
-            if (this.prehash === undefined || this.difficulty === undefined || this.isMining === false) {
-                await new Promise<void>((resolve) => { this.wakeup = resolve })
-            } else {
-                this.nonce = Long.UZERO
-
-                while (this.nonce !== undefined && this.nonce.compare(this.lastNonce)) {
-                    const result = new Hash(await CpuMiner.hash(this.prehash, this.nonce.toString(16)))
-                    if (this.difficulty === undefined) {
-                        logger.info(`Already mined block`)
-                        break
-                    }
-
-                    if (this.difficulty.acceptable(result)) {
-                        // logger.debug(`>>>>>>>>Submit - nonce : ${zeroPad(this.nonce.toString(16), MinerServer.LEN_HEX_NONCE)} / hash : ${Buffer.from(result.buffer).toString("hex")}`)
-                        this.minerServer.submitNonce(this.nonce.toString(16))
-                    }
-                    this.nonce = this.nonce.add(Long.UONE)
-                }
-                this.isMining = false
+    public hashRate() {
+        const startingNonces = this.miners.map((m) => m.inspect())
+        setTimeout(() => {
+            const endingNonces = this.miners.map((m) => m.inspect())
+            let hashCount = 0
+            for (let i = 0; i < Math.min(endingNonces.length, startingNonces.length); i++) {
+                const delta = endingNonces[i] - startingNonces[i]
+                hashCount += Math.max(delta, 0)
             }
+            if (hashCount > 0) {
+                logger.info(`CPU Hashrate: ${hashCount} H/s`)
+            }
+        }, 1000)
+    }
+
+    public async stop() {
+        const promises: Array<Promise<number | void>> = []
+        for (const miner of this.miners) {
+            promises.push(miner.stop())
         }
+        await Promise.all(promises)
     }
 
-    // tslint:disable-next-line:member-ordering
-    public static async hash(prehash: Uint8Array, nonce: string): Promise<Uint8Array> {
-        try {
-            const bufBlock = new Uint8Array(MinerServer.LEN_BLOB)
-
-            // set prehash
-            bufBlock.set(new Uint8Array(prehash))
-
-            // set nonce
-            const strNonce = (nonce.length >= MinerServer.LEN_NONCE) ? nonce : new Array(MinerServer.LEN_NONCE - nonce.length + 1).join("0") + nonce
-            const bufNonce = new Uint8Array(Buffer.from(strNonce, "hex"))
-            bufBlock.set(bufNonce.reverse(), prehash.length)
-
-            // run hash
-            const ret = await Hash.hashCryptonight(bufBlock)
-            return ret
-
-        } catch (e) {
-            logger.error(`Fail to hash in Miner : ${e}`)
-            throw e
+    public async putWork(block: Block, prehash: Uint8Array, difficulty: Difficulty) {
+        await this.stop()
+        for (let i = 0; i < this.minerCount; i++) {
+            const miner = CpuMiner.mine(prehash, difficulty, i)
+            miner.nonce.then((nonce) => {
+                block.header.nonce = nonce
+                this.minerServer.submitBlock(block)
+            }).catch(() => {})
+            this.miners.push(miner)
         }
-    }
-
-    public putWork(prehash: Uint8Array, difficulty: Difficulty, minersCount: number) {
-        this.prehash = prehash
-        this.difficulty = difficulty
-        this.nonce = Long.UZERO
-        this.lastNonce = minersCount === 0 ? Long.MAX_UNSIGNED_VALUE : Long.MAX_UNSIGNED_VALUE.divide(minersCount)
-        this.wakeup()
-    }
-
-    private init() {
-        this.prehash = undefined
-        this.difficulty = undefined
-        this.nonce = undefined
-        this.lastNonce = undefined
     }
 }

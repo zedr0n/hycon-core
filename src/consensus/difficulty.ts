@@ -72,7 +72,10 @@ export class Difficulty {
         return (this.exponent << 24) + this.mantissa
     }
 
-    public acceptable(hash: Hash): boolean {
+    public acceptable(hash: Uint8Array | Hash): boolean {
+        if (!(hash instanceof Hash) && hash.length !== 32) {
+            throw new Error(`Expected 32 byte hash, got ${hash.length} bytes`)
+        }
         const target = this.getTarget()
 
         for (let i = 31; i >= 0; i--) {

@@ -139,7 +139,7 @@ export class WorldState {
                     logger.error(`Tx ${new Hash(tx)} Rejected: ${tx.from.toString()} has not been seen before, so it has insufficient balance.`)
                     continue
                 }
-                // TODO: Handle coin burn
+
                 let toAccount: Account | undefined
                 const toIndex = mapIndex.get(tx.to.toString())
                 if (toIndex === undefined) {
@@ -153,14 +153,14 @@ export class WorldState {
 
                 if (tx.nonce !== (fromAccount.nonce + 1)) {
                     invalidTxs.push(tx)
-                    logger.debug(`Tx ${new Hash(tx)} Rejected: TxNonce=${tx.nonce}  ${tx.from}Nonce=${fromAccount.nonce}`)
+                    logger.info(`Tx ${new Hash(tx)} Rejected: TxNonce=${tx.nonce}  ${tx.from}Nonce=${fromAccount.nonce}`)
                     continue
                 }
 
                 const total = tx.amount.add(tx.fee)
                 if (fromAccount.balance.lessThan(total)) {
                     invalidTxs.push(tx)
-                    logger.debug(`Tx ${new Hash(tx)} Rejected: The balance of the account is insufficient.`)
+                    logger.info(`Tx ${new Hash(tx)} Rejected: The balance of the account is insufficient.`)
                     continue
                 }
 
@@ -183,6 +183,7 @@ export class WorldState {
 
             }
 
+            // TODO: Handle coin burn
             if (minerAddress !== undefined) {
                 let minerAccount: Account | undefined
                 const minerIndex = mapIndex.get(minerAddress.toString())
