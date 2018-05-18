@@ -1,8 +1,9 @@
+import { SIGPIPE } from "constants"
 import { stat } from "fs"
 import * as ip from "ip"
 import { getLogger } from "log4js"
-import * as net from "net"
 import { createConnection, createServer, Socket } from "net"
+import * as net from "net"
 import * as netmask from "netmask"
 import { IConsensus } from "../../consensus/iconsensus"
 import * as proto from "../../serialization/proto"
@@ -214,6 +215,11 @@ export class RabbitNetwork implements INetwork {
         return new Promise<RabbitPeer>((resolve, reject) => {
             const ipeer = { host, port }
             const key = PeerDb.ipeer2key(ipeer)
+            if (host === ip.address() && port === this.localPort) {
+                this.peerDB.remove(ipeer)
+                reject(`Don't connect self`)
+                return
+            }
             if (this.pendingConnections.has(key)) {
                 reject(`Already connecting to ${host}:${port} `)
                 return
