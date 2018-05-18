@@ -195,31 +195,19 @@ export class RabbitNetwork implements INetwork {
 
     public getRandomPeer(): IPeer {
         const index = Math.floor(Math.random() * this.peers.size)
-        let cntr = 0
-        for (const value of this.peers.values()) {
-            if (cntr++ === index) {
-                return value
-            }
-        }
+        const key = Array.from(this.peers.keys())[index]
+        return this.peers.get(key)
     }
 
     public getRandomPeers(count: number = 1): IPeer[] {
         const randomList: number[] = []
         const iPeer: IPeer[] = []
+        const key: number[] = Array.from(this.peers.keys())
         while (randomList.length < count) {
             const index = Math.floor(Math.random() * this.peers.size)
             if (randomList.indexOf(index) === -1) {
                 randomList.push(index)
-            }
-        }
-
-        let cntr = 0
-        let index2 = 0
-        for (const value of this.peers.values()) {
-            if (cntr++ === randomList[index2]) {
-                iPeer.push(value)
-                index2 += 1
-                if (index2 === randomList.length) { break }
+                iPeer.push(this.peers.get(key[index]))
             }
         }
         return iPeer
