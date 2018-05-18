@@ -262,7 +262,7 @@ export class RabbitNetwork implements INetwork {
                     resolve(peer)
                     await this.peerDB.seen(ipeer)
                     await peer.detectStatus()
-                    //logger.info(`Peer ${key} ${socket.remoteAddress}:${socket.remotePort} Status=${JSON.stringify(await peer.status())}`)
+                    // logger.info(`Peer ${key} ${socket.remoteAddress}:${socket.remotePort} Status=${JSON.stringify(await peer.status())}`)
                 } catch (e) {
                     logger.debug(e)
                 }
