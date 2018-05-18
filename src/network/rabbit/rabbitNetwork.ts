@@ -5,6 +5,7 @@ import { getLogger } from "log4js"
 import { createConnection, createServer, Socket } from "net"
 import * as net from "net"
 import * as netmask from "netmask"
+import * as os from "os"
 import { IConsensus } from "../../consensus/iconsensus"
 import * as proto from "../../serialization/proto"
 import { Server } from "../../server"
@@ -215,7 +216,7 @@ export class RabbitNetwork implements INetwork {
         return new Promise<RabbitPeer>((resolve, reject) => {
             const ipeer = { host, port }
             const key = PeerDb.ipeer2key(ipeer)
-            if (host === ip.address() && port === this.localPort) {
+            if ( (host === ip.address() || host === os.hostname() ) && (port === this.localPort || port === this.port) ) {
                 this.peerDB.remove(ipeer)
                 reject(`Don't connect self`)
                 return
@@ -306,7 +307,7 @@ export class RabbitNetwork implements INetwork {
                     const peers = await rabbitPeer.getPeers()
                     if (peers.length !== 0) {
                         for (const peer of peers) {
-                            if (!(peer.host === ip.address() && (peer.port === this.localPort || peer.port === this.port))) {
+                            if (!( (peer.host === ip.address() || peer.host === os.hostname()) && (peer.port === this.localPort || peer.port === this.port))) {
                                 await this.peerDB.put({ host: peer.host, port: peer.port })
                             }
                         }
