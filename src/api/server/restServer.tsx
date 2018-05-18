@@ -346,10 +346,11 @@ export class RestServer implements IRest {
                         })
                     }
                 }
+                const hash = new Hash(dbblock.header)
                 const webBlock = {
-                    hash: new Hash(dbblock.header).toString(),
+                    hash: hash.toString(),
                     difficulty: dbblock.header.difficulty,
-                    // height: dbblock.height,
+                    height: await this.consensus.getBlockHeight(hash),
                     txs,
                     timeStamp: Number(dbblock.header.timeStamp),
                 }
