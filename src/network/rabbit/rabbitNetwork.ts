@@ -94,7 +94,7 @@ export class RabbitNetwork implements INetwork {
             return ipTemp[3]
         } else { return ipTemp[0] }
     }
-    public readonly networkid: string = "hycon"
+    public networkid: string = "hycon"
     public readonly version: number = 3
     public port: number
     public localPort: number
@@ -111,9 +111,12 @@ export class RabbitNetwork implements INetwork {
     private upnpClient: UpnpClient
     private natUpnp: NatUpnp
 
-    constructor(hycon: Server, port: number = 8148, peerDbPath: string = "peerdb") {
+    constructor(hycon: Server, port: number = 8148, peerDbPath: string = "peerdb",
+                networkid: string,
+    ) {
         RabbitNetwork.failLimit = 10
         this.port = port
+        this.networkid = networkid
         this.localPort = port
         this.targetConnectedPeers = 5
         this.hycon = hycon
