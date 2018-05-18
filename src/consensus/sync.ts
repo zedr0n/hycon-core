@@ -88,7 +88,6 @@ export class Sync {
                 await this.putHeaders(startHeaderHeight)
             }
 
-
             const startBlockHeight = await this.findStartBlock(startHeaderHeight)
             logger.info(`Find Start Block=${startBlockHeight}`)
             if (remoteTip.height === localTip.height) {

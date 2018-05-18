@@ -5,7 +5,6 @@ import { getLogger } from "log4js"
 import { createConnection, createServer, Socket } from "net"
 import * as net from "net"
 import * as netmask from "netmask"
-import * as os from "os"
 import { IConsensus } from "../../consensus/iconsensus"
 import * as proto from "../../serialization/proto"
 import { Server } from "../../server"
@@ -17,7 +16,9 @@ import { PeerDb } from "../peerDb"
 import { UpnpClient, UpnpServer } from "../upnp"
 import { RabbitPeer } from "./rabbitPeer"
 // tslint:disable-next-line:no-var-requires
+const hostToIp = require("host-to-ip")
 const logger = getLogger("Network")
+
 export class RabbitNetwork implements INetwork {
     public static seeds: any[] = [
         { host: "rapid1.hycon.io", port: 8148 },
@@ -77,6 +78,14 @@ export class RabbitNetwork implements INetwork {
         return true
     }
 
+    public static async host2ip(host: string): Promise<string> {
+        try {
+            const ipTemp = await hostToIp(host)
+            return ipTemp
+        } catch ( e ) {
+            logger.debug(`fail to convert Host to IP: ${e}`)
+        }
+    }
     public static ipv6Toipv4(ipv6: string): string {
         const ipTemp: string[] = ipv6.split(":")
         if (ipTemp.length === 4) {
@@ -213,7 +222,7 @@ export class RabbitNetwork implements INetwork {
         return new Promise<RabbitPeer>((resolve, reject) => {
             const ipeer = { host, port }
             const key = PeerDb.ipeer2key(ipeer)
-            if ((host === ip.address() || host === os.hostname()) && (port === this.localPort || port === this.port)) {
+            if ( host === ip.address() && (port === this.localPort || port === this.port) ) {
                 this.peerDB.remove(ipeer)
                 reject(`Don't connect self`)
                 return
@@ -302,13 +311,14 @@ export class RabbitNetwork implements INetwork {
             if (this.peers.size < this.targetConnectedPeers) {
                 const ipeer = await this.peerDB.getRandomPeer(this.endPoints)
                 if (ipeer !== undefined) {
+                    if (!net.isIP(ipeer.host)) {
+                        ipeer.host = await RabbitNetwork.host2ip(ipeer.host)
+                    }
                     const rabbitPeer = await this.connect(ipeer.host, ipeer.port)
                     const peers = await rabbitPeer.getPeers()
                     if (peers.length !== 0) {
                         for (const peer of peers) {
-                            if (!((peer.host === ip.address() || peer.host === os.hostname()) && (peer.port === this.localPort || peer.port === this.port))) {
                                 await this.peerDB.put({ host: peer.host, port: peer.port })
-                            }
                         }
                     }
                 }
