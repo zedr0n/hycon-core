@@ -70,6 +70,10 @@ export class TxPool implements ITxPool {
         this.callbacks.push({ callback, n })
     }
 
+    public getPending(): SignedTx[] {
+        return this.txs
+    }
+
     private insert(newTxs: SignedTx[]): { count: number, lowestIndex?: number } {
         newTxs.sort((a, b) => b.fee.compare(a.fee))
         let lowestIndex
@@ -155,7 +159,7 @@ export class TxPool implements ITxPool {
             }
         }
 
-        // the size should be always the same        
+        // the size should be always the same
         if (this.txMap.size !== this.txs.length) {
             logger.fatal("TX Pool error In Removing, resetting TX Pool")
             this.txs = Array.from(this.txMap.values())
@@ -171,4 +175,5 @@ export class TxPool implements ITxPool {
             }
         }
     }
+
 }

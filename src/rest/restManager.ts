@@ -7,7 +7,6 @@ import { WorldState } from "../consensus/database/worldState"
 import { IConsensus } from "../consensus/iconsensus"
 import { Server } from "../server"
 export class RestManager {
-    public useRabbit = true
     public subscription: Map<number, any> | undefined
 
     public txQueue: ITxPool

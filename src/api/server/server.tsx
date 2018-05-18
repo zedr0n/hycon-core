@@ -197,6 +197,12 @@ export class HttpServer {
             )
         })
 
+        router.get("/txPool", async (req: express.Request, res: express.Response) => {
+            res.json(
+                await this.rest.getPendingTxs(this.hyconServer.txQueue.getPending()),
+            )
+        })
+
         this.app.use(`/api/${apiVersion}`, router)
     }
 

@@ -517,4 +517,21 @@ export class RestServer implements IRest {
             return Promise.resolve(false)
         }
     }
+
+    public getPendingTxs(arr: SignedTx[]): Promise<ITxProp[]> {
+        if (arr.length === 0 || arr === null || arr === undefined) { return Promise.resolve([]) } else {
+            const out = []
+            for (const tx of arr) {
+                out.push({
+                    hash: new Hash(tx).toHex(),
+                    amount: hycontoString(tx.amount),
+                    fee: hycontoString(tx.fee),
+                    from: tx.from.toString(),
+                    to: tx.to.toString(),
+                    signature: tx.signature.toString("hex"),
+                })
+            }
+            return Promise.resolve(out)
+        }
+    }
 }
