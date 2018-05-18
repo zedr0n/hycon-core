@@ -10,7 +10,7 @@ const logger = getLogger("PeerDb")
 
 export class PeerDb {
     public static ipeer2key(peer: proto.IPeer): number {
-        const hash = new Hash(peer.host + peer.port.toString())
+        const hash = new Hash(peer.host + "!" + peer.port.toString())
         let key = 0
         for (let i = 0; i < 6; i++) {
             // tslint:disable-next-line:no-bitwise
@@ -28,21 +28,15 @@ export class PeerDb {
     private keyListLock: AsyncLock// This lock protects this.keys from concurrent usage
 
     constructor(peerDbPath: string = "peerdb") {
+        // Locked until this.keys is initialized
         const rocksDB: any = rocksdb(peerDbPath)// TODO: Fix levelup type declarartion
         this.db = levelup(rocksDB)
-        this.keyListLock = new AsyncLock(true) // Locked until this.keys is initialized
         const db: any = this.db // TODO: Fix levelup type declarartion
-        db.on("open", () => {
-            logger.debug("peer db is open")
-        })
+        this.initKeys()
     }
 
     public peerCount(): number {
         return this.keys.length
-    }
-    public async run() {
-        this.keys = await this.getKeys()
-        this.keyListLock.releaseLock()
     }
     public async printDB() {
         let i = 1
@@ -128,44 +122,42 @@ export class PeerDb {
     public async getRandomPeer(connections: Map<number, proto.IPeer>): Promise<proto.IPeer | undefined> {
         return this.keyListLock.critical(async () => {
             let key: number
-            if (connections.size < this.keys.length) {
-                // Use the more potentially CPU intensive method when the number of connections is low or the peerDB is large
-                do {
-                    const index = Math.floor(this.keys.length * Math.random())
-                    key = this.keys[index]
-                } while (connections.has(key))
-            } else {
-                // Use more memory intensive the number of connections approaches the DB size
-                const filtered = this.keys.filter((filterkey) => !connections.has(filterkey))
-                if (filtered.length === 0) {
-                    return undefined
-                }
-                const index = Math.floor(filtered.length * Math.random())
-                key = filtered[index]
+            const filtered = this.keys.filter((filterkey) => !connections.has(filterkey))
+            if (filtered.length === 0) {
+                return undefined
             }
+            const index = Math.floor(filtered.length * Math.random())
+            key = filtered[index]
             return await this.get(key)
         })
     }
 
-    private async getKeys(): Promise<number[]> {
-        return new Promise<number[]>((resolve, reject) => {
-            const keys: number[] = []
-            const stream = this.db.createKeyStream()
-                .on("data", async (key: Buffer) => {
-                    const num = Number(key)
-                    if (Number.isNaN(num)) {
-                        logger.debug(`Peer db contains unexpected key '${key.toString()}'`)
-                    } else {
-                        keys.push(num)
-                    }
-                })
-                .on("error", (e: any) => {
-                    logger.debug(`Could not clear all elements from DB: ${e}`)
-                    reject(e)
-                })
-                .on("end", () => {
-                    resolve(keys)
-                })
-        })
+    private async initKeys() {
+        try {
+            this.keyListLock = new AsyncLock(true)
+            this.keys = []
+            await new Promise((resolve, reject) => {
+                const stream = this.db.createKeyStream()
+                    .on("data", async (key: Buffer) => {
+                        const num = Number(key)
+                        if (Number.isNaN(num)) {
+                            logger.debug(`Peer db contains unexpected key '${key.toString()}'`)
+                        } else {
+                            this.keys.push(num)
+                        }
+                    })
+                    .on("error", (e: any) => {
+                        logger.debug(`Could not clear all elements from DB: ${e}`)
+                        reject(e)
+                    })
+                    .on("end", () => {
+                        resolve()
+                    })
+            })
+        } catch (e) {
+            logger.error(`Failed to init peer db keys: ${e}`)
+        } finally {
+            this.keyListLock.releaseLock()
+        }
     }
 }

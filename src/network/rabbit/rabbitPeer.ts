@@ -27,25 +27,22 @@ export class RabbitPeer extends BasePeer implements IPeer {
     constructor(socket: Socket, network: RabbitNetwork, consensus: IConsensus, txPool: ITxPool, peerDB: PeerDb) {
         super(socket)
         // tslint:disable-next-line:max-line-length
-        logger.debug(`New Netpeer Local=${RabbitNetwork.ipv6Toipv4(socket.localAddress)}:${socket.localPort} --> Remote=${RabbitNetwork.ipv6Toipv4(socket.remoteAddress)}:${socket.remotePort}`)
+        logger.debug(`New Netpeer Local=${RabbitNetwork.ipNormalise(socket.localAddress)}:${socket.localPort} --> Remote=${RabbitNetwork.ipNormalise(socket.remoteAddress)}:${socket.remotePort}`)
         this.network = network
         this.consensus = consensus
         this.txPool = txPool
         this.peerDB = peerDB
     }
 
-    public async detectStatus(peer: proto.IPeer): Promise<boolean> {
+    public async detectStatus(): Promise<boolean> {
         const status = await this.status()
-        const otherStatus = new proto.Status(status)
-        const remoteNetworkId = otherStatus.networkid
+        const remoteNetworkId = status.networkid
         const myNetworkId = Server.globalOptions.networkid
         if (myNetworkId === remoteNetworkId) {
-            // ok
             logger.info(`Successfully Checked NetworkID LocalNetworkID=${myNetworkId} RemoteNetworkID=${remoteNetworkId}`)
         } else {
             logger.info(`Different NetworkID LocalNetworkID=${myNetworkId} RemoteNetworkID=${remoteNetworkId}`)
             this.disconnect()
-            await this.peerDB.remove(peer)
             return false
         }
         return true

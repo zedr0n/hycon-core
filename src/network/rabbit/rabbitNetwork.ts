@@ -1,4 +1,3 @@
-import { SIGPIPE } from "constants"
 import { stat } from "fs"
 import * as ip from "ip"
 import { getLogger } from "log4js"
@@ -15,8 +14,6 @@ import { NatUpnp } from "../nat"
 import { PeerDb } from "../peerDb"
 import { UpnpClient, UpnpServer } from "../upnp"
 import { RabbitPeer } from "./rabbitPeer"
-// tslint:disable-next-line:no-var-requires
-const hostToIp = require("host-to-ip")
 // tslint:disable-next-line:no-var-requires
 const publicIp = require("public-ip")
 const logger = getLogger("Network")
@@ -35,7 +32,7 @@ export class RabbitNetwork implements INetwork {
         }
         if (net.isIPv6(host)) {
             // TODO: fd00::/8
-            host = RabbitNetwork.ipv6Toipv4(host)
+            host = RabbitNetwork.ipNormalise(host)
         }
         if (net.isIPv4(host)) {
             // 10.0.0.0 – 10.255.255.255      10/8
@@ -66,19 +63,11 @@ export class RabbitNetwork implements INetwork {
         return true
     }
 
-    public static async host2ip(host: string): Promise<string> {
-        try {
-            const ipTemp = await hostToIp(host)
-            return ipTemp
-        } catch (e) {
-            logger.debug(`fail to convert Host to IP: ${e}`)
-        }
-    }
-    public static ipv6Toipv4(ipv6: string): string {
+    public static ipNormalise(ipv6: string): string {
         const ipTemp: string[] = ipv6.split(":")
         if (ipTemp.length === 4) {
             return ipTemp[3]
-        } else { return ipTemp[0] }
+        } else { return ipv6 }
     }
     public networkid: string = "hycon"
     public readonly version: number = 3
@@ -133,7 +122,6 @@ export class RabbitNetwork implements INetwork {
             logger.info(`Get PublicIP Fail=${error}`)
             this.publicIp = undefined
         }
-        await this.peerDB.run()
 
         this.server = createServer((socket) => this.accept(socket).catch(() => undefined))
         await new Promise<boolean>((resolve, reject) => {
@@ -204,7 +192,7 @@ export class RabbitNetwork implements INetwork {
         return iPeer
     }
 
-    public async connect(host: string, port: number): Promise<RabbitPeer> {
+    public async connect(host: string, port: number, save: boolean = true): Promise<RabbitPeer> {
         return new Promise<RabbitPeer>(async (resolve, reject) => {
             const ipeer = { host, port }
             const key = PeerDb.ipeer2key(ipeer)
@@ -236,15 +224,23 @@ export class RabbitNetwork implements INetwork {
             })
             socket.connect({ host, port }, async () => {
                 try {
-                    logger.debug(`Connected to ${key}: ${host}:${port}`)
+                    logger.info(`Connected to ${key}: ${host}:${port}`)
                     const peer = await this.newConnection(socket)
-                    this.endPoints.set(key, ipeer)
+                    ipeer.host = socket.remoteAddress
+                    if (await peer.detectStatus()) {
+                        if (save) {
+                            this.endPoints.set(key, ipeer)
+                            socket.on("close", () => this.endPoints.delete(key))
+                            await this.peerDB.seen(ipeer)
+                        }
+                        resolve(peer)
+                        logger.debug(`Peer ${key} ${socket.remoteAddress}:${socket.remotePort} Status=${JSON.stringify(await peer.status())}`)
+                    } else {
+                        await this.peerDB.fail(ipeer, RabbitNetwork.failLimit)
+                        reject("Peer is using a different network")
+                        peer.disconnect()
+                    }
                     this.pendingConnections.delete(key)
-                    socket.on("close", () => this.endPoints.delete(key))
-                    resolve(peer)
-                    await this.peerDB.seen(ipeer)
-                    await peer.detectStatus(ipeer)
-                    logger.debug(`Peer ${key} ${socket.remoteAddress}:${socket.remotePort} Status=${JSON.stringify(await peer.status())}`)
                 } catch (e) {
                     logger.debug(e)
                 }
@@ -254,16 +250,17 @@ export class RabbitNetwork implements INetwork {
 
     private async accept(socket: Socket): Promise<void> {
         try {
-            logger.debug(`Detect a incoming peer ${RabbitNetwork.ipv6Toipv4(socket.remoteAddress)}:${socket.remotePort}`)
+            logger.debug(`Detect a incoming peer ${RabbitNetwork.ipNormalise(socket.remoteAddress)}:${socket.remotePort}`)
             const peer = await this.newConnection(socket)
             if (RabbitNetwork.isRemoteSocket(socket)) {
                 const status = await peer.status()
-                const ipeer = { host: RabbitNetwork.ipv6Toipv4(socket.remoteAddress), port: status.port }
-                const key = PeerDb.ipeer2key(ipeer)
-                this.endPoints.set(key, ipeer)
-                socket.on("close", () => this.endPoints.delete(key))
-                await this.peerDB.seen(ipeer)
-                await peer.detectStatus(ipeer)
+                if (await peer.detectStatus()) {
+                    const ipeer = { host: RabbitNetwork.ipNormalise(socket.remoteAddress), port: status.port }
+                    await this.peerDB.seen(ipeer)
+                    const key = PeerDb.ipeer2key(ipeer)
+                    this.endPoints.set(key, ipeer)
+                    socket.on("close", () => this.endPoints.delete(key))
+                }
             }
         } catch (e) {
             logger.debug(e)
@@ -288,7 +285,7 @@ export class RabbitNetwork implements INetwork {
 
     private async connectLoop() {
         await this.connectToPeer()
-        setTimeout(() => this.connectLoop(), 100)
+        setTimeout(() => this.connectLoop(), 1000)
     }
     private async connectToPeer(): Promise<void> {
         try {
@@ -296,9 +293,6 @@ export class RabbitNetwork implements INetwork {
             if (this.peers.size < this.targetConnectedPeers) {
                 const ipeer = await this.peerDB.getRandomPeer(this.endPoints)
                 if (ipeer !== undefined) {
-                    if (!net.isIP(ipeer.host)) {
-                        ipeer.host = await RabbitNetwork.host2ip(ipeer.host)
-                    }
                     const rabbitPeer = await this.connect(ipeer.host, ipeer.port)
                     const peers = await rabbitPeer.getPeers()
                     if (peers.length !== 0) {
@@ -316,8 +310,7 @@ export class RabbitNetwork implements INetwork {
     private async connectSeeds() {
         try {
             for (const seed of RabbitNetwork.seeds) {
-                seed.host = await RabbitNetwork.host2ip(seed.host)
-                const rabbitPeer = await this.connect(seed.host, seed.port)
+                const rabbitPeer = await this.connect(seed.host, seed.port, false)
                 const peers = await rabbitPeer.getPeers()
                 rabbitPeer.disconnect()
                 if (peers.length !== 0) {
