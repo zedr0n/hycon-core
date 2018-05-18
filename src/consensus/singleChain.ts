@@ -79,8 +79,20 @@ export class SingleChain implements IConsensus {
                 let lastHeight = 0
                 if (lastHash !== undefined) { lastHeight = await this.db.getBlockHeight(lastHash) }
                 if (lastHeight < this.blockTip.height) {
-                    const blocks = await this.db.getBlocksRange(lastHeight)
-                    await this.txdb.init(blocks)
+
+                    const total = this.blockTip.height - lastHeight + 1
+                    const q = Math.trunc(total / 20)
+                    const r = total % 20
+                    if ( q >= 1 ) {
+                        for (let n = 0; n < q; n++) {
+                            const blks = await this.db.getBlocksRange(lastHeight + 20 * n, 20)
+                            await this.txdb.init(blks)
+                        }
+                    }
+                    if ( r !== 0 ) {
+                        const rBlks = await this.db.getBlocksRange(lastHeight + 20 * q, r)
+                        await this.txdb.init(rBlks)
+                    }
                 }
             }
 
