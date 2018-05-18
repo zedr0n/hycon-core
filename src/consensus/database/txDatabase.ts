@@ -41,7 +41,7 @@ export class TxDatabase {
     }
 
     public async putTxs(blockHash: Hash, txs: AnySignedTx[]): Promise<void> {
-        logger.error(`PutTxs length : ${txs.length}`)
+        logger.info(`PutTxs length : ${txs.length}`)
         const batch: levelup.Batch[] = []
         const mapLastTx: Map<string, Hash> = new Map<string, Hash>()
         for (const tx of txs) {

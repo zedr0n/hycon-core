@@ -79,9 +79,7 @@ export class SingleChain implements IConsensus {
                 let lastHeight = 0
                 if (lastHash !== undefined) { lastHeight = await this.db.getBlockHeight(lastHash) }
                 if (lastHeight < this.blockTip.height) {
-                    logger.debug(` < initTxDB > Tip Height : ${this.blockTip.height}, lastHeight : ${lastHeight}`)
                     const blocks = await this.db.getBlocksRange(lastHeight)
-                    // TODO : Have to divide blocks?
                     await this.txdb.init(blocks)
                 }
             }
@@ -91,7 +89,7 @@ export class SingleChain implements IConsensus {
                 (block: Block) => {
                     this.onMinedBlock(block)
                 })
-            logger.debug(`Initialization of singlechain is over.`)
+            logger.info(`Initialization of singlechain is over.`)
         } catch (e) {
             logger.error(`Initialization fail in singleChain : ${e}`)
             process.exit(1)
