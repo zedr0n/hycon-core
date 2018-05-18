@@ -16,7 +16,7 @@ configure({
         },
     },
     categories: {
-        default: { appenders: ["console", "fileLogs"], level: "debug" },
+        default: { appenders: ["console", "fileLogs"], level: "info" },
     },
 })
 

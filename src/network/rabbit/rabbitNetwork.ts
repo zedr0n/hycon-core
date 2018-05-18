@@ -227,9 +227,8 @@ export class RabbitNetwork implements INetwork {
             const ipeer = { host, port }
             const key = PeerDb.ipeer2key(ipeer)
             if ( (host === ip.address() || host === this.publicIp) && (port === this.localPort || port === this.port) ) {
-                logger.info(ipeer.host, ipeer.port)
                 await this.peerDB.remove(ipeer)
-                reject(`Don't connect self`)
+                reject(`Don't connect self, remove from peerDB`)
                 return
             }
             if (this.pendingConnections.has(key)) {
