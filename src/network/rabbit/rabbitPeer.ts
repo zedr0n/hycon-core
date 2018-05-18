@@ -34,7 +34,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
         this.peerDB = peerDB
     }
 
-    public async  detectStatus(peer: proto.IPeer): Promise<boolean> {
+    public async detectStatus(peer: proto.IPeer): Promise<boolean> {
         const status = await this.status()
         const otherStatus = new proto.Status(status)
         const remoteNetworkId = otherStatus.networkid
@@ -51,12 +51,6 @@ export class RabbitPeer extends BasePeer implements IPeer {
         return true
     }
 
-    public polling() {
-        if (this.socketBuffer.isSendLockOverflow()) {
-            logger.info(`SocketBuffer Overflow ${this.socketBuffer.getInfo()}`)
-            this.disconnect()
-        }
-    }
     public async getTip(): Promise<{ hash: Hash, height: number }> {
         const { reply, packet } = await this.sendRequest({ getTip: { dummy: 0 } })
         if (reply.getTipReturn === undefined) {

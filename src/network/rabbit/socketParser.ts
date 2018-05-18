@@ -16,7 +16,6 @@ const headerRouteLength = 4
 const headerPostfixLength = 4
 const scrapBufferLength = Math.max(headerPrefix.length, headerRouteLength, headerPostfixLength)
 const writeBufferLength = headerRouteLength + headerPostfixLength
-const MaximumSendQueueLength = 100
 export class SocketParser {
     private socket: Socket
     private parseState: ParseState
@@ -36,37 +35,34 @@ export class SocketParser {
         this.writeBuffer = Buffer.allocUnsafeSlow(writeBufferLength)
         this.sendLock = new AsyncLock(false, 30000)
         this.parseReset()
-        socket.on("data", (data) => this.receive(data))
-        socket.on("drain", () => {
-            logger.warn("Resuming socket")
+        this.socket.on("data", (data) => this.receive(data))
+        this.socket.on("drain", () => {
+            logger.warn(`Resuming socket ${this.socket.remoteAddress}:${this.socket.remotePort}`)
             this.socket.resume()
             this.sendLock.releaseLock()
         })
     }
-    public isSendLockOverflow() {
-        const ret = this.sendLock.queueLength() > MaximumSendQueueLength
-        return ret
-    }
+
     public async send(route: number, buffer: Buffer): Promise<void> {
         if (buffer.length > defaultMaxPacketSize) {
             throw new Error("Buffer too large")
         }
         this.writeBuffer.writeUInt32LE(route, 0)
         this.writeBuffer.writeUInt32LE(buffer.length, 4)
-        let kernal = true
-        await this.sendLock.getLock()
 
         // true: all queued to kernel buffer
         // false: user memory is used
-        kernal = kernal && this.socket.write(headerPrefix)
-        kernal = kernal && this.socket.write(this.writeBuffer)
-        kernal = kernal && this.socket.write(buffer)
-        if (kernal) {
+        let kernel = true
+        await this.sendLock.getLock()
+        kernel = kernel && this.socket.write(headerPrefix)
+        kernel = kernel && this.socket.write(this.writeBuffer)
+        kernel = kernel && this.socket.write(buffer)
+        if (kernel) {
             this.sendLock.releaseLock()
         } else {
             // for this case, user memory is used
             // it will be released in "drain" event
-            logger.warn("Pausing socket")
+            logger.warn(`Pausing socket ${this.socket.bufferSize}`)
             this.socket.pause()
         }
     }
@@ -76,22 +72,16 @@ export class SocketParser {
         if (this.socket) {
             this.socket.unref()
             this.socket.destroy()
-            this.socket = null
         }
     }
 
     public getInfo() {
-        const socket = this.socket
-        const ret = `Local=${socket.localAddress}:${socket.localPort}  Remote=${socket.remoteAddress}:${socket.remotePort} CurrentQueue=${this.sendLock.queueLength()} MaxQueue=${MaximumSendQueueLength}`
-        return ret
+        return `Local=${this.socket.localAddress}:${this.socket.localPort}  Remote=${this.socket.remoteAddress}:${this.socket.remotePort} CurrentQueue=${this.sendLock.queueLength()}`
     }
     private receive(src: Buffer): void {
-        // tslint:disable-next-line:max-line-length
-        // logger.info(`Recieving ${src.length} bytes ${this.socket.localAddress}:${this.socket.localPort} <-- ${this.socket.localAddress}:${this.socket.localPort}`)
         try {
             this.parse(src)
         } catch (e) {
-            // tslint:disable-next-line:max-line-length
             if (this.socket) {
                 logger.fatal(`Disconnecting from ${this.socket.remoteAddress}:${this.socket.remotePort} due to internal parser error: ${e}`)
             }
@@ -144,7 +134,6 @@ export class SocketParser {
         if (this.parseIndex === 0 && newBytesAvailable >= 4) {
             const uint32 = newData.readUInt32LE(newDataIndex)
             newDataIndex += 4
-            // logger.info(`Got Uint32 directly ${uint32}`)
             return { newDataIndex, uint32 }
         } else {
             const sourceEnd = newDataIndex + Math.min(newBytesAvailable, 4)
@@ -153,10 +142,8 @@ export class SocketParser {
             this.parseIndex += bytesCopied
             if (this.parseIndex === 4) {
                 const uint32 = this.scrapBuffer.readUInt32LE(0)
-                // logger.info(`Got Uint32 ${uint32}`)
                 return { newDataIndex, uint32 }
             } else {
-                // tslint:disable-next-line:max-line-length
                 logger.info(`Got partial Uint32, copied ${bytesCopied} into scrapBuffer ${this.parseIndex}/${this.scrapBuffer.length}`)
             }
         }
@@ -177,15 +164,14 @@ export class SocketParser {
         const result = this.parseUInt32LE(newData, newDataIndex)
         if (result.uint32 !== undefined) {
             if (result.uint32 > defaultMaxPacketSize) {
-                // tslint:disable-next-line:max-line-length
                 logger.debug(`Disconnecting client ${this.socket.remoteAddress}:${this.socket.remotePort}, packet too large`)
                 this.destroy()
                 return
             }
+            // Body buffer does not need to be initialized and will be short lived
             this.bodyBuffer = Buffer.allocUnsafe(result.uint32)
             this.parseIndex = 0
             this.parseState++
-            // Body buffer does not need to be initialized and will be short lived
         }
         return result.newDataIndex
     }
@@ -195,7 +181,6 @@ export class SocketParser {
         newDataIndex += bytesCopied
         this.parseIndex += bytesCopied
         if (this.parseIndex === this.bodyBuffer.length) {
-            // logger.info(`Got body (${this.bodyBuffer.length} bytes)`)
             if (this.packetCallback) {
                 this.packetCallback(this.route, this.bodyBuffer)
             } else {
@@ -215,7 +200,6 @@ export class SocketParser {
     }
 
     private protocolError() {
-        // tslint:disable-next-line:max-line-length
         logger.info(`Disconnecting from ${this.socket.remoteAddress}:${this.socket.remotePort} due to invalid message format`)
         this.destroy()
     }

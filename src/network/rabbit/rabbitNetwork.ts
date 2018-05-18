@@ -29,22 +29,12 @@ export class RabbitNetwork implements INetwork {
     ]
     public static failLimit: number
     public static isRemoteSocket(socket: net.Socket) {
-        // TODO:
-        // Local Ranges:
-        // 172.16.0.0 – 172.31.255.255
-        // 10.0.0.0 – 10.255.255.255
-        // 192.168.0.0 – 192.168.255.255
-        // 127.0.0.0 - 127.255.255.255
-        // 0.0.0.0
-        // fd00::/8
-        // if (socket.remoteFamily === "IPv4") { }
-        // if (socket.remoteFamily === "IPv6") { }
         let host = socket.remoteAddress
         if (!net.isIP(host)) {
             return true
         }
         if (net.isIPv6(host)) {
-            // fd00::/8
+            // TODO: fd00::/8
             host = RabbitNetwork.ipv6Toipv4(host)
         }
         if (net.isIPv4(host)) {
@@ -52,29 +42,25 @@ export class RabbitNetwork implements INetwork {
             const block1 = new netmask.Netmask("10.0.0.0/8")
             if (block1.contains(host)) {
                 return false
-            } else {
-                // 172.16.0.0 – 172.31.255.255    172.16/12
-                const block2 = new netmask.Netmask("172.16.0.0/12")
-                if (block2.contains(host)) {
-                    return false
-                } else {
-                    // 192.168.0.0 – 192.168.255.255  192.168/16
-                    const block3 = new netmask.Netmask("192.168.0.0/16")
-                    if (block3.contains(host)) {
-                        return false
-                    } else {
-                        // 127.0.0.0 – 127.255.255.255    127/8
-                        const block4 = new netmask.Netmask("127.0.0.0/8")
-                        if (block4.contains(host)) {
-                            return false
-                        } else {
-                            // 0.0.0.0
-                            if (host === "0.0.0.0") {
-                                return false
-                            }
-                        }
-                    }
-                }
+            }
+            // 172.16.0.0 – 172.31.255.255    172.16/12
+            const block2 = new netmask.Netmask("172.16.0.0/12")
+            if (block2.contains(host)) {
+                return false
+            }
+            // 192.168.0.0 – 192.168.255.255  192.168/16
+            const block3 = new netmask.Netmask("192.168.0.0/16")
+            if (block3.contains(host)) {
+                return false
+            }
+            // 127.0.0.0 – 127.255.255.255    127/8
+            const block4 = new netmask.Netmask("127.0.0.0/8")
+            if (block4.contains(host)) {
+                return false
+            }
+            // 0.0.0.0
+            if (host === "0.0.0.0") {
+                return false
             }
         }
         return true
@@ -184,7 +170,6 @@ export class RabbitNetwork implements INetwork {
             logger.info(`Peers Count=${this.peers.size}  PeerDB Size= ${this.peerDB.peerCount()}`)
             this.showInfo()
             this.peerDB.printDB()
-            this.polling()
         }, 10 * 1000)
 
         return true
@@ -285,7 +270,6 @@ export class RabbitNetwork implements INetwork {
         }
     }
 
-    // only connecting
     private async newConnection(socket: Socket): Promise<RabbitPeer> {
         const peer = new RabbitPeer(socket, this, this.hycon.consensus, this.hycon.txPool, this.peerDB)
         const ipeer = { host: socket.remoteAddress, port: socket.remotePort }
@@ -338,19 +322,12 @@ export class RabbitNetwork implements INetwork {
                 rabbitPeer.disconnect()
                 if (peers.length !== 0) {
                     for (const peer of peers) {
-                            await this.peerDB.put({ host: peer.host, port: peer.port })
+                        await this.peerDB.put({ host: peer.host, port: peer.port })
                     }
                 }
             }
         } catch (e) {
             logger.debug(`Error occurred while connecting to seeds: ${e}`)
-        }
-    }
-
-    // check peer periodically
-    private polling() {
-        for (const [key, peer] of this.peers) {
-            peer.polling()
         }
     }
 }
