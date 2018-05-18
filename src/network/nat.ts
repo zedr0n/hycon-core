@@ -22,7 +22,7 @@ export class NatUpnp {
             })
         })
     }
-    private static async mapPort(privatePort: number, maxAttempts: number = 10, ttl?: number): Promise<number> {
+    private static async mapPort(privatePort: number, maxAttempts: number = 5, ttl?: number): Promise<number> {
         let publicPort = privatePort
         for (let i = 0; i < maxAttempts; i++) {
             try {

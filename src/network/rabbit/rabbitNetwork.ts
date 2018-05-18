@@ -23,9 +23,9 @@ const logger = getLogger("Network")
 
 export class RabbitNetwork implements INetwork {
     public static seeds: any[] = [
-        { host: "rapid1.hycon.io", port: 8148 },
-        { host: "rapid2.hycon.io", port: 8148 },
-        { host: "rapid3.hycon.io", port: 8148 },
+        { host: "rapid1.hycon.iO", port: 8148 },
+        { host: "rapid1.hycon.iO", port: 8148 },
+        { host: "rapid1.hycon.iO", port: 8148 },
     ]
     public static failLimit: number
     public static isRemoteSocket(socket: net.Socket) {
@@ -223,11 +223,12 @@ export class RabbitNetwork implements INetwork {
     }
 
     public async connect(host: string, port: number): Promise<RabbitPeer> {
-        return new Promise<RabbitPeer>((resolve, reject) => {
+        return new Promise<RabbitPeer>( async (resolve, reject) => {
             const ipeer = { host, port }
             const key = PeerDb.ipeer2key(ipeer)
             if ( (host === ip.address() || host === this.publicIp) && (port === this.localPort || port === this.port) ) {
-                this.peerDB.remove(ipeer)
+                logger.info(ipeer.host, ipeer.port)
+                await this.peerDB.remove(ipeer)
                 reject(`Don't connect self`)
                 return
             }
@@ -335,7 +336,8 @@ export class RabbitNetwork implements INetwork {
     private async saveSeedstoDB() {
         try {
             for (const seed of RabbitNetwork.seeds) {
-                await this.peerDB.put({ host: seed.host, port: seed.port })
+                const host = await RabbitNetwork.host2ip(seed.host)
+                await this.peerDB.put({host, port: seed.port })
             }
         } catch (e) {
             logger.debug(`Error occurred while connecting to seeds: ${e}`)
