@@ -213,7 +213,7 @@ export class RabbitNetwork implements INetwork {
         return new Promise<RabbitPeer>((resolve, reject) => {
             const ipeer = { host, port }
             const key = PeerDb.ipeer2key(ipeer)
-            if ( (host === ip.address() || host === os.hostname() ) && (port === this.localPort || port === this.port) ) {
+            if ((host === ip.address() || host === os.hostname()) && (port === this.localPort || port === this.port)) {
                 this.peerDB.remove(ipeer)
                 reject(`Don't connect self`)
                 return
@@ -248,7 +248,8 @@ export class RabbitNetwork implements INetwork {
                     socket.on("close", () => this.endPoints.delete(key))
                     resolve(peer)
                     await this.peerDB.seen(ipeer)
-                    logger.info(`Peer ${key} ${socket.remoteAddress}:${socket.remotePort} Status=${JSON.stringify(await peer.status())}`)
+                    await peer.detectStatus()
+                    //logger.info(`Peer ${key} ${socket.remoteAddress}:${socket.remotePort} Status=${JSON.stringify(await peer.status())}`)
                 } catch (e) {
                     logger.debug(e)
                 }
@@ -267,6 +268,7 @@ export class RabbitNetwork implements INetwork {
                 this.endPoints.set(key, ipeer)
                 socket.on("close", () => this.endPoints.delete(key))
                 await this.peerDB.seen(ipeer)
+                await peer.detectStatus()
             }
         } catch (e) {
             logger.debug(e)
@@ -304,7 +306,7 @@ export class RabbitNetwork implements INetwork {
                     const peers = await rabbitPeer.getPeers()
                     if (peers.length !== 0) {
                         for (const peer of peers) {
-                            if (!( (peer.host === ip.address() || peer.host === os.hostname()) && (peer.port === this.localPort || peer.port === this.port))) {
+                            if (!((peer.host === ip.address() || peer.host === os.hostname()) && (peer.port === this.localPort || peer.port === this.port))) {
                                 await this.peerDB.put({ host: peer.host, port: peer.port })
                             }
                         }

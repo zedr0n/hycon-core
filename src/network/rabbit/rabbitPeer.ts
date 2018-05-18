@@ -8,13 +8,13 @@ import { ITxPool } from "../../common/itxPool"
 import { SignedTx } from "../../common/txSigned"
 import { IConsensus } from "../../consensus/iconsensus"
 import * as proto from "../../serialization/proto"
+import { Server } from "../../server"
 import { Hash } from "../../util/hash"
 import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"
 import { PeerDb } from "../peerDb"
 import { BasePeer } from "./basePeer"
 import { RabbitNetwork } from "./rabbitNetwork"
-
 const logger = getLogger("NetPeer")
 
 interface IResponse { message: proto.INetwork, relay: boolean }
@@ -32,6 +32,22 @@ export class RabbitPeer extends BasePeer implements IPeer {
         this.consensus = consensus
         this.txPool = txPool
         this.peerDB = peerDB
+    }
+
+    public async  detectStatus(): Promise<boolean> {
+        const status = await this.status()
+        const otherStatus = new proto.Status(status)
+        const remoteNetworkId = otherStatus.networkid
+        const myNetworkId = Server.globalOptions.networkid
+        if (myNetworkId === remoteNetworkId) {
+            // ok
+            logger.info(`Successfully Checked NetworkID LocalNetworkID=${myNetworkId} RemoteNetworkID=${remoteNetworkId}`)
+        } else {
+            logger.info(`Different NetworkID LocalNetworkID=${myNetworkId} RemoteNetworkID=${remoteNetworkId}`)
+            this.disconnect()
+            return false
+        }
+        return true
     }
 
     public polling() {
@@ -70,7 +86,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public async status(): Promise<proto.IStatus> {
         const { reply, packet } = await this.sendRequest({
             status: {
-                networkid: "hycon",
+                networkid: this.network.networkid,
                 port: this.network.port,
                 version: this.network.version,
             },

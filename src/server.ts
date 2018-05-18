@@ -23,7 +23,7 @@ const optionDefinitions = [
     { name: "api_port", alias: "A", type: Number },
     { name: "disable_upnp", alias: "x", type: Boolean },
     { name: "mine", alias: "m", type: Boolean },
-    { name: "networkid", alias: "n", type: Number },
+    { name: "networkid", alias: "n", type: String },
     { name: "peer", type: String, multiple: true, defaultOption: true },
     { name: "plot", alias: "g", type: Boolean },
     { name: "port", alias: "p", type: Number },
@@ -79,7 +79,8 @@ export class Server {
 
         const postfix = Server.globalOptions.postfix
         this.consensus = new SingleChain(this, "blockdb" + postfix, "worldstate" + postfix, "rawblock" + postfix, "txDB" + postfix)
-        this.network = new RabbitNetwork(this, Server.globalOptions.port, "peerdb" + postfix)
+        this.network = new RabbitNetwork(this, Server.globalOptions.port, "peerdb" + postfix,
+            Server.globalOptions.networkid)
 
         this.wallet = new WalletManager(this)
         this.miner = new MinerServer(this, Server.globalOptions.str_port)
