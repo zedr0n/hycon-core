@@ -48,7 +48,7 @@ export class PeerDb {
         let i = 1
         for (const key of this.keys) {
             const peer = await this.get(key)
-            logger.debug(`${i++}/${this.keys.length} host: ${peer.host}, port: ${peer.port}, failCount: ${peer.failCount}`)
+            logger.info(`${i++}/${this.keys.length} host: ${peer.host}, port: ${peer.port}, failCount: ${peer.failCount}`)
         }
     }
     public async seen(peer: proto.IPeer) {
@@ -94,7 +94,7 @@ export class PeerDb {
                 }
                 return peer
             } catch (e) {
-                logger.info(`Saving to db ${e}`)
+                logger.debug(`Saving to db ${e}`)
             }
         })
     }
@@ -108,7 +108,7 @@ export class PeerDb {
             if (e.notFound) {
                 return undefined
             }
-            logger.info(`Could not get key '${key}': ${e}`)
+            logger.debug(`Could not get key '${key}': ${e}`)
             throw e
         }
     }
@@ -154,13 +154,13 @@ export class PeerDb {
                 .on("data", async (key: Buffer) => {
                     const num = Number(key)
                     if (Number.isNaN(num)) {
-                        logger.info(`Peer db contains unexpected key '${key.toString()}'`)
+                        logger.debug(`Peer db contains unexpected key '${key.toString()}'`)
                     } else {
                         keys.push(num)
                     }
                 })
                 .on("error", (e: any) => {
-                    logger.info(`Could not clear all elements from DB: ${e}`)
+                    logger.debug(`Could not clear all elements from DB: ${e}`)
                     reject(e)
                 })
                 .on("end", () => {

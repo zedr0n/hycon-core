@@ -325,7 +325,7 @@ export class RabbitNetwork implements INetwork {
                 await this.peerDB.put({ host: seed.host, port: seed.port })
             }
         } catch (e) {
-            logger.info(`Error occurred while connecting to seeds: ${e}`)
+            logger.debug(`Error occurred while connecting to seeds: ${e}`)
         }
     }
 }
