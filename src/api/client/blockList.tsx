@@ -19,23 +19,9 @@ export class BlockList extends React.Component<any, any> {
     }
     public componentWillUnmount() {
         this.mounted = false
+        this.intervalId = null
     }
     public componentWillMount() {
-        this.mounted = true
-        this.props.rest.setLoading(true)
-        this.props.rest.getBlockList().then((data: IBlock[]) => {
-            for (const block of data) {
-                let sum = Long.fromInt(0)
-                for (const tx of block.txs) {
-                    sum = sum.add(hyconfromString(tx.amount))
-                }
-                block.txSummary = hycontoString(sum)
-            }
-            if (this.mounted) {
-                this.setState({ blocks: data })
-            }
-            this.props.rest.setLoading(false)
-        })
     }
 
     public componentDidMount() {
@@ -69,6 +55,7 @@ export class BlockList extends React.Component<any, any> {
             })
         })
     }
+
     public render() {
         let blockIndex = 0
         if (this.state.blocks.length === 0) {
