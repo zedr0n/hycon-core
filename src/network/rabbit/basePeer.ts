@@ -69,7 +69,7 @@ export abstract class BasePeer {
                     break
             }
         } catch (e) {
-            this.protocolError()
+            this.protocolError(e)
         }
     }
 
@@ -80,7 +80,7 @@ export abstract class BasePeer {
             const { resolved } = this.replyMap.get(route)
             resolved({ reply, packet })
         } catch (e) {
-            this.protocolError()
+            this.protocolError(e)
         }
     }
 
@@ -101,8 +101,8 @@ export abstract class BasePeer {
         return this.socketBuffer.send(route, buffer)
     }
 
-    protected protocolError() {
-        logger.fatal("Disconnecting due to protocol error")
+    protected protocolError(e?: Error) {
+        logger.info(`Disconnecting due to protocol error: ${e}`)
         this.socketBuffer.destroy()
     }
 

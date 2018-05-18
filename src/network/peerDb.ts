@@ -133,6 +133,10 @@ export class PeerDb {
     }
 
     private async initKeys() {
+        if (this.keyListLock !== undefined) {
+            // The below initilizes keyListLock
+            throw new Error("Trying to initialize keys after it has already been initialized")
+        }
         try {
             this.keyListLock = new AsyncLock(true)
             this.keys = []

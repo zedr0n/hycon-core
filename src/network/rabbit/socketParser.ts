@@ -62,7 +62,7 @@ export class SocketParser {
         } else {
             // for this case, user memory is used
             // it will be released in "drain" event
-            logger.warn(`Pausing socket ${this.socket.bufferSize}`)
+            logger.warn(`Pausing socket ${this.socket.remoteAddress}:${this.socket.remotePort} ${JSON.stringify(this.socket)}`)
             this.socket.pause()
         }
     }
@@ -116,7 +116,8 @@ export class SocketParser {
     private parseHeaderPrefix(newData: Buffer, newDataIndex: number): number {
         while (newDataIndex < newData.length && this.parseIndex < headerPrefix.length) {
             if (newData[newDataIndex] !== headerPrefix[this.parseIndex]) {
-                this.protocolError()
+                logger.warn("Packet parsing error")
+                this.destroy()
             }
             this.parseIndex++
             newDataIndex++
@@ -197,10 +198,5 @@ export class SocketParser {
         this.parseIndex = 0
         this.parseState = ParseState.HeaderPrefix
         this.bodyBuffer = undefined
-    }
-
-    private protocolError() {
-        logger.info(`Disconnecting from ${this.socket.remoteAddress}:${this.socket.remotePort} due to invalid message format`)
-        this.destroy()
     }
 }
