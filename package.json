@@ -9,7 +9,7 @@
     "assets": "mnemonic/*"
   },
   "scripts": {
-    "start": "./node_modules/.bin/ts-node src/main.ts --networkid=3 --port=8148 --str_port=9081 --writing  --mine --api --api_port=2442",
+    "start": "./node_modules/.bin/ts-node src/main.ts --networkid=3 --port=8148 --str_port=9081 --mine --api --api_port=2442",
     "start2": "./node_modules/.bin/ts-node src/main.ts --networkid=3 --port=8149 --str_port=9082 --writing --mine",
     "start3": "./node_modules/.bin/ts-node src/main.ts --networkid=3 --port=8148 --writing --str_port=9081 --api --api_port=2442 --mine",
     "start4": "./node_modules/.bin/ts-node src/main.ts --networkid=3 --wallet --disable_upnp",
@@ -92,7 +92,7 @@
     "fs-extra": "^5.0.0",
     "ip": "^1.1.5",
     "levelup": "^2.0.2",
-    "log4js": "^2.5.3",
+    "log4js": "^2.6.1",
     "log4js-protractor-appender": "^1.1.2",
     "merkle-lib": "^2.0.10",
     "nat-pmp": "^1.0.0",
