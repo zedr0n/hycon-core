@@ -47,13 +47,13 @@ export class SocketParser {
         if (buffer.length > defaultMaxPacketSize) {
             throw new Error("Buffer too large")
         }
-        this.writeBuffer.writeUInt32LE(route, 0)
-        this.writeBuffer.writeUInt32LE(buffer.length, 4)
 
         // true: all queued to kernel buffer
         // false: user memory is used
         let kernel = true
         await this.sendLock.getLock()
+        this.writeBuffer.writeUInt32LE(route, 0)
+        this.writeBuffer.writeUInt32LE(buffer.length, 4)
         kernel = kernel && this.socket.write(headerPrefix)
         kernel = kernel && this.socket.write(this.writeBuffer)
         kernel = kernel && this.socket.write(buffer)
