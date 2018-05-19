@@ -59,7 +59,7 @@ export class Database {
         return this.database.put("b" + hash, dbBlock.encode())
     }
 
-    public async putBlock(hash: Hash, block: Block): Promise<{ current: DBBlock, previous: DBBlock }> {
+    public async putBlock(hash: Hash, block: AnyBlock): Promise<{ current: DBBlock, previous: DBBlock }> {
         // Async problem, block could be inserted twice
         return await this.blockLock.critical<{ current: DBBlock, previous: DBBlock }>(async () => {
             const { current, previous } = await this.putHeader(hash, block.header)
@@ -72,7 +72,7 @@ export class Database {
         })
     }
 
-    public async writeBlock(block: Block) {
+    public async writeBlock(block: AnyBlock) {
         const writeLocation = await this.blockFile.put(block)
         if (this.fileNumber !== writeLocation.fileNumber) {
             this.fileNumber = writeLocation.fileNumber

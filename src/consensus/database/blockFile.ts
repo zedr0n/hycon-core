@@ -2,7 +2,7 @@
 import * as fs from "fs-extra"
 import { getLogger } from "log4js"
 import { AsyncLock } from "../../common/asyncLock"
-import { Block } from "../../common/block"
+import { AnyBlock, Block } from "../../common/block"
 import * as proto from "../../serialization/proto"
 import { zeroPad } from "../../util/commonUtil"
 import { FileUtil } from "../../util/fileUtil"
@@ -30,23 +30,23 @@ export class BlockFile {
         this.writeFileLock.releaseLock()
     }
 
-    public async get(n: number, offset: number, length: number): Promise<Block> {
+    public async get(n: number, offset: number, length: number): Promise<AnyBlock> {
         if (this.n === n) {
             return this.writeFileLock.critical(async () => {
                 const data: Buffer = new Buffer(length)
                 await fs.read(this.fd, data, 0, length, offset)
-                return new Block(proto.Block.decode(data))
+                return Block.decode(data)
             })
         } else {
             const fd = await this.open(n, false)
             const data: Buffer = new Buffer(length)
             await fs.read(this.fd, data, 0, length, offset)
             await fs.close(fd)
-            return new Block(proto.Block.decode(data))
+            return Block.decode(data)
         }
     }
 
-    public async put(block: Block) {
+    public async put(block: AnyBlock) {
         return this.writeFileLock.critical(async () => {
             const data = block.encode()
             if (this.fileSize < this.filePosition + data.length) {
