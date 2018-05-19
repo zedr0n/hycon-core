@@ -39,7 +39,7 @@ export class MinerServer implements IMiner {
         const difficulty = Difficulty.decode(candidateBlock.header.difficulty)
         const minersCount = this.getMinersCount()
 
-        logger.info(`New Candidate Block Hash: ${new Hash(candidateBlock).toString()}, MinerCount: ${minersCount} Target: ${difficulty.getMinerTarget()}`)
+        logger.info(`New Candidate Block Hash: ${new Hash(candidateBlock).toString()}, Difficulty: 0x${difficulty.getMantissa().toString(16)} e${difficulty.getExponent()} Target: ${difficulty.getMinerTarget()}`)
         this.cpuMiner.putWork(candidateBlock, prehash, difficulty)
         this.stratumServer.putWork(candidateBlock, prehash, difficulty, this.cpuMiner.minerCount)
     }

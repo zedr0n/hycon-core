@@ -37,9 +37,7 @@ export class Database {
     private blockFile: BlockFile
     private headerLock: AsyncLock
     private blockLock: AsyncLock
-    private filePosition: number
     private fileNumber: number
-    private filePath: string
 
     constructor(dbPath: string, filePath: string) {
         // TODO: Fix levelup defintions to use abstract leveldown in the constructor
@@ -47,8 +45,7 @@ export class Database {
         this.database = levelup(rocks)
         this.headerLock = new AsyncLock()
         this.blockLock = new AsyncLock()
-        this.blockFile = new BlockFile()
-        this.filePath = filePath
+        this.blockFile = new BlockFile(filePath)
     }
 
     public async init(): Promise<void> {
@@ -56,29 +53,33 @@ export class Database {
         const fileNumber = await this.getOrInitKey("fileNumber")
         const filePosition = await this.getOrInitKey("filePosition")
         this.fileNumber = +fileNumber
-        this.filePosition = +filePosition
-        await this.blockFile.fileInit(this.filePath, this.fileNumber, this.filePosition)
+        await this.blockFile.fileInit(this.fileNumber, +filePosition)
+    }
+    public putDBBlock(hash: Hash, dbBlock: DBBlock) {
+        return this.database.put("b" + hash, dbBlock.encode())
     }
 
-    public async putBlock(hash: Hash, block: AnyBlock): Promise<{ current: DBBlock, previous: DBBlock }> {
+    public async putBlock(hash: Hash, block: Block): Promise<{ current: DBBlock, previous: DBBlock }> {
         // Async problem, block could be inserted twice
         return await this.blockLock.critical<{ current: DBBlock, previous: DBBlock }>(async () => {
             const { current, previous } = await this.putHeader(hash, block.header)
-            // Put block info into blockFile and update header in DB using fileResult.
-            const encodeBlock = block.encode()
-            const { filePosition, blockOffset } = await this.blockFile.put(encodeBlock)
-            this.filePosition = filePosition
-            current.offset = blockOffset
-            current.length = encodeBlock.length
-            current.fileNumber = this.blockFile.n
-
-            if (this.blockFile.size() > 134217728) {
-                await this.nextFile()
-            }
-            await this.database.put("filePosition", this.filePosition)
+            const { fileNumber, offset, length } = await this.writeBlock(block)
+            current.offset = offset
+            current.length = length
+            current.fileNumber = fileNumber
             await this.database.put("b" + hash, current.encode())
             return { current, previous }
         })
+    }
+
+    public async writeBlock(block: Block) {
+        const writeLocation = await this.blockFile.put(block)
+        if (this.fileNumber !== writeLocation.fileNumber) {
+            this.fileNumber = writeLocation.fileNumber
+            await this.database.put("fileNumber", this.fileNumber)
+        }
+        await this.database.put("filePosition", writeLocation.filePosition)
+        return writeLocation
     }
 
     public async putHeader(hash: Hash, header: AnyBlockHeader): Promise<{ current: DBBlock, previous: DBBlock }> {
@@ -295,40 +296,9 @@ export class Database {
         }
     }
 
-    private async filePositionInit(): Promise<undefined> {
-        try {
-            this.filePosition = 0
-            return await this.database.put("filePosition", this.filePosition)
-        } catch (e) {
-            logger.error(`Fail to filePositionInit : ${e}`)
-            return Promise.reject(e)
-        }
-    }
-
-    private async nextFile(): Promise<undefined> {
-        await this.blockFile.close()
-        this.fileNumber++
-        await this.filePositionInit()
-        this.blockFile = new BlockFile()
-        await this.blockFile.fileInit(this.filePath, this.fileNumber, this.filePosition)
-        return await this.database.put("fileNumber", this.fileNumber)
-    }
-
     private async dbBlockToBlock(dbBlock: DBBlock): Promise<AnyBlock> {
         if (dbBlock.offset !== undefined && dbBlock.length !== undefined && dbBlock.fileNumber !== undefined) {
-            const blockFile = new BlockFile()
-            await blockFile.fileInit(this.filePath, dbBlock.fileNumber, 0)
-            const encodeBlock = await blockFile.get(dbBlock.offset, dbBlock.length)
-            try {
-                const block = Block.decode(encodeBlock)
-                return block
-            } catch (e) {
-                // TODO: Schedule redownload?
-                logger.error(`Could not decode block: ${e}`)
-                throw new Error("Corrupt block")
-            } finally {
-                await blockFile.close()
-            }
+            return this.blockFile.get(dbBlock.fileNumber, dbBlock.offset, dbBlock.length)
         } else {
             logger.error(`Fail to dbBlock to block : Block file information is not found`)
             throw new Error("Block could not be found")
