@@ -8,22 +8,26 @@ export class Difficulty {
     public static minimumExponent: number = 0
 
     public static decode(num: number): Difficulty {
+        if (num > 0xFFFFFFFF) {
+            // Node js can not perform bitwise operations on numbers with more than 32 bits
+            throw new Error("Invalid difficulty")
+        }
         const exponent = num >> 24
         const mantissa = num & 0xFFFFFF
 
         return new Difficulty(mantissa, exponent)
     }
     private static normalize(mantissa: number, exponent: number) {
-        if ( mantissa === 0 ) {
-            return { mantissa : Difficulty.minimumMantissa, exponent: Difficulty.minimumExponent }
+        if (mantissa === 0) {
+            return { mantissa: Difficulty.minimumMantissa, exponent: Difficulty.minimumExponent }
         }
 
-        if ( exponent > 28 ) {
-            return { mantissa , exponent: 28 }
+        if (exponent > 28) {
+            return { mantissa, exponent: 28 }
         }
 
         while ((mantissa & 0xFF) === 0 && exponent < 29) {
-            mantissa = mantissa >> 8
+            mantissa = mantissa / 0xFF
             exponent += 1
         }
         return { mantissa, exponent }
@@ -52,7 +56,7 @@ export class Difficulty {
         target.fill(0x00)
         const index = 32 - (this.exponent + 3)
         target.writeUIntBE(Math.pow(2, 24) - 1 - this.mantissa, index, 3)
-        if ( this.exponent + 3 !== 31) {
+        if (this.exponent + 3 !== 31) {
             target.fill(0xFF, 0, index)
         }
         return target
@@ -146,7 +150,7 @@ export class Difficulty {
     }
 
     private reverseByte(target: string) {
-        return target.substr(4, 2) + target.substr(2, 2 ) + target.substr(0, 2 )
+        return target.substr(4, 2) + target.substr(2, 2) + target.substr(0, 2)
     }
 
 }
