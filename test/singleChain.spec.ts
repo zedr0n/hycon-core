@@ -2,13 +2,18 @@ import { randomBytes } from "crypto"
 import Long = require("long")
 import { Block } from "../src/common/block"
 import { GenesisBlock } from "../src/common/blockGenesis"
+import { ITxPool } from "../src/common/itxPool"
+import { Consensus } from "../src/consensus/consensus"
 import { Database } from "../src/consensus/database/database"
-import { SingleChain } from "../src/consensus/singleChain"
+import { IConsensus } from "../src/consensus/iconsensus"
+import { IMiner } from "../src/miner/iminer"
 import { Server } from "../src/server"
 
 xdescribe("SingleChain", () => {
     let serverSpy: jasmine.SpyObj<Server> = jasmine.createSpyObj("Server", ["run"])
-    let consensus = new SingleChain(serverSpy, "./garbage", "./garbage", "./garbage")
+    const minerSpy: jasmine.SpyObj<IMiner> = jasmine.createSpyObj("MinerSpy", [])
+    const txPool: jasmine.SpyObj<ITxPool> = jasmine.createSpyObj("TxPoolSpy", [])
+    let consensus: Consensus
     let dbSpy: jasmine.SpyObj<Database> = jasmine.createSpyObj("Database", ["init"])
     let header = {}
 
@@ -31,7 +36,7 @@ xdescribe("SingleChain", () => {
         dbSpy.getHeaderTip.and.callFake(() => {
 
         })
-        consensus = new SingleChain(serverSpy, "./garbage", "./garbage", "./garbage")
+        consensus = new Consensus(minerSpy, txPool, "./garbage", "./garbage", "./garbage")
         // Dirty trick to prevent an actual DB from forming
         // tslint:disable-next-line:no-string-literal
         consensus["db"] = dbSpy

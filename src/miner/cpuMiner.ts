@@ -22,13 +22,13 @@ export class CpuMiner {
         const nonce = new Promise<Long>(async (resolve, reject) => {
             try {
                 const buffer = Buffer.allocUnsafe(72)
-                const tmpPreHash = preHash
-                buffer.fill(tmpPreHash, 0, 64)
+                buffer.fill(preHash, 0, 64)
                 buffer.writeUInt32LE(prefix, 64)
+                const target = difficulty.getTarget()
 
                 while (currentNonce < maxNonce && calculate) {
                     buffer.writeUInt32LE(currentNonce, 68)
-                    if (difficulty.acceptable(await Hash.hashCryptonight(buffer))) {
+                    if (difficulty.acceptable(await Hash.hashCryptonight(buffer), target)) {
                         const low = buffer.readInt32LE(64)
                         const high = buffer.readInt32LE(68)
                         resolve(Long.fromBits(low, high, true))
@@ -74,8 +74,10 @@ export class CpuMiner {
     }
 
     public hashRate() {
-        const hashrate = this.miners.map((m) => m.hashrate())
-        return (hashrate.length > 0) ? Math.round(hashrate.reduce((a, b) => a + b)) : 0
+        if (this.miners === undefined || this.miners.length === 0) {
+            return 0
+        }
+        return Math.round(this.miners.map((m) => m.hashrate()).reduce((a, b) => a + b))
     }
 
     public async stop() {
@@ -89,11 +91,13 @@ export class CpuMiner {
     public async putWork(block: Block, prehash: Uint8Array, difficulty: Difficulty) {
         await this.stop()
         this.miners = []
+        const hash = new Hash(block.header)
         for (let i = 0; i < this.minerCount; i++) {
             const miner = CpuMiner.mine(prehash, difficulty, i)
             miner.nonce.then((nonce) => {
                 const minedBlock = new Block(block)
                 minedBlock.header.nonce = nonce
+                const hash2 = new Hash(minedBlock.header)
                 this.minerServer.submitBlock(minedBlock)
             }).catch(() => { })
             this.miners.push(miner)

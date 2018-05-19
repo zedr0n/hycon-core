@@ -8,7 +8,6 @@ import { GenesisTx } from "../common/txGenesis"
 import { GenesisSignedTx } from "../common/txGenesisSigned"
 import { SignedTx } from "../common/txSigned"
 import { WorldState } from "../consensus/database/worldState"
-import { verifyTx } from "../consensus/singleChain"
 import { Block } from "../serialization/proto"
 import { Wallet } from "../wallet/wallet"
 import { hycontoString } from "./commonUtil"
@@ -41,7 +40,7 @@ const logger = getLogger("Genesis")
 const g = GenesisBlock.loadFromFile()
 logger.info(`Genesis hash : ${new Hash(g.header)}`)
 for (const tx of g.txs) {
-    if (verifyTx(tx)) {
+    if (tx.verify()) {
         logger.info(`Tx amount : ${tx.amount} /  Address : ${tx.to} / rec : ${tx.recovery}`)
     }
 }
@@ -85,7 +84,7 @@ async function editGenesis(genesis: GenesisBlock) {
     const editedGen = GenesisBlock.decode(fs.readFileSync("./data/genesisTest.dat"))
     logger.info(`Genesis : `, editedGen)
     for (const tx of editedGen.txs) {
-        if (!verifyTx(tx)) { continue }
+        if (!tx.verify()) { continue }
         logger.info(`Tx amount : ${hycontoString(tx.amount)}`)
     }
 }

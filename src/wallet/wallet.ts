@@ -148,8 +148,7 @@ export class Wallet {
     }
     public static encryptAES(password: string, data: string): string {
         const iv = crypto.randomBytes(16)
-        const key = new Buffer(32)
-        blake2b(32).update(Buffer.from(password)).digest(key)
+        const key = blake2b(32).update(Buffer.from(password)).digest()
         const cipher = crypto.createCipheriv("aes-256-cbc", key, iv)
         const dataBuffer = Buffer.from(data)
         const encryptedData1 = cipher.update(dataBuffer)
@@ -163,10 +162,9 @@ export class Wallet {
         const rawData = rawBufferData.toString()
         const stringArray = rawData.split(":")
         if (stringArray.length !== 3) { throw new Error(`Fail to decryptAES`) }
-        const iv = new Buffer(stringArray[1], "hex")
-        const encryptedData = new Buffer(stringArray[2], "hex")
-        const key = new Buffer(32)
-        blake2b(32).update(Buffer.from(password)).digest(key)
+        const iv = Buffer.from(stringArray[1], "hex")
+        const encryptedData = Buffer.from(stringArray[2], "hex")
+        const key = blake2b(32).update(Buffer.from(password)).digest()
         const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv)
         const originalData1 = decipher.update(encryptedData)
         const originalData2 = decipher.final()
@@ -185,7 +183,7 @@ export class Wallet {
         try {
             const rawRootKey = await fs.readFile(`./wallet/rootKey/${name}`)
             const decrypteResult = Wallet.decryptAES(password, rawRootKey)
-            const privateKeyBuffer = new Buffer(decrypteResult, "hex")
+            const privateKeyBuffer = Buffer.from(decrypteResult, "hex")
             return new Wallet(privateKeyBuffer)
         } catch (e) {
             logger.error("Fail to loadKeys : " + e)

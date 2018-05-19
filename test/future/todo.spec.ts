@@ -11,7 +11,6 @@ import { Database } from "./consensus/database/database"
 import { TxDatabase } from "./consensus/database/txDatabase"
 import { WorldState } from "./consensus/database/worldState"
 import { IConsensus } from "./consensus/iconsensus"
-import { SingleChain } from "./consensus/singleChain"
 import { IMiner } from "./miner/iminer"
 import { MinerServer } from "./miner/minerServer"
 import { StratumServer } from "./miner/stratumServer"
@@ -61,7 +60,7 @@ export class TestServer {
             const w = this.wallets[i]
             const account = await this.server.consensus.getAccount(w.pubKey.address())
             assert(account)
-            //assert(account.balance.compare(0) === 1)
+            // assert(account.balance.compare(0) === 1)
             logger.debug(`Wallet${i} Public=${w.pubKey.address().toString()} Balance=${hycontoString(account.balance)}`)
             assert(w)
         }
@@ -111,7 +110,7 @@ export class TestServer {
             const a = amt.add(randomInt(0, 10) * Math.pow(10, 9)).add(randomInt(0, 10) * Math.pow(10, 9)).add(randomInt(0, 10) * Math.pow(10, 9))
             const b = fee.add(randomInt(0, 10) * Math.pow(10, 9)).add(randomInt(0, 10) * Math.pow(10, 9))
             const tx = fromWallet.send(toAddr, a, nonce, b)
-            //logger.debug(`TX ${txList.length} Nonce=${nonce} Amount=${hycontoString(tx.amount)} Fee=${hycontoString(tx.fee)} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
+            // logger.debug(`TX ${txList.length} Nonce=${nonce} Amount=${hycontoString(tx.amount)} Fee=${hycontoString(tx.fee)} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
             txList.push(tx)
         }
 

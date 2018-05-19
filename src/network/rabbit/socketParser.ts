@@ -62,7 +62,7 @@ export class SocketParser {
         } else {
             // for this case, user memory is used
             // it will be released in "drain" event
-            logger.warn(`Pausing socket ${this.socket.remoteAddress}:${this.socket.remotePort} ${JSON.stringify(this.socket)}`)
+            logger.warn(`Pausing socket ${this.socket.remoteAddress}:${this.socket.remotePort}`)
             this.socket.pause()
         }
     }

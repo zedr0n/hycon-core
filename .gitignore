@@ -5,6 +5,7 @@ build
 blockdb*
 coverage
 deleteme*/
+garbage/
 hycon-*
 logs
 node_modules
@@ -13,9 +14,9 @@ peerdb*
 PeerList.db
 rawblock*
 src/keys
+txDB/*
+tx/
 wallet/
 worldstate*
 *.png
-garbage/
-txDB/*
-tx/
+

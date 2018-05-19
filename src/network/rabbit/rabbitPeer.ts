@@ -6,7 +6,9 @@ import { AnyBlock, Block } from "../../common/block"
 import { AnyBlockHeader, BlockHeader } from "../../common/blockHeader"
 import { ITxPool } from "../../common/itxPool"
 import { SignedTx } from "../../common/txSigned"
+import { IStatusChange } from "../../consensus/consensus"
 import { IConsensus } from "../../consensus/iconsensus"
+import { BlockStatus } from "../../consensus/sync"
 import * as proto from "../../serialization/proto"
 import { Server } from "../../server"
 import { Hash } from "../../util/hash"
@@ -334,13 +336,12 @@ export class RabbitPeer extends BasePeer implements IPeer {
         let relay = false
         try {
 
-            const promises: Array<Promise<boolean>> = []
+            const statusChanges: IStatusChange[] = []
             for (const iblock of request.blocks) {
                 const block = new Block(iblock)
-                promises.push(this.consensus.putBlock(block))
+                statusChanges.push(await this.consensus.putBlock(block))
             }
-            const results = await Promise.all(promises)
-            relay = results.every((value) => value)
+            relay = statusChanges.every((change) => (change.new !== BlockStatus.Rejected && change.old !== change.new))
         } catch (e) {
             logger.error(`Failed to put block: ${e}`)
         }
@@ -425,13 +426,12 @@ export class RabbitPeer extends BasePeer implements IPeer {
     private async respondPutHeaders(reply: boolean, request: proto.IPutHeaders): Promise<IResponse> {
         let relay = false
         try {
-            const promises: Array<Promise<boolean>> = []
+            const statusChanges: IStatusChange[] = []
             for (const iheader of request.headers) {
                 const header = new BlockHeader(iheader)
-                promises.push(this.consensus.putHeader(header))
+                statusChanges.push(await this.consensus.putHeader(header))
             }
-            const results = await Promise.all(promises)
-            relay = results.every((value) => value)
+            relay = statusChanges.every((change) => (change.new !== BlockStatus.Rejected && change.old !== change.new))
         } catch (e) {
             logger.error(`Failed to put header: ${e}`)
         }

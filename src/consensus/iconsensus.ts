@@ -1,3 +1,4 @@
+import { EventEmitter } from "events"
 import { Address } from "../common/address"
 import { AnyBlock, Block } from "../common/block"
 import { GenesisBlock } from "../common/blockGenesis"
@@ -9,15 +10,16 @@ import { Account } from "../consensus/database/account"
 import { TxList } from "../consensus/database/txList"
 import { BlockStatus } from "../consensus/sync"
 import { Hash } from "../util/hash"
+import { TxValidity } from "./database/worldState"
+
 export type AnySignedTx = (GenesisSignedTx | SignedTx)
 
 export type NewBlockCallback = (block: AnyBlock) => void
-export interface IConsensus {
+export interface IConsensus extends EventEmitter {
     init(): Promise<void>
-    putBlock(block: Block): Promise<boolean>
-    putHeader(header: AnyBlockHeader): Promise<boolean>
-    addCallbackNewBlock(callback: NewBlockCallback, priority?: number): void
-    removeCallbackNewBlock(callback: NewBlockCallback): void
+    // HEY CHecks the Refs
+    putBlock(block: Block): Promise<{ old: BlockStatus, new: BlockStatus }>
+    putHeader(header: BlockHeader): Promise<{ old: BlockStatus, new: BlockStatus }>
     getBlockByHash(hash: Hash): Promise<AnyBlock>
     getHeaderByHash(hash: Hash): Promise<AnyBlockHeader>
     getBlocksRange(fromHeight: number, count?: number): Promise<AnyBlock[]>
@@ -28,11 +30,9 @@ export interface IConsensus {
     getBlockStatus(hash: Hash): Promise<BlockStatus>
     getHeaderTip(): { hash: Hash, height: number }
     getBlocksTip(): { hash: Hash, height: number }
-    testMakeBlock(txs: SignedTx[], previous?: Block): Promise<Block>
-    isTxValid(tx: SignedTx): Promise<boolean>
     getTx(hash: Hash): Promise<{ tx: TxList, timestamp: number, confirmation: number } | undefined>
+    txValidity(tx: SignedTx): Promise<TxValidity>
     getHash(height: number): Promise<Hash>
-    getNonce(address: Address): Promise<number>
     getBlockHeight(hash: Hash): Promise<number | undefined>
     getPendingTxs(index: number, count: number): { txs: SignedTx[], length: number, totalAmount: Long, totalFee: Long }
 }

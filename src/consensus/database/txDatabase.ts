@@ -5,7 +5,6 @@ import { Address } from "../../common/address"
 import { SignedTx } from "../../common/txSigned"
 import { Hash } from "../../util/hash"
 import { AnySignedTx, IConsensus } from "../iconsensus"
-import { SingleChain, verifyTx } from "../singleChain"
 import { BlockStatus } from "../sync"
 import { TxList } from "./txList"
 const logger = getLogger("TxDB")
@@ -47,7 +46,6 @@ export class TxDatabase {
         const batch: levelup.Batch[] = []
         const mapLastTx: Map<string, Hash> = new Map<string, Hash>()
         for (const tx of txs) {
-            if (!verifyTx(tx)) { continue }
             const txHash = new Hash(tx)
             const existedCheck = await this.get(txHash)
             if (existedCheck !== undefined) {
@@ -142,7 +140,7 @@ export class TxDatabase {
             } else if (txList.tx instanceof SignedTx) {
                 if (txList.tx.from.equals(address)) {
                     if (txList.previousFrom !== undefined) {
-                         txList = await this.get(txList.previousFrom)
+                        txList = await this.get(txList.previousFrom)
                     } else {
                         txList = undefined
                     }
@@ -150,7 +148,7 @@ export class TxDatabase {
             }
             if (txList !== undefined) {
                 const block = await this.consensus.getHeaderByHash(txList.blockHash)
-                txs.push({txList, timestamp: block.timeStamp})
+                txs.push({ txList, timestamp: block.timeStamp })
             }
         }
         return txs

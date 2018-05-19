@@ -22,9 +22,15 @@ import { NodeRef } from "./nodeRef"
 import { StateNode } from "./stateNode"
 // tslint:disable-next-line:no-var-requires
 const assert = require("assert")
+
 const logger = getLogger("WorldState")
 
-// tslint:disable:max-line-length
+export enum TxValidity {
+    Invalid,
+    Valid,
+    Waiting,
+}
+
 function match(pre: Uint8Array, address: Address, offset: number): boolean {
     if (pre.length > address.length - offset) { return false }
     for (let i = 0; i < pre.length; i++) {
@@ -88,6 +94,9 @@ export class WorldState {
             return Promise.reject("Print Error : " + e)
         }
     }
+    public async validateTx(stateRoot: Hash, tx: SignedTx): Promise<TxValidity> {
+        throw new Error("Method not implemented.")
+    }
 
     public async first(genesis: GenesisBlock): Promise<IStateTransition> {
         try {
@@ -98,7 +107,7 @@ export class WorldState {
             genesis.txs.sort((a, b) => a.to[0] - b.to[0])
 
             for (const tx of genesis.txs) {
-                if (!Verify.tx(tx)) { continue }
+                if (!tx.verify()) { continue }
                 const toAccount = new Account({ balance: +tx.amount, nonce: 0 })
                 const toAccountHash = this.put(batch, mapAccount, toAccount)
                 const nodeRef = new NodeRef({ address: tx.to, child: toAccountHash })

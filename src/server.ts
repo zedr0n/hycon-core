@@ -1,20 +1,18 @@
 import commandLineArgs = require("command-line-args")
 import { getLogger } from "log4js"
 import { HttpServer } from "./api/server/server"
-import { Address } from "./common/address"
 import { ITxPool } from "./common/itxPool"
 import { TxPool } from "./common/txPool"
+import { Consensus } from "./consensus/consensus"
 import { Database } from "./consensus/database/database"
 import { WorldState } from "./consensus/database/worldState"
 import { IConsensus } from "./consensus/iconsensus"
-import { SingleChain } from "./consensus/singleChain"
 import { Sync } from "./consensus/sync"
 import { IMiner } from "./miner/iminer"
 import { MinerServer } from "./miner/minerServer"
 import { INetwork } from "./network/inetwork"
 import { RabbitNetwork } from "./network/rabbit/rabbitNetwork" // for speed
 import { RestManager } from "./rest/restManager"
-import { TestServer } from "./testServer"
 import { Wallet } from "./wallet/wallet"
 import { WalletManager } from "./wallet/walletManager"
 
@@ -53,7 +51,6 @@ export class Server {
     public readonly rest: RestManager = undefined // api server for hycon
     public db: Database
     public accountDB: WorldState
-    public test: TestServer
     public httpServer: HttpServer
     public sync: Sync
     private triggerMining: () => void
@@ -87,12 +84,11 @@ export class Server {
         }
 
         const postfix = Server.globalOptions.postfix
-        this.consensus = new SingleChain(this, "blockdb" + postfix, "worldstate" + postfix, "rawblock" + postfix, "txDB" + postfix)
-        this.network = new RabbitNetwork(this, Server.globalOptions.port, "peerdb" + postfix, Server.globalOptions.networkid)
-
-        this.wallet = new WalletManager(this)
-        this.miner = new MinerServer(this, Server.globalOptions.str_port)
         this.txPool = new TxPool(this)
+        this.miner = new MinerServer(this, Server.globalOptions.str_port)
+        this.consensus = new Consensus(this.miner, this.txPool, "blockdb" + postfix, "worldstate" + postfix, "rawblock" + postfix, "txDB" + postfix)
+        this.network = new RabbitNetwork(this, Server.globalOptions.port, "peerdb" + postfix, Server.globalOptions.networkid)
+        this.wallet = new WalletManager(this)
         this.rest = new RestManager(this)
     }
     public setTriggerMining(f: () => void) {
@@ -118,7 +114,7 @@ export class Server {
         }
         if (Server.globalOptions.writing) {
             logger.info("Test Writing")
-            this.test = new TestServer(this)
+            throw new Error("Deprecated")
         }
         await this.runSync()
     }

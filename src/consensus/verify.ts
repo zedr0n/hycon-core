@@ -7,80 +7,81 @@ import { SignedTx } from "../common/txSigned"
 import { MinerServer } from "../miner/minerServer"
 import { Hash } from "../util/hash"
 import { Database } from "./database/database"
+import { DBBlock } from "./database/dbblock"
 import { IStateTransition, WorldState } from "./database/worldState"
 import { Difficulty } from "./difficulty"
 import { DifficultyAdjuster } from "./difficultyAdjuster"
+import { BlockStatus } from "./sync"
 
 const logger = getLogger("Verify")
 export class Verify {
-    public static async blockHeader(header: BlockHeader): Promise<boolean> {
+    public static async processHeader(previousDBBlock: DBBlock, header: BlockHeader, hash: Hash) {
+        const { difficulty, workDelta, timeEMA, workEMA } = DifficultyAdjuster.adjustDifficulty(previousDBBlock, header.timeStamp)
+
+        let newStatus
+        if (difficulty.encode() !== header.difficulty) {
+            logger.warn(`Rejecting block(${hash.toString()}): Difficulty(${header.difficulty}) does not match calculated value(${difficulty.encode()})`)
+            newStatus = BlockStatus.Rejected
+            return { newStatus }
+        }
+
         const preHash = header.preHash()
-        return MinerServer.checkNonce(preHash, header.nonce, Difficulty.decode(header.difficulty))
-    }
-    public static async block(givenBlock: Block, previousHeader: AnyBlockHeader, worldState: WorldState, database: Database): Promise<{ isVerified: boolean, stateTransition?: IStateTransition }> {
-        const isValidHeader = await Verify.blockHeader(givenBlock.header)
-        if (!isValidHeader) {
-            logger.warn(`Invalid header`)
-            return { isVerified: false }
+        const nonceCheck = await MinerServer.checkNonce(preHash, header.nonce, difficulty)
+        if (!nonceCheck) {
+            logger.warn(`Rejecting block(${hash.toString()}): Hash does not meet difficulty(${header.difficulty})`)
+            newStatus = BlockStatus.Rejected
+            return { newStatus }
         }
 
-        const verifyResult = await Verify.preBlock(givenBlock, previousHeader, worldState, database)
-        if (!verifyResult.isVerified) {
-            return { isVerified: false }
-        }
+        const height = previousDBBlock.height + 1
+        const totalWork = difficulty.add(workDelta)
+        const dbBlock = new DBBlock({ header, height, timeEMA, workEMA: workEMA.encode(), totalWork: totalWork.encode() })
+        newStatus = BlockStatus.Header
 
-        return verifyResult
+        return { newStatus, dbBlock }
     }
-    public static async preBlock(block: Block, previousHeader: AnyBlockHeader, worldState: WorldState, database: Database): Promise<{ isVerified: boolean, stateTransition?: IStateTransition }> {
-        const txVerify = block.txs.every((tx) => Verify.tx(tx))
-        if (!txVerify) { return { isVerified: false } }
 
+    public static async processBlock(block: Block, dbBlock: DBBlock, hash: Hash, header: BlockHeader, previousDBBlock: DBBlock, database: Database, worldState: WorldState) {
         const merkleRoot = block.calculateMerkleRoot()
-        const merkleRootVerify = merkleRoot.equals(block.header.merkleRoot)
-        if (!merkleRootVerify) {
-            logger.warn(`Invalid merkleRoot expected ${block.header.merkleRoot}, got ${merkleRoot}`)
-            return { isVerified: false }
+        if (!merkleRoot.equals(header.merkleRoot)) {
+            logger.warn(`Rejecting block(${hash.toString()}): Merkle root(${header.merkleRoot.toString()}) does not match calculated value(${merkleRoot.toString()})`)
+
+            return { newStatus: BlockStatus.Rejected }
         }
-        const { stateTransition, validTxs, invalidTxs } = await worldState.next(block.txs, previousHeader.stateRoot, block.header.miner)
+
+        for (const tx of block.txs) {
+            if (!tx.verify()) {
+                const txHash = new Hash(tx)
+                logger.warn(`Rejecting block(${hash.toString()}): TX(${txHash.toString()}) signature is incorrect`)
+                return { newStatus: BlockStatus.Rejected }
+            }
+        }
+
+        const { stateTransition, validTxs, invalidTxs } = await worldState.next(block.txs, previousDBBlock.header.stateRoot, block.header.miner)
         if (!stateTransition.currentStateRoot.equals(block.header.stateRoot)) {
-            logger.warn(`State root(${stateTransition.currentStateRoot.toString()}) is incorrect, expected: ${block.header.stateRoot.toString()}, previous: ${previousHeader.stateRoot.toString()}`)
-            return { isVerified: false }
+            logger.warn(`Rejecting block(${hash.toString()}): stateRoot(${header.stateRoot}) does not match calculated value(${stateTransition.currentStateRoot})`)
+            return { newStatus: BlockStatus.Rejected }
         }
+
         if (invalidTxs.length > 0) {
-            logger.warn(`Block contains invalid Txs`)
-            return { isVerified: false }
+            logger.warn(`Rejecting block(${hash.toString()}): ${invalidTxs.length} txs were rejected`)
+            return { newStatus: BlockStatus.Rejected }
         }
 
         if (validTxs.length !== block.txs.length) {
-            logger.warn(`Not all txs were valid`)
-            return { isVerified: false }
+            logger.warn(`Rejecting block(${hash.toString()}): expected ${block.txs.length} transactions to be processed, but ${validTxs.length} were processed`)
+            return { newStatus: BlockStatus.Rejected }
         }
 
-        const prevHash = new Hash(previousHeader)
-        const prevDBBlock = await database.getDBBlock(prevHash)
-
-        const prevTimeEMA = prevDBBlock.timeEMA
-        const prevWorkEMA = prevDBBlock.workEMA
-
-        const blockDifficulty = Difficulty.decode(block.header.difficulty)
-        const timeDelta = block.header.timeStamp - previousHeader.timeStamp
-        const workDelta = Difficulty.decode(previousHeader.difficulty)
-
-        if (!(DifficultyAdjuster.verifyDifficulty(timeDelta, prevTimeEMA, workDelta, prevWorkEMA, blockDifficulty))) {
-            logger.warn(`Invalid block difficulty`)
-            return { isVerified: false }
+        const { offset, fileNumber, length } = await database.writeBlock(block)
+        await worldState.putPending(stateTransition.batch, stateTransition.mapAccount)
+        if (dbBlock === undefined) {
+            dbBlock = await database.getDBBlock(hash)
         }
+        dbBlock.offset = offset
+        dbBlock.fileNumber = fileNumber
+        dbBlock.length = length
 
-        logger.debug(`Verified stateRoot: ${block.header.stateRoot}, Block: ${block.header.merkleRoot.toString()}`)
-
-        return { isVerified: true, stateTransition }
-    }
-
-    public static tx(givenTx: SignedTx | GenesisSignedTx): boolean {
-        try {
-            const pubKey = new PublicKey(givenTx)
-            if (!pubKey.verify(givenTx)) { return false }
-            return true
-        } catch (e) { return false }
+        return { newStatus: BlockStatus.Block, dbBlockHasChanged: true }
     }
 }

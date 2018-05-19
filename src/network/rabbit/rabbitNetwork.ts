@@ -4,6 +4,7 @@ import { getLogger } from "log4js"
 import { createConnection, createServer, Socket } from "net"
 import * as net from "net"
 import * as netmask from "netmask"
+import uuidv4 = require("uuid/v4")
 import { IConsensus } from "../../consensus/iconsensus"
 import * as proto from "../../serialization/proto"
 import { Server } from "../../server"
@@ -14,7 +15,6 @@ import { NatUpnp } from "../nat"
 import { PeerDb } from "../peerDb"
 import { UpnpClient, UpnpServer } from "../upnp"
 import { RabbitPeer } from "./rabbitPeer"
-const uuidv4 = require('uuid/v4');
 
 const logger = getLogger("Network")
 
@@ -26,7 +26,6 @@ export class RabbitNetwork implements INetwork {
         { host: "rapid3.hycon.io", port: 8148 },
     ]
     public static failLimit: number
-
 
     public static ipNormalise(ipv6: string): string {
         const ipTemp: string[] = ipv6.split(":")
@@ -49,7 +48,6 @@ export class RabbitNetwork implements INetwork {
     private upnpServer: UpnpServer
     private upnpClient: UpnpClient
     private natUpnp: NatUpnp
-
 
     constructor(hycon: Server, port: number = 8148, peerDbPath: string = "peerdb", networkid: string = "hycon") {
         RabbitNetwork.failLimit = 10
@@ -74,8 +72,7 @@ export class RabbitNetwork implements INetwork {
             const key = PeerDb.ipeer2key(ipeer)
             this.endPoints.set(key, ipeer)
             // ok
-        }
-        else {
+        } else {
             // the self connection
             logger.debug(`GuidCheck Self-Connection Disconnect ${peer.socketBuffer.getInfo()}`)
             peer.disconnect()
@@ -90,10 +87,10 @@ export class RabbitNetwork implements INetwork {
         return peerList
     }
 
-    public broadcast(packet: Buffer, exempt: RabbitPeer): void {
+    public broadcast(packet: Buffer, exempt?: RabbitPeer): void {
         for (const [key, peer] of this.peers) {
             if (exempt !== peer) {
-                peer.sendPacket(packet).catch((e) => { logger.info(e) })
+                peer.sendPacket(packet).catch((e) => { logger.warn(e) })
             }
         }
     }
@@ -250,7 +247,6 @@ export class RabbitNetwork implements INetwork {
         }
     }
 
-
     private async newConnection(socket: Socket): Promise<RabbitPeer> {
         const peer = new RabbitPeer(socket, this, this.hycon.consensus, this.hycon.txPool, this.peerDB)
         const ipeer = { host: socket.remoteAddress, port: socket.remotePort }
@@ -258,8 +254,9 @@ export class RabbitNetwork implements INetwork {
         this.peers.set(key, peer)
         socket.on("close", async (error) => {
             this.peers.delete(key)
-            if (this.endPoints.has(key))
+            if (this.endPoints.has(key)) {
                 this.endPoints.delete(key)
+            }
             logger.debug(`disconnected from ${key} ${ipeer.host}:${ipeer.port}`)
 
         })
