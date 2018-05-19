@@ -36,7 +36,6 @@ export class SingleChain implements IConsensus {
     private blockTip: DBBlock
     private headerTip: DBBlock
     private txUnit: number
-    private forkHeight: number
     private txdb?: TxDatabase
     private blockLock: AsyncLock
     private headerLock: AsyncLock
@@ -436,11 +435,7 @@ export class SingleChain implements IConsensus {
 
     private async verifyHeader(header: BlockHeader): Promise<boolean> {
         const preHash = header.preHash()
-
-        if (MinerServer.checkNonce(preHash, header.nonce, Difficulty.decode(header.difficulty))) {
-            return true
-        }
-        return false
+        return MinerServer.checkNonce(preHash, header.nonce, Difficulty.decode(header.difficulty))
     }
 
     private async organizeChains(newBlockHash: Hash, dbBlock: DBBlock, block?: Block, txCount: number = 0): Promise<void> {
