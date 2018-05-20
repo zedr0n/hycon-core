@@ -39,6 +39,12 @@ export class TxList implements proto.ITxList {
             } else { this.previousTo = new Hash(txList.previousTo) }
         }
 
+        if (txList.blockHash !== undefined) {
+            if (this.blockHash) {
+                this.blockHash.set(txList.blockHash)
+            } else { this.blockHash = new Hash(txList.blockHash) }
+        }
+
         if (this.tx) {
             this.tx.set(txList.tx)
         } else { this.tx = new SignedTx(txList.tx) }

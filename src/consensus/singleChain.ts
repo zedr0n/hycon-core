@@ -72,18 +72,7 @@ export class SingleChain implements IConsensus {
             }
 
             if (this.txdb) {
-                const lastHash = await this.txdb.getLastBlock()
-                let lastHeight = 0
-                if (lastHash !== undefined) { lastHeight = await this.db.getBlockHeight(lastHash) }
-                let from = lastHeight
-                while (true) {
-                    if (from >= this.blockTip.height) { break }
-                    const r = (this.blockTip.height - from) % 20
-                    const n = (r === 0) ? 20 : r
-                    const blocks = await this.db.getBlocksRange(from, n)
-                    await this.txdb.init(blocks)
-                    from += n
-                }
+                await this.txdb.init(this.db, this.blockTip.height)
             }
 
             this.server.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock(txs))
@@ -132,7 +121,7 @@ export class SingleChain implements IConsensus {
                 const transitionResult = verifyResult.stateTransition
                 await this.worldState.putPending(transitionResult.batch, transitionResult.mapAccount)
                 const { current, previous } = await this.db.putBlock(blockHash, block)
-                if (this.txdb) { await this.txdb.putTxs(blockHash, block.txs) }
+                logger.error(`BlockHash : ${blockHash} / ${new Hash(current.header)}`)
 
                 await this.organizeChains(blockHash, current, block, this.txUnit)
 
@@ -355,7 +344,7 @@ export class SingleChain implements IConsensus {
                 timeStamp,
             })
             const newBlock = new Block({ header, txs: validTxs, miner })
-            this.server.txPool.updateTxs(validTxs, 0)
+            this.server.txPool.updateTxs(invalidTxs, 0)
             newBlock.updateMerkleRoot()
 
             this.server.miner.newCandidateBlock(newBlock)
@@ -442,6 +431,7 @@ export class SingleChain implements IConsensus {
                 if (this.blockTip === undefined || this.blockTip.height < dbBlock.height) {
                     const txs = await this.reorganize(newBlockHash, block, dbBlock.height, txCount)
                     this.blockTip = dbBlock
+                    logger.error(`BlockTip Hash : ${new Hash(this.blockTip.header)}`)
                     await this.db.setBlockTip(newBlockHash)
                     this.createCandidateBlock(txs)
                 } else {
@@ -508,6 +498,7 @@ export class SingleChain implements IConsensus {
             await this.db.setHashAtHeight(pushHeight, hash)
             pushHeight += 1
             txs = this.server.txPool.updateTxs(block.txs, newBlockHashes.length > 0 ? 0 : txCount)
+            if (this.txdb) { await this.txdb.putTxs(hash, block.txs) }
             this.newBlock(block)
         }
         return txs

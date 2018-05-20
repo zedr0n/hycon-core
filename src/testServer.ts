@@ -78,12 +78,16 @@ export class TestServer {
         setInterval(() => {
             this.makeTx()
         }, 3000)
+        setTimeout(() => {
+            logger.error(`Start test Consensus`)
+            this.testConsensus()
+        }, 10000)
     }
     private async makeTx() {
         const amt = hyconfromString("100.123")
         const fee = hyconfromString("10.2")
 
-        const n = 1
+        const n = 5
         const lastWalletIndex = this.wallets.length - 1
         const txList: SignedTx[] = []
         for (let i = 0; i < n; i++) {
@@ -118,23 +122,27 @@ export class TestServer {
     // TODO : Block, hash, SignedTx, randomBytes import, and testMakeBlock(db, consensus) remove
     // tslint:disable-next-line:member-ordering
     public async testConsensus() {
-        const block1 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 3))
+        const block1 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 2))
         const block1Hash = new Hash(block1.header)
         logger.error(`########################   Make block1:${block1Hash}`)
-        const block2 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 3))
-        const decodeBlock = Block.decode(block1.encode())
-
-        const block2Hash = new Hash(block1.header)
+        for (const tx of block1.txs) {
+            logger.error(`Tx : ${new Hash(tx)}`)
+        }
+        const block2 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 2))
+        const block2Hash = new Hash(block2.header)
         logger.error(`########################   Make block2:${block2Hash}`)
-        const block3 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 3))
+        for (const tx of block2.txs) {
+            logger.error(`Tx : ${new Hash(tx)}`)
+        }
+        const block3 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 2))
         const block3Hash = new Hash(block3.header)
         logger.error(`########################   Make block3:${block3Hash}`)
+        for (const tx of block3.txs) {
+            logger.error(`Tx : ${new Hash(tx)}`)
+        }
 
         setTimeout(async () => {
-            logger.error(`########################   Save block1`)
-            for (const tx of block1.txs) {
-                logger.error(`Tx : ${new Hash(tx)}`)
-            }
+            logger.error(`########################   Save block1 : ${new Hash(block1.header)}`)
             await this.server.consensus.putBlock(block1)
             const bTip1 = this.server.consensus.getBlocksTip()
             const hTip1 = this.server.consensus.getHeaderTip()
@@ -142,10 +150,7 @@ export class TestServer {
             const tipHash1 = await this.server.consensus.getHash(bTip1.height)
             logger.error(`########################   Get Hash using Tip Height : ${tipHash1}`)
 
-            logger.error(`########################   Save block2`)
-            for (const tx of block2.txs) {
-                logger.error(`Tx : ${new Hash(tx)}`)
-            }
+            logger.error(`########################   Save block2 : ${new Hash(block2.header)}`)
             await this.server.consensus.putBlock(block2)
             const bTip2 = this.server.consensus.getBlocksTip()
             const hTip2 = this.server.consensus.getHeaderTip()
@@ -153,10 +158,7 @@ export class TestServer {
             const tipHash2 = await this.server.consensus.getHash(bTip2.height)
             logger.error(`########################   Get Hash using Tip Height : ${tipHash2}`)
 
-            logger.error(`########################   Save block3`)
-            for (const tx of block3.txs) {
-                logger.error(`Tx : ${new Hash(tx)}`)
-            }
+            logger.error(`########################   Save block3 : ${new Hash(block3.header)}`)
             await this.server.consensus.putBlock(block3)
             const bTip3 = this.server.consensus.getBlocksTip()
             const hTip3 = this.server.consensus.getHeaderTip()
@@ -166,51 +168,51 @@ export class TestServer {
 
             // Block4(block2)
             setTimeout(async () => {
-                const block4 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 3), block2)
+                const block4 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 2), block2)
                 const block4Hash = new Hash(block4.header)
                 logger.error(`########################   Make block4:${block4Hash}`)
-                logger.error(`########################   Save block4`)
                 for (const tx of block4.txs) {
                     logger.error(`Tx : ${new Hash(tx)}`)
                 }
+                logger.error(`########################   Save block4 : ${new Hash(block4.header)}`)
                 await this.server.consensus.putBlock(block4)
-                const bTip4 = this.server.consensus.getBlocksTip()
-                const hTip4 = this.server.consensus.getHeaderTip()
-                logger.error(`########################   Block4Tip : ${bTip4.hash}(${bTip4.height}) / Header4Tip : ${hTip4.hash}(${hTip4.height})`)
-                const tipHash4 = await this.server.consensus.getHash(bTip4.height)
-                logger.error(`########################   Get Hash using Tip Height : ${tipHash4}`)
+                // const bTip4 = this.server.consensus.getBlocksTip()
+                // const hTip4 = this.server.consensus.getHeaderTip()
+                // logger.error(`########################   Block4Tip : ${bTip4.hash}(${bTip4.height}) / Header4Tip : ${hTip4.hash}(${hTip4.height})`)
+                // const tipHash4 = await this.server.consensus.getHash(bTip4.height)
+                // logger.error(`########################   Get Hash using Tip Height : ${tipHash4}`)
 
-                // Block5(block3)
-                setTimeout(async () => {
-                    const block5 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 3), block3)
-                    const block5Hash = new Hash(block5.header)
-                    logger.error(`########################   Make block5:${block5Hash}`)
-                    logger.error(`########################   Save block5`)
-                    for (const tx of block5.txs) {
-                        logger.error(`Tx : ${new Hash(tx)}`)
-                    }
-                    await this.server.consensus.putBlock(block5)
-                    const bTip5 = this.server.consensus.getBlocksTip()
-                    const hTip5 = this.server.consensus.getHeaderTip()
-                    logger.error(`########################   Block5Tip : ${bTip5.hash}(${bTip5.height}) / Header5Tip : ${hTip5.hash}(${hTip5.height})`)
-                    const tipHash5 = await this.server.consensus.getHash(bTip5.height)
-                    logger.error(`########################   Get Hash using Tip Height : ${tipHash5}`)
+                // // Block5(block3)
+                // setTimeout(async () => {
+                //     const block5 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 3), block3)
+                //     const block5Hash = new Hash(block5.header)
+                //     logger.error(`########################   Make block5:${block5Hash}`)
+                //     logger.error(`########################   Save block5`)
+                //     for (const tx of block5.txs) {
+                //         logger.error(`Tx : ${new Hash(tx)}`)
+                //     }
+                //     await this.server.consensus.putBlock(block5)
+                //     const bTip5 = this.server.consensus.getBlocksTip()
+                //     const hTip5 = this.server.consensus.getHeaderTip()
+                //     logger.error(`########################   Block5Tip : ${bTip5.hash}(${bTip5.height}) / Header5Tip : ${hTip5.hash}(${hTip5.height})`)
+                //     const tipHash5 = await this.server.consensus.getHash(bTip5.height)
+                //     logger.error(`########################   Get Hash using Tip Height : ${tipHash5}`)
 
-                    // Block6(block5)
-                    const block6 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 3), block5)
-                    const block6Hash = new Hash(block6.header)
-                    logger.error(`########################   Make block6:${block6Hash}`)
-                    logger.error(`########################   Save block6`)
-                    for (const tx of block6.txs) {
-                        logger.error(`Tx : ${new Hash(tx)}`)
-                    }
-                    await this.server.consensus.putBlock(block6)
-                    const bTip6 = this.server.consensus.getBlocksTip()
-                    const hTip6 = this.server.consensus.getHeaderTip()
-                    logger.error(`########################   Block6Tip : ${bTip6.hash}(${bTip6.height}) / Header5Tip : ${hTip6.hash}(${hTip6.height})`)
-                    const tipHash6 = await this.server.consensus.getHash(bTip6.height)
-                    logger.error(`########################   Get Hash using Tip Height : ${tipHash6}`)
-                }, 1000)
+                //     // Block6(block5)
+                //     const block6 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 3), block5)
+                //     const block6Hash = new Hash(block6.header)
+                //     logger.error(`########################   Make block6:${block6Hash}`)
+                //     logger.error(`########################   Save block6`)
+                //     for (const tx of block6.txs) {
+                //         logger.error(`Tx : ${new Hash(tx)}`)
+                //     }
+                //     await this.server.consensus.putBlock(block6)
+                //     const bTip6 = this.server.consensus.getBlocksTip()
+                //     const hTip6 = this.server.consensus.getHeaderTip()
+                //     logger.error(`########################   Block6Tip : ${bTip6.hash}(${bTip6.height}) / Header5Tip : ${hTip6.hash}(${hTip6.height})`)
+                //     const tipHash6 = await this.server.consensus.getHash(bTip6.height)
+                //     logger.error(`########################   Get Hash using Tip Height : ${tipHash6}`)
+                // }, 1000)
 
             }, 1000)
 

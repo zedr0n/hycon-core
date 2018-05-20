@@ -1,17 +1,17 @@
 
 import { getHashes } from "crypto"
-import { ADDRGETNETWORKPARAMS } from "dns"
 import levelup = require("levelup")
 import { getLogger } from "log4js"
 import rocksdb = require("rocksdb")
 import { Address } from "../../common/address"
-import { AnyBlock } from "../../common/block"
+import { AnyBlock, Block } from "../../common/block"
 import { GenesisSignedTx } from "../../common/txGenesisSigned"
 import { SignedTx } from "../../common/txSigned"
 import * as proto from "../../serialization/proto"
 import { Hash } from "../../util/hash"
 import { AnySignedTx } from "../iconsensus"
 import { SingleChain, verifyTx } from "../singleChain"
+import { Database } from "./database"
 import { TxList } from "./txList"
 const logger = getLogger("TxDB")
 
@@ -22,10 +22,16 @@ export class TxDatabase {
         const rocks: any = rocksdb(path)
         this.database = levelup(rocks)
     }
-    public async init(blocks: AnyBlock[]) {
-        const newTxs: AnySignedTx[] = []
-        for (const block of blocks) {
-            await this.putTxs(new Hash(block.header), block.txs)
+    public async init(blockDB: Database, tipHeight: number) {
+        const lastHash = await this.getLastBlock()
+        let lastHeight = 0
+        if (lastHash !== undefined) { lastHeight = await blockDB.getBlockHeight(lastHash) }
+        if (lastHeight < tipHeight) {
+            const blocks = await blockDB.getBlocksRange(lastHeight)
+            for (const block of blocks) {
+                const blockHash = new Hash(block.header)
+                await this.putTxs(blockHash, block.txs)
+            }
         }
     }
 
@@ -46,36 +52,43 @@ export class TxDatabase {
         const mapLastTx: Map<string, Hash> = new Map<string, Hash>()
         for (const tx of txs) {
             if (!verifyTx(tx)) { continue }
-            const txList = new TxList(tx)
-            txList.blockHash = blockHash
-            // TODO : How to handle same tx different block? If db key change txHash to txListHash,
-            // Every time a previousTo or previousFrom changes, key have to changed...
             const txHash = new Hash(tx)
-
-            const toAddress = tx.to.toString()
-            let tLastTx = mapLastTx.get(toAddress)
-            if (tLastTx === undefined) {
-                const lastTx = await this.getTx(tx.to)
-                if (lastTx) { tLastTx = new Hash(lastTx.tx) }
-            }
-            if (tLastTx !== undefined) { txList.previousTo = tLastTx }
-            mapLastTx.set(toAddress, txHash)
-
-            if (tx instanceof SignedTx) {
-                const fromAddress = tx.from.toString()
-                let fLastTx = mapLastTx.get(fromAddress)
-                if (fLastTx === undefined) {
-                    const lastTx = await this.getTx(tx.from)
-                    if (lastTx) { fLastTx = new Hash(lastTx.tx) }
+            const existedCheck = await this.getTx(txHash)
+            if (existedCheck !== undefined) {
+                logger.error(`TxList info is already exsited, so change blockHash of txList : ${blockHash} / ${txHash}`)
+                if (!existedCheck.blockHash.equals(blockHash)) {
+                    existedCheck.blockHash = blockHash
+                    batch.push({ type: "put", key: txHash.toString(), value: existedCheck.encode() })
                 }
-                if (fLastTx !== undefined) { txList.previousFrom = fLastTx }
-                mapLastTx.set(fromAddress, txHash)
+            } else {
+                const txList = new TxList(tx)
+                txList.blockHash = blockHash
+
+                const toAddress = tx.to.toString()
+                let tLastTx = mapLastTx.get(toAddress)
+                if (tLastTx === undefined) {
+                    const lastTx = await this.getTx(tx.to)
+                    if (lastTx) { tLastTx = new Hash(lastTx.tx) }
+                }
+                if (tLastTx !== undefined) { txList.previousTo = tLastTx }
+                mapLastTx.set(toAddress, txHash)
+
+                if (tx instanceof SignedTx) {
+                    const fromAddress = tx.from.toString()
+                    let fLastTx = mapLastTx.get(fromAddress)
+                    if (fLastTx === undefined) {
+                        const lastTx = await this.getTx(tx.from)
+                        if (lastTx) { fLastTx = new Hash(lastTx.tx) }
+                    }
+                    if (fLastTx !== undefined) { txList.previousFrom = fLastTx }
+                    mapLastTx.set(fromAddress, txHash)
+                }
+                batch.push({ type: "put", key: txHash.toString(), value: txList.encode() })
             }
-            batch.push({ type: "put", key: txHash.toString(), value: txList.encode() })
-        }
-        for (const key of mapLastTx.keys()) {
-            const txListHash = mapLastTx.get(key)
-            batch.push({ type: "put", key, value: txListHash.toBuffer() })
+            for (const key of mapLastTx.keys()) {
+                const txListHash = mapLastTx.get(key)
+                batch.push({ type: "put", key, value: txListHash.toBuffer() })
+            }
         }
         batch.push({ type: "put", key: "lastBlock", value: blockHash.toBuffer() })
 
@@ -98,6 +111,7 @@ export class TxDatabase {
     public async getLastTxs(address: Address, count?: number): Promise<TxList[]> {
         const txs: TxList[] = []
         let txList = await this.getTx(address)
+        // TODO : Have to check block status before return? Should txDB have blockDatabase?
         while (txList) {
             txs.push(txList)
             if (txs.length === count) { break }
@@ -113,7 +127,6 @@ export class TxDatabase {
                 }
             }
         }
-        // TODO : Return with blockHash?
         return Promise.resolve(txs)
     }
 
