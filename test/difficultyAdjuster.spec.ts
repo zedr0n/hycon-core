@@ -1,7 +1,7 @@
 import { Difficulty } from "../src/consensus/difficulty"
 import { DifficultyAdjuster } from "../src/consensus/difficultyAdjuster"
 
-fdescribe("DifficultyAdjuster", () => {
+describe("DifficultyAdjuster", () => {
 
         it("calcTimeEMA: should calculate the latest EMAs from a time delta", () => {
                 const prevTimeEMA = 30

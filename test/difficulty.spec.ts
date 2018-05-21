@@ -1,7 +1,7 @@
 import { Difficulty } from "../src/consensus/difficulty"
 import { Hash } from "../src/util/hash"
 
-fdescribe("Difficulty", () => {
+describe("Difficulty", () => {
     let difficulty: Difficulty
 
     it("decode: should decode a 4 byte number into a Difficulty object", () => {
@@ -287,7 +287,7 @@ fdescribe("Difficulty", () => {
         expect(sum.encode()).toEqual(correctSum)
     })
 
-    fit("add: 5 should add correctly", () => {
+    it("add: 5 should add correctly", () => {
         const difficulty1 = new Difficulty(0x2, 0x5)
         const difficulty2 = new Difficulty(0x1, 0x4)
         const correctSum = 0x04000201
@@ -297,7 +297,7 @@ fdescribe("Difficulty", () => {
         expect(sum.encode()).toEqual(correctSum)
     })
 
-    fit("add: 6 should be the same as add 5", () => {
+    it("add: 6 should be the same as add 5", () => {
         const difficulty1 = new Difficulty(0x1, 0x4)
         const difficulty2 = new Difficulty(0x2, 0x5)
         const correctSum = 0x04000201
@@ -305,5 +305,41 @@ fdescribe("Difficulty", () => {
         const sum = difficulty1.add(difficulty2)
 
         expect(sum.encode()).toEqual(correctSum)
+    })
+
+    it("greaterThan: 1 ", () => {
+        const difficulty1 = new Difficulty(0x180, 0x4)
+        const difficulty2 = new Difficulty(0x1, 0x5)
+
+        const greaterThan = difficulty1.greaterThan(difficulty2)
+
+        expect(greaterThan).toEqual(true)
+    })
+
+    it("greaterThan: 2 ", () => {
+        const difficulty1 = new Difficulty(0x1, 0x5)
+        const difficulty2 = new Difficulty(0x180, 0x4)
+
+        const greaterThan = difficulty1.greaterThan(difficulty2)
+
+        expect(greaterThan).toEqual(false)
+    })
+
+    it("greaterThan: 3 ", () => {
+        const difficulty1 = new Difficulty(0x180, 0x5)
+        const difficulty2 = new Difficulty(0x1, 0x5)
+
+        const greaterThan = difficulty1.greaterThan(difficulty2)
+
+        expect(greaterThan).toEqual(true)
+    })
+
+    it("greaterThan: 4 ", () => {
+        const difficulty1 = new Difficulty(0x1, 0x5)
+        const difficulty2 = new Difficulty(0x180, 0x5)
+
+        const greaterThan = difficulty1.greaterThan(difficulty2)
+
+        expect(greaterThan).toEqual(false)
     })
 })

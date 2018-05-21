@@ -3,7 +3,6 @@ import { Hash } from "../util/hash"
 // tslint:disable:no-bitwise
 
 export class Difficulty {
-
     public static decode(num: number): Difficulty {
         if (num > 0xFFFFFFFF) {
             // Node js can not perform bitwise operations on numbers with more than 32 bits
@@ -102,6 +101,13 @@ export class Difficulty {
         return true
     }
 
+    public greaterThan(difficulty: Difficulty): boolean {
+        if (this.exponent < difficulty.exponent) {
+            return !difficulty.greaterThan(this)
+        }
+        const expDiff = this.exponent - difficulty.exponent
+        return this.mantissa > Math.pow(0x100, expDiff) * difficulty.mantissa
+    }
     public multiply(num: number): Difficulty {
         const newMantissa = num * this.mantissa
         const newExponent = this.exponent
