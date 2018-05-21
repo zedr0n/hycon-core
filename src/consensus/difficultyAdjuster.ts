@@ -3,22 +3,22 @@ import { Hash } from "../util/hash"
 import { Difficulty } from "./../consensus/difficulty"
 
 export class DifficultyAdjuster {
-    public static calcNewDifficulty(timeEMA: number, workEMA: Difficulty): Difficulty {
-        let timeRatio = DifficultyAdjuster.targetTime / timeEMA
+    public static calcNewDifficulty(timeEMA: number, workEMA: Difficulty, targetTime: number = DifficultyAdjuster.targetTime): Difficulty {
+        let timeRatio = targetTime / timeEMA
         timeRatio = timeRatio > 3 ? 3 : timeRatio
         timeRatio = timeRatio < 0.25 ? 0.25 : timeRatio
         const newDifficulty = workEMA.multiply(timeRatio)
         return newDifficulty
     }
 
-    public static calcTimeEMA(newValue: number, prevEMA: number) {
-        const newEMA = DifficultyAdjuster.alpha * newValue + (1 - DifficultyAdjuster.alpha) * prevEMA
+    public static calcTimeEMA(newValue: number, prevEMA: number, alpha: number = DifficultyAdjuster.alpha) {
+        const newEMA = alpha * newValue + (1 - alpha) * prevEMA
         return newEMA
     }
 
-    public static calcWorkEMA(newValue: Difficulty, prevEMA: Difficulty) {
-        const oldTerm = prevEMA.multiply(1 - DifficultyAdjuster.alpha)
-        let newEMA = newValue.multiply(DifficultyAdjuster.alpha)
+    public static calcWorkEMA(newValue: Difficulty, prevEMA: Difficulty, alpha: number = DifficultyAdjuster.alpha) {
+        const oldTerm = prevEMA.multiply(1 - alpha)
+        let newEMA = newValue.multiply(alpha)
         newEMA = newEMA.add(oldTerm)
         return newEMA
     }
