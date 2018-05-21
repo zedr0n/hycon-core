@@ -268,7 +268,7 @@ export class Database {
         try {
             let height = 0
             let previous: DBBlock
-            let workEMA = 0
+            let workEMA = 1
             let timeEMA = DifficultyAdjuster.getTargetTime()
 
             if (header instanceof BlockHeader) {

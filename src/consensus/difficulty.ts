@@ -4,9 +4,6 @@ import { Hash } from "../util/hash"
 
 export class Difficulty {
 
-    public static minimumMantissa: number = 0xFF
-    public static minimumExponent: number = 0
-
     public static decode(num: number): Difficulty {
         if (num > 0xFFFFFFFF) {
             // Node js can not perform bitwise operations on numbers with more than 32 bits
@@ -19,15 +16,33 @@ export class Difficulty {
     }
     private static normalize(mantissa: number, exponent: number) {
         if (mantissa === 0) {
-            return { mantissa: Difficulty.minimumMantissa, exponent: Difficulty.minimumExponent }
+            return { mantissa: 1, exponent: 0 }
         }
 
         if (exponent > 28) {
+            // TODO: Adjust mantissa
             return { mantissa, exponent: 28 }
         }
 
-        while ((mantissa & 0xFF) === 0 && exponent < 29) {
-            mantissa = mantissa / 0xFF
+        const mBits = Math.ceil(Math.log2(mantissa))
+        let shift = Math.ceil((mBits - 24) / 8)
+
+        // If after a shift, the exponent would be negative
+        if (exponent + shift < 0) {
+            shift = -exponent
+        }
+        // If after a shift, the exponent would be greater than 29
+        if (exponent + shift > 29) {
+            shift = 29 - exponent
+        }
+        if (shift !== 0) {
+            mantissa = mantissa / Math.pow(2, shift * 8)
+            exponent = exponent + shift
+        }
+        mantissa = Math.round(mantissa)
+
+        while ((mantissa % 0x100) === 0 && exponent < 28) {
+            mantissa = mantissa / 0x100
             exponent += 1
         }
         return { mantissa, exponent }
@@ -56,7 +71,7 @@ export class Difficulty {
         target.fill(0x00)
         const index = 32 - (this.exponent + 3)
         target.writeUIntBE(Math.pow(2, 24) - 1 - this.mantissa, index, 3)
-        if (this.exponent + 3 !== 31) {
+        if (index <= 29) {
             target.fill(0xFF, 0, index)
         }
         return target
@@ -64,12 +79,6 @@ export class Difficulty {
 
     public getMinerTarget(): string {
         return this.getTarget().slice(24, 32).toString("hex")
-    }
-
-    public inspect(value: number) {
-        const buf = new Buffer(6)
-        buf.writeUIntBE(value, 0, 6)
-        return "0x" + buf.toString("hex")
     }
 
     public encode(): number {
@@ -94,63 +103,24 @@ export class Difficulty {
     }
 
     public multiply(num: number): Difficulty {
-        let newMantissa = num * this.mantissa
-        let newExponent = this.exponent
-        const mBits = Math.ceil(Math.log2(newMantissa))
-        const shift = Math.ceil((mBits - 24) / 8)
-        newExponent = this.exponent + shift
-
-        if (newExponent < 0) {
-            newExponent = 0
-        }
-
-        if (shift !== 0 && newExponent !== 0) {
-            newMantissa = Math.round(newMantissa / Math.pow(2, shift * 8))
-        }
-        newMantissa = Math.round(newMantissa)
+        const newMantissa = num * this.mantissa
+        const newExponent = this.exponent
 
         // Normalize the mantissa
         const { mantissa, exponent } = Difficulty.normalize(newMantissa, newExponent)
         return new Difficulty(mantissa, exponent)
     }
 
-    public add(diff: Difficulty) {
-        const expDiff = this.exponent - diff.getExponent()
-        let newExponent = this.exponent
-        let newMantissa = 0
-        let shift = 0
-        if (expDiff > 0 && expDiff < 24) {
-            newMantissa = ((this.mantissa * Math.pow(2, expDiff)) + diff.getMantissa())
-            const mBits = Math.ceil(Math.log2(newMantissa))
-            shift = Math.ceil((mBits - 24) / 8)
-            newExponent = this.exponent + shift
-        } else if (expDiff > -24 && expDiff < 0) {
-            newMantissa = ((diff.getMantissa() * Math.pow(2, -expDiff)) + this.mantissa)
-            const mBits = Math.ceil(Math.log2(newMantissa))
-            shift = Math.ceil((mBits - 24) / 8)
-            newExponent = diff.getExponent() + shift
-        } else if (expDiff === 0) {
-            newMantissa = this.mantissa + diff.getMantissa()
-        } else {
-            return new Difficulty(this.mantissa, this.exponent)
+    public add(diff: Difficulty): Difficulty {
+        if (this.exponent < diff.getExponent()) {
+            return diff.add(this)
         }
 
-        if (newExponent < 0) {
-            newExponent = 0
-        }
+        const expDiff = diff.getExponent() - this.exponent
+        const newMantissa = this.mantissa + diff.getMantissa() * Math.pow(2, expDiff * 8)
 
-        if (shift !== 0) {
-            newMantissa = Math.round(newMantissa / Math.pow(2, shift * 8))
-        } else {
-            newMantissa = Math.round(newMantissa)
-        }
-
-        const { mantissa, exponent } = Difficulty.normalize(newMantissa, newExponent)
+        const { mantissa, exponent } = Difficulty.normalize(newMantissa, this.exponent)
         return new Difficulty(mantissa, exponent)
-    }
-
-    private reverseByte(target: string) {
-        return target.substr(4, 2) + target.substr(2, 2) + target.substr(0, 2)
     }
 
 }
