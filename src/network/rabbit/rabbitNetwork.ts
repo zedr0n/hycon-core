@@ -86,7 +86,7 @@ export class RabbitNetwork implements INetwork {
     private upnpClient: UpnpClient
     private natUpnp: NatUpnp
 
-    constructor(hycon: Server, port: number = 8148, peerDbPath: string = "peerdb", networkid: string = "") {
+    constructor(hycon: Server, port: number = 8148, peerDbPath: string = "peerdb", networkid: string = "hycon") {
         RabbitNetwork.failLimit = 10
         this.port = port
         this.networkid = networkid
