@@ -148,7 +148,6 @@ export class RabbitNetwork implements INetwork {
             this.publicIp = undefined
         }
         await this.peerDB.run()
-        await this.saveSeedstoDB()
 
         this.server = createServer((socket) => this.accept(socket).catch(() => undefined))
         await new Promise<boolean>((resolve, reject) => {
@@ -176,6 +175,8 @@ export class RabbitNetwork implements INetwork {
                 this.port = this.natUpnp.publicPort
             }
         }
+
+        await this.connectSeeds()
 
         this.connectLoop()
 
@@ -250,7 +251,7 @@ export class RabbitNetwork implements INetwork {
             })
             socket.connect({ host, port }, async () => {
                 try {
-                    logger.info(`Connected to ${key}: ${host}:${port}`)
+                    logger.debug(`Connected to ${key}: ${host}:${port}`)
                     const peer = await this.newConnection(socket)
                     this.endPoints.set(key, ipeer)
                     this.pendingConnections.delete(key)
@@ -258,7 +259,7 @@ export class RabbitNetwork implements INetwork {
                     resolve(peer)
                     await this.peerDB.seen(ipeer)
                     await peer.detectStatus(ipeer)
-                    // logger.info(`Peer ${key} ${socket.remoteAddress}:${socket.remotePort} Status=${JSON.stringify(await peer.status())}`)
+                    logger.debug(`Peer ${key} ${socket.remoteAddress}:${socket.remotePort} Status=${JSON.stringify(await peer.status())}`)
                 } catch (e) {
                     logger.debug(e)
                 }
@@ -328,11 +329,18 @@ export class RabbitNetwork implements INetwork {
         }
     }
 
-    private async saveSeedstoDB() {
+    private async connectSeeds() {
         try {
             for (const seed of RabbitNetwork.seeds) {
-                const host = await RabbitNetwork.host2ip(seed.host)
-                await this.peerDB.put({ host, port: seed.port })
+                seed.host = await RabbitNetwork.host2ip(seed.host)
+                const rabbitPeer = await this.connect(seed.host, seed.port)
+                const peers = await rabbitPeer.getPeers()
+                rabbitPeer.disconnect()
+                if (peers.length !== 0) {
+                    for (const peer of peers) {
+                            await this.peerDB.put({ host: peer.host, port: peer.port })
+                    }
+                }
             }
         } catch (e) {
             logger.debug(`Error occurred while connecting to seeds: ${e}`)
