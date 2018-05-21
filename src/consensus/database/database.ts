@@ -278,13 +278,12 @@ export class Database {
                 // Async safe, previousBlock's height will not change
                 previous = await this.getDBBlock(header.previousHash[0])
                 const prevTimeEMA = previous.timeEMA
-                const prevWorkEMA = Difficulty.decode(previous.workEMA)
 
                 const timeDelta = header.timeStamp - previous.header.timeStamp
                 const workDelta = Difficulty.decode(header.difficulty)
 
                 timeEMA = DifficultyAdjuster.calcTimeEMA(timeDelta, prevTimeEMA)
-                workEMA = DifficultyAdjuster.calcWorkEMA(workDelta, prevWorkEMA).encode()
+                workEMA = DifficultyAdjuster.calcWorkEMA(workDelta, previous.workEMA).encode()
 
                 height = previous.height + 1
             }

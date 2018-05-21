@@ -35,6 +35,7 @@ describe("DBBlock Test", () => {
             length: 0,
             offset: 0,
             timeEMA: 30,
+            totalWork: new Difficulty(0x0000FF, 0x00).encode(),
             workEMA: new Difficulty(0x0000FF, 0x00).encode(),
         }
         dbBlock = new DBBlock(iDBBlock)
@@ -49,7 +50,8 @@ describe("DBBlock Test", () => {
         expect(block.header).toBeDefined()
         expect(block.length).toEqual(0)
         expect(block.timeEMA).toEqual(30)
-        expect(block.workEMA).toEqual(0x100000FF)
+        expect(block.totalWork.encode()).toEqual(0x100000FF)
+        expect(block.workEMA.encode()).toEqual(0x100000FF)
     })
 
     it("set(block) : if set method set property", () => {
@@ -77,12 +79,18 @@ describe("DBBlock Test", () => {
             height: 7,
             length: 9,
             offset: 8,
+            timeEMA: 30,
+            totalWork: new Difficulty(0x0000FF, 0x00).encode(),
+            workEMA: new Difficulty(0x0000EE, 0x00).encode(),
         })
 
         expect(dbBlock.height).toEqual(7)
         expect(dbBlock.fileNumber).toEqual(6)
         expect(dbBlock.offset).toEqual(8)
         expect(dbBlock.length).toEqual(9)
+        expect(dbBlock.timeEMA).toEqual(30)
+        expect(dbBlock.totalWork.encode()).toEqual(0xFF)
+        expect(dbBlock.workEMA.encode()).toEqual(0xEE)
         expect(setSpy).toHaveBeenCalled()
     })
 
@@ -117,8 +125,7 @@ describe("DBBlock Test", () => {
 describe("Test case, throw error", () => {
     let dbBlock: DBBlock
     beforeEach(() => {
-        let iDBBlock: proto.IBlockDB
-        dbBlock = new DBBlock(iDBBlock)
+        dbBlock = new DBBlock({})
     })
     it("When decode throw error, exception handling", () => {
         spyOn(proto.BlockDB, "decode").and.throwError("Error while decode data")

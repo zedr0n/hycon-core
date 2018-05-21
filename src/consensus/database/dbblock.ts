@@ -3,7 +3,7 @@ import { setGenesisBlockHeader } from "../../common/genesisHeader"
 import * as proto from "../../serialization/proto"
 import { Difficulty } from "../difficulty"
 
-export class DBBlock implements proto.IBlockDB {
+export class DBBlock {
     public static decode(data: Uint8Array): DBBlock {
         const blockDB = proto.BlockDB.decode(data)
         return new DBBlock(blockDB)
@@ -14,7 +14,8 @@ export class DBBlock implements proto.IBlockDB {
     public offset?: number
     public length?: number
     public timeEMA: number
-    public workEMA: number
+    public workEMA: Difficulty
+    public totalWork: Difficulty
 
     constructor(dbBlock: proto.IBlockDB) {
         this.set(dbBlock)
@@ -26,6 +27,15 @@ export class DBBlock implements proto.IBlockDB {
         }
         if (block.header === undefined) {
             throw new Error("DBBlock header is missing")
+        }
+        if (block.timeEMA === undefined) {
+            throw new Error("DBBlock timeEMA is missing")
+        }
+        if (block.workEMA === undefined) {
+            throw new Error("DBBlock workEMA is missing")
+        }
+        if (block.totalWork === undefined) {
+            throw new Error("DBBlock totalWork is missing")
         }
 
         if (block.fileNumber !== undefined) {
@@ -41,7 +51,10 @@ export class DBBlock implements proto.IBlockDB {
             this.timeEMA = block.timeEMA
         }
         if (block.workEMA !== undefined) {
-            this.workEMA = block.workEMA
+            this.workEMA = Difficulty.decode(block.workEMA)
+        }
+        if (block.totalWork !== undefined) {
+            this.totalWork = Difficulty.decode(block.totalWork)
         }
 
         this.height = block.height
@@ -57,6 +70,15 @@ export class DBBlock implements proto.IBlockDB {
     }
 
     public encode(): Uint8Array {
-        return proto.BlockDB.encode(this).finish()
+        return proto.BlockDB.encode({
+            fileNumber: this.fileNumber,
+            header: this.header,
+            height: this.height,
+            length: this.length,
+            offset: this.offset,
+            timeEMA: this.timeEMA,
+            totalWork: this.totalWork.encode(),
+            workEMA: this.workEMA.encode(),
+        }).finish()
     }
 }

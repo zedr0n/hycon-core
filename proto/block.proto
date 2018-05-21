@@ -10,11 +10,12 @@ message Block {
 }
 
 message BlockDB {
-    int32 height = 1;
+    uint32 height = 1;
     BlockHeader header = 2;
-    int32 fileNumber = 3;
-    int32 offset = 4;
-    int32 length = 5;
+    uint32 fileNumber = 3;
+    uint32 offset = 4;
+    uint32 length = 5;
     double timeEMA = 6;
-    int32 workEMA = 7;
+    uint32 workEMA = 7;
+    uint32 totalWork = 8;
 }

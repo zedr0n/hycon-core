@@ -7335,6 +7335,7 @@ $root.BlockDB = (function() {
      * @property {number|null} [length] BlockDB length
      * @property {number|null} [timeEMA] BlockDB timeEMA
      * @property {number|null} [workEMA] BlockDB workEMA
+     * @property {number|null} [totalWork] BlockDB totalWork
      */
 
     /**
@@ -7409,6 +7410,14 @@ $root.BlockDB = (function() {
     BlockDB.prototype.workEMA = 0;
 
     /**
+     * BlockDB totalWork.
+     * @member {number} totalWork
+     * @memberof BlockDB
+     * @instance
+     */
+    BlockDB.prototype.totalWork = 0;
+
+    /**
      * Creates a new BlockDB instance using the specified properties.
      * @function create
      * @memberof BlockDB
@@ -7433,19 +7442,21 @@ $root.BlockDB = (function() {
         if (!writer)
             writer = $Writer.create();
         if (message.height != null && message.hasOwnProperty("height"))
-            writer.uint32(/* id 1, wireType 0 =*/8).int32(message.height);
+            writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.height);
         if (message.header != null && message.hasOwnProperty("header"))
             $root.BlockHeader.encode(message.header, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
         if (message.fileNumber != null && message.hasOwnProperty("fileNumber"))
-            writer.uint32(/* id 3, wireType 0 =*/24).int32(message.fileNumber);
+            writer.uint32(/* id 3, wireType 0 =*/24).uint32(message.fileNumber);
         if (message.offset != null && message.hasOwnProperty("offset"))
-            writer.uint32(/* id 4, wireType 0 =*/32).int32(message.offset);
+            writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.offset);
         if (message.length != null && message.hasOwnProperty("length"))
-            writer.uint32(/* id 5, wireType 0 =*/40).int32(message.length);
+            writer.uint32(/* id 5, wireType 0 =*/40).uint32(message.length);
         if (message.timeEMA != null && message.hasOwnProperty("timeEMA"))
             writer.uint32(/* id 6, wireType 1 =*/49).double(message.timeEMA);
         if (message.workEMA != null && message.hasOwnProperty("workEMA"))
-            writer.uint32(/* id 7, wireType 0 =*/56).int32(message.workEMA);
+            writer.uint32(/* id 7, wireType 0 =*/56).uint32(message.workEMA);
+        if (message.totalWork != null && message.hasOwnProperty("totalWork"))
+            writer.uint32(/* id 8, wireType 0 =*/64).uint32(message.totalWork);
         return writer;
     };
 
@@ -7481,25 +7492,28 @@ $root.BlockDB = (function() {
             var tag = reader.uint32();
             switch (tag >>> 3) {
             case 1:
-                message.height = reader.int32();
+                message.height = reader.uint32();
                 break;
             case 2:
                 message.header = $root.BlockHeader.decode(reader, reader.uint32());
                 break;
             case 3:
-                message.fileNumber = reader.int32();
+                message.fileNumber = reader.uint32();
                 break;
             case 4:
-                message.offset = reader.int32();
+                message.offset = reader.uint32();
                 break;
             case 5:
-                message.length = reader.int32();
+                message.length = reader.uint32();
                 break;
             case 6:
                 message.timeEMA = reader.double();
                 break;
             case 7:
-                message.workEMA = reader.int32();
+                message.workEMA = reader.uint32();
+                break;
+            case 8:
+                message.totalWork = reader.uint32();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -7559,6 +7573,9 @@ $root.BlockDB = (function() {
         if (message.workEMA != null && message.hasOwnProperty("workEMA"))
             if (!$util.isInteger(message.workEMA))
                 return "workEMA: integer expected";
+        if (message.totalWork != null && message.hasOwnProperty("totalWork"))
+            if (!$util.isInteger(message.totalWork))
+                return "totalWork: integer expected";
         return null;
     };
 
@@ -7575,22 +7592,24 @@ $root.BlockDB = (function() {
             return object;
         var message = new $root.BlockDB();
         if (object.height != null)
-            message.height = object.height | 0;
+            message.height = object.height >>> 0;
         if (object.header != null) {
             if (typeof object.header !== "object")
                 throw TypeError(".BlockDB.header: object expected");
             message.header = $root.BlockHeader.fromObject(object.header);
         }
         if (object.fileNumber != null)
-            message.fileNumber = object.fileNumber | 0;
+            message.fileNumber = object.fileNumber >>> 0;
         if (object.offset != null)
-            message.offset = object.offset | 0;
+            message.offset = object.offset >>> 0;
         if (object.length != null)
-            message.length = object.length | 0;
+            message.length = object.length >>> 0;
         if (object.timeEMA != null)
             message.timeEMA = Number(object.timeEMA);
         if (object.workEMA != null)
-            message.workEMA = object.workEMA | 0;
+            message.workEMA = object.workEMA >>> 0;
+        if (object.totalWork != null)
+            message.totalWork = object.totalWork >>> 0;
         return message;
     };
 
@@ -7615,6 +7634,7 @@ $root.BlockDB = (function() {
             object.length = 0;
             object.timeEMA = 0;
             object.workEMA = 0;
+            object.totalWork = 0;
         }
         if (message.height != null && message.hasOwnProperty("height"))
             object.height = message.height;
@@ -7630,6 +7650,8 @@ $root.BlockDB = (function() {
             object.timeEMA = options.json && !isFinite(message.timeEMA) ? String(message.timeEMA) : message.timeEMA;
         if (message.workEMA != null && message.hasOwnProperty("workEMA"))
             object.workEMA = message.workEMA;
+        if (message.totalWork != null && message.hasOwnProperty("totalWork"))
+            object.totalWork = message.totalWork;
         return object;
     };
 

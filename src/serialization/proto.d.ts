@@ -2972,6 +2972,9 @@ export interface IBlockDB {
 
     /** BlockDB workEMA */
     workEMA?: number;
+
+    /** BlockDB totalWork */
+    totalWork?: number;
 }
 
 /** Represents a BlockDB. */
@@ -3003,6 +3006,9 @@ export class BlockDB implements IBlockDB {
 
     /** BlockDB workEMA. */
     public workEMA: number;
+
+    /** BlockDB totalWork. */
+    public totalWork: number;
 
     /**
      * Creates a new BlockDB instance using the specified properties.
