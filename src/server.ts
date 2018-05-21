@@ -76,6 +76,9 @@ export class Server {
         if (Server.globalOptions.postfix === undefined) {
             Server.globalOptions.postfix = ""
         }
+        if (Server.globalOptions.networkid === undefined) {
+            Server.globalOptions.networkid = "hycon"
+        }
 
         const postfix = Server.globalOptions.postfix
         this.consensus = new SingleChain(this, "blockdb" + postfix, "worldstate" + postfix, "rawblock" + postfix, "txDB" + postfix)
