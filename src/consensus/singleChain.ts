@@ -43,6 +43,8 @@ export class SingleChain implements IConsensus {
     private targetTimeEMA: number = 30
     private targetWorkEMA: Difficulty = new Difficulty(0x0000FF, 0x00)
     private difficultyAdjuster: DifficultyAdjuster
+    private blockLock: AsyncLock
+    private headerLock: AsyncLock
 
     constructor(server: Server, dbPath: string, wsPath: string, filePath: string, txPath?: string) {
         this.server = server
@@ -52,6 +54,8 @@ export class SingleChain implements IConsensus {
         this.txUnit = 1000
         if (txPath) { this.txdb = new TxDatabase(txPath) }
         this.graph = new Graph()
+        this.blockLock = new AsyncLock()
+        this.headerLock = new AsyncLock()
     }
     public async getNonce(address: Address): Promise<number> {
         const account = await this.worldState.getAccount(this.blockTip.header.stateRoot, address)
@@ -82,13 +86,13 @@ export class SingleChain implements IConsensus {
                     const total = this.blockTip.height - lastHeight + 1
                     const q = Math.trunc(total / 20)
                     const r = total % 20
-                    if ( q >= 1 ) {
+                    if (q >= 1) {
                         for (let n = 0; n < q; n++) {
                             const blks = await this.db.getBlocksRange(lastHeight + 20 * n, 20)
                             await this.txdb.init(blks)
                         }
                     }
-                    if ( r !== 0 ) {
+                    if (r !== 0) {
                         const rBlks = await this.db.getBlocksRange(lastHeight + 20 * q, r)
                         await this.txdb.init(rBlks)
                     }
@@ -108,79 +112,83 @@ export class SingleChain implements IConsensus {
     }
 
     public async putBlock(block: Block): Promise<boolean> {
-        try {
-            // TODO: Return block status
-            const blockHash = new Hash(block.header)
-            logger.info(`Put Block : ${blockHash}`)
+        return await this.blockLock.critical<boolean>(async () => {
+            try {
+                // TODO: Return block status
+                const blockHash = new Hash(block.header)
+                logger.info(`Put Block : ${blockHash}`)
 
-            const blockStatus = await this.getBlockStatus(blockHash)
-            if (blockStatus === BlockStatus.Rejected) {
-                logger.warn(`Already rejected Block : ${blockHash}`)
-                throw new Error(`Rejecting Block : ${blockHash}`)
-            }
-            if (blockStatus === BlockStatus.MainChain || blockStatus === BlockStatus.Block) {
-                logger.warn(`Already exsited Header : ${blockHash}`)
+                const blockStatus = await this.getBlockStatus(blockHash)
+                if (blockStatus === BlockStatus.Rejected) {
+                    logger.warn(`Already rejected Block : ${blockHash}`)
+                    throw new Error(`Rejecting Block : ${blockHash}`)
+                }
+                if (blockStatus === BlockStatus.MainChain || blockStatus === BlockStatus.Block) {
+                    logger.warn(`Already exsited Header : ${blockHash}`)
+                    return false
+                }
+
+                const previousHeader = await this.db.getBlockHeader(block.header.previousHash[0])
+                if (previousHeader === undefined) {
+                    logger.info(`Previous Header not Found`)
+                    return false
+                }
+
+                const verifyResult = await this.verifyBlock(block, previousHeader)
+                if (!verifyResult.isVerified) {
+                    logger.error(`Invalid Block Rejected : ${blockHash}`)
+                    await this.db.setBlockStatus(blockHash, BlockStatus.Rejected)
+                    throw new Error(`Rejecting Block : ${blockHash}`)
+                }
+
+                const transitionResult = verifyResult.stateTransition
+                await this.worldState.putPending(transitionResult.batch, transitionResult.mapAccount)
+                const { current, previous } = await this.db.putBlock(blockHash, block)
+                if (this.txdb) { await this.txdb.putTxs(blockHash, block.txs) }
+
+                await this.organizeChains(blockHash, current, block, this.txUnit)
+
+                logger.info(`Put Block(${current.height}) HTip(${this.headerTip.height}) BTip(${this.blockTip.height})`)
+                return true
+            } catch (e) {
+                logger.error(e)
                 return false
             }
-
-            const previousHeader = await this.db.getBlockHeader(block.header.previousHash[0])
-            if (previousHeader === undefined) {
-                logger.info(`Previous Header not Found`)
-                return false
-            }
-
-            const verifyResult = await this.verifyBlock(block, previousHeader)
-            if (!verifyResult.isVerified) {
-                logger.error(`Invalid Block Rejected : ${blockHash}`)
-                await this.db.setBlockStatus(blockHash, BlockStatus.Rejected)
-                throw new Error(`Rejecting Block : ${blockHash}`)
-            }
-
-            const transitionResult = verifyResult.stateTransition
-            await this.worldState.putPending(transitionResult.batch, transitionResult.mapAccount)
-            const { current, previous } = await this.db.putBlock(blockHash, block)
-            if (this.txdb) { await this.txdb.putTxs(blockHash, block.txs) }
-
-            await this.organizeChains(blockHash, current, block, this.txUnit)
-
-            logger.info(`Put Block(${current.height}) HTip(${this.headerTip.height}) BTip(${this.blockTip.height})`)
-            return true
-        } catch (e) {
-            logger.error(e)
-            return false
-        }
+        })
     }
 
     public async putHeader(header: BlockHeader): Promise<boolean> {
-        try {
-            // TODO: Return block status
-            const blockHash = new Hash(header)
-            const blockStatus = await this.getBlockStatus(new Hash(header))
-            if (blockStatus === BlockStatus.Rejected) {
-                logger.warn(`Already rejected Block : ${blockHash}`)
-                throw new Error(`Rejecting Header : ${blockHash}`)
+        return await this.headerLock.critical<boolean>(async () => {
+            try {
+                // TODO: Return block status
+                const blockHash = new Hash(header)
+                const blockStatus = await this.getBlockStatus(new Hash(header))
+                if (blockStatus === BlockStatus.Rejected) {
+                    logger.warn(`Already rejected Block : ${blockHash}`)
+                    throw new Error(`Rejecting Header : ${blockHash}`)
+                }
+
+                if (blockStatus === BlockStatus.MainChain || blockStatus === BlockStatus.Block || blockStatus === BlockStatus.Header) {
+                    logger.warn(`Already exsited Header : ${blockHash}`)
+                    return false
+                }
+
+                if (!await this.verifyHeader(header)) {
+                    logger.error(`Invalid Header Rejected : ${blockHash}`)
+                    await this.db.setBlockStatus(blockHash, BlockStatus.Rejected)
+                    throw new Error(`Rejecting Header : ${blockHash}`)
+                }
+
+                const { current, previous } = await this.db.putHeader(blockHash, header)
+                await this.organizeChains(blockHash, current)
+
+                logger.info(`Put Header(${current.height}) HTip(${this.headerTip.height}) BTip(${this.blockTip.height})`)
+                return true
+            } catch (e) {
+                logger.error(`Fail to putHeader in SingleChain : ${e}`)
+                return Promise.reject(e)
             }
-
-            if (blockStatus === BlockStatus.MainChain || blockStatus === BlockStatus.Block || blockStatus === BlockStatus.Header) {
-                logger.warn(`Already exsited Header : ${blockHash}`)
-                return false
-            }
-
-            if (!await this.verifyHeader(header)) {
-                logger.error(`Invalid Header Rejected : ${blockHash}`)
-                await this.db.setBlockStatus(blockHash, BlockStatus.Rejected)
-                throw new Error(`Rejecting Header : ${blockHash}`)
-            }
-
-            const { current, previous } = await this.db.putHeader(blockHash, header)
-            await this.organizeChains(blockHash, current)
-
-            logger.info(`Put Header(${current.height}) HTip(${this.headerTip.height}) BTip(${this.blockTip.height})`)
-            return true
-        } catch (e) {
-            logger.error(`Fail to putHeader in SingleChain : ${e}`)
-            return Promise.reject(e)
-        }
+        })
     }
     public addCallbackNewBlock(callback: (block: AnyBlock) => void, priority?: number): void {
         if (priority) {
@@ -496,6 +504,7 @@ export class SingleChain implements IConsensus {
                 throw new Error("Error trying to reorganize past the genesis block")
             }
             await this.db.setBlockStatus(popHash, BlockStatus.Block)
+            this.graph.addToGraph(popBlock.header, BlockStatus.Block)
             this.server.txPool.putTxs(popBlock.txs)
             popHash = popBlock.header.previousHash[0]
             popHeight -= 1
