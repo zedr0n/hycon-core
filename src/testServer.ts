@@ -87,15 +87,15 @@ export class TestServer {
         const amt = hyconfromString("100.123")
         const fee = hyconfromString("10.2")
 
-        const n = 5
+        const n = 8
         const lastWalletIndex = this.wallets.length - 1
         const txList: SignedTx[] = []
         for (let i = 0; i < n; i++) {
             // get nonce, increase 1
-            const toWallet = this.wallets[randomInt(0, lastWalletIndex)]
+            const toWallet = this.wallets[2]
             assert(toWallet)
             const toAddr = toWallet.pubKey.address()
-            const fromWallet = this.wallets[randomInt(0, lastWalletIndex)]
+            const fromWallet = this.wallets[1]
             assert(fromWallet)
             const fromAddr = fromWallet.pubKey.address()
             const fromAddrString = fromAddr.toString()
@@ -122,19 +122,24 @@ export class TestServer {
     // TODO : Block, hash, SignedTx, randomBytes import, and testMakeBlock(db, consensus) remove
     // tslint:disable-next-line:member-ordering
     public async testConsensus() {
-        const block1 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 2))
+        const txs1 = this.txPool.updateTxs([], 8)
+        let count = 0
+        for (const tx of txs1) {
+            logger.error(`Tx${count++} : ${new Hash(tx)}`)
+        }
+        const block1 = await this.server.consensus.testMakeBlock(txs1.slice(0, 5)) // 0, 1, 2, 3, 4
         const block1Hash = new Hash(block1.header)
         logger.error(`########################   Make block1:${block1Hash}`)
         for (const tx of block1.txs) {
             logger.error(`Tx : ${new Hash(tx)}`)
         }
-        const block2 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 2))
+        const block2 = await this.server.consensus.testMakeBlock(txs1.slice(2, 4)) // 2, 3
         const block2Hash = new Hash(block2.header)
         logger.error(`########################   Make block2:${block2Hash}`)
         for (const tx of block2.txs) {
             logger.error(`Tx : ${new Hash(tx)}`)
         }
-        const block3 = await this.server.consensus.testMakeBlock(this.txPool.updateTxs([], 2))
+        const block3 = await this.server.consensus.testMakeBlock(txs1.slice(0, 5)) // 0, 1, 2, 3, 4
         const block3Hash = new Hash(block3.header)
         logger.error(`########################   Make block3:${block3Hash}`)
         for (const tx of block3.txs) {

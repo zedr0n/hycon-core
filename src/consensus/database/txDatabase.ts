@@ -11,6 +11,7 @@ import * as proto from "../../serialization/proto"
 import { Hash } from "../../util/hash"
 import { AnySignedTx } from "../iconsensus"
 import { SingleChain, verifyTx } from "../singleChain"
+import { BlockStatus } from "../sync"
 import { Database } from "./database"
 import { TxList } from "./txList"
 const logger = getLogger("TxDB")
@@ -18,16 +19,18 @@ const logger = getLogger("TxDB")
 export class TxDatabase {
 
     private database: levelup.LevelUp
+    private blockDB: Database
     constructor(path: string) {
         const rocks: any = rocksdb(path)
         this.database = levelup(rocks)
     }
     public async init(blockDB: Database, tipHeight: number) {
+        this.blockDB = blockDB
         const lastHash = await this.getLastBlock()
         let lastHeight = 0
-        if (lastHash !== undefined) { lastHeight = await blockDB.getBlockHeight(lastHash) }
+        if (lastHash !== undefined) { lastHeight = await this.blockDB.getBlockHeight(lastHash) }
         if (lastHeight < tipHeight) {
-            const blocks = await blockDB.getBlocksRange(lastHeight)
+            const blocks = await this.blockDB.getBlocksRange(lastHeight)
             for (const block of blocks) {
                 const blockHash = new Hash(block.header)
                 await this.putTxs(blockHash, block.txs)
@@ -113,7 +116,7 @@ export class TxDatabase {
         let txList = await this.getTx(address)
         // TODO : Have to check block status before return? Should txDB have blockDatabase?
         while (txList) {
-            txs.push(txList)
+            if (await this.blockDB.getBlockStatus(txList.blockHash) === BlockStatus.MainChain) { txs.push(txList) }
             if (txs.length === count) { break }
             if (txList.tx.to.equals(address)) {
                 if (txList.previousTo !== undefined) {
