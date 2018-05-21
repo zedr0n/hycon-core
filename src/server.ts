@@ -23,6 +23,7 @@ const optionDefinitions = [
     { name: "api_port", alias: "A", type: Number },
     { name: "cpuMiners", alias: "m", type: Number },
     { name: "disable_upnp", alias: "x", type: Boolean },
+    { name: "disable_nat", alias: "N", type: Boolean },
     { name: "networkid", alias: "n", type: String },
     { name: "peer", type: String, multiple: true, defaultOption: true },
     { name: "plot", alias: "g", type: Boolean },
@@ -79,6 +80,7 @@ export class Server {
         if (Server.globalOptions.networkid === undefined) {
             Server.globalOptions.networkid = "hycon"
         }
+
 
         const postfix = Server.globalOptions.postfix
         this.consensus = new SingleChain(this, "blockdb" + postfix, "worldstate" + postfix, "rawblock" + postfix, "txDB" + postfix)
