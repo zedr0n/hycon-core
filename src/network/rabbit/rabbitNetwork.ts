@@ -138,9 +138,14 @@ export class RabbitNetwork implements INetwork {
 
         this.server.on("error", (error) => logger.error(`${error}`))
         let useUpnp = true
+        let useNat = true
 
         if (Server.globalOptions.disable_upnp) {
             useUpnp = false
+        }
+
+        if (Server.globalOptions.disable_nat) {
+            useNat = false
         }
 
         if (useUpnp) {
@@ -150,7 +155,7 @@ export class RabbitNetwork implements INetwork {
 
         }
 
-        if (Server.globalOptions.disable_nat) {
+        if (useNat) {
             // nat
             this.natUpnp = new NatUpnp(this.port, this)
             await this.natUpnp.run()
