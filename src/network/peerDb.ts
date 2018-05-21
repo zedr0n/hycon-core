@@ -23,8 +23,9 @@ export class PeerDb {
         const value = Buffer.from(buf)
         return value
     }
+
+    public keys: number[]
     private db: levelup.LevelUp // database
-    private keys: number[]
     private keyListLock: AsyncLock// This lock protects this.keys from concurrent usage
 
     constructor(peerDbPath: string = "peerdb") {

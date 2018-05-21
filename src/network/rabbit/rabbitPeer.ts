@@ -286,7 +286,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     private async respondGetPeers(reply: boolean, request: proto.IGetPeers): Promise<IResponse> {
         try {
             const num = request.count
-            const peers: proto.IPeer[] = this.network.getConnections()
+            const peers: proto.IPeer[] = await this.network.getConnections()
             const message: proto.INetwork = { getPeersReturn: { success: true, peers } }
             const relay = false
             return { message, relay }

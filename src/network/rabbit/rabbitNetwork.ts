@@ -101,8 +101,12 @@ export class RabbitNetwork implements INetwork {
         logger.debug(`TcpNetwork Port=${port}`)
     }
 
-    public getConnections(): proto.IPeer[] {
-        return Array.from(this.endPoints.values())
+    public async getConnections(): Promise<proto.IPeer[]> {
+        const peerList: proto.IPeer[] = []
+        for (const key of this.peerDB.keys) {
+            peerList.push(await this.peerDB.get(key))
+        }
+        return peerList
     }
 
     public broadcast(packet: Buffer, exempt: RabbitPeer): void {
