@@ -122,5 +122,4 @@ export class Difficulty {
         const { mantissa, exponent } = Difficulty.normalize(newMantissa, this.exponent)
         return new Difficulty(mantissa, exponent)
     }
-
 }

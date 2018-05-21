@@ -243,7 +243,7 @@ export class SingleChain implements IConsensus {
     }
 
     public async getBlockStatus(hash: Hash): Promise<BlockStatus> {
-        return await this.db.getBlockStatus(hash)
+        return this.db.getBlockStatus(hash)
     }
     public getHeaderTip(): { hash: Hash; height: number } {
         const block = this.headerTip
@@ -326,10 +326,9 @@ export class SingleChain implements IConsensus {
             const previousHeader = previousDBBlock.header
 
             const prevTimeEMA = previousDBBlock.timeEMA
-            const prevWorkEMA = Difficulty.decode(previousDBBlock.workEMA)
 
             const newTimeEMA = DifficultyAdjuster.calcTimeEMA(timeStamp - previousHeader.timeStamp, prevTimeEMA)
-            const newWorkEMA = DifficultyAdjuster.calcWorkEMA(Difficulty.decode(previousHeader.difficulty), prevWorkEMA)
+            const newWorkEMA = DifficultyAdjuster.calcWorkEMA(Difficulty.decode(previousHeader.difficulty), previousDBBlock.workEMA)
 
             const difficulty = DifficultyAdjuster.calcNewDifficulty(newTimeEMA, newWorkEMA).encode()
             txs.sort((txA, txB) => txA.nonce - txB.nonce)
@@ -399,13 +398,12 @@ export class SingleChain implements IConsensus {
         const prevDBBlock = await this.db.getDBBlock(prevHash)
 
         const prevTimeEMA = prevDBBlock.timeEMA
-        const prevWorkEMA = Difficulty.decode(prevDBBlock.workEMA)
 
         const blockDifficulty = Difficulty.decode(block.header.difficulty)
         const timeDelta = block.header.timeStamp - previousHeader.timeStamp
         const workDelta = Difficulty.decode(previousHeader.difficulty)
 
-        if (!(DifficultyAdjuster.verifyDifficulty(timeDelta, prevTimeEMA, workDelta, prevWorkEMA, blockDifficulty))) {
+        if (!(DifficultyAdjuster.verifyDifficulty(timeDelta, prevTimeEMA, workDelta, prevDBBlock.workEMA, blockDifficulty))) {
             logger.warn(`Invalid block difficulty`)
             return { isVerified: false }
         }

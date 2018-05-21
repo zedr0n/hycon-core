@@ -1,18 +1,12 @@
-
-import { getHashes } from "crypto"
 import levelup = require("levelup")
 import { getLogger } from "log4js"
 import rocksdb = require("rocksdb")
 import { Address } from "../../common/address"
-import { AnyBlock, Block } from "../../common/block"
-import { GenesisSignedTx } from "../../common/txGenesisSigned"
 import { SignedTx } from "../../common/txSigned"
-import * as proto from "../../serialization/proto"
 import { Hash } from "../../util/hash"
 import { AnySignedTx, IConsensus } from "../iconsensus"
-import { SingleChain, verifyTx } from "../singleChain"
+import { verifyTx } from "../singleChain"
 import { BlockStatus } from "../sync"
-import { Database } from "./database"
 import { TxList } from "./txList"
 const logger = getLogger("TxDB")
 

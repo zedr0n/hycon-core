@@ -15,7 +15,7 @@ import { hycontoString } from "../../util/commonUtil"
 import { Hash } from "../../util/hash"
 import * as mnemonic from "../../wallet/mnemonic"
 import { Wallet } from "../../wallet/wallet"
-import { verifyTx } from "../singleChain"
+import { Verify } from "../verify"
 import { Account } from "./account"
 import { DBState } from "./dbState"
 import { NodeRef } from "./nodeRef"
@@ -98,7 +98,7 @@ export class WorldState {
             genesis.txs.sort((a, b) => a.to[0] - b.to[0])
 
             for (const tx of genesis.txs) {
-                if (!verifyTx(tx)) { continue }
+                if (!Verify.tx(tx)) { continue }
                 const toAccount = new Account({ balance: +tx.amount, nonce: 0 })
                 const toAccountHash = this.put(batch, mapAccount, toAccount)
                 const nodeRef = new NodeRef({ address: tx.to, child: toAccountHash })
