@@ -159,6 +159,9 @@ export class RabbitNetwork implements INetwork {
             this.showInfo()
             this.peerDB.printDB()
         }, 10 * 1000)
+        setInterval(() => {
+            this.connectSeeds()
+        }, 60 * 1000)
 
         return true
     }
@@ -313,10 +316,8 @@ export class RabbitNetwork implements INetwork {
                 const rabbitPeer = await this.connect(seed.host, seed.port, false)
                 const peers = await rabbitPeer.getPeers()
                 rabbitPeer.disconnect()
-                if (peers.length !== 0) {
-                    for (const peer of peers) {
-                        await this.peerDB.put({ host: peer.host, port: peer.port })
-                    }
+                for (const peer of peers) {
+                    await this.peerDB.put({ host: peer.host, port: peer.port })
                 }
             }
         } catch (e) {
