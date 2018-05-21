@@ -1,8 +1,22 @@
+import { AnyBlockHeader } from "../common/blockHeader"
 import { BaseBlockHeader } from "../common/genesisHeader"
 import { Hash } from "../util/hash"
 import { Difficulty } from "./../consensus/difficulty"
+import { DBBlock } from "./database/dbblock"
 
 export class DifficultyAdjuster {
+    public static adjustDifficulty(previousDBBlock: DBBlock, timeStamp: number, hash?: Hash) {
+        const previousTimeEMA = previousDBBlock.timeEMA
+
+        const timeDelta = timeStamp - previousDBBlock.header.timeStamp
+        const workDelta = Difficulty.decode(previousDBBlock.header.difficulty)
+        const timeEMA = DifficultyAdjuster.calcTimeEMA(timeDelta, previousTimeEMA)
+        const workEMA = DifficultyAdjuster.calcWorkEMA(workDelta, previousDBBlock.workEMA)
+
+        const difficulty = DifficultyAdjuster.calcNewDifficulty(timeEMA, workEMA)
+        return { difficulty, workDelta, timeEMA, workEMA }
+    }
+
     public static calcNewDifficulty(timeEMA: number, workEMA: Difficulty, targetTime: number = DifficultyAdjuster.targetTime): Difficulty {
         let timeRatio = targetTime / timeEMA
         timeRatio = timeRatio > 3 ? 3 : timeRatio
