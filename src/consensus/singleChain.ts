@@ -347,6 +347,7 @@ export class SingleChain implements IConsensus {
             this.server.txPool.updateTxs(invalidTxs, 0)
             newBlock.updateMerkleRoot()
 
+            if (!await this.verifyPreBlock(newBlock, previousHeader)) { throw new Error("Not verified.") }
             this.server.miner.newCandidateBlock(newBlock)
             return newBlock
         } catch (e) {

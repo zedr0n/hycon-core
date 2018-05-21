@@ -55,7 +55,7 @@ export class TxDatabase {
             const txHash = new Hash(tx)
             const existedCheck = await this.getTx(txHash)
             if (existedCheck !== undefined) {
-                logger.error(`TxList info is already exsited, so change blockHash of txList : ${blockHash} / ${txHash}`)
+                logger.error(`TxList info is already exsited, so change blockHash of txList : ${existedCheck.blockHash} -> ${blockHash} / ${txHash}`)
                 if (!existedCheck.blockHash.equals(blockHash)) {
                     existedCheck.blockHash = blockHash
                     batch.push({ type: "put", key: txHash.toString(), value: existedCheck.encode() })
