@@ -9,7 +9,7 @@ import { GenesisSignedTx } from "../../common/txGenesisSigned"
 import { SignedTx } from "../../common/txSigned"
 import * as proto from "../../serialization/proto"
 import { Hash } from "../../util/hash"
-import { AnySignedTx } from "../iconsensus"
+import { AnySignedTx, IConsensus } from "../iconsensus"
 import { SingleChain, verifyTx } from "../singleChain"
 import { BlockStatus } from "../sync"
 import { Database } from "./database"
@@ -19,18 +19,18 @@ const logger = getLogger("TxDB")
 export class TxDatabase {
 
     private database: levelup.LevelUp
-    private blockDB: Database
+    private consensus: IConsensus
     constructor(path: string) {
         const rocks: any = rocksdb(path)
         this.database = levelup(rocks)
     }
-    public async init(blockDB: Database, tipHeight: number) {
-        this.blockDB = blockDB
+    public async init(consensus: IConsensus, tipHeight: number) {
+        this.consensus = consensus
         const lastHash = await this.getLastBlock()
         let lastHeight = 0
-        if (lastHash !== undefined) { lastHeight = await this.blockDB.getBlockHeight(lastHash) }
+        if (lastHash !== undefined) { lastHeight = await this.consensus.getBlockHeight(lastHash) }
         if (lastHeight < tipHeight) {
-            const blocks = await this.blockDB.getBlocksRange(lastHeight)
+            const blocks = await this.consensus.getBlocksRange(lastHeight)
             for (const block of blocks) {
                 const blockHash = new Hash(block.header)
                 await this.putTxs(blockHash, block.txs)
@@ -56,6 +56,7 @@ export class TxDatabase {
         for (const tx of txs) {
             if (!verifyTx(tx)) { continue }
             const txHash = new Hash(tx)
+            logger.info(`PutTx : ${txHash}`)
             const existedCheck = await this.getTx(txHash)
             if (existedCheck !== undefined) {
                 logger.error(`TxList info is already exsited, so change blockHash of txList : ${existedCheck.blockHash} -> ${blockHash} / ${txHash}`)
@@ -116,7 +117,7 @@ export class TxDatabase {
         let txList = await this.getTx(address)
         // TODO : Have to check block status before return? Should txDB have blockDatabase?
         while (txList) {
-            if (await this.blockDB.getBlockStatus(txList.blockHash) === BlockStatus.MainChain) { txs.push(txList) }
+            if (await this.consensus.getBlockStatus(txList.blockHash) === BlockStatus.MainChain) { txs.push(txList) }
             if (txs.length === count) { break }
             if (txList.tx.to.equals(address)) {
                 if (txList.previousTo !== undefined) {

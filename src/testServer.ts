@@ -84,8 +84,8 @@ export class TestServer {
         }, 5000)
     }
     private async makeTx() {
-        const amt = hyconfromString("100.123")
-        const fee = hyconfromString("10.2")
+        const amt = hyconfromString("12345")
+        const fee = hyconfromString("123")
 
         const n = 8
         const lastWalletIndex = this.wallets.length - 1
@@ -147,6 +147,11 @@ export class TestServer {
         }
 
         setTimeout(async () => {
+            const bblk1LastTxs = await this.server.consensus.getLastTxs(block1.txs[0].to)
+            logger.error(`########################   Before Save Block1 Get Last Tx of tx[0].to`)
+            for (const txList of bblk1LastTxs) {
+                logger.error(`Tx Hash : ${new Hash(txList.tx)}`)
+            }
             logger.error(`########################   Save block1 : ${new Hash(block1.header)}`)
             await this.server.consensus.putBlock(block1)
             const bTip1 = this.server.consensus.getBlocksTip()
@@ -154,6 +159,11 @@ export class TestServer {
             logger.error(`########################   Block1Tip : ${bTip1.hash}(${bTip1.height}) / Header1Tip : ${hTip1.hash}(${hTip1.height})`)
             const tipHash1 = await this.server.consensus.getHash(bTip1.height)
             logger.error(`########################   Get Hash using Tip Height : ${tipHash1}`)
+            logger.error(`########################   After Save Block1 Get Last Tx of tx[0].to`)
+            const ablk1LastTxs = await this.server.consensus.getLastTxs(block1.txs[0].to)
+            for (const txList of ablk1LastTxs) {
+                logger.error(`Tx Hash : ${new Hash(txList.tx)}`)
+            }
 
             logger.error(`########################   Save block2 : ${new Hash(block2.header)}`)
             await this.server.consensus.putBlock(block2)
