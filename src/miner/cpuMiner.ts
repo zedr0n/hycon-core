@@ -8,13 +8,17 @@ const logger = getLogger("CpuMiner")
 
 interface IAsyncCpuMiner {
     nonce: Promise<Long>
-    inspect: () => number
+    hashrate: () => number
     stop: () => Promise<void | number>
 }
 
 export class CpuMiner {
-    public static mine(preHash: Uint8Array, difficulty: Difficulty, prefix: number, currentNonce: number = 0, maxNonce: number = 0xFFFFFFFF): IAsyncCpuMiner {
+    public static mine(preHash: Uint8Array, difficulty: Difficulty, prefix: number, startNonce: number = 0, maxNonce: number = 0xFFFFFFFF): IAsyncCpuMiner {
         let calculate = true
+        const hashrate = 0
+        let currentNonce = startNonce
+        const startTime = Date.now()
+        let endTime: number
         const nonce = new Promise<Long>(async (resolve, reject) => {
             try {
                 const buffer = new Buffer(72)
@@ -35,11 +39,13 @@ export class CpuMiner {
                 reject(currentNonce)
             } catch (e) {
                 reject(new Error(`CPU Miner failed: ${e}`))
+            } finally {
+                endTime = Date.now()
             }
         })
 
         return {
-            inspect: () => currentNonce,
+            hashrate: () => 1000 * (currentNonce - startNonce) / ((endTime ? endTime : Date.now()) - startTime),
             nonce,
             stop: async () => {
                 calculate = false
@@ -64,22 +70,11 @@ export class CpuMiner {
         this.minerServer = minerServer
         this.minerCount = minerCount
         this.miners = []
-        setInterval(() => this.hashRate(), 10000)
+        setInterval(() => logger.info(`CPU Hashrate: ${this.hashRate()} H/s`), 10000)
     }
 
     public hashRate() {
-        const startingNonces = this.miners.map((m) => m.inspect())
-        setTimeout(() => {
-            const endingNonces = this.miners.map((m) => m.inspect())
-            let hashCount = 0
-            for (let i = 0; i < Math.min(endingNonces.length, startingNonces.length); i++) {
-                const delta = endingNonces[i] - startingNonces[i]
-                hashCount += Math.max(delta, 0)
-            }
-            if (hashCount > 0) {
-                logger.info(`CPU Hashrate: ${hashCount} H/s`)
-            }
-        }, 1000)
+        return Math.round(this.miners.map((m) => m.hashrate()).reduce((a, b) => a + b))
     }
 
     public async stop() {
