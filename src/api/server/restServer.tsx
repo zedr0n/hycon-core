@@ -348,7 +348,6 @@ export class RestServer implements IRest {
         }
     }
     public async getBlockList(index: number): Promise<{ blocks: IBlock[], length: number }> {
-        const n = 10
         const blockList: IBlock[] = []
         let pageCount: number = 0
         try {
@@ -396,7 +395,8 @@ export class RestServer implements IRest {
                 if (dbblock.header instanceof BlockHeader) {
                     Object.assign(webBlock, {
                         prevBlock: dbblock.header.previousHash,
-                        nonce: dbblock.header.nonce,
+                        nonce: zeroPad(dbblock.header.nonce.low.toString(), 4) + zeroPad(dbblock.header.nonce.high.toString(), 4),
+                        miner: dbblock.header.miner.toString(),
                     })
                 }
                 blockList.push(webBlock)

@@ -87,8 +87,12 @@ export class BlockLine extends React.Component<any, any> {
                 <td className="numericTd">
                     {this.formatNumber(this.state.block.txSummary)} HYCON
                 </td>
-                <td className="mdl-data-table__cell--non-numeric">Glosfer</td>
-                <td className="numericTd">{(this.state.block.size / 1000).toPrecision(3) }</td>
+                <td className="mdl-data-table__cell--non-numeric">
+                    <a href={`/address/${this.state.block.miner}`}>
+                        {this.state.block.miner}
+                    </a>
+                </td>
+                <td className="numericTd">{(this.state.block.size / 1000).toPrecision(3)}</td>
                 {/* <td /> */}
             </tr>
         )

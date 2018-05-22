@@ -75,9 +75,10 @@ export class BlockView extends React.Component<IBlockProps, IBlockViewState> {
                         </tr>
                         <tr>
                             <td className="tdSubTitle subTitle_width20">Previous Hash</td>
-                            <td><a href={`/block/${this.state.block.prevBlock}`}>
-                                {this.state.block.prevBlock}
-                            </a>
+                            <td>
+                                <a href={`/block/${this.state.block.prevBlock}`}>
+                                    {this.state.block.prevBlock}
+                                </a>
                             </td>
                         </tr>
                         <tr>
@@ -102,7 +103,11 @@ export class BlockView extends React.Component<IBlockProps, IBlockViewState> {
                         </tr>
                         <tr>
                             <td className="tdSubTitle subTitle_width20">Miner</td>
-                            <td>{this.state.block.miner}</td>
+                            <td>
+                                <a href={`/address/${this.state.block.miner}`}>
+                                    {this.state.block.miner}
+                                </a>
+                            </td>
                         </tr>
                         <tr>
                             <td className="tdSubTitle subTitle_width20">Mined Time</td>
