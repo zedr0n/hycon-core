@@ -70,9 +70,15 @@ export class SocketParser {
     public destroy(): void {
         this.sendLock.rejectAll()
         if (this.socket) {
+            logger.debug(`Disconnect ${this.getInfo()}`)
             this.socket.unref()
             this.socket.destroy()
         }
+    }
+
+    public isSelfConnection(port: number): boolean {
+        const ret = this.socket.localAddress === this.socket.remoteAddress && this.socket.remotePort === port
+        return ret
     }
 
     public getInfo() {

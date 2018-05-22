@@ -19,6 +19,7 @@ const publicIp = require("public-ip")
 const logger = getLogger("Network")
 
 export class RabbitNetwork implements INetwork {
+    public static useSelfConnection = false
     public static seeds: any[] = [
         { host: "rapid1.hycon.io", port: 8148 },
         { host: "rapid2.hycon.io", port: 8148 },
@@ -72,6 +73,8 @@ export class RabbitNetwork implements INetwork {
     public networkid: string = "hycon"
     public readonly version: number = 3
     public port: number
+
+    // TODO: replace with port
     public localPort: number
     public publicIp: string
 
@@ -244,6 +247,13 @@ export class RabbitNetwork implements INetwork {
                     const peer = await this.newConnection(socket)
                     logger.info(`Connected to ${key}: ${host}:${port} Info ${peer.socketBuffer.getInfo()}`)
                     ipeer.host = socket.remoteAddress
+
+                    if (!RabbitNetwork.useSelfConnection) {
+                        if (peer.isSelfConnection(this.port)) {
+                            reject("Peer is myself")
+                            peer.disconnect()
+                        }
+                    }
                     if (await peer.detectStatus()) {
                         if (save) {
                             this.endPoints.set(key, ipeer)

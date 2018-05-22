@@ -33,7 +33,9 @@ export class RabbitPeer extends BasePeer implements IPeer {
         this.txPool = txPool
         this.peerDB = peerDB
     }
-
+    public isSelfConnection(port: number): boolean {
+        return this.socketBuffer.isSelfConnection(port)
+    }
     public async detectStatus(): Promise<boolean> {
         const status = await this.status()
         const remoteNetworkId = status.networkid
