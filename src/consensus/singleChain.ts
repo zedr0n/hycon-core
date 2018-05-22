@@ -80,7 +80,7 @@ export class SingleChain implements IConsensus {
                 (block: Block) => {
                     this.onMinedBlock(block)
                 })
-            setInterval(() => this.createCandidateBlock(this.server.txPool.getPending().slice(0, 10)), 5000)
+            this.createCandidateBlock(this.server.txPool.getPending().slice(0, 10))
             logger.info(`Initialization of singlechain is over.`)
         } catch (e) {
             logger.error(`Initialization fail in singleChain : ${e}`)
