@@ -14,7 +14,9 @@ interface IBlockViewState {
     hash: string
     amount?: string
     fees?: string
-    volume?: string,
+    volume?: string
+    prevBlock?: string
+    resultHash?: string
 }
 export class BlockView extends React.Component<IBlockProps, IBlockViewState> {
     public mounted: boolean = false
@@ -44,6 +46,8 @@ export class BlockView extends React.Component<IBlockProps, IBlockViewState> {
                     amount: hycontoString(amount),
                     block: data,
                     fees: hycontoString(fees),
+                    prevBlock: data.prevBlock,
+                    resultHash: data.resultHash,
                     volume: hycontoString(volume),
                 })
             }
@@ -64,13 +68,24 @@ export class BlockView extends React.Component<IBlockProps, IBlockViewState> {
                                 className="tableBorder_Header tableHeader_floatLeft"
                             >
                                 Summary
-              </th>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td className="tdSubTitle subTitle_width20">Hash</td>
                             <td>{this.state.hash}</td>
+                        </tr>
+                        <tr>
+                            <td className="tdSubTitle subTitle_width20">Previous Hash</td>
+                            <td><a href={`/block/${this.state.prevBlock}`}>
+                                {this.state.prevBlock}
+                            </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td className="tdSubTitle subTitle_width20">Result Hash</td>
+                            <td>{this.state.resultHash}</td>
                         </tr>
                         <tr>
                             <td className="tdSubTitle subTitle_width20">Num of Txs</td>

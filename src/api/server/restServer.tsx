@@ -294,6 +294,7 @@ export class RestServer implements IRest {
                         from: hyconTx.from.toString(),
                         to: hyconTx.to.toString(),
                         estimated: hycontoString(hyconTx.amount.add(hyconTx.fee)),
+                        receiveTime: hyconBlock.header.timeStamp,
                     })
                 } else {
                     txs.push({
@@ -301,6 +302,7 @@ export class RestServer implements IRest {
                         hash: new Hash(hyconTx).toString(),
                         to: hyconTx.to.toString(),
                         estimated: hycontoString(hyconTx.amount),
+                        receiveTime: hyconBlock.header.timeStamp,
                     })
                 }
             }
@@ -308,23 +310,34 @@ export class RestServer implements IRest {
             const webBlock = {
                 hash,
                 difficulty: hyconBlock.header.difficulty,
-                // height: hyconBlock.height,
                 txs,
+                height: await this.consensus.getBlockHeight(Hash.decode(hash)),
                 timeStamp: Number(hyconBlock.header.timeStamp),
             }
 
             if (hyconBlock.header instanceof BlockHeader) {
                 Object.assign(webBlock, {
-                    prevBlock: hyconBlock.header.previousHash,
+                    prevBlock: hyconBlock.header.previousHash.toString(),
                     nonce: hyconBlock.header.nonce,
                 })
+
+                const buffer = Buffer.allocUnsafe(72)
+                buffer.fill(hyconBlock.header.preHash(), 0, 64)
+                buffer.writeUInt32LE(hyconBlock.header.nonce.low, 64)
+                buffer.writeUInt32LE(hyconBlock.header.nonce.high, 68)
+                const result = await Hash.hashCryptonight(buffer)
+
+                Object.assign(webBlock, {
+                    resultHash: Buffer.from(result.buffer).toString("hex"),
+                })
             }
+
             return Promise.resolve(webBlock)
         } catch (e) {
             return Promise.reject("Error while getting block information from server : " + e)
         }
     }
-    public async getBlockList(index: number): Promise<{blocks: IBlock[], length: number}> {
+    public async getBlockList(index: number): Promise<{ blocks: IBlock[], length: number }> {
         const n = 10
         const blockList: IBlock[] = []
         let pageCount: number = 0
@@ -333,7 +346,7 @@ export class RestServer implements IRest {
             let indexCount = 20
             let startIndex = blockTip.height - (indexCount * (Number(index) + 1))
             pageCount = Math.ceil(blockTip.height / 20)
-            if (startIndex < 0 ) {
+            if (startIndex < 0) {
                 indexCount += startIndex
                 startIndex = 0
             }
@@ -381,7 +394,7 @@ export class RestServer implements IRest {
         } catch (e) {
             logger.error(e)
         }
-        return Promise.resolve({blocks: blockList, length: pageCount})
+        return Promise.resolve({ blocks: blockList, length: pageCount })
     }
     public async getLanguage(): Promise<string[]> {
         await Wallet.walletInit()

@@ -132,12 +132,12 @@ table {
 .txAmtBtn {
   float: right;
   margin: 0% 0% 3% 0.5%;
-  width: 14em;
+  width: 18em;
   height: 2.5em;
 }
 .txAmtBtn_margin0 {
   float: right;
-  width: 14em;
+  width: 18em;
   height: 2.5em;
 }
 .addrBtn {

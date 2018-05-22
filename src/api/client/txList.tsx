@@ -21,7 +21,7 @@ export class TxList extends React.Component<any, any> {
                         <div key={txIndex++}>
                             <TxLine tx={tx} rest={this.state.rest} />
                             <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored txAmtBtn green">
-                                {tx.amount} HYCON
+                                {tx.estimated + " HYCON"}
                             </button>
                         </div>
                     )
