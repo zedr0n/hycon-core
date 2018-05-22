@@ -2,6 +2,7 @@ import blake2b = require("blake2b")
 import * as Long from "long"
 import * as proto from "../serialization/proto"
 import { Hash } from "../util/hash"
+import { Address } from "./address"
 import { BaseBlockHeader, GenesisBlockHeader } from "./genesisHeader"
 
 export type AnyBlockHeader = (BlockHeader | GenesisBlockHeader)
@@ -9,6 +10,7 @@ export type AnyBlockHeader = (BlockHeader | GenesisBlockHeader)
 export class BlockHeader extends BaseBlockHeader {
     public previousHash: Hash[] = []
     public nonce: Long
+    public miner: Address
 
     constructor(header: proto.IBlockHeader) {
         super()
@@ -21,6 +23,11 @@ export class BlockHeader extends BaseBlockHeader {
         if (header.nonce === undefined) { throw new Error("Header missing nonce") }
         if (header.difficulty === undefined || header.difficulty == null || header.difficulty < 0) {
             throw new Error("Header missing difficulty")
+        }
+        if (header.miner === undefined) {
+            this.miner = new Address(new Uint8Array(20))
+        } else {
+            this.miner = new Address(header.miner)
         }
 
         for (const prev of header.previousHash) {

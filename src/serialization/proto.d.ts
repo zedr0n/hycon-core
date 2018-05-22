@@ -3533,6 +3533,9 @@ export interface IBlockHeader {
 
     /** BlockHeader nonce */
     nonce?: number|Long;
+
+    /** BlockHeader miner */
+    miner?: Uint8Array;
 }
 
 /** Represents a BlockHeader. */
@@ -3561,6 +3564,9 @@ export class BlockHeader implements IBlockHeader {
 
     /** BlockHeader nonce. */
     public nonce: (number|Long);
+
+    /** BlockHeader miner. */
+    public miner: Uint8Array;
 
     /**
      * Creates a new BlockHeader instance using the specified properties.

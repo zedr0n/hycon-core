@@ -8774,6 +8774,7 @@ $root.BlockHeader = (function() {
      * @property {number|null} [difficulty] BlockHeader difficulty
      * @property {number|Long|null} [timeStamp] BlockHeader timeStamp
      * @property {number|Long|null} [nonce] BlockHeader nonce
+     * @property {Uint8Array|null} [miner] BlockHeader miner
      */
 
     /**
@@ -8841,6 +8842,14 @@ $root.BlockHeader = (function() {
     BlockHeader.prototype.nonce = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
 
     /**
+     * BlockHeader miner.
+     * @member {Uint8Array} miner
+     * @memberof BlockHeader
+     * @instance
+     */
+    BlockHeader.prototype.miner = $util.newBuffer([]);
+
+    /**
      * Creates a new BlockHeader instance using the specified properties.
      * @function create
      * @memberof BlockHeader
@@ -8877,6 +8886,8 @@ $root.BlockHeader = (function() {
             writer.uint32(/* id 5, wireType 0 =*/40).int64(message.timeStamp);
         if (message.nonce != null && message.hasOwnProperty("nonce"))
             writer.uint32(/* id 6, wireType 0 =*/48).int64(message.nonce);
+        if (message.miner != null && message.hasOwnProperty("miner"))
+            writer.uint32(/* id 7, wireType 2 =*/58).bytes(message.miner);
         return writer;
     };
 
@@ -8930,6 +8941,9 @@ $root.BlockHeader = (function() {
                 break;
             case 6:
                 message.nonce = reader.int64();
+                break;
+            case 7:
+                message.miner = reader.bytes();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -8988,6 +9002,9 @@ $root.BlockHeader = (function() {
         if (message.nonce != null && message.hasOwnProperty("nonce"))
             if (!$util.isInteger(message.nonce) && !(message.nonce && $util.isInteger(message.nonce.low) && $util.isInteger(message.nonce.high)))
                 return "nonce: integer|Long expected";
+        if (message.miner != null && message.hasOwnProperty("miner"))
+            if (!(message.miner && typeof message.miner.length === "number" || $util.isString(message.miner)))
+                return "miner: buffer expected";
         return null;
     };
 
@@ -9043,6 +9060,11 @@ $root.BlockHeader = (function() {
                 message.nonce = object.nonce;
             else if (typeof object.nonce === "object")
                 message.nonce = new $util.LongBits(object.nonce.low >>> 0, object.nonce.high >>> 0).toNumber();
+        if (object.miner != null)
+            if (typeof object.miner === "string")
+                $util.base64.decode(object.miner, message.miner = $util.newBuffer($util.base64.length(object.miner)), 0);
+            else if (object.miner.length)
+                message.miner = object.miner;
         return message;
     };
 
@@ -9075,6 +9097,7 @@ $root.BlockHeader = (function() {
                 object.nonce = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.nonce = options.longs === String ? "0" : 0;
+            object.miner = options.bytes === String ? "" : [];
         }
         if (message.previousHash && message.previousHash.length) {
             object.previousHash = [];
@@ -9097,6 +9120,8 @@ $root.BlockHeader = (function() {
                 object.nonce = options.longs === String ? String(message.nonce) : message.nonce;
             else
                 object.nonce = options.longs === String ? $util.Long.prototype.toString.call(message.nonce) : options.longs === Number ? new $util.LongBits(message.nonce.low >>> 0, message.nonce.high >>> 0).toNumber() : message.nonce;
+        if (message.miner != null && message.hasOwnProperty("miner"))
+            object.miner = options.bytes === String ? $util.base64.encode(message.miner, 0, message.miner.length) : options.bytes === Array ? Array.prototype.slice.call(message.miner) : message.miner;
         return object;
     };
 

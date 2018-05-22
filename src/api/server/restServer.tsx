@@ -220,7 +220,6 @@ export class RestServer implements IRest {
         if (Hwallet.name !== undefined && Hwallet.password !== undefined && Hwallet.hint !== undefined && Hwallet.mnemonic !== undefined && Hwallet.language !== undefined) {
             const wallet = Wallet.generate({ name: Hwallet.name, password: Hwallet.password, mnemonic: Hwallet.mnemonic, language: Hwallet.language, hint: Hwallet.hint })
             await wallet.save(Hwallet.name, Hwallet.password)
-            // TODO : save other information in wallet class
             const address = await Wallet.getAddress(Hwallet.name)
             return Promise.resolve(address.toString())
         } else {
