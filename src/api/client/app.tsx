@@ -143,10 +143,10 @@ export class App extends React.Component<{ rest: IRest }, any> {
                                 </div>
                             </form>
                             <Link className="mdl-navigation__link" to="/">Home</Link>
-                            <Link className="mdl-navigation__link" to="/block">Block</Link>
+                            {/* <Link className="mdl-navigation__link" to="/block">Block</Link> */}
                             <Link className="mdl-navigation__link" to="/txView">Tx</Link>
                             <Link className="mdl-navigation__link" to="/wallet">Wallet</Link>
-                            <Link className="mdl-navigation__link" to="/peersView">Peers List</Link>
+                            {/* <Link className="mdl-navigation__link" to="/peersView">Peers List</Link> */}
                         </nav>
                     </div>
                     <div
@@ -186,10 +186,10 @@ export class App extends React.Component<{ rest: IRest }, any> {
                                 </div>
                             </form>
                             <Link className="mdl-navigation__link" to="/">Home</Link>
-                            <Link className="mdl-navigation__link" to="/block">Block</Link>
+                            {/* <Link className="mdl-navigation__link" to="/block">Block</Link> */}
                             <Link className="mdl-navigation__link" to="/txView">Tx</Link>
                             <Link className="mdl-navigation__link" to="/wallet">Wallet</Link>
-                            <Link className="mdl-navigation__link" to="/peersView">Peers List</Link>
+                            {/* <Link className="mdl-navigation__link" to="/peersView">Peers List</Link> */}
                         </nav>
                     </div>
                     <div
