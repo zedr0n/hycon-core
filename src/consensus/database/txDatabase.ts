@@ -50,13 +50,11 @@ export class TxDatabase {
     }
 
     public async putTxs(blockHash: Hash, txs: AnySignedTx[]): Promise<void> {
-        logger.info(`PutTxs length : ${txs.length}`)
         const batch: levelup.Batch[] = []
         const mapLastTx: Map<string, Hash> = new Map<string, Hash>()
         for (const tx of txs) {
             if (!verifyTx(tx)) { continue }
             const txHash = new Hash(tx)
-            logger.info(`PutTx : ${txHash}`)
             const existedCheck = await this.getTx(txHash)
             if (existedCheck !== undefined) {
                 logger.error(`TxList info is already exsited, so change blockHash of txList : ${existedCheck.blockHash} -> ${blockHash} / ${txHash}`)
@@ -90,8 +88,8 @@ export class TxDatabase {
                 batch.push({ type: "put", key: txHash.toString(), value: txList.encode() })
             }
             for (const key of mapLastTx.keys()) {
-                const txListHash = mapLastTx.get(key)
-                batch.push({ type: "put", key, value: txListHash.toBuffer() })
+                const txhash = mapLastTx.get(key)
+                batch.push({ type: "put", key, value: txhash.toBuffer() })
             }
         }
         batch.push({ type: "put", key: "lastBlock", value: blockHash.toBuffer() })
@@ -115,7 +113,6 @@ export class TxDatabase {
     public async getLastTxs(address: Address, count?: number): Promise<TxList[]> {
         const txs: TxList[] = []
         let txList = await this.getTx(address)
-        // TODO : Have to check block status before return? Should txDB have blockDatabase?
         while (txList) {
             if (await this.consensus.getBlockStatus(txList.blockHash) === BlockStatus.MainChain) { txs.push(txList) }
             if (txs.length === count) { break }

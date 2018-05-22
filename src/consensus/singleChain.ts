@@ -121,7 +121,6 @@ export class SingleChain implements IConsensus {
                 const transitionResult = verifyResult.stateTransition
                 await this.worldState.putPending(transitionResult.batch, transitionResult.mapAccount)
                 const { current, previous } = await this.db.putBlock(blockHash, block)
-                logger.error(`BlockHash : ${blockHash} / ${new Hash(current.header)}`)
 
                 await this.organizeChains(blockHash, current, block, this.txUnit)
 
@@ -348,7 +347,7 @@ export class SingleChain implements IConsensus {
             newBlock.updateMerkleRoot()
 
             if (!await this.verifyPreBlock(newBlock, previousHeader)) { throw new Error("Not verified.") }
-            // this.server.miner.newCandidateBlock(newBlock)
+            this.server.miner.newCandidateBlock(newBlock)
             return newBlock
         } catch (e) {
             logger.error(`Fail to createCandidateBlock: ${e}`)
@@ -434,7 +433,7 @@ export class SingleChain implements IConsensus {
                     this.blockTip = dbBlock
                     logger.error(`BlockTip Hash : ${new Hash(this.blockTip.header)}`)
                     await this.db.setBlockTip(newBlockHash)
-                    // this.createCandidateBlock(txs)
+                    this.createCandidateBlock(txs)
                 } else {
                     await this.db.setBlockStatus(newBlockHash, BlockStatus.Block)
                     this.graph.addToGraph(dbBlock.header, BlockStatus.Block)
@@ -506,11 +505,11 @@ export class SingleChain implements IConsensus {
     }
 
     private async onMinedBlock(block: Block) {
-        // logger.info("New block mined")
-        // await this.putBlock(block)
-        // // start network propagation
-        // const encoded: Uint8Array = proto.Network.encode({ putBlock: { blocks: [block] } }).finish()
-        // this.server.network.broadcast(new Buffer(encoded), null)
+        logger.info("New block mined")
+        await this.putBlock(block)
+        // start network propagation
+        const encoded: Uint8Array = proto.Network.encode({ putBlock: { blocks: [block] } }).finish()
+        this.server.network.broadcast(new Buffer(encoded), null)
     }
 }
 

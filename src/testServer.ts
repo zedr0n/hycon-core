@@ -78,10 +78,6 @@ export class TestServer {
         setInterval(() => {
             this.makeTx()
         }, 3000)
-        setTimeout(() => {
-            logger.error(`Start test Consensus`)
-            this.testConsensus()
-        }, 5000)
     }
     private async makeTx() {
         const amt = hyconfromString("12345")

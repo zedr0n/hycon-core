@@ -448,6 +448,13 @@ export class RestServer implements IRest {
                             to: tx.tx.to.toString(),
                             signature: tx.tx.signature.toString(),
                         }
+                    } else {
+                        webTx = {
+                            hash: new Hash(tx.tx).toString(),
+                            amount: hycontoString(tx.tx.amount),
+                            to: tx.tx.to.toString(),
+                            signature: tx.tx.signature.toString(),
+                        }
                     }
                     // unsigned Txs are unlisted
                     webTxs.push(webTx)

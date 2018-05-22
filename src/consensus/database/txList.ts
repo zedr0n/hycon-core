@@ -47,7 +47,11 @@ export class TxList implements proto.ITxList {
 
         if (this.tx) {
             this.tx.set(txList.tx)
-        } else { this.tx = new SignedTx(txList.tx) }
+        } else if (txList.previousFrom.length === 0 && txList.previousTo.length === 0 && txList.tx.from.length === 0) {
+            this.tx = new GenesisSignedTx(txList.tx)
+        } else {
+            this.tx = new SignedTx(txList.tx)
+        }
 
     }
 
