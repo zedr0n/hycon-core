@@ -92,12 +92,14 @@ export class CpuMiner {
 
     public async putWork(block: Block, prehash: Uint8Array, difficulty: Difficulty) {
         await this.stop()
+        this.miners = []
         for (let i = 0; i < this.minerCount; i++) {
             const miner = CpuMiner.mine(prehash, difficulty, i)
             miner.nonce.then((nonce) => {
-                block.header.nonce = nonce
-                this.minerServer.submitBlock(block)
-            }).catch(() => {})
+                const minedBlock = new Block(block)
+                minedBlock.header.nonce = nonce
+                this.minerServer.submitBlock(minedBlock)
+            }).catch(() => { })
             this.miners.push(miner)
         }
     }
