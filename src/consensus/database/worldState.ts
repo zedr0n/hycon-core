@@ -194,7 +194,7 @@ export class WorldState {
                 }
                 if (minerAccount === undefined) { minerAccount = new Account({ balance: 0, nonce: 0 }) }
 
-                fees.add(hyconfromString("240"))
+                fees = fees.add(hyconfromString("240"))
                 minerAccount.balance = minerAccount.balance.add(fees)
 
                 if (minerIndex === undefined) {
