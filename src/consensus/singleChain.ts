@@ -337,12 +337,14 @@ export class SingleChain implements IConsensus {
             const header = new BlockHeader({
                 difficulty,
                 merkleRoot: new Hash(),
+                miner,
                 nonce: -1,
                 previousHash: [previousHash],
                 stateRoot: currentStateRoot,
                 timeStamp,
+
             })
-            const newBlock = new Block({ header, txs: validTxs, miner })
+            const newBlock = new Block({ header, txs: validTxs })
             this.server.txPool.updateTxs(invalidTxs, 0)
             newBlock.updateMerkleRoot()
 
