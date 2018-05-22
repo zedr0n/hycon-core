@@ -14,8 +14,7 @@ import { NatUpnp } from "../nat"
 import { PeerDb } from "../peerDb"
 import { UpnpClient, UpnpServer } from "../upnp"
 import { RabbitPeer } from "./rabbitPeer"
-// tslint:disable-next-line:no-var-requires
-const publicIp = require("public-ip")
+
 const logger = getLogger("Network")
 
 export class RabbitNetwork implements INetwork {
@@ -74,10 +73,6 @@ export class RabbitNetwork implements INetwork {
     public readonly version: number = 3
     public port: number
 
-    // TODO: replace with port
-    public localPort: number
-    public publicIp: string
-
     private hycon: Server
     private server: net.Server
     private peerDB: PeerDb
@@ -93,14 +88,13 @@ export class RabbitNetwork implements INetwork {
         RabbitNetwork.failLimit = 10
         this.port = port
         this.networkid = networkid
-        this.localPort = port
         this.targetConnectedPeers = 5
         this.hycon = hycon
         this.peers = new Map<number, RabbitPeer>()
         this.endPoints = new Map<number, proto.IPeer>()
         this.pendingConnections = new Map<number, proto.IPeer>()
         this.peerDB = new PeerDb(peerDbPath)
-        this.publicIp = undefined
+
         logger.debug(`TcpNetwork Port=${port}`)
     }
 
@@ -122,13 +116,6 @@ export class RabbitNetwork implements INetwork {
     public async start(): Promise<boolean> {
         logger.debug(`Tcp Network Started`)
         // initial peerDB
-        try {
-            this.publicIp = await publicIp.v4()
-            logger.info(`Get PublicIP Success=${this.publicIp.toString()}`)
-        } catch (error) {
-            logger.info(`Get PublicIP Fail=${error}`)
-            this.publicIp = undefined
-        }
 
         this.server = createServer((socket) => this.accept(socket).catch(() => undefined))
         await new Promise<boolean>((resolve, reject) => {
@@ -216,11 +203,6 @@ export class RabbitNetwork implements INetwork {
         return new Promise<RabbitPeer>(async (resolve, reject) => {
             const ipeer = { host, port }
             const key = PeerDb.ipeer2key(ipeer)
-            if ((host === ip.address() || host === this.publicIp) && (port === this.localPort || port === this.port)) {
-                await this.peerDB.remove(ipeer)
-                reject(`Don't connect self, remove from peerDB`)
-                return
-            }
             if (this.pendingConnections.has(key)) {
                 reject(`Already connecting to ${host}:${port} `)
                 return
