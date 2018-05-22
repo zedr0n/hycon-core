@@ -241,8 +241,8 @@ export class RabbitNetwork implements INetwork {
             })
             socket.connect({ host, port }, async () => {
                 try {
-                    logger.info(`Connected to ${key}: ${host}:${port}`)
                     const peer = await this.newConnection(socket)
+                    logger.info(`Connected to ${key}: ${host}:${port} Info ${peer.socketBuffer.getInfo()}`)
                     ipeer.host = socket.remoteAddress
                     if (await peer.detectStatus()) {
                         if (save) {
