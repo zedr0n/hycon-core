@@ -58,6 +58,11 @@ export class SingleChain implements IConsensus {
         return account.nonce
     }
 
+    public broadcastTxs(txList: SignedTx[]) {
+        const encoded: Uint8Array = proto.Network.encode({ putTx: { txs: txList } }).finish()
+        this.server.network.broadcast(new Buffer(encoded), null)
+
+    }
     public async init(): Promise<void> {
         try {
             await this.db.init()

@@ -9,6 +9,7 @@ import { SignedTx } from "../../common/txSigned"
 import { IConsensus } from "../../consensus/iconsensus"
 import { IPeer } from "../../network/ipeer"
 import { RestManager } from "../../rest/restManager"
+import * as proto from "../../serialization/proto"
 import * as Hycon from "../../server"
 import { App, routes } from "../client/app"
 import { indexRender } from "./index"
@@ -113,6 +114,7 @@ export class HttpServer {
                     fee: req.body.fee,
                 }, (tx: SignedTx) => {
                     this.hyconServer.txQueue.putTxs([tx])
+                    this.consensus.broadcastTxs([tx])
                 }),
             )
         })
@@ -128,6 +130,7 @@ export class HttpServer {
                     recovery: req.body.recovery,
                 }, (tx: SignedTx) => {
                     this.hyconServer.txQueue.putTxs([tx])
+                    this.consensus.broadcastTxs([tx])
                 }),
             )
         })
@@ -193,6 +196,7 @@ export class HttpServer {
                     minerFee: req.body.minerFee,
                 }, (tx: SignedTx) => {
                     this.hyconServer.txQueue.putTxs([tx])
+                    this.consensus.broadcastTxs([tx])
                 }),
             )
         })
