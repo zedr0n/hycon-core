@@ -9,7 +9,6 @@ interface ITxListView {
     txs: ITxProp[]
 }
 export class TxPoolList extends React.Component<any, any> {
-    // public intervalId: any // NodeJS.Timer
     public mounted: boolean = false
 
     constructor(props: any) {
@@ -19,15 +18,11 @@ export class TxPoolList extends React.Component<any, any> {
 
     public componentWillUnmount() {
         this.mounted = false
-        // this.intervalId = null
     }
 
     public componentDidMount() {
+        // TODO : Have to refresh recent TxPool data and paginate
         this.getPendingTxs()
-        // this.getPendingTxs(this.state.index)
-        // this.intervalId = setInterval(() => {
-        //     this.getPendingTxs(this.state.index)
-        // }, 10000)
     }
 
     public getPendingTxs() {
@@ -58,23 +53,6 @@ export class TxPoolList extends React.Component<any, any> {
         return (
             <div>
                 <div className="contentTitle">Transactions</div>
-                {/* <div className="contentTitle"> Transactions
-                    <span className="seeMoreLink">
-                        <ReactPaginate previousLabel={"PREV"}
-                            nextLabel={"NEXT"}
-                            breakLabel={<a>...</a>}
-                            breakClassName={"break-me"}
-                            pageCount={this.state.length}
-                            marginPagesDisplayed={1}
-                            pageRangeDisplayed={9}
-                            onPageChange={this.handlePageClick}
-                            containerClassName={"pagination"}
-                            activeClassName={"active"}
-                            initialPage={this.state.index}
-                            disableInitialCallback={true}
-                        />
-                    </span>
-                </div> */}
                 {this.state.txs.map((tx: ITxProp) => {
                     return (
                         <div key={txIndex++}>

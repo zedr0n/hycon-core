@@ -104,7 +104,7 @@ export class TestServer {
                 const b = fee.add(randomInt(0, 10))
                 // logger.info(`Amount : ${hycontoString(a)} / Fee : ${hycontoString(b)}`)
                 const tx = fromWallet.send(toAddr, a, nonce, b)
-                logger.error(`TX ${i + 1} Amount=${hycontoString(tx.amount)} Fee=${hycontoString(tx.fee)} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
+                // logger.error(`TX ${i + 1} Amount=${hycontoString(tx.amount)} Fee=${hycontoString(tx.fee)} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
                 txList.push(tx)
             }
         }

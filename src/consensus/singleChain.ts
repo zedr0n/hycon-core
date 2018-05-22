@@ -349,7 +349,7 @@ export class SingleChain implements IConsensus {
 
             })
             const newBlock = new Block({ header, txs: validTxs, miner })
-            // this.server.txPool.updateTxs(invalidTxs, 0)
+            this.server.txPool.updateTxs(invalidTxs, 0)
             newBlock.updateMerkleRoot()
 
             if (!await this.verifyPreBlock(newBlock, previousHeader)) { throw new Error("Not verified.") }
@@ -493,7 +493,7 @@ export class SingleChain implements IConsensus {
             throw new Error("Error during reorganization")
         }
 
-        const txs: SignedTx[] = []
+        let txs: SignedTx[] = []
         let pushHeight = popStopHeight
         while (newBlockHashes.length > 0) {
             hash = newBlockHashes.pop()
@@ -502,7 +502,7 @@ export class SingleChain implements IConsensus {
             this.graph.addToGraph(block.header, BlockStatus.MainChain)
             await this.db.setHashAtHeight(pushHeight, hash)
             pushHeight += 1
-            // txs = this.server.txPool.updateTxs(block.txs, newBlockHashes.length > 0 ? 0 : txCount)
+            txs = this.server.txPool.updateTxs(block.txs, newBlockHashes.length > 0 ? 0 : txCount)
             if (this.txdb) { await this.txdb.putTxs(hash, block.txs) }
             this.newBlock(block)
         }
