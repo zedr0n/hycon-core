@@ -33,5 +33,5 @@ export interface IConsensus {
     getHash(height: number): Promise<Hash>
     getNonce(address: Address): Promise<number>
     getBlockHeight(hash: Hash): Promise<number | undefined>
-    broadcastTxs(txList: SignedTx[]): void
+
 }

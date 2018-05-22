@@ -2,9 +2,11 @@ import { address } from "ip"
 import { IResponseError } from "../api/client/rest"
 import { Address } from "../common/address"
 import { ITxPool } from "../common/itxPool"
+import { SignedTx } from "../common/txSigned"
 import { Database } from "../consensus/database/database"
 import { WorldState } from "../consensus/database/worldState"
 import { IConsensus } from "../consensus/iconsensus"
+import * as proto from "../serialization/proto"
 import { Server } from "../server"
 export class RestManager {
     public subscription: Map<number, any> | undefined
@@ -21,6 +23,11 @@ export class RestManager {
         this.consensus = server.consensus
         this.db = server.db
         this.accountDB = server.accountDB
+    }
+
+    public broadcastTxs(txList: SignedTx[]) {
+        const encoded: Uint8Array = proto.Network.encode({ putTx: { txs: txList } }).finish()
+        this.server.network.broadcast(new Buffer(encoded), null)
     }
 
     // tslint:disable:object-literal-sort-keys

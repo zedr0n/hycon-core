@@ -22,7 +22,7 @@ export class HttpServer {
     public app: express.Application
     public rest: RestServer
     public hyconServer: RestManager
-    private consensus: IConsensus
+
     constructor(hyconServer: RestManager, port: number = 8080) {
         this.app = express()
         this.config()
@@ -114,7 +114,7 @@ export class HttpServer {
                     fee: req.body.fee,
                 }, (tx: SignedTx) => {
                     this.hyconServer.txQueue.putTxs([tx])
-                    this.consensus.broadcastTxs([tx])
+                    this.hyconServer.broadcastTxs([tx])
                 }),
             )
         })
@@ -130,7 +130,7 @@ export class HttpServer {
                     recovery: req.body.recovery,
                 }, (tx: SignedTx) => {
                     this.hyconServer.txQueue.putTxs([tx])
-                    this.consensus.broadcastTxs([tx])
+                    this.hyconServer.broadcastTxs([tx])
                 }),
             )
         })
@@ -196,7 +196,7 @@ export class HttpServer {
                     minerFee: req.body.minerFee,
                 }, (tx: SignedTx) => {
                     this.hyconServer.txQueue.putTxs([tx])
-                    this.consensus.broadcastTxs([tx])
+                    this.hyconServer.broadcastTxs([tx])
                 }),
             )
         })
