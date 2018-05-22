@@ -60,7 +60,7 @@ export class Verify {
         const prevDBBlock = await database.getDBBlock(prevHash)
 
         const prevTimeEMA = prevDBBlock.timeEMA
-        const prevWorkEMA = Difficulty.decode(prevDBBlock.workEMA)
+        const prevWorkEMA = prevDBBlock.workEMA
 
         const blockDifficulty = Difficulty.decode(block.header.difficulty)
         const timeDelta = block.header.timeStamp - previousHeader.timeStamp
