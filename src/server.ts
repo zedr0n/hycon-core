@@ -81,7 +81,6 @@ export class Server {
             Server.globalOptions.networkid = "hycon"
         }
 
-
         const postfix = Server.globalOptions.postfix
         this.consensus = new SingleChain(this, "blockdb" + postfix, "worldstate" + postfix, "rawblock" + postfix, "txDB" + postfix)
         this.network = new RabbitNetwork(this, Server.globalOptions.port, "peerdb" + postfix, Server.globalOptions.networkid)
