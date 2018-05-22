@@ -429,7 +429,7 @@ export class SingleChain implements IConsensus {
                 if (this.blockTip === undefined || this.blockTip.height < dbBlock.height) {
                     const txs = await this.reorganize(newBlockHash, block, dbBlock.height, txCount)
                     this.blockTip = dbBlock
-                    logger.error(`BlockTip Hash : ${new Hash(this.blockTip.header)}`)
+                    logger.info(`BlockTip Hash : ${new Hash(this.blockTip.header)}`)
                     await this.db.setBlockTip(newBlockHash)
                     this.createCandidateBlock(txs)
                 } else {
