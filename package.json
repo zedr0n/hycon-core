@@ -112,7 +112,7 @@
     "react-router": "^4.2.0",
     "react-router-config": "^1.0.0-beta.4",
     "react-router-dom": "^4.2.2",
-    "rocksdb": "^2.0.0",
+    "rocksdb": "https://github.com/Team-Hycon/rocksdb",
     "secp256k1": "^3.5.0",
     "sha256": "^0.2.0",
     "stratum": "^0.2.4",
