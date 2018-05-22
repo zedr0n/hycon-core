@@ -270,6 +270,7 @@ export class Database {
             let previous: DBBlock
             let workEMA = 1
             let timeEMA = DifficultyAdjuster.getTargetTime()
+            let totalWork = new Difficulty(0x0, 0)
 
             if (header instanceof BlockHeader) {
                 if (header.previousHash.length <= 0) {
@@ -284,11 +285,12 @@ export class Database {
 
                 timeEMA = DifficultyAdjuster.calcTimeEMA(timeDelta, prevTimeEMA)
                 workEMA = DifficultyAdjuster.calcWorkEMA(workDelta, previous.workEMA).encode()
+                totalWork = previous.totalWork.add(workDelta)
 
                 height = previous.height + 1
             }
 
-            return { current: new DBBlock({ header, height, timeEMA, workEMA }), previous }
+            return { current: new DBBlock({ header, height, timeEMA, workEMA, totalWork: totalWork.encode() }), previous }
         } catch (e) {
             logger.error(`failed to make DBBlock : ${e}`)
             throw e
