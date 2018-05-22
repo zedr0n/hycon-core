@@ -86,10 +86,10 @@ export class BlockLine extends React.Component<any, any> {
                 <td className="numericTd">{this.state.block.txs.length}</td>
                 <td className="numericTd">
                     {this.formatNumber(this.state.block.txSummary)} HYCON
-        </td>
+                </td>
                 <td className="mdl-data-table__cell--non-numeric">Glosfer</td>
-                <td />
-                <td />
+                <td className="numericTd">{(this.state.block.size / 1000).toPrecision(3) }</td>
+                {/* <td /> */}
             </tr>
         )
     }

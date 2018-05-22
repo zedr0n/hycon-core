@@ -338,6 +338,7 @@ export class RestServer implements IRest {
 
             for (const dbblock of dbblocks) {
                 const txs: ITxProp[] = []
+                const size = dbblock.encode().byteLength
                 for (const tx of dbblock.txs) {
                     if (tx instanceof SignedTx) {
                         txs.push({
@@ -360,6 +361,7 @@ export class RestServer implements IRest {
                     hash: hash.toString(),
                     difficulty: dbblock.header.difficulty,
                     height: await this.consensus.getBlockHeight(hash),
+                    size,
                     txs,
                     timeStamp: Number(dbblock.header.timeStamp),
                 }

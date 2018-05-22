@@ -104,7 +104,7 @@ export class BlockList extends React.Component<any, any> {
                                 <th className="mdl-data-table__cell--non-numeric">Total Sent</th>
                                 <th className="mdl-data-table__cell--non-numeric">Relayed By</th>
                                 <th className="mdl-data-table__cell--non-numeric">Size(kB)</th>
-                                <th className="mdl-data-table__cell--non-numeric">Weight(kWU)</th>
+                                {/* <th className="mdl-data-table__cell--non-numeric">Weight(kWU)</th> */}
                             </tr>
                         </thead>
                         <tbody>
