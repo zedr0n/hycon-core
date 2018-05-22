@@ -79,6 +79,9 @@ export class Server {
         if (Server.globalOptions.networkid === undefined) {
             Server.globalOptions.networkid = "hycon"
         }
+        if (Server.globalOptions.verbose) {
+            logger.level = 'debug';
+        }
 
         const postfix = Server.globalOptions.postfix
         this.consensus = new SingleChain(this, "blockdb" + postfix, "worldstate" + postfix, "rawblock" + postfix, "txDB" + postfix)
