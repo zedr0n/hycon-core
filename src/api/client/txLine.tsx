@@ -17,7 +17,7 @@ export class TxLine extends React.Component<ITxLineProps, ITxLineView> {
         this.state = { tx: props.tx, rest: props.rest, address: props.address ? props.address : undefined }
     }
     public render() {
-        const date = new Date(Date.now())
+        const date = new Date(this.state.tx.receiveTime)
         return (
             <table className="table_margined">
                 <thead>
@@ -27,8 +27,7 @@ export class TxLine extends React.Component<ITxLineProps, ITxLineView> {
                                 <span className="coloredText">{this.state.tx.hash}</span>
                             </Link>
                             <span className="timeStampArea">
-                                {date.getFullYear()}-{(Array(2 + 1).join("0") + (date.getMonth() + 1)).slice(-2)}-{(Array(2 + 1).join("0") + date.getDate()).slice(-2)}{" "}
-                                {date.getHours()}:{date.getMinutes()}:{date.getSeconds()}
+                                {date.toString()}
                             </span>
                         </th>
                     </tr>

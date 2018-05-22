@@ -259,7 +259,7 @@ export class SingleChain implements IConsensus {
         return true
     }
 
-    public async getTx(hash: Hash): Promise<TxList | undefined> {
+    public async getTx(hash: Hash): Promise<{tx: TxList, timestamp: number, confirmation: number} | undefined> {
         if (this.txdb) {
             return await this.txdb.getTx(hash)
         } else {

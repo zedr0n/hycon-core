@@ -49,7 +49,7 @@ export class TxDatabase {
         for (const tx of txs) {
             if (!verifyTx(tx)) { continue }
             const txHash = new Hash(tx)
-            const existedCheck = await this.getTx(txHash)
+            const existedCheck = await this.get(txHash)
             if (existedCheck !== undefined) {
                 logger.error(`TxList info is already exsited, so change blockHash of txList : ${existedCheck.blockHash} -> ${blockHash} / ${txHash}`)
                 if (!existedCheck.blockHash.equals(blockHash)) {
@@ -63,7 +63,7 @@ export class TxDatabase {
                 const toAddress = tx.to.toString()
                 let tLastTx = mapLastTx.get(toAddress)
                 if (tLastTx === undefined) {
-                    const lastTx = await this.getTx(tx.to)
+                    const lastTx = await this.get(tx.to)
                     if (lastTx) { tLastTx = new Hash(lastTx.tx) }
                 }
                 if (tLastTx !== undefined) { txList.previousTo = tLastTx }
@@ -73,7 +73,7 @@ export class TxDatabase {
                     const fromAddress = tx.from.toString()
                     let fLastTx = mapLastTx.get(fromAddress)
                     if (fLastTx === undefined) {
-                        const lastTx = await this.getTx(tx.from)
+                        const lastTx = await this.get(tx.from)
                         if (lastTx) { fLastTx = new Hash(lastTx.tx) }
                     }
                     if (fLastTx !== undefined) { txList.previousFrom = fLastTx }
@@ -106,18 +106,18 @@ export class TxDatabase {
 
     public async getLastTxs(address: Address, count?: number): Promise<TxList[]> {
         const txs: TxList[] = []
-        let txList = await this.getTx(address)
+        let txList = await this.get(address)
         while (txList) {
             if (await this.consensus.getBlockStatus(txList.blockHash) === BlockStatus.MainChain) { txs.push(txList) }
             if (txs.length === count) { break }
             if (txList.tx.to.equals(address)) {
                 if (txList.previousTo !== undefined) {
-                    txList = await this.getTx(txList.previousTo)
+                    txList = await this.get(txList.previousTo)
                 } else { break }
             } else if (txList.tx instanceof SignedTx) {
                 if (txList.tx.from.equals(address)) {
                     if (txList.previousFrom !== undefined) {
-                        txList = await this.getTx(txList.previousFrom)
+                        txList = await this.get(txList.previousFrom)
                     } else { break }
                 }
             }
@@ -125,7 +125,17 @@ export class TxDatabase {
         return Promise.resolve(txs)
     }
 
-    public async getTx(key: Address | Hash): Promise<TxList | undefined> {
+    public async getTx(key: Hash): Promise<{tx: TxList, timestamp: number, confirmation: number} | undefined> {
+        const tx = await this.get(key)
+        if (tx === undefined) {return undefined}
+        const block = await this.consensus.getHeaderByHash(tx.blockHash)
+        const height = await this.consensus.getBlockHeight(tx.blockHash)
+        const tip = this.consensus.getBlocksTip()
+        const confirmation = tip.height - height
+        return Promise.resolve({tx, timestamp: block.timeStamp, confirmation})
+    }
+
+    private async get(key: Address | Hash): Promise<TxList | undefined> {
         let decodingDBEntry = false
         try {
             let dbKey = key

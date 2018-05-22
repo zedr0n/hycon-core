@@ -16,6 +16,10 @@ export interface IUser {
 export interface ITxProp {
     hash: string
     amount: string
+    estimated: string
+    receiveTime?: number
+    confirmation?: number
+    blockHash?: string
     fee?: string
     from?: string
     to?: string
@@ -33,7 +37,7 @@ export interface IBlock {
 }
 export interface IWalletAddress {
     hash: string
-    balance: number
+    balance: string
     txs: ITxProp[]
 }
 export interface IPeer {

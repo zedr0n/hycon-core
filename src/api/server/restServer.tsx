@@ -106,14 +106,15 @@ export class RestServer implements IRest {
             for (const tx of txList) {
                 let webTx: ITxProp
                 if (tx !== undefined) {
-                    if (tx instanceof SignedTx && tx.nonce >= nonce) {
+                    if (tx.tx instanceof SignedTx && tx.tx.nonce >= nonce) {
                         webTx = {
                             hash: tx.tx.unsignedHash().toString(),
                             amount: hycontoString(tx.tx.amount),
-                            fee: hycontoString(tx.fee),
-                            from: tx.from.toString(),
+                            fee: hycontoString(tx.tx.fee),
+                            from: tx.tx.from.toString(),
                             to: tx.tx.to.toString(),
                             signature: tx.tx.signature.toString(),
+                            estimated: hycontoString(tx.tx.amount.add(tx.tx.fee)),
                         }
                     }
                     // unsigned Txs are unlisted
@@ -245,6 +246,7 @@ export class RestServer implements IRest {
                             from: tx.tx.from.toString(),
                             to: tx.tx.to.toString(),
                             signature: tx.tx.signature.toString(),
+                            estimated: hycontoString(tx.tx.amount.add(tx.tx.fee)),
                         }
                         // unsigned Txs are unlisted
                         webTxs.push(webTx)
@@ -253,7 +255,7 @@ export class RestServer implements IRest {
             }
             return Promise.resolve<IWalletAddress>({
                 hash: address,
-                balance: account ? account.balance.toInt() : 0,
+                balance: account ? hycontoString(account.balance) : "0.0",
                 txs: webTxs,
             })
 
@@ -292,12 +294,14 @@ export class RestServer implements IRest {
                         fee: hycontoString(hyconTx.fee),
                         from: hyconTx.from.toString(),
                         to: hyconTx.to.toString(),
+                        estimated: hycontoString(hyconTx.amount.add(hyconTx.fee)),
                     })
                 } else {
                     txs.push({
                         amount: hycontoString(hyconTx.amount),
                         hash: new Hash(hyconTx).toString(),
                         to: hyconTx.to.toString(),
+                        estimated: hycontoString(hyconTx.amount),
                     })
                 }
             }
@@ -347,12 +351,14 @@ export class RestServer implements IRest {
                             fee: hycontoString(tx.fee),
                             from: tx.from.toString(),
                             to: tx.to.toString(),
+                            estimated: hycontoString(tx.amount.add(tx.fee)),
                         })
                     } else {
                         txs.push({
                             amount: hycontoString(tx.amount),
                             hash: new Hash(tx).toString(),
                             to: tx.to.toString(),
+                            estimated: hycontoString(tx.amount),
                         })
                     }
                 }
@@ -391,7 +397,8 @@ export class RestServer implements IRest {
     }
     public async getTx(hash: string): Promise<ITxProp | IResponseError> {
         try {
-            const hyconBlockTx = await this.consensus.getTx(new Hash(Hash.decode(hash)))
+            const getTxResult = await this.consensus.getTx(new Hash(Hash.decode(hash)))
+            const hyconBlockTx = getTxResult.tx
             if (hyconBlockTx === undefined) {
                 return Promise.resolve({
                     status: 404,
@@ -408,12 +415,21 @@ export class RestServer implements IRest {
                     fee: hycontoString(hyconBlockTx.tx.fee),
                     from: hyconBlockTx.tx.from.toString(),
                     to: hyconBlockTx.tx.to.toString(),
+                    blockHash: hyconBlockTx.blockHash.toString(),
+                    receiveTime: getTxResult.timestamp,
+                    estimated: hycontoString(hyconBlockTx.tx.amount.add(hyconBlockTx.tx.fee)),
+                    confirmation: getTxResult.confirmation,
                 }
             } else {
                 tx = {
                     hash,
                     amount: hycontoString(hyconBlockTx.tx.amount),
+                    fee: "0.0",
                     to: hyconBlockTx.tx.to.toString(),
+                    blockHash: hyconBlockTx.blockHash.toString(),
+                    receiveTime: getTxResult.timestamp,
+                    estimated: hycontoString(hyconBlockTx.tx.amount),
+                    confirmation: getTxResult.confirmation,
                 }
             }
             return tx
@@ -447,6 +463,8 @@ export class RestServer implements IRest {
                             from: tx.tx.from.toString(),
                             to: tx.tx.to.toString(),
                             signature: tx.tx.signature.toString(),
+                            blockHash: tx.blockHash.toString(),
+                            estimated: hycontoString(tx.tx.amount.add(tx.tx.fee)),
                         }
                     } else {
                         webTx = {
@@ -454,6 +472,7 @@ export class RestServer implements IRest {
                             amount: hycontoString(tx.tx.amount),
                             to: tx.tx.to.toString(),
                             signature: tx.tx.signature.toString(),
+                            estimated: hycontoString(tx.tx.amount),
                         }
                     }
                     // unsigned Txs are unlisted
@@ -548,6 +567,7 @@ export class RestServer implements IRest {
                     from: tx.from.toString(),
                     to: tx.to.toString(),
                     signature: tx.signature.toString("hex"),
+                    estimated: hycontoString(tx.amount.add(tx.fee)),
                 })
             }
             return Promise.resolve(out)
