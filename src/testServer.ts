@@ -77,13 +77,13 @@ export class TestServer {
 
         setInterval(() => {
             this.makeTx()
-        }, 3000)
+        }, 1000)
     }
     private async makeTx() {
         const amt = hyconfromString("12345")
         const fee = hyconfromString("123")
 
-        const n = 8
+        const n = 1
         const lastWalletIndex = this.wallets.length - 1
         const txList: SignedTx[] = []
         for (let i = 0; i < n; i++) {
@@ -104,7 +104,7 @@ export class TestServer {
                 const b = fee.add(randomInt(0, 10))
                 // logger.info(`Amount : ${hycontoString(a)} / Fee : ${hycontoString(b)}`)
                 const tx = fromWallet.send(toAddr, a, nonce, b)
-                // logger.debug(`TX ${i + 1} Amount=${hycontoString(tx.amount)} Fee=${hycontoString(tx.fee)} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
+                logger.error(`TX ${i + 1} Amount=${hycontoString(tx.amount)} Fee=${hycontoString(tx.fee)} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
                 txList.push(tx)
             }
         }

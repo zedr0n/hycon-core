@@ -268,6 +268,10 @@ export class SingleChain implements IConsensus {
             return undefined
         }
     }
+
+    public getPendingTxs(): SignedTx[] {
+        return this.server.txPool.getPending()
+    }
     public async getHash(height: number): Promise<Hash> {
         return await this.db.getHashAtHeight(height)
     }
@@ -344,8 +348,8 @@ export class SingleChain implements IConsensus {
                 timeStamp,
 
             })
-            const newBlock = new Block({ header, txs: validTxs })
-            this.server.txPool.updateTxs(invalidTxs, 0)
+            const newBlock = new Block({ header, txs: validTxs, miner })
+            // this.server.txPool.updateTxs(invalidTxs, 0)
             newBlock.updateMerkleRoot()
 
             if (!await this.verifyPreBlock(newBlock, previousHeader)) { throw new Error("Not verified.") }
@@ -489,7 +493,7 @@ export class SingleChain implements IConsensus {
             throw new Error("Error during reorganization")
         }
 
-        let txs: SignedTx[] = []
+        const txs: SignedTx[] = []
         let pushHeight = popStopHeight
         while (newBlockHashes.length > 0) {
             hash = newBlockHashes.pop()
@@ -498,7 +502,7 @@ export class SingleChain implements IConsensus {
             this.graph.addToGraph(block.header, BlockStatus.MainChain)
             await this.db.setHashAtHeight(pushHeight, hash)
             pushHeight += 1
-            txs = this.server.txPool.updateTxs(block.txs, newBlockHashes.length > 0 ? 0 : txCount)
+            // txs = this.server.txPool.updateTxs(block.txs, newBlockHashes.length > 0 ? 0 : txCount)
             if (this.txdb) { await this.txdb.putTxs(hash, block.txs) }
             this.newBlock(block)
         }

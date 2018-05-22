@@ -45,6 +45,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
         { match }: RouteComponentProps<{ hash: string }>,
     ) => JSX.Element
     public txView: ({ match }: RouteComponentProps<{ hash: string }>) => JSX.Element
+    public txList: ({ match }: RouteComponentProps<{}>) => JSX.Element
 
     public transaction: ({ match }: RouteComponentProps<{ name: string }>) => JSX.Element
     // public peersView: ({ match }: RouteComponentProps<{ hash: string }>) => JSX.Element
@@ -55,9 +56,8 @@ export class App extends React.Component<{ rest: IRest }, any> {
     public wallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
     public addWallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
     public recoverWallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
-    public walletDetail: (
-        { match }: RouteComponentProps<{ name: string }>,
-    ) => JSX.Element
+    public walletDetail: ({ match }: RouteComponentProps<{ name: string }>) => JSX.Element
+
     constructor(props: any) {
         super(props)
         this.state = {
@@ -85,6 +85,9 @@ export class App extends React.Component<{ rest: IRest }, any> {
         )
         this.txView = ({ match }: RouteComponentProps<{ hash: string }>) => (
             <TxView hash={match.params.hash} rest={this.rest} />
+        )
+        this.txList = ({ match }: RouteComponentProps<{}>) => (
+            <TxList rest={this.rest} />
         )
         this.transaction = ({ match }: RouteComponentProps<{ name: string }>) => (
             <Transaction name={match.params.name} rest={this.rest} />
@@ -144,7 +147,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
                             </form>
                             <Link className="mdl-navigation__link" to="/">Home</Link>
                             {/* <Link className="mdl-navigation__link" to="/block">Block</Link> */}
-                            <Link className="mdl-navigation__link" to="/txView">Tx</Link>
+                            <Link className="mdl-navigation__link" to="/txList">Tx</Link>
                             <Link className="mdl-navigation__link" to="/wallet">Wallet</Link>
                             {/* <Link className="mdl-navigation__link" to="/peersView">Peers List</Link> */}
                         </nav>
@@ -187,7 +190,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
                             </form>
                             <Link className="mdl-navigation__link" to="/">Home</Link>
                             {/* <Link className="mdl-navigation__link" to="/block">Block</Link> */}
-                            <Link className="mdl-navigation__link" to="/txView">Tx</Link>
+                            <Link className="mdl-navigation__link" to="/txList">Tx</Link>
                             <Link className="mdl-navigation__link" to="/wallet">Wallet</Link>
                             {/* <Link className="mdl-navigation__link" to="/peersView">Peers List</Link> */}
                         </nav>
@@ -205,7 +208,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
                             <Route exact path="/" component={this.home} />
                             <Route exact path="/tx/:hash" component={this.txView} />
                             <Route exact path="/block/:hash" component={this.blockView} />
-                            <Route exact path="/txList" component={TxList} />
+                            <Route exact path="/txList" component={this.txList} />
                             <Route exact path="/address/:hash" component={this.addressInfo} />
                             <Route exact path="/transaction/:name" component={this.transaction} />
                             <Route exact path="/wallet/addWallet" component={this.addWallet} />

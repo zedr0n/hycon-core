@@ -571,21 +571,30 @@ export class RestServer implements IRest {
         }
     }
 
-    public getPendingTxs(arr: SignedTx[]): Promise<ITxProp[]> {
-        if (arr.length === 0 || arr === null || arr === undefined) { return Promise.resolve([]) } else {
-            const out = []
-            for (const tx of arr) {
-                out.push({
-                    hash: new Hash(tx).toHex(),
-                    amount: hycontoString(tx.amount),
-                    fee: hycontoString(tx.fee),
-                    from: tx.from.toString(),
-                    to: tx.to.toString(),
-                    signature: tx.signature.toString("hex"),
-                    estimated: hycontoString(tx.amount.add(tx.fee)),
-                })
-            }
-            return Promise.resolve(out)
+    public getPendingTxs(): Promise<{ txs: ITxProp[], length: number }> {
+        let pageCount: number = 0
+        const arr = this.consensus.getPendingTxs()
+        pageCount = Math.ceil(arr.length / 20)
+        const out: ITxProp[] = []
+        for (const tx of arr) {
+            out.push({
+                // hash: "hash",
+                // amount: "1000",
+                // fee: "1",
+                // from: "fromAddress",
+                // to: "toAddress",
+                // signature: "signature",
+                // estimated: "1001",
+                hash: new Hash(tx).toHex(),
+                amount: hycontoString(tx.amount),
+                fee: hycontoString(tx.fee),
+                from: tx.from.toString(),
+                to: tx.to.toString(),
+                signature: tx.signature.toString("hex"),
+                estimated: hycontoString(tx.amount.add(tx.fee)),
+            })
         }
+        console.log(`getPendingTxs length : ${out.length}}`)
+        return Promise.resolve({ txs: out, length: pageCount })
     }
 }

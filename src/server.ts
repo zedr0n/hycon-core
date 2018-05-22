@@ -101,6 +101,8 @@ export class Server {
             logger.info(`API Port ${Server.globalOptions.api_port}`)
             this.httpServer = new HttpServer(this.rest, Server.globalOptions.api_port)
         }
+        logger.error("Test Writing")
+        this.test = new TestServer(this)
         await this.network.start()
         await Wallet.walletInit()
         if (Server.globalOptions.peer) {
@@ -109,10 +111,6 @@ export class Server {
                 logger.info(`Connecting to ${ip}:${port}`)
                 this.network.connect(ip, port).catch((e) => logger.error(`Failed to connect to client: ${e}`))
             }
-        }
-        if (Server.globalOptions.writing) {
-            logger.info("Test Writing")
-            this.test = new TestServer(this)
         }
         await this.runSync()
     }
