@@ -57,7 +57,6 @@ export class Server {
     public sync: Sync
     constructor() {
         Server.globalOptions = commandLineArgs(optionDefinitions)
-        Server.globalOptions = Server.globalOptions
         logger.info(`Options=${JSON.stringify(Server.globalOptions)}`)
         logger.info(`Verbose=${Server.globalOptions.verbose}`)
 
