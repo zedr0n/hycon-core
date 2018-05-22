@@ -1,6 +1,7 @@
 import Long = require("long")
 import * as React from "react"
 import update = require("react-addons-update")
+import * as ReactPaginate from "react-paginate"
 import { Link } from "react-router-dom"
 import { BlockLine } from "./blockLine"
 import { IBlock, IRest } from "./rest"
@@ -15,7 +16,7 @@ export class BlockList extends React.Component<any, any> {
     public mounted: boolean = false
     constructor(props: any) {
         super(props)
-        this.state = { blocks: [], rest: props.rest }
+        this.state = { blocks: [], rest: props.rest, length: 0, index: 0}
     }
     public componentWillUnmount() {
         this.mounted = false
@@ -25,14 +26,15 @@ export class BlockList extends React.Component<any, any> {
     }
 
     public componentDidMount() {
+        this.getRecentBlockList(this.state.index)
         this.intervalId = setInterval(() => {
-            this.getRecentBlockList()
+            this.getRecentBlockList(this.state.index)
         }, 10000)
     }
 
-    public getRecentBlockList() {
-        this.state.rest.getBlockList().then((data: IBlock[]) => {
-            for (const block of data) {
+    public getRecentBlockList(index: number) {
+        this.state.rest.getBlockList(index).then((result: { blocks: IBlock[], length: number }) => {
+            for (const block of result.blocks) {
                 let sum = Long.fromInt(0)
                 for (const tx of block.txs) {
                     sum = sum.add(hyconfromString(tx.amount))
@@ -49,7 +51,17 @@ export class BlockList extends React.Component<any, any> {
             this.setState({
                 blocks: update(
                     this.state.blocks, {
-                        $push: data,
+                        $push: result.blocks,
+                    },
+                ),
+                index: update(
+                    this.state.index, {
+                        $set: index,
+                    },
+                ),
+                length: update(
+                    this.state.length, {
+                        $set: result.length,
                     },
                 ),
             })
@@ -65,29 +77,48 @@ export class BlockList extends React.Component<any, any> {
             <div>
                 <div className="contentTitle">
                     LATEST BLOCKS
-          <span className="seeMoreLink">
-                        <Link to="/block">SEE MORE ></Link>
+                    <span className="seeMoreLink">
+                    <ReactPaginate previousLabel={"PREV"}
+                       nextLabel={"NEXT"}
+                       breakLabel={<a>...</a>}
+                       breakClassName={"break-me"}
+                       pageCount={this.state.length}
+                       marginPagesDisplayed={1}
+                       pageRangeDisplayed={9}
+                       onPageChange={this.handlePageClick}
+                       containerClassName={"pagination"}
+                       activeClassName={"active"}
+                       initialPage={this.state.index}
+                       disableInitialCallback={true}
+                        />
                     </span>
                 </div>
-                <table className="mdl-data-table mdl-js-data-table mdl-shadow--2dp table_margined">
-                    <thead>
-                        <tr>
-                            <th className="mdl-data-table__cell--non-numeric">Height</th>
-                            <th className="mdl-data-table__cell--non-numeric">Age</th>
-                            <th className="mdl-data-table__cell--non-numeric">Transactions</th>
-                            <th className="mdl-data-table__cell--non-numeric">Total Sent</th>
-                            <th className="mdl-data-table__cell--non-numeric">Relayed By</th>
-                            <th className="mdl-data-table__cell--non-numeric">Size(kB)</th>
-                            <th className="mdl-data-table__cell--non-numeric">Weight(kWU)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {this.state.blocks.reverse().map((block: IBlock) => {
-                            return <BlockLine key={blockIndex++} block={block} />
-                        })}
-                    </tbody>
-                </table>
+
+                <div>
+                    <table className="mdl-data-table mdl-js-data-table mdl-shadow--2dp table_margined">
+                        <thead>
+                            <tr>
+                                <th className="mdl-data-table__cell--non-numeric">Height</th>
+                                <th className="mdl-data-table__cell--non-numeric">Age</th>
+                                <th className="mdl-data-table__cell--non-numeric">Transactions</th>
+                                <th className="mdl-data-table__cell--non-numeric">Total Sent</th>
+                                <th className="mdl-data-table__cell--non-numeric">Relayed By</th>
+                                <th className="mdl-data-table__cell--non-numeric">Size(kB)</th>
+                                <th className="mdl-data-table__cell--non-numeric">Weight(kWU)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {this.state.blocks.reverse().map((block: IBlock) => {
+                                return <BlockLine key={blockIndex++} block={block} />
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         )
+    }
+
+    private handlePageClick = (data: any) => {
+        this.getRecentBlockList(data.selected)
     }
 }

@@ -89,7 +89,7 @@ export interface IRest {
     getAddressInfo(address: string): Promise<IWalletAddress>
     getAllAccounts(name: string): Promise<{ represent: number, accounts: Array<{ address: string, balance: string }> } | boolean>
     getBlock(hash: string): Promise<IBlock>
-    getBlockList(): Promise<IBlock[]>
+    getBlockList(index: number): Promise<{blocks: IBlock[], length: number}>
     getLanguage(): Promise<string[]>
     getMnemonic(lang: string): Promise<string>
     // [ipeer.ts not implemented] getPeerDetails(hash: string): Promise<IPeer>

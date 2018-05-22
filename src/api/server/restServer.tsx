@@ -321,11 +321,20 @@ export class RestServer implements IRest {
             return Promise.reject("Error while getting block information from server : " + e)
         }
     }
-    public async getBlockList(): Promise<IBlock[]> {
+    public async getBlockList(index: number): Promise<{blocks: IBlock[], length: number}> {
         const n = 10
         const blockList: IBlock[] = []
+        let pageCount: number = 0
         try {
-            const dbblocks = await this.consensus.getBlocksRange(0)
+            const blockTip = await this.consensus.getBlocksTip()
+            let indexCount = 20
+            let startIndex = blockTip.height - (indexCount * (Number(index) + 1))
+            pageCount = Math.ceil(blockTip.height / 20)
+            if (startIndex < 0 ) {
+                indexCount += startIndex
+                startIndex = 0
+            }
+            const dbblocks = await this.consensus.getBlocksRange(startIndex, indexCount)
 
             for (const dbblock of dbblocks) {
                 const txs: ITxProp[] = []
@@ -365,7 +374,7 @@ export class RestServer implements IRest {
         } catch (e) {
             logger.error(e)
         }
-        return blockList
+        return Promise.resolve({blocks: blockList, length: pageCount})
     }
     public async getLanguage(): Promise<string[]> {
         await Wallet.walletInit()

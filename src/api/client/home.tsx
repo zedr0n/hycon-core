@@ -13,7 +13,9 @@ export class Home extends React.Component<any, any> {
     public render() {
         return (
             <div>
-                <BlockList rest={this.state.rest} />
+                <BlockList
+                    rest={this.state.rest}
+                />
             </div>
         )
     }

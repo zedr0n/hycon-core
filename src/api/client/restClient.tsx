@@ -157,9 +157,9 @@ export class RestClient implements IRest {
                 }),
         )
     }
-    public getBlockList(): Promise<IBlock[]> {
+    public getBlockList(index: number): Promise<{blocks: IBlock[], length: number}> {
         return Promise.resolve(
-            fetch(`/api/${this.apiVersion}/blockList`)
+            fetch(`/api/${this.apiVersion}/blockList/${index}`)
                 .then((response) => response.json())
                 .catch((err: Error) => {
                     console.log(err)
