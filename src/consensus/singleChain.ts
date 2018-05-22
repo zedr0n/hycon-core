@@ -13,6 +13,7 @@ import { SignedTx } from "../common/txSigned"
 import { MinerServer } from "../miner/minerServer"
 import * as proto from "../serialization/proto"
 import { Server } from "../server"
+import conf = require("../settings")
 import { Graph } from "../util/graph"
 import { Hash } from "../util/hash"
 import { Difficulty } from "./../consensus/difficulty"
@@ -259,7 +260,7 @@ export class SingleChain implements IConsensus {
         return true
     }
 
-    public async getTx(hash: Hash): Promise<{tx: TxList, timestamp: number, confirmation: number} | undefined> {
+    public async getTx(hash: Hash): Promise<{ tx: TxList, timestamp: number, confirmation: number } | undefined> {
         if (this.txdb) {
             return await this.txdb.getTx(hash)
         } else {
@@ -322,7 +323,7 @@ export class SingleChain implements IConsensus {
             }
             const timeStamp = Date.now()
             // TODO : get Miner address -> If miner is undefined, occur error
-            const miner: Address = undefined
+            const miner: Address = new Address(conf.minerAddress)
             const previousHeader = previousDBBlock.header
 
             const prevTimeEMA = previousDBBlock.timeEMA
