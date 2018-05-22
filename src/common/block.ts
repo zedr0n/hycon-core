@@ -24,7 +24,6 @@ export class Block implements proto.IBlock {
 
     public header: BlockHeader
     public txs: SignedTx[]
-    public miner: Address// TODO: move miner to header
 
     constructor(block: proto.IBlock) {
         this.set(block)
@@ -44,14 +43,6 @@ export class Block implements proto.IBlock {
             this.header = new BlockHeader(block.header)
         } else {
             this.header.set(block.header)
-        }
-
-        if (block.miner !== undefined) {
-            if (block.miner.length === 0) {
-                this.miner = undefined
-            } else {
-                this.miner = new Address(block.miner)
-            }
         }
     }
 

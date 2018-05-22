@@ -380,7 +380,7 @@ export class SingleChain implements IConsensus {
             logger.warn(`Invalid merkleRoot expected ${block.header.merkleRoot}, got ${merkleRoot}`)
             return { isVerified: false }
         }
-        const { stateTransition, validTxs, invalidTxs } = await this.worldState.next(block.txs, previousHeader.stateRoot, block.miner)
+        const { stateTransition, validTxs, invalidTxs } = await this.worldState.next(block.txs, previousHeader.stateRoot, block.header.miner)
         if (!stateTransition.currentStateRoot.equals(block.header.stateRoot)) {
             logger.warn(`State root(${stateTransition.currentStateRoot.toString()}) is incorrect, expected: ${block.header.stateRoot.toString()}, previous: ${previousHeader.stateRoot.toString()}`)
             return { isVerified: false }
