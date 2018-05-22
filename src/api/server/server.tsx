@@ -202,7 +202,7 @@ export class HttpServer {
         })
 
         router.get("/txList", async (req: express.Request, res: express.Response) => {
-            res.json(this.rest.getPendingTxs())
+            res.json(await this.rest.getPendingTxs())
         })
 
         this.app.use(`/api/${apiVersion}`, router)

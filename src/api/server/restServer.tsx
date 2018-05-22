@@ -101,25 +101,24 @@ export class RestServer implements IRest {
             }
 
             const n = 10
-            const txList = await this.consensus.getLastTxs(addressOfWallet, n)
+            const results = await this.consensus.getLastTxs(addressOfWallet, n)
             const webTxs: ITxProp[] = []
-            for (const tx of txList) {
+            for (const result of results) {
                 let webTx: ITxProp
-                if (tx !== undefined) {
-                    if (tx.tx instanceof SignedTx && tx.tx.nonce >= nonce) {
-                        webTx = {
-                            hash: tx.tx.unsignedHash().toString(),
-                            amount: hycontoString(tx.tx.amount),
-                            fee: hycontoString(tx.tx.fee),
-                            from: tx.tx.from.toString(),
-                            to: tx.tx.to.toString(),
-                            signature: tx.tx.signature.toString(),
-                            estimated: hycontoString(tx.tx.amount.add(tx.tx.fee)),
-                        }
+                if (result.txList.tx instanceof SignedTx && result.txList.tx.nonce >= nonce) {
+                    webTx = {
+                        hash: result.txList.tx.unsignedHash().toString(),
+                        amount: hycontoString(result.txList.tx.amount),
+                        fee: hycontoString(result.txList.tx.fee),
+                        from: result.txList.tx.from.toString(),
+                        to: result.txList.tx.to.toString(),
+                        signature: result.txList.tx.signature.toString(),
+                        estimated: hycontoString(result.txList.tx.amount.add(result.txList.tx.fee)),
+                        receiveTime: result.timestamp,
                     }
-                    // unsigned Txs are unlisted
-                    webTxs.push(webTx)
                 }
+                // unsigned Txs are unlisted
+                webTxs.push(webTx)
             }
             return Promise.resolve({
                 txs: webTxs,
@@ -232,25 +231,33 @@ export class RestServer implements IRest {
             const addressOfWallet = new Address(address)
             const n = 10
             const account = await this.consensus.getAccount(addressOfWallet)
-            const txList = await this.consensus.getLastTxs(addressOfWallet, n)
+            const results = await this.consensus.getLastTxs(addressOfWallet, n)
             const webTxs: ITxProp[] = []
-            for (const tx of txList) {
+            for (const result of results) {
                 let webTx: ITxProp
-                if (tx !== undefined) {
-                    if (tx.tx instanceof SignedTx) {
-                        webTx = {
-                            hash: tx.tx.unsignedHash().toString(),
-                            amount: hycontoString(tx.tx.amount),
-                            fee: hycontoString(tx.tx.fee),
-                            from: tx.tx.from.toString(),
-                            to: tx.tx.to.toString(),
-                            signature: tx.tx.signature.toString(),
-                            estimated: hycontoString(tx.tx.amount.add(tx.tx.fee)),
-                        }
-                        // unsigned Txs are unlisted
-                        webTxs.push(webTx)
+                if (result.txList.tx instanceof SignedTx) {
+                    webTx = {
+                        hash: result.txList.tx.unsignedHash().toString(),
+                        amount: hycontoString(result.txList.tx.amount),
+                        fee: hycontoString(result.txList.tx.fee),
+                        from: result.txList.tx.from.toString(),
+                        to: result.txList.tx.to.toString(),
+                        signature: result.txList.tx.signature.toString(),
+                        estimated: hycontoString(result.txList.tx.amount.add(result.txList.tx.fee)),
+                        receiveTime: result.timestamp,
+                    }
+                    // unsigned Txs are unlisted
+                } else {
+                    webTx = {
+                        hash: result.txList.tx.unsignedHash().toString(),
+                        amount: hycontoString(result.txList.tx.amount),
+                        to: result.txList.tx.to.toString(),
+                        signature: result.txList.tx.signature.toString(),
+                        estimated: hycontoString(result.txList.tx.amount),
+                        receiveTime: result.timestamp,
                     }
                 }
+                webTxs.push(webTx)
             }
             return Promise.resolve<IWalletAddress>({
                 hash: address,
@@ -464,35 +471,35 @@ export class RestServer implements IRest {
         const n = 10
         try {
             const account = await this.consensus.getAccount(addrOfWallet)
-            const txList = await this.consensus.getLastTxs(addrOfWallet, n)
-            logger.debug(`Tx List = ${txList.length}`)
+            const results = await this.consensus.getLastTxs(addrOfWallet, n)
+            logger.debug(`getLastTxs result = ${results.length}`)
             const webTxs: ITxProp[] = []
-            for (const tx of txList) {
+            for (const result of results) {
                 let webTx: ITxProp
-                if (tx !== undefined) {
-                    if (tx.tx instanceof SignedTx) {
-                        webTx = {
-                            hash: new Hash(tx.tx).toString(),
-                            amount: hycontoString(tx.tx.amount),
-                            fee: hycontoString(tx.tx.fee),
-                            from: tx.tx.from.toString(),
-                            to: tx.tx.to.toString(),
-                            signature: tx.tx.signature.toString(),
-                            blockHash: tx.blockHash.toString(),
-                            estimated: hycontoString(tx.tx.amount.add(tx.tx.fee)),
-                        }
-                    } else {
-                        webTx = {
-                            hash: new Hash(tx.tx).toString(),
-                            amount: hycontoString(tx.tx.amount),
-                            to: tx.tx.to.toString(),
-                            signature: tx.tx.signature.toString(),
-                            estimated: hycontoString(tx.tx.amount),
-                        }
+                if (result.txList.tx instanceof SignedTx) {
+                    webTx = {
+                        hash: new Hash(result.txList.tx).toString(),
+                        amount: hycontoString(result.txList.tx.amount),
+                        fee: hycontoString(result.txList.tx.fee),
+                        from: result.txList.tx.from.toString(),
+                        to: result.txList.tx.to.toString(),
+                        signature: result.txList.tx.signature.toString(),
+                        blockHash: result.txList.blockHash.toString(),
+                        estimated: hycontoString(result.txList.tx.amount.add(result.txList.tx.fee)),
+                        receiveTime: result.timestamp,
                     }
-                    // unsigned Txs are unlisted
-                    webTxs.push(webTx)
+                } else {
+                    webTx = {
+                        hash: new Hash(result.txList.tx).toString(),
+                        amount: hycontoString(result.txList.tx.amount),
+                        to: result.txList.tx.to.toString(),
+                        signature: result.txList.tx.signature.toString(),
+                        estimated: hycontoString(result.txList.tx.amount),
+                        receiveTime: result.timestamp,
+                    }
                 }
+                // unsigned Txs are unlisted
+                webTxs.push(webTx)
             }
             const hyconWallet: IHyconWallet = {
                 name,
@@ -578,13 +585,6 @@ export class RestServer implements IRest {
         const out: ITxProp[] = []
         for (const tx of arr) {
             out.push({
-                // hash: "hash",
-                // amount: "1000",
-                // fee: "1",
-                // from: "fromAddress",
-                // to: "toAddress",
-                // signature: "signature",
-                // estimated: "1001",
                 hash: new Hash(tx).toHex(),
                 amount: hycontoString(tx.amount),
                 fee: hycontoString(tx.fee),
@@ -594,7 +594,6 @@ export class RestServer implements IRest {
                 estimated: hycontoString(tx.amount.add(tx.fee)),
             })
         }
-        console.log(`getPendingTxs length : ${out.length}}`)
         return Promise.resolve({ txs: out, length: pageCount })
     }
 }

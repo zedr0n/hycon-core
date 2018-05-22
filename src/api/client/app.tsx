@@ -11,7 +11,7 @@ import { PeerDetailsView } from "./peerDetails"
 // import { PeersView } from "./peersView"
 import { IRest } from "./rest"
 import { Transaction } from "./transaction"
-import { TxList } from "./txList"
+import { TxPoolList } from "./txPoolList"
 import { TxView } from "./txView"
 
 import { AddWallet } from "./addWallet"
@@ -25,7 +25,7 @@ export const routes: RouteConfig[] = [
     { exact: true, path: "/" },
     { exact: true, path: "/tx/:hash" },
     { exact: true, path: "/block/:hash" },
-    { exact: true, path: "/txList" },
+    { exact: true, path: "/txPool" },
     { exact: true, path: "/address/:hash" },
     { exact: true, path: "/wallet" },
     { exact: true, path: "/transaction/:name" },
@@ -45,7 +45,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
         { match }: RouteComponentProps<{ hash: string }>,
     ) => JSX.Element
     public txView: ({ match }: RouteComponentProps<{ hash: string }>) => JSX.Element
-    public txList: ({ match }: RouteComponentProps<{}>) => JSX.Element
+    public txPool: ({ match }: RouteComponentProps<{}>) => JSX.Element
 
     public transaction: ({ match }: RouteComponentProps<{ name: string }>) => JSX.Element
     // public peersView: ({ match }: RouteComponentProps<{ hash: string }>) => JSX.Element
@@ -86,8 +86,8 @@ export class App extends React.Component<{ rest: IRest }, any> {
         this.txView = ({ match }: RouteComponentProps<{ hash: string }>) => (
             <TxView hash={match.params.hash} rest={this.rest} />
         )
-        this.txList = ({ match }: RouteComponentProps<{}>) => (
-            <TxList rest={this.rest} />
+        this.txPool = ({ match }: RouteComponentProps<{}>) => (
+            <TxPoolList rest={this.rest} />
         )
         this.transaction = ({ match }: RouteComponentProps<{ name: string }>) => (
             <Transaction name={match.params.name} rest={this.rest} />
@@ -147,7 +147,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
                             </form>
                             <Link className="mdl-navigation__link" to="/">Home</Link>
                             {/* <Link className="mdl-navigation__link" to="/block">Block</Link> */}
-                            <Link className="mdl-navigation__link" to="/txList">Tx</Link>
+                            <Link className="mdl-navigation__link" to="/txPool">Tx</Link>
                             <Link className="mdl-navigation__link" to="/wallet">Wallet</Link>
                             {/* <Link className="mdl-navigation__link" to="/peersView">Peers List</Link> */}
                         </nav>
@@ -190,7 +190,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
                             </form>
                             <Link className="mdl-navigation__link" to="/">Home</Link>
                             {/* <Link className="mdl-navigation__link" to="/block">Block</Link> */}
-                            <Link className="mdl-navigation__link" to="/txList">Tx</Link>
+                            <Link className="mdl-navigation__link" to="/txPool">Tx</Link>
                             <Link className="mdl-navigation__link" to="/wallet">Wallet</Link>
                             {/* <Link className="mdl-navigation__link" to="/peersView">Peers List</Link> */}
                         </nav>
@@ -208,7 +208,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
                             <Route exact path="/" component={this.home} />
                             <Route exact path="/tx/:hash" component={this.txView} />
                             <Route exact path="/block/:hash" component={this.blockView} />
-                            <Route exact path="/txList" component={this.txList} />
+                            <Route exact path="/txPool" component={this.txPool} />
                             <Route exact path="/address/:hash" component={this.addressInfo} />
                             <Route exact path="/transaction/:name" component={this.transaction} />
                             <Route exact path="/wallet/addWallet" component={this.addWallet} />

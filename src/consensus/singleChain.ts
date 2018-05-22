@@ -231,7 +231,7 @@ export class SingleChain implements IConsensus {
         }
     }
 
-    public async getLastTxs(address: Address, count?: number): Promise<TxList[]> {
+    public async getLastTxs(address: Address, count?: number): Promise<Array<{ txList: TxList, timestamp: number }>> {
         try {
             if (this.txdb) {
                 return await this.txdb.getLastTxs(address, count)

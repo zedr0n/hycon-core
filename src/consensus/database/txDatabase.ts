@@ -104,12 +104,15 @@ export class TxDatabase {
         // }
     }
 
-    public async getLastTxs(address: Address, count?: number): Promise<TxList[]> {
-        const txs: TxList[] = []
+    public async getLastTxs(address: Address, count?: number): Promise<Array<{ txList: TxList, timestamp: number }>> {
+        const result: Array<{ txList: TxList, timestamp: number }> = []
         let txList = await this.get(address)
         while (txList) {
-            if (await this.consensus.getBlockStatus(txList.blockHash) === BlockStatus.MainChain) { txs.push(txList) }
-            if (txs.length === count) { break }
+            if (await this.consensus.getBlockStatus(txList.blockHash) === BlockStatus.MainChain) {
+                const block = await this.consensus.getHeaderByHash(txList.blockHash)
+                result.push({ txList, timestamp: block.timeStamp })
+            }
+            if (result.length === count) { break }
             if (txList.tx.to.equals(address)) {
                 if (txList.previousTo !== undefined) {
                     txList = await this.get(txList.previousTo)
@@ -122,17 +125,17 @@ export class TxDatabase {
                 }
             }
         }
-        return Promise.resolve(txs)
+        return Promise.resolve(result)
     }
 
-    public async getTx(key: Hash): Promise<{tx: TxList, timestamp: number, confirmation: number} | undefined> {
+    public async getTx(key: Hash): Promise<{ tx: TxList, timestamp: number, confirmation: number } | undefined> {
         const tx = await this.get(key)
-        if (tx === undefined) {return undefined}
+        if (tx === undefined) { return undefined }
         const block = await this.consensus.getHeaderByHash(tx.blockHash)
         const height = await this.consensus.getBlockHeight(tx.blockHash)
         const tip = this.consensus.getBlocksTip()
         const confirmation = tip.height - height
-        return Promise.resolve({tx, timestamp: block.timeStamp, confirmation})
+        return Promise.resolve({ tx, timestamp: block.timeStamp, confirmation })
     }
 
     private async get(key: Address | Hash): Promise<TxList | undefined> {

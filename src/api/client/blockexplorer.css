@@ -156,6 +156,9 @@ table {
 .green {
   background-color: #5fb404 !important;
 }
+.red {
+  background-color: red !important;
+}
 .mdl-button {
   text-transform: none !important;
 }

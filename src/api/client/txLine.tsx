@@ -23,12 +23,19 @@ export class TxLine extends React.Component<ITxLineProps, ITxLineView> {
                 <thead>
                     <tr>
                         <th colSpan={4} className="tableBorder_Header">
-                            <Link to={`/tx/${this.state.tx.hash}`}>
-                                <span className="coloredText">{this.state.tx.hash}</span>
-                            </Link>
-                            <span className="timeStampArea">
-                                {date.toString()}
-                            </span>
+                            {this.state.tx.receiveTime ? (
+                                <div>
+                                    <Link to={`/tx/${this.state.tx.hash}`}>
+                                        <span className="coloredText">{this.state.tx.hash}</span>
+                                    </Link>
+                                    <span className="timeStampArea">
+                                        {date.toString()}
+                                    </span>
+
+                                </div>
+                            ) : (
+                                    <div >{this.state.tx.hash}</div>
+                                )}
                         </th>
                     </tr>
                 </thead>

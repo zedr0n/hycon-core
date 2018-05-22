@@ -20,16 +20,16 @@ export class TxView extends React.Component<any, any> {
     public componentWillUnMount() {
         this.mounted = false
     }
-    public componentWillMount() {
+    public componentDidMount() {
         this.mounted = true
         this.state.rest.setLoading(true)
         this.state.rest.getTx(this.state.hash)
-        .then((data: ITxProp) => {
-            this.state.rest.setLoading(false)
-            if (this.mounted) {
-                this.setState({ tx: data })
-            }
-        })
+            .then((data: ITxProp) => {
+                this.state.rest.setLoading(false)
+                if (this.mounted) {
+                    this.setState({ tx: data })
+                }
+            })
     }
     public render() {
         if (this.state.tx === undefined) {
