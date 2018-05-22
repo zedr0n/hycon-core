@@ -69,7 +69,7 @@ export class Difficulty {
         const target = new Buffer(32)
         target.fill(0x00)
         const index = 32 - (this.exponent + 3)
-        target.writeUIntBE(Math.pow(2, 24) - 1 - this.mantissa, index, 3)
+        target.writeUIntLE(Math.pow(2, 24) - 1 - this.mantissa, index, 3)
         if (index <= 29) {
             target.fill(0xFF, 0, index)
         }
