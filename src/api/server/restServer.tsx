@@ -5,7 +5,7 @@ import { BlockHeader } from "../../common/blockHeader"
 import { Tx } from "../../common/tx"
 import { SignedTx } from "../../common/txSigned"
 import { IConsensus } from "../../consensus/iconsensus"
-import { hyconfromString, hycontoString } from "../../util/commonUtil"
+import { hyconfromString, hycontoString, zeroPad } from "../../util/commonUtil"
 import { Hash } from "../../util/hash"
 import { Wallet } from "../../wallet/wallet"
 import { IBlock, IHyconWallet, IPeer, IResponseError, IRest, ITxProp, IUser, IWalletAddress } from "../client/rest"
@@ -310,15 +310,18 @@ export class RestServer implements IRest {
             const webBlock = {
                 hash,
                 difficulty: hyconBlock.header.difficulty,
+                stateRoot: hyconBlock.header.stateRoot.toString(),
+                merkleRoot: hyconBlock.header.merkleRoot.toString(),
                 txs,
                 height: await this.consensus.getBlockHeight(Hash.decode(hash)),
                 timeStamp: Number(hyconBlock.header.timeStamp),
-            }
 
+            }
             if (hyconBlock.header instanceof BlockHeader) {
                 Object.assign(webBlock, {
                     prevBlock: hyconBlock.header.previousHash.toString(),
-                    nonce: hyconBlock.header.nonce,
+                    nonce: zeroPad(hyconBlock.header.nonce.low.toString(), 4) + zeroPad(hyconBlock.header.nonce.high.toString(), 4),
+                    miner: hyconBlock.header.miner.toString(),
                 })
 
                 const buffer = Buffer.allocUnsafe(72)

@@ -15,8 +15,6 @@ interface IBlockViewState {
     amount?: string
     fees?: string
     volume?: string
-    prevBlock?: string
-    resultHash?: string
 }
 export class BlockView extends React.Component<IBlockProps, IBlockViewState> {
     public mounted: boolean = false
@@ -46,8 +44,6 @@ export class BlockView extends React.Component<IBlockProps, IBlockViewState> {
                     amount: hycontoString(amount),
                     block: data,
                     fees: hycontoString(fees),
-                    prevBlock: data.prevBlock,
-                    resultHash: data.resultHash,
                     volume: hycontoString(volume),
                 })
             }
@@ -57,6 +53,7 @@ export class BlockView extends React.Component<IBlockProps, IBlockViewState> {
         if (this.state.block === undefined) {
             return < div ></div >
         }
+        const date = new Date(this.state.block.timeStamp)
         return (
             <div>
                 <div className="contentTitle">Block #{this.state.block.height}</div>
@@ -78,14 +75,38 @@ export class BlockView extends React.Component<IBlockProps, IBlockViewState> {
                         </tr>
                         <tr>
                             <td className="tdSubTitle subTitle_width20">Previous Hash</td>
-                            <td><a href={`/block/${this.state.prevBlock}`}>
-                                {this.state.prevBlock}
+                            <td><a href={`/block/${this.state.block.prevBlock}`}>
+                                {this.state.block.prevBlock}
                             </a>
                             </td>
                         </tr>
                         <tr>
+                            <td className="tdSubTitle subTitle_width20">Merkle Root</td>
+                            <td>{this.state.block.merkleRoot}</td>
+                        </tr>
+                        <tr>
+                            <td className="tdSubTitle subTitle_width20">State Root</td>
+                            <td>{this.state.block.stateRoot}</td>
+                        </tr>
+                        <tr>
                             <td className="tdSubTitle subTitle_width20">Result Hash</td>
-                            <td>{this.state.resultHash}</td>
+                            <td>{this.state.block.resultHash}</td>
+                        </tr>
+                        <tr>
+                            <td className="tdSubTitle subTitle_width20">Difficulty</td>
+                            <td>{this.state.block.difficulty}</td>
+                        </tr>
+                        <tr>
+                            <td className="tdSubTitle subTitle_width20">Nonce</td>
+                            <td>{this.state.block.nonce}</td>
+                        </tr>
+                        <tr>
+                            <td className="tdSubTitle subTitle_width20">Miner</td>
+                            <td>{this.state.block.miner}</td>
+                        </tr>
+                        <tr>
+                            <td className="tdSubTitle subTitle_width20">Mined Time</td>
+                            <td>{date.toString()}</td>
                         </tr>
                         <tr>
                             <td className="tdSubTitle subTitle_width20">Num of Txs</td>

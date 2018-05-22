@@ -32,9 +32,12 @@ export interface IBlock {
     timeStamp: number
     difficulty: number
     prevBlock?: string
-    nonce?: number
-    txSummary?: string,
-    resultHash?: string,
+    nonce?: string
+    txSummary?: string
+    resultHash?: string
+    stateRoot?: string
+    merkleRoot?: string
+    miner?: string
 }
 export interface IWalletAddress {
     hash: string
