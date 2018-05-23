@@ -185,10 +185,12 @@ export class WalletDetail extends React.Component<any, any> {
                                 const key = accountIndex + 1
                                 return (
                                     <div key={key}>
-                                        <input type="radio" name="account" value={key}
-                                            checked={this.state.represent === key ? true : false}
-                                            onChange={(option) => { this.handleSelectAccount(option) }} />
-                                        <label><span>{account.address}</span> <span className="balanceOfAccount">{account.balance} HYC</span></label>
+                                        <label className="displayBlock">
+                                            <input type="radio" name="account" value={key}
+                                                checked={this.state.represent === key ? true : false}
+                                                onChange={(option) => { this.handleSelectAccount(option) }} />
+                                            <span> {account.address}</span> <span className="balanceOfAccount">{account.balance} HYC</span>
+                                        </label>
                                     </div>
                                 )
                             })}
