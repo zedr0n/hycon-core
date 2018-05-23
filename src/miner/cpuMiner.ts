@@ -74,7 +74,8 @@ export class CpuMiner {
     }
 
     public hashRate() {
-        return Math.round(this.miners.map((m) => m.hashrate()).reduce((a, b) => a + b))
+        const hashrate = this.miners.map((m) => m.hashrate())
+        return (hashrate.length > 0) ? Math.round(hashrate.reduce((a, b) => a + b)) : 0
     }
 
     public async stop() {
