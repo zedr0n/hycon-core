@@ -247,7 +247,7 @@ export class Transaction extends React.Component<any, any> {
                             </p>
                         </div>
                         <div className="inlineDiv">
-                            <button type="button" onClick={this.handleOpenDialog} className="buttonAjust" >Ajust the fee</button>
+                            <button type="button" onClick={this.handleOpenDialog} className="buttonAjust" >Adjust the fee</button>
                         </div>
                         <label className="">Wallet Password :
                             <input name="password" type="password" onChange={(data) => { this.handlePassword(data) }}
