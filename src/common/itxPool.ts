@@ -5,5 +5,5 @@ export interface ITxPool {
     putTxs(txs: SignedTx[]): number
     updateTxs(old: SignedTx[], maxReturn?: number): SignedTx[]
     onTopTxChanges(count: number, callback: TopTxCallback): void
-    getPending(): SignedTx[]
+    getPending(index: number, count: number): { txs: SignedTx[], length: number, totalAmount: Long, totalFee: Long }
 }

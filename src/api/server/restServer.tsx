@@ -578,16 +578,14 @@ export class RestServer implements IRest {
         }
     }
 
-    public getPendingTxs(index: number): Promise<{ txs: ITxProp[], length: number }> {
+    public getPendingTxs(index: number): Promise<{ txs: ITxProp[], length: number, totalCount: number, totalAmount: string, totalFee: string }> {
         let pageCount: number = 0
-        const cntPerPage: number = 20
-        const txPoolTxs = this.consensus.getPendingTxs()
-        logger.error(`txPoolTxs length : ${txPoolTxs.length}`)
-        pageCount = Math.ceil(txPoolTxs.length / cntPerPage)
+        const cntPerPage: number = 10
         const startIndex = cntPerPage * index
-        const txs = txPoolTxs.slice(startIndex, startIndex + cntPerPage)
+        const txPoolTxs = this.consensus.getPendingTxs(startIndex, cntPerPage)
+        pageCount = Math.ceil(txPoolTxs.length / cntPerPage)
         const txList: ITxProp[] = []
-        for (const tx of txs) {
+        for (const tx of txPoolTxs.txs) {
             txList.push({
                 hash: new Hash(tx).toHex(),
                 amount: hycontoString(tx.amount),
@@ -598,7 +596,7 @@ export class RestServer implements IRest {
                 estimated: hycontoString(tx.amount.add(tx.fee)),
             })
         }
-        return Promise.resolve({ txs: txList, length: pageCount })
+        return Promise.resolve({ txs: txList, length: pageCount, totalCount: txPoolTxs.length, totalAmount: hycontoString(txPoolTxs.totalAmount), totalFee: hycontoString(txPoolTxs.totalFee) })
     }
 
     public getHint(name: string): Promise<string> {

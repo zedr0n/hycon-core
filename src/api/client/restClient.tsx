@@ -243,7 +243,7 @@ export class RestClient implements IRest {
             }))
     }
 
-    public getPendingTxs(index: number): Promise<{ txs: ITxProp[], length: number }> {
+    public getPendingTxs(index: number): Promise<{ txs: ITxProp[], length: number, totalCount: number, totalAmount: string, totalFee: string }> {
         return Promise.resolve(
             fetch(`/api/${this.apiVersion}/txList/${index}`)
                 .then((response) => response.json())

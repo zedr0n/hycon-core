@@ -83,9 +83,9 @@ export class SingleChain implements IConsensus {
                 (block: Block) => {
                     this.onMinedBlock(block)
                 })
-            this.createCandidateBlock(this.server.txPool.getPending().slice(0, 10))
+            this.createCandidateBlock(this.server.txPool.updateTxs([], 10))
             this.server.setTriggerMining(() => {
-                this.createCandidateBlock(this.server.txPool.getPending().slice(0, 10))
+                this.createCandidateBlock(this.server.txPool.updateTxs([], 10))
             })
             logger.info(`Initialization of singlechain is over.`)
         } catch (e) {
@@ -274,8 +274,8 @@ export class SingleChain implements IConsensus {
         }
     }
 
-    public getPendingTxs(): SignedTx[] {
-        return this.server.txPool.getPending()
+    public getPendingTxs(index: number, count: number): { txs: SignedTx[], length: number, totalAmount: Long, totalFee: Long } {
+        return this.server.txPool.getPending(index, count)
     }
     public async getHash(height: number): Promise<Hash> {
         return await this.db.getHashAtHeight(height)

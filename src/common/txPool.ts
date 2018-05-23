@@ -1,6 +1,7 @@
 import { getLogger } from "log4js"
 import { NewTx } from "../serialization/proto"
 import { Server } from "../server"
+import { hyconfromString } from "../util/commonUtil"
 import { Hash } from "../util/hash"
 import { ITxPool } from "./itxPool"
 import { SignedTx } from "./txSigned"
@@ -70,8 +71,15 @@ export class TxPool implements ITxPool {
         this.callbacks.push({ callback, n })
     }
 
-    public getPending(): SignedTx[] {
-        return this.txs
+    public getPending(index: number, count: number): { txs: SignedTx[], length: number, totalAmount: Long, totalFee: Long } {
+        const txs = this.txs.slice()
+        let totalAmount = hyconfromString("0")
+        let totalFee = hyconfromString("0")
+        for (const tx of txs) {
+            totalAmount = totalAmount.add(tx.amount)
+            totalFee = totalFee.add(tx.fee)
+        }
+        return { txs: txs.slice(index, index + count), length: txs.length, totalAmount, totalFee }
     }
 
     private insert(newTxs: SignedTx[]): { count: number, lowestIndex?: number } {
