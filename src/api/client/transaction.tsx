@@ -94,24 +94,32 @@ export class Transaction extends React.Component<any, any> {
 
         if (name === "amount") {
             const temp: string = value
-            if (temp.match("(^[0-9]*)([.]{0,1}[0-9]{0,8}$)") == null) {
-                alert("Please enter only numbers")
-            } else if (hyconfromString(value).greaterThan(hyconfromString(this.state.piggyBank))) {
-                alert("You can't spend the money you don't have")
-            } else {
-                newMinerFee = 1
-                if (target.value === 0) {
-                    newMinerFee = 0
+            try {
+                if (temp.match("(^[0-9]*)([.]{0,1}[0-9]{0,8}$)") == null) {
+                    alert("Please enter only numbers")
+                    return
+                } else if (hyconfromString(value).greaterThan(hyconfromString(this.state.piggyBank))) {
+                    alert("You can't spend the money you don't have")
+                    return
                 }
-                this.setState({
-                    dialogFee: newMinerFee + "," + 0,
-                    left: newReturnedFee,
-                    minerFee: newMinerFee,
-                    [name]: value,
-                })
-                this.currentMinerFee = newMinerFee
-                this.currentReturnedFee = 0
             }
+            catch (error) {
+                console.log(error)
+            }
+
+            newMinerFee = 1
+            if (target.value === 0) {
+                newMinerFee = 0
+            }
+            this.setState({
+                dialogFee: newMinerFee + "," + 0,
+                left: newReturnedFee,
+                minerFee: newMinerFee,
+                [name]: value,
+            })
+            this.currentMinerFee = newMinerFee
+            this.currentReturnedFee = 0
+
         } else if (name === "address") {
             this.setState({
                 [name]: value,
