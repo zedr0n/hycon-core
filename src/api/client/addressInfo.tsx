@@ -28,20 +28,9 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
         this.mounted = true
         this.state.rest.setLoading(true)
         this.state.rest.getAddressInfo(this.state.hash).then((data: IWalletAddress) => {
-            let sumRec = Long.fromInt(0)
-            let sumSnd = Long.fromInt(0)
-            for (const tx of data.txs) {
-                if (tx.to === this.state.hash) {
-                    sumRec = sumRec.add(hyconfromString(tx.amount))
-                } else {
-                    sumSnd = sumSnd.add(hyconfromString(tx.amount))
-                }
-            }
             if (this.mounted) {
                 this.setState({
                     address: data,
-                    totalReceive: hycontoString(sumRec),
-                    totalSend: hycontoString(sumSnd),
                 })
             }
             this.state.rest.setLoading(false)
