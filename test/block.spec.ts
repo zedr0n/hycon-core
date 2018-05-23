@@ -26,7 +26,7 @@ describe("Block", () => {
             timeStamp: Date.now(),
         }
 
-        block = new Block({ header, txs: [], miner: new Address(randomBytes(20)) })
+        block = new Block({ header, txs: [] })
         tx = jasmine.createSpyObj("Tx", ["verify"])
         tx2 = jasmine.createSpyObj("Tx", ["verify"])
     })
@@ -77,7 +77,6 @@ describe("Block", () => {
                 previousHash: [randomBytes(32)],
                 timeStamp: 1,
             },
-            miner: new Address(randomBytes(20)),
             txs: [],
         }
         expect(block.header).toBeDefined()
@@ -115,7 +114,7 @@ describe("Block", () => {
             nonce: 1234, recovery: 10, signature: randomBytes(32),
             to: new Address(randomBytes(20)),
         }
-        block.set({ header, txs: [stx, stx], miner: new Address(randomBytes(20)) })
+        block.set({ header, txs: [stx, stx] })
 
         expect(block.txs.length).toEqual(2)
     })
