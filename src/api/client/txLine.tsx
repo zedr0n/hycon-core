@@ -43,9 +43,9 @@ export class TxLine extends React.Component<ITxLineProps, ITxLineView> {
                     <tr>
                         <td className="coloredText tableDivision txAddrTd">
                             {this.state.tx.from ? (
-                                <Link to={`/address/${this.state.tx.from}`}>
+                                <a href={`/address/${this.state.tx.from}`}>
                                     {this.state.tx.from}
-                                </Link>
+                                </a>
                             ) : (
                                     <span className="NoFrom">No Inputs(Newly Generated Coins)</span>
                                 )}
@@ -55,9 +55,9 @@ export class TxLine extends React.Component<ITxLineProps, ITxLineView> {
                         </td>
                         <td className="coloredText tableDivision txAddrTd">
                             {this.state.tx.to ? (
-                                <Link to={`/address/${this.state.tx.to}`}>
+                                <a href={`/address/${this.state.tx.to}`}>
                                     {this.state.tx.to}
-                                </Link>
+                                </a>
                             ) : (
                                     <span className="CantDecode">
                                         Unable to decode output address
