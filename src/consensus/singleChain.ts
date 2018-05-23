@@ -348,7 +348,7 @@ export class SingleChain implements IConsensus {
                 timeStamp,
 
             })
-            const newBlock = new Block({ header, txs: validTxs, miner })
+            const newBlock = new Block({ header, txs: validTxs })
             this.server.txPool.updateTxs(invalidTxs, 0)
             newBlock.updateMerkleRoot()
 
