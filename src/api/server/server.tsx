@@ -206,6 +206,10 @@ export class HttpServer {
             res.json(await this.rest.getPendingTxs(req.params.index))
         })
 
+        router.get("/peerList", async (req: express.Request, res: express.Response) => {
+            res.json(await this.rest.getPeerList())
+        })
+
         router.get("/hint/:name", async (req: express.Request, res: express.Response) => {
             res.json(await this.rest.getHint(req.params.name))
         })

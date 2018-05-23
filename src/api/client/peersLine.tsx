@@ -17,13 +17,7 @@ export class PeersLine extends React.Component<any, any> {
         return (
             <tr>
                 <td className="mdl-data-table__cell--non-numeric">
-                    <Link to={`/peer/${this.state.peer.name}`}>
-                        {this.state.peer.name}
-                    </Link>
-                    {/* <span>{this.state.peer.name}</span> */}
-                </td>
-                <td className="mdl-data-table__cell--non-numeric">
-                    <span>{this.state.peer.ip}</span>
+                    <span>{this.state.peer.host}</span>
                 </td>
                 <td className="mdl-data-table__cell--non-numeric">
                     <span>{this.state.peer.port}</span>
@@ -32,30 +26,16 @@ export class PeersLine extends React.Component<any, any> {
                     <span>{this.state.peer.location}</span>
                 </td>
                 <td className="mdl-data-table__cell--non-numeric">
-                    {this.state.peer.isMiner ? (
-                        <span>Mining</span>
-                    ) : (
-                            <span>Not mining</span>
-                        )}
+                    <span>{this.state.peer.FailCount} nodes</span>
                 </td>
                 <td className="mdl-data-table__cell--non-numeric">
-                    <span>{this.state.peer.nodes} nodes</span>
+                    <span>{this.state.peer.LastSeen} ms</span>
                 </td>
                 <td className="mdl-data-table__cell--non-numeric">
-                    <span>{this.state.peer.nodeLatency} ms</span>
+                    <span>{this.state.peer.Latitude}</span>
                 </td>
                 <td className="mdl-data-table__cell--non-numeric">
-                    <span>
-                        <Link to={`/block/${this.state.peer.lastBlock}`}>
-                            {this.state.peer.lastBlock}
-                        </Link>
-                    </span>
-                </td>
-                <td className="mdl-data-table__cell--non-numeric">
-                    <span>{this.state.peer.pendingTransaction}</span>
-                </td>
-                <td className="mdl-data-table__cell--non-numeric">
-                    <span>{this.state.peer.peersNumber}</span>
+                    <span>{this.state.peer.Longitude}</span>
                 </td>
             </tr>
         )

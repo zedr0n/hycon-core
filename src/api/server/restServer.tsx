@@ -7,6 +7,7 @@ import { Tx } from "../../common/tx"
 import { SignedTx } from "../../common/txSigned"
 import { IConsensus } from "../../consensus/iconsensus"
 import { INetwork } from "../../network/inetwork"
+import * as proto from "../../serialization/proto"
 import { hyconfromString, hycontoString, zeroPad } from "../../util/commonUtil"
 import { Hash } from "../../util/hash"
 import { Wallet } from "../../wallet/wallet"
@@ -593,6 +594,25 @@ export class RestServer implements IRest {
             })
         }
         return Promise.resolve({ txs: txList, length: pageCount, totalCount: txPoolTxs.length, totalAmount: hycontoString(txPoolTxs.totalAmount), totalFee: hycontoString(txPoolTxs.totalFee) })
+    }
+
+    public async getPeerList(): Promise<IPeer[]> {
+        const peerList: IPeer[] = []
+        const peers: proto.IPeer[] = await this.network.getConnections()
+        for (const peer of peers) {
+            const temp: IPeer = {
+                host: peer.host,
+                port: peer.port,
+                lastSeen: peer.lastSeen,
+                failCount: peer.failCount,
+                lastAttempt: peer.lastAttempt,
+                location: undefined,
+                latitude: undefined,
+                longitude: undefined,
+            }
+            peerList.push(temp)
+        }
+        return peerList
     }
 
     public getHint(name: string): Promise<string> {

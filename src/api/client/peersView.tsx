@@ -13,10 +13,10 @@ interface IPeersProps {
     peer: IPeer
 }
 
-// tslint:disable-next-line:no-var-requires
-const googleMapsClient = require("@google/maps").createClient({
-    key: "AIzaSyAp-2W8_T6dZjq71yOhxW1kRkbY6E1iyuk",
-})
+// // tslint:disable-next-line:no-var-requires
+// const googleMapsClient = require("@google/maps").createClient({
+//     key: "AIzaSyAp-2W8_T6dZjq71yOhxW1kRkbY6E1iyuk",
+// })
 
 export class PeersView extends React.Component<any, any> {
     public mounted: boolean = false
@@ -25,7 +25,6 @@ export class PeersView extends React.Component<any, any> {
         super(props)
         this.state = {
             center: [59.938043, 30.337157],
-            hash: "",
             rest: props.rest,
             zoom: 0,
         }
@@ -36,7 +35,7 @@ export class PeersView extends React.Component<any, any> {
     public componentWillMount() {
         this.mounted = true
         this.state.rest.setLoading(true)
-        this.state.rest.getPeersList("").then((data: IPeer[]) => {
+        this.state.rest.getPeerList().then((data: IPeer[]) => {
             this.state.rest.setLoading(false)
             if (this.mounted) {
                 this.setState({ peer: data })

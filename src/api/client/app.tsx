@@ -8,7 +8,7 @@ import { BlockView } from "./blockView"
 import { Home } from "./home"
 import { PeerDetailsView } from "./peerDetails"
 // import { PeersList } from "./peersList"
-// import { PeersView } from "./peersView"
+import { PeersView } from "./peersView"
 import { IRest } from "./rest"
 import { Transaction } from "./transaction"
 import { TxPoolList } from "./txPoolList"
@@ -29,7 +29,7 @@ export const routes: RouteConfig[] = [
     { exact: true, path: "/address/:hash" },
     { exact: true, path: "/wallet" },
     { exact: true, path: "/transaction/:name" },
-    // { exact: true, path: "/peersView" },
+    { exact: true, path: "/peersView" },
     // { exact: true, path: "/peer/:hash" },
     { exact: true, path: "/wallet/addWallet" },
     { exact: true, path: "/wallet/recoverWallet" },
@@ -48,7 +48,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
     public txPool: ({ match }: RouteComponentProps<{}>) => JSX.Element
 
     public transaction: ({ match }: RouteComponentProps<{ name: string }>) => JSX.Element
-    // public peersView: ({ match }: RouteComponentProps<{ hash: string }>) => JSX.Element
+    public peersView: ({ match }: RouteComponentProps<{}>) => JSX.Element
     // public peerDetails: (
     //     { match }: RouteComponentProps<{ hash: string }>,
     // ) => JSX.Element
@@ -90,9 +90,9 @@ export class App extends React.Component<{ rest: IRest }, any> {
         this.transaction = ({ match }: RouteComponentProps<{ name: string }>) => (
             <Transaction name={match.params.name} rest={this.rest} />
         )
-        // this.peersView = ({ match }: RouteComponentProps<{ hash: string }>) => (
-        //     <PeersView hash={match.params.hash} rest={this.rest} />
-        // )
+        this.peersView = ({ match }: RouteComponentProps<{}>) => (
+            <PeersView rest={props.rest} />
+        )
         // this.peerDetails = ({ match }: RouteComponentProps<{ hash: string }>) => (
         //     <PeerDetailsView hash={match.params.hash} rest={this.rest} />
         // )
@@ -140,7 +140,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
                             {/* <Link className="mdl-navigation__link" to="/block">Block</Link> */}
                             <Link className="mdl-navigation__link" to="/txPool">Tx</Link>
                             <Link className="mdl-navigation__link" to="/wallet">Wallet</Link>
-                            {/* <Link className="mdl-navigation__link" to="/peersView">Peers List</Link> */}
+                            <Link className="mdl-navigation__link" to="/peersView">Peers List</Link>
                         </nav>
                     </div>
                     <div

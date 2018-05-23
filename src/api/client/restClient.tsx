@@ -233,6 +233,16 @@ export class RestClient implements IRest {
         )
     }
 
+    public getPeerList(): Promise<IPeer[]> {
+        return Promise.resolve(
+            fetch(`/api/${this.apiVersion}/peerList`)
+                .then((response) => response.json())
+                .catch((err: Error) => {
+                    console.log(err)
+                }),
+        )
+    }
+
     public getHint(name: string): Promise<string> {
         return Promise.resolve(
             fetch(`/api/${this.apiVersion}/hint/${name}`)

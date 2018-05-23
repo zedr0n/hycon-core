@@ -20,10 +20,7 @@ export class PeersList extends React.Component<any, any> {
                     <thead>
                         <tr>
                             <th className="mdl-data-table__cell--non-numeric">
-                                <span>Name</span>
-                            </th>
-                            <th className="mdl-data-table__cell--non-numeric">
-                                <span>Ip</span>
+                                <span>Host</span>
                             </th>
                             <th className="mdl-data-table__cell--non-numeric">
                                 <span>Port</span>
@@ -32,22 +29,19 @@ export class PeersList extends React.Component<any, any> {
                                 <span>Location</span>
                             </th>
                             <th className="mdl-data-table__cell--non-numeric">
-                                <span>Is Miner</span>
+                                <span>FailCount</span>
                             </th>
                             <th className="mdl-data-table__cell--non-numeric">
-                                <span>Nodes</span>
+                                <span>LastSeen</span>
                             </th>
                             <th className="mdl-data-table__cell--non-numeric">
-                                <span>Node Latency</span>
+                                <span>LastAttempt</span>
                             </th>
                             <th className="mdl-data-table__cell--non-numeric">
-                                <span>Last Block</span>
+                                <span>Latitude</span>
                             </th>
                             <th className="mdl-data-table__cell--non-numeric">
-                                <span>Pending Transaction</span>
-                            </th>
-                            <th className="mdl-data-table__cell--non-numeric">
-                                <span>Number of Peers</span>
+                                <span>Longitude</span>
                             </th>
                         </tr>
                     </thead>
