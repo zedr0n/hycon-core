@@ -52,15 +52,11 @@ describe("DifficultyAdjuster", () => {
                 expect(newDifficulty.encode()).toEqual(correctDifficulty.encode())
         })
 
-        it("verifyDifficulty: 1 should return true when a valid difficulty is presented", () => {
+        fit("calcNewDifficuly: 3 should correctly calculate a new difficulty value", () => {
+                const timeRatio = 0.7485525341780098
+                const difficulty = new Difficulty(0xb684ad, 8)
 
-                const timeDelta = DifficultyAdjuster.getTargetTime()
-                const workDelta = new Difficulty(0x0000FF, 0x15)
-                const prevTimeEMA = DifficultyAdjuster.getTargetTime()
-                const prevWorkEMA = new Difficulty(0x0000FF, 0x15)
-                const givenDifficulty = new Difficulty(0x0000FF, 0x15)
-                const verifyResult = DifficultyAdjuster.verifyDifficulty(timeDelta, prevTimeEMA, workDelta, prevWorkEMA, givenDifficulty)
+                const result = difficulty.multiply(timeRatio)
 
-                expect(verifyResult).toEqual(true)
         })
 })

@@ -25,7 +25,7 @@ export class Difficulty {
             return { mantissa, exponent: 232 }
         }
 
-        const mBits = Math.ceil(Math.log2(mantissa))
+        const mBits = Math.ceil(Math.log2(mantissa + 1))
         let shift = mBits - 24
 
         // If after a shift, the exponent would be negative
@@ -42,10 +42,6 @@ export class Difficulty {
         }
         mantissa = Math.round(mantissa)
 
-        while ((mantissa % 2) === 0 && exponent < 232) {
-            mantissa = mantissa / 2
-            exponent += 1
-        }
         return { mantissa, exponent }
     }
 
@@ -69,9 +65,15 @@ export class Difficulty {
 
     public getTarget(): Buffer {
         const target = Buffer.alloc(32)
-        const index = Math.floor((231 - this.exponent) / 8)
-        const alignment = this.exponent % 8
-        target.writeInt32LE(-(this.mantissa << alignment), index)
+        const index = Math.floor((256 - 24 - this.exponent) / 8)
+        const alignment = (256 - 24 - this.exponent) - index * 8
+        let bytes
+        if (alignment === 0) {
+            bytes = 3
+        } else {
+            bytes = 4
+        }
+        target.writeUIntLE(((0xFFFFFF - this.mantissa) << alignment), index, bytes)
         if (index <= 29) {
             target.fill(0xFF, 0, index)
         }
@@ -101,10 +103,10 @@ export class Difficulty {
         }
 
         for (let i = 31; i >= 0; i--) {
-            if (hash[i] < target[i]) {
+            if ((0xFF - hash[i]) < target[i]) {
                 return true
             }
-            if (hash[i] > target[i]) {
+            if ((0xFF - hash[i]) > target[i]) {
                 return false
             }
         }
