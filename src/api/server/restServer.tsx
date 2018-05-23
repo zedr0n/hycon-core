@@ -602,4 +602,28 @@ export class RestServer implements IRest {
     public getHint(name: string): Promise<string> {
         return Wallet.getHint(name)
     }
+
+    public async getNextTxs(address: string, txHash: string): Promise<Array<{ txList: ITxProp, timestamp: number }>> {
+        const cntPerPage: number = 10
+        const nextTxs = await this.consensus.getNextTxs(new Address(address), Hash.decode(txHash), cntPerPage)
+        const txList: Array<{ txList: ITxProp, timestamp: number }> = []
+        for (const next of nextTxs) {
+            const tx = next.txList.tx
+            const txProp = {
+                hash: new Hash(tx).toHex(),
+                amount: hycontoString(tx.amount),
+                to: tx.to.toString(),
+                signature: tx.signature.toString("hex"),
+                estimated: hycontoString(tx.amount),
+            }
+            if (tx instanceof SignedTx) {
+                Object.assign(txProp, {
+                    fee: hycontoString(tx.fee),
+                    from: tx.from.toString(),
+                })
+            }
+            txList.push({ txList: txProp, timestamp: next.timestamp })
+        }
+        return txList
+    }
 }

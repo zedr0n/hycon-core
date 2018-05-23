@@ -208,6 +208,9 @@ export class HttpServer {
         router.get("/hint/:name", async (req: express.Request, res: express.Response) => {
             res.json(await this.rest.getHint(req.params.name))
         })
+        router.get("/nextTxs/:address/:txHash", async (req: express.Request, res: express.Response) => {
+            res.json(await this.rest.getNextTxs(req.params.address, req.params.txHash))
+        })
 
         this.app.use(`/api/${apiVersion}`, router)
     }

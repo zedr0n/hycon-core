@@ -1,7 +1,9 @@
 import { Dialog } from "material-ui"
 import * as QRCode from "qrcode.react"
 import * as React from "react"
+import update = require("react-addons-update")
 import * as CopyToClipboard from "react-copy-to-clipboard"
+import * as ReactPaginate from "react-paginate"
 import { Redirect } from "react-router"
 import { Link } from "react-router-dom"
 import { IHyconWallet, IRest, ITxProp } from "./rest"
@@ -150,7 +152,24 @@ export class WalletDetail extends React.Component<any, any> {
                             <td />
                         </tr>
                         <tr>
-                            <td className="walletNameTd walletTxTitle" colSpan={2}>Transactions</td>
+                            <td className="walletNameTd walletTxTitle">Transactions</td>
+                            <td>
+                                <span className="seeMoreLink">
+                                    <ReactPaginate previousLabel={"PREV"}
+                                        nextLabel={"NEXT"}
+                                        breakLabel={<a>...</a>}
+                                        breakClassName={"break-me"}
+                                        pageCount={this.state.length}
+                                        marginPagesDisplayed={1}
+                                        pageRangeDisplayed={9}
+                                        onPageChange={this.handlePageClick}
+                                        containerClassName={"pagination"}
+                                        activeClassName={"active"}
+                                        initialPage={this.state.index}
+                                        disableInitialCallback={true}
+                                    />
+                                </span>
+                            </td>
                         </tr>
                         {this.state.wallet.txs.map((tx: ITxProp) => {
                             return (
@@ -203,5 +222,8 @@ export class WalletDetail extends React.Component<any, any> {
                 </Dialog>
             </div>
         )
+    }
+    private handlePageClick = (data: any) => {
+        // this.getNextTxs(data.selected)
     }
 }

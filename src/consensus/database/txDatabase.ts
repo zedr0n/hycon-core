@@ -5,7 +5,7 @@ import { Address } from "../../common/address"
 import { SignedTx } from "../../common/txSigned"
 import { Hash } from "../../util/hash"
 import { AnySignedTx, IConsensus } from "../iconsensus"
-import { verifyTx } from "../singleChain"
+import { SingleChain, verifyTx } from "../singleChain"
 import { BlockStatus } from "../sync"
 import { TxList } from "./txList"
 const logger = getLogger("TxDB")
@@ -126,6 +126,29 @@ export class TxDatabase {
             }
         }
         return Promise.resolve(result)
+    }
+
+    public async getNextTxs(address: Address, txHash: Hash, count?: number): Promise<Array<{ txList: TxList, timestamp: number }>> {
+        let txList = await this.get(txHash)
+        const txs: Array<{ txList: TxList, timestamp: number }> = []
+        while (txList) {
+            if (txs.length === count) { break }
+            if (txList.tx.to.equals(address)) {
+                if (txList.previousTo === undefined) {txList = undefined}
+                txList = await this.get(txList.previousTo)
+            }
+            if (txList.tx instanceof SignedTx) {
+                if (txList.tx.from.equals(address)) {
+                    if (txList.previousFrom === undefined) {txList = undefined}
+                    txList = await this.get(txList.previousFrom)
+                }
+            }
+            if (txList !== undefined) {
+                const block = await this.consensus.getHeaderByHash(txList.blockHash)
+                txs.push({txList, timestamp: block.timeStamp})
+            }
+        }
+        return txs
     }
 
     public async getTx(key: Hash): Promise<{ tx: TxList, timestamp: number, confirmation: number } | undefined> {
