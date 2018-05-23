@@ -69,11 +69,11 @@ export class TxPoolList extends React.Component<any, any> {
                         </tr>
                         <tr>
                             <td className="tdSubTitle subTitle_width20">Total Amount</td>
-                            <td>{this.state.totalAmount}</td>
+                            <td>{this.state.totalAmount} HYCON</td>
                         </tr>
                         <tr>
                             <td className="tdSubTitle subTitle_width20">Total Fee</td>
-                            <td>{this.state.totalFee}</td>
+                            <td>{this.state.totalFee} HYCON</td>
                         </tr>
                     </tbody>
                 </table>
