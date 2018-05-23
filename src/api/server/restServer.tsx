@@ -218,7 +218,7 @@ export class RestServer implements IRest {
         await Wallet.walletInit()
         if (Hwallet.name !== undefined && Hwallet.password !== undefined && Hwallet.hint !== undefined && Hwallet.mnemonic !== undefined && Hwallet.language !== undefined) {
             const wallet = Wallet.generate({ name: Hwallet.name, password: Hwallet.password, mnemonic: Hwallet.mnemonic, language: Hwallet.language, hint: Hwallet.hint })
-            await wallet.save(Hwallet.name, Hwallet.password)
+            await wallet.save(Hwallet.name, Hwallet.password, Hwallet.hint)
             const address = await Wallet.getAddress(Hwallet.name)
             return Promise.resolve(address.toString())
         } else {
@@ -599,5 +599,9 @@ export class RestServer implements IRest {
             })
         }
         return Promise.resolve({ txs: txList, length: pageCount })
+    }
+
+    public getHint(name: string): Promise<string> {
+        return Wallet.getHint(name)
     }
 }

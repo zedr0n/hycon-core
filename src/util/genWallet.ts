@@ -47,8 +47,8 @@ async function recoverWallet() {
         await Wallet.walletInit()
         const addressList = []
         for (let i = 0; i < 18; i++) {
-            const address = await Wallet.recoverWallet({
-                hint: "",
+            const address: any = await Wallet.recoverWallet({
+                hint: i + " Hint",
                 language: "english",
                 mnemonic: TestWalletMnemonics[i].mnemonic,
                 name: TestWalletMnemonics[i].name,

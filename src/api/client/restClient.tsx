@@ -253,4 +253,14 @@ export class RestClient implements IRest {
         )
     }
 
+    public getHint(name: string): Promise<string> {
+        return Promise.resolve(
+            fetch(`/api/${this.apiVersion}/hint/${name}`)
+                .then((response) => response.json())
+                .catch((err: Error) => {
+                    console.log(err)
+                }),
+        )
+    }
+
 }

@@ -22,6 +22,8 @@ export class Transaction extends React.Component<any, any> {
             address: "",
             amount: 0,
             dialogFee: "0,0",
+            hint: "",
+            isHint: false,
             isLoading: false,
             left: 0,
             minerFee: 0,
@@ -44,7 +46,7 @@ export class Transaction extends React.Component<any, any> {
     public componentWillUnmount() {
         this.mounted = false
     }
-    public componentWillMount() {
+    public componentDidMount() {
         this.mounted = true
         this.state.rest.setLoading(true)
         this.state.rest
@@ -223,7 +225,7 @@ export class Transaction extends React.Component<any, any> {
                     defaultZoom={this.state.zoom}
                 /> */}
 
-                <form onSubmit={this.handleSubmit} className="form">
+                <form className="form">
                     <label className="">From Address : {this.state.wallet.address}
                     </label>
                     <br />
@@ -249,10 +251,11 @@ export class Transaction extends React.Component<any, any> {
                         <div className="inlineDiv">
                             <button type="button" onClick={this.handleOpenDialog} className="buttonAjust" >Adjust the fee</button>
                         </div>
-                        <label className="">Wallet Password :
-                            <input name="password" type="password" onChange={(data) => { this.handlePassword(data) }}
-                            />
+                        <label className="">
+                            Wallet Password : <input name="password" type="password" onChange={(data) => { this.handlePassword(data) }} />
                         </label>
+                        {this.state.isHint ? (this.state.hint) : (<button onClick={(e) => this.showHint(e)}>hint</button>)}
+
                     </div>
                     <Dialog title="Dialog With Actions" open={this.state.visible} className="dialog" >
                         <span className="dialogTitle">
@@ -282,10 +285,17 @@ export class Transaction extends React.Component<any, any> {
                     {this.state.isLoading ? (
                         <CircularProgress size={50} thickness={2} />
                     ) : (
-                            <input type="submit" value="Submit" />
+                            // <input type="submit" value="Submit" />
+                            <button onClick={this.handleSubmit}>Submit</button>
                         )}
                 </form>
-            </div>
+            </div >
         )
+    }
+    private showHint(e: any) {
+        this.state.rest.getHint(this.state.name).then((result: string) => {
+            this.setState({ isHint: true, hint: result })
+        })
+        e.preventDefault()
     }
 }

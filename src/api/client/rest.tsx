@@ -109,4 +109,5 @@ export interface IRest {
     // [Depreciated: Use above] recoverWalletForce(Hwallet: IHyconWallet): Promise<string | boolean>
     sendTx(tx: { name: string, password: string, address: string, amount: number, minerFee: number }, queueTx?: Function): Promise<boolean>
     getPendingTxs(index: number): Promise<{ txs: ITxProp[], length: number }>
+    getHint(name: string): Promise<string>
 }

@@ -46,13 +46,7 @@ export class Wallet {
         return new Wallet(privateKey)
     }
 
-    public static generate(wallet?: {
-        name?: string,
-        password?: string,
-        mnemonic: string,
-        language?: string,
-        hint?: string,
-    }): Wallet {
+    public static generate(wallet?: { name?: string, password?: string, mnemonic: string, language?: string, hint?: string }): Wallet {
         if (wallet && wallet.mnemonic) {
             let language = ""
             if (!wallet.language) {
@@ -184,8 +178,9 @@ export class Wallet {
     public static decryptAES(password: string, rawBufferData: Buffer): string {
         const rawData = rawBufferData.toString()
         const stringArray = rawData.split(":")
-        const iv = new Buffer(stringArray[0], "hex")
-        const encryptedData = new Buffer(stringArray[1], "hex")
+        if (stringArray.length !== 3) { throw new Error(`Fail to decryptAES`) }
+        const iv = new Buffer(stringArray[1], "hex")
+        const encryptedData = new Buffer(stringArray[2], "hex")
         const key = new Buffer(32)
         blake2b(32).update(Buffer.from(password)).digest(key)
         const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv)
@@ -193,6 +188,13 @@ export class Wallet {
         const originalData2 = decipher.final()
         const originalData = Buffer.concat([originalData1, originalData2])
         return originalData.toString()
+    }
+
+    public static async getHint(name: string): Promise<string> {
+        const rawData = await fs.readFile(`./wallet/rootKey/${name}`)
+        const stringArr = rawData.toString().split(":")
+        if (stringArr.length !== 3) { throw new Error(`Wallet did not save with hint`) }
+        return rawData.toString().split(":")[0]
     }
 
     public static async loadKeys(name: string, password: string): Promise<Wallet> {
@@ -224,18 +226,13 @@ export class Wallet {
 
     public static async recoverWallet(
         recoveryParamets: {
-            name: string,
-            password: string,
-            mnemonic: string,
-            language: string,
-            hint: string,
-        }):
-        Promise<string> {
+            name: string, password: string, mnemonic: string, language: string, hint: string,
+        }): Promise<string> {
         if (await fs.pathExists(`./wallet/rootKey/${recoveryParamets.name}`)) {
             throw new Error("Duplicate wallet name...")
         }
         const wallet = Wallet.generate(recoveryParamets)
-        await wallet.save(recoveryParamets.name, recoveryParamets.password)
+        await wallet.save(recoveryParamets.name, recoveryParamets.password, recoveryParamets.hint)
         const addressString = await Wallet.getAddress(recoveryParamets.name)
         return addressString.toString()
     }
@@ -327,12 +324,16 @@ export class Wallet {
         this.pubKey = (publicKeyBuffer === undefined) ? this.privKey.publicKey() : new PublicKey(publicKeyBuffer)
     }
 
-    public async save(name: string, password: string): Promise<undefined> {
+    public async save(name: string, password: string, hint?: string): Promise<undefined> {
         try {
             const walletExist = await fs.existsSync(`./wallet/rootKey/${name}`)
             if (!walletExist) {
                 const encryptedPrivateKey = Wallet.encryptAES(password, this.privKey.privKey.toString("hex"))
-                await fs.writeFile(`./wallet/rootKey/${name}`, encryptedPrivateKey)
+                let encPrivWithHint
+                if (hint !== undefined) {
+                    encPrivWithHint = hint + ":" + encryptedPrivateKey
+                } else { encPrivWithHint = ":" + encryptedPrivateKey }
+                await fs.writeFile(`./wallet/rootKey/${name}`, encPrivWithHint)
                 try {
                     await fs.ensureFile("./wallet/public")
                     const originalData = await Wallet.getAllPubliclist()
