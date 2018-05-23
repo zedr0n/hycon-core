@@ -150,6 +150,21 @@ export class Consensus extends EventEmitter implements IConsensus {
                 } else {
                     await this.db.putDBBlock(hash, dbBlock)
                 }
+
+                if (this.headerTip === undefined || this.headerTip.height < dbBlock.height) {
+                    this.headerTip = dbBlock
+                    await this.db.setHeaderTip(hash)
+                }
+
+                // TODO: Check timestamp, wait until timestamp has passed
+                if (block !== undefined && this.blockTip === undefined || this.blockTip.height < dbBlock.height) {
+                    await this.reorganize(hash, block, dbBlock.height)
+                    this.blockTip = dbBlock
+                    await this.db.setBlockTip(hash)
+                    this.createCandidateBlock(this.blockTip, hash)
+                }
+
+                logger.info(`Put ${block ? "Block" : "Header"}(${dbBlock.height}) ${hash}, BTip(${this.blockTip.height}) HTip(${this.headerTip.height})`)
             }
             return { old: status, new: newStatus }
         })
@@ -185,30 +200,20 @@ export class Consensus extends EventEmitter implements IConsensus {
             }
         }
 
-        if (this.headerTip === undefined || dbBlock.totalWork.greaterThan(this.headerTip.totalWork)) {
-            this.headerTip = dbBlock
-            await this.db.setHeaderTip(hash)
-        }
-
         if (block === undefined) {
             return { status, newStatus, dbBlock, dbBlockHasChanged }
         }
 
         if (status === BlockStatus.Nothing || status === BlockStatus.Header) {
+            if (dbBlock === undefined) {
+                dbBlock = await this.db.getDBBlock(hash)
+            }
             const result = await Verify.processBlock(block, dbBlock, hash, header, previousDBBlock, this.db, this.worldState)
             if (result.newStatus === BlockStatus.Rejected) {
                 return { status, newStatus }
             }
             dbBlockHasChanged = dbBlockHasChanged || result.dbBlockHasChanged
             newStatus = result.newStatus
-        }
-
-        // TODO: Check timestamp, wait until timestamp has passed
-        if (this.blockTip === undefined || this.blockTip.height < dbBlock.height) {
-            await this.reorganize(hash, block, dbBlock.height)
-            this.blockTip = dbBlock
-            await this.db.setBlockTip(hash)
-            this.createCandidateBlock(this.blockTip, hash)
         }
 
         return { status, newStatus, dbBlock, dbBlockHasChanged }
@@ -298,7 +303,6 @@ export class Consensus extends EventEmitter implements IConsensus {
             const transition = await this.worldState.first(genesis)
             await this.worldState.putPending(transition.batch, transition.mapAccount)
             genesis.header.stateRoot = transition.currentStateRoot // TODO: Investigate
-            genesis.header.timeStamp = Date.now()
             genesis.header.difficulty = 0x08000001
             genesis.header.merkleRoot = new Hash("Centralization is the root of all evil.")
             const genesisHash = new Hash(genesis.header)
