@@ -13,7 +13,7 @@ export class RecoverWallet extends React.Component<any, any> {
         this.state = {
             isUnValid: false,
             language: "english",
-            languages: ["english", "chinese_simplified", "chinese_traditional", "korean", "french", "italian", "japanese", "spanish"],
+            languages: ["english", "chinese_simplified", "chinese_traditional", "korean"],
             mnemonic: "",
             redirect: false,
             rest: props.rest,

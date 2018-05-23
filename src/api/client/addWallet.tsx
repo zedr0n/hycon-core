@@ -16,7 +16,7 @@ export class AddWallet extends React.Component<any, any> {
             isMnemonicTypeView: false,
             isMnemonicView: false,
             language: "",
-            languages: ["English", "French", "Spanish", "Italian", "Chinese - Simplified", "Chinese - Traditional", "Japanese", "Korean"],
+            languages: ["English", "Chinese - Simplified", "Chinese - Traditional", "Korean"],
             mnemonic: "",
             redirect: false,
             rest: props.rest,
