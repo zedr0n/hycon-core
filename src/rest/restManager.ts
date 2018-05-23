@@ -6,6 +6,7 @@ import { SignedTx } from "../common/txSigned"
 import { Database } from "../consensus/database/database"
 import { WorldState } from "../consensus/database/worldState"
 import { IConsensus } from "../consensus/iconsensus"
+import { INetwork } from "../network/inetwork"
 import * as proto from "../serialization/proto"
 import { Server } from "../server"
 export class RestManager {
@@ -14,6 +15,8 @@ export class RestManager {
     public txQueue: ITxPool
 
     public consensus: IConsensus
+
+    public network: INetwork
     private db: Database
     private accountDB: WorldState
     private server: Server
@@ -21,6 +24,7 @@ export class RestManager {
         this.server = server
         this.txQueue = server.txPool
         this.consensus = server.consensus
+        this.network = server.network
         this.db = server.db
         this.accountDB = server.accountDB
     }

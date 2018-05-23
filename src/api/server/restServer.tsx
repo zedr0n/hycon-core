@@ -6,6 +6,7 @@ import { ITxPool } from "../../common/itxPool"
 import { Tx } from "../../common/tx"
 import { SignedTx } from "../../common/txSigned"
 import { IConsensus } from "../../consensus/iconsensus"
+import { INetwork } from "../../network/inetwork"
 import { hyconfromString, hycontoString, zeroPad } from "../../util/commonUtil"
 import { Hash } from "../../util/hash"
 import { Wallet } from "../../wallet/wallet"
@@ -22,9 +23,11 @@ const googleMapsClient = require("@google/maps").createClient({
 export class RestServer implements IRest {
     private consensus: IConsensus
     private txPool: ITxPool
+    private network: INetwork
 
-    constructor(consensus: IConsensus, txPool: ITxPool) {
+    constructor(consensus: IConsensus, network: INetwork, txPool: ITxPool) {
         this.consensus = consensus
+        this.network = network
         this.txPool = txPool
     }
 
