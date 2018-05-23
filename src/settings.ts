@@ -8,5 +8,4 @@ export = {
     dataRaw: "./data/raw",
     dataRoot: "./data",
     dataWallet: "./wallet",
-    minerAddress: "H3AmJptRB8rvNYpEGz4bWpCzm1Hkc5pJn",
 }

@@ -13,7 +13,6 @@ import { SignedTx } from "../common/txSigned"
 import { MinerServer } from "../miner/minerServer"
 import * as proto from "../serialization/proto"
 import { Server } from "../server"
-import conf = require("../settings")
 import { Graph } from "../util/graph"
 import { Hash } from "../util/hash"
 import { Difficulty } from "./../consensus/difficulty"
@@ -28,6 +27,9 @@ import { AnySignedTx, IConsensus, NewBlockCallback } from "./iconsensus"
 import { BlockStatus } from "./sync"
 
 const logger = getLogger("SingleChain Consensus")
+// tslint:disable-next-line:no-var-requires
+const fs = require("fs")
+const conf = JSON.parse(fs.readFileSync("./data/config.json", "utf-8"))
 export class SingleChain implements IConsensus {
     public graph: Graph
     private server: Server
@@ -329,7 +331,9 @@ export class SingleChain implements IConsensus {
                 previousDBBlock = await this.db.getDBBlock(previousHash)
             }
             const timeStamp = Date.now()
-            // TODO : get Miner address -> If miner is undefined, occur error
+            if (conf.minerAddress === undefined) {
+                throw new Error("Undefined of minerAddres.")
+            }
             const miner: Address = new Address(conf.minerAddress)
             const previousHeader = previousDBBlock.header
 
