@@ -25,7 +25,7 @@ export class BlockView extends React.Component<IBlockProps, IBlockViewState> {
     public componentWillUnmount() {
         this.mounted = false
     }
-    public componentWillMount() {
+    public componentDidMount() {
         this.mounted = true
         this.state.rest.setLoading(true)
         this.state.rest.getBlock(this.state.hash).then((data: IBlock) => {
