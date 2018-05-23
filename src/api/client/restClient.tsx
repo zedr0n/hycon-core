@@ -243,9 +243,9 @@ export class RestClient implements IRest {
             }))
     }
 
-    public getPendingTxs(): Promise<{ txs: ITxProp[], length: number }> {
+    public getPendingTxs(index: number): Promise<{ txs: ITxProp[], length: number }> {
         return Promise.resolve(
-            fetch(`/api/${this.apiVersion}/txList`)
+            fetch(`/api/${this.apiVersion}/txList/${index}`)
                 .then((response) => response.json())
                 .catch((err: Error) => {
                     console.log(err)

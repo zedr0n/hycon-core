@@ -201,8 +201,8 @@ export class HttpServer {
             )
         })
 
-        router.get("/txList", async (req: express.Request, res: express.Response) => {
-            res.json(await this.rest.getPendingTxs())
+        router.get("/txList/:index", async (req: express.Request, res: express.Response) => {
+            res.json(await this.rest.getPendingTxs(req.params.index))
         })
 
         this.app.use(`/api/${apiVersion}`, router)

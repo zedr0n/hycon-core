@@ -80,17 +80,17 @@ export class TestServer {
     }
     private async makeTx() {
         const amt = hyconfromString("12345")
-        const fee = hyconfromString("123")
+        const fee = hyconfromString("10")
 
-        const n = 1
+        const n = 10
         const lastWalletIndex = this.wallets.length - 1
         const txList: SignedTx[] = []
         for (let i = 0; i < n; i++) {
             // get nonce, increase 1
-            const toWallet = this.wallets[2]
+            const toWallet = this.wallets[i]
             assert(toWallet)
             const toAddr = toWallet.pubKey.address()
-            const fromWallet = this.wallets[1]
+            const fromWallet = this.wallets[i + 1]
             assert(fromWallet)
             const fromAddr = fromWallet.pubKey.address()
             const fromAddrString = fromAddr.toString()
@@ -99,11 +99,11 @@ export class TestServer {
 
             this.nonceTable.set(fromAddrString, nonce)
             if (!fromAddr.equals(toAddr)) {
-                const a = amt.add(randomInt(0, 10))
-                const b = fee.add(randomInt(0, 10))
+                const a = amt.add(randomInt(0, 10) * Math.pow(10, 9)).add(randomInt(0, 10) * Math.pow(10, 9)).add(randomInt(0, 10) * Math.pow(10, 9))
+                const b = fee.add(randomInt(0, 10) * Math.pow(10, 9)).add(randomInt(0, 10) * Math.pow(10, 9))
                 // logger.info(`Amount : ${hycontoString(a)} / Fee : ${hycontoString(b)}`)
                 const tx = fromWallet.send(toAddr, a, nonce, b)
-                // logger.error(`TX ${i + 1} Amount=${hycontoString(tx.amount)} Fee=${hycontoString(tx.fee)} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
+                logger.error(`TX ${i + 1} Amount=${hycontoString(tx.amount)} Fee=${hycontoString(tx.fee)} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
                 txList.push(tx)
             }
         }

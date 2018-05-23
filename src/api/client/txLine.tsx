@@ -65,7 +65,8 @@ export class TxLine extends React.Component<ITxLineProps, ITxLineView> {
                                 )}
                         </td>
                         <td className="tableDivision amountTd">
-                            {this.state.tx.amount + " HYCON"}
+                            {this.state.tx.amount + " HYCON"}<br />
+                            <span className="fee-font">(F:{this.state.tx.fee})</span>
                         </td>
                     </tr>
                 </tbody>
