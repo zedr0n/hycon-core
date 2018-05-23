@@ -3,6 +3,7 @@ import * as QRCode from "qrcode.react"
 import * as React from "react"
 import * as CopyToClipboard from "react-copy-to-clipboard"
 import { Redirect } from "react-router"
+import { Link } from "react-router-dom"
 import { IHyconWallet, IRest, ITxProp } from "./rest"
 import { TxLine } from "./txLine"
 interface IWalletDetailProps {
@@ -187,7 +188,7 @@ export class WalletDetail extends React.Component<any, any> {
                                         <input type="radio" name="account" value={key}
                                             checked={this.state.represent === key ? true : false}
                                             onChange={(option) => { this.handleSelectAccount(option) }} />
-                                        <label><span >{account.address}</span> <span className="balanceOfAccount">{account.balance}HYC</span></label>
+                                        <label><span>{account.address}</span> <span className="balanceOfAccount">{account.balance} HYC</span></label>
                                     </div>
                                 )
                             })}
@@ -198,6 +199,9 @@ export class WalletDetail extends React.Component<any, any> {
                             Cancel</button>
                         <button onClick={() => { this.accountSelected() }} className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored addAccountBtn" >
                             Select</button>
+                        <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" >
+                            <Link to="/wallet/addWallet">
+                                New Account</Link></button>
                     </div>
                 </Dialog>
             </div>
