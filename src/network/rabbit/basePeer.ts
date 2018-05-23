@@ -2,6 +2,7 @@ import { getLogger } from "log4js"
 import { Socket } from "net"
 import { resolve } from "url"
 import * as proto from "../../serialization/proto"
+import { Hash } from "../../util/hash"
 import { SocketParser } from "./socketParser"
 
 const logger = getLogger("Network")
@@ -24,13 +25,11 @@ export abstract class BasePeer {
     public async sendPacket(buffer: Uint8Array): Promise<void> {
         return this.socketBuffer.send(0, buffer)
     }
-
     public disconnect() {
         this.socketBuffer.destroy()
     }
 
     protected onPacket(route: number, packet: Buffer): void {
-        // logger.info(` route ${route}, ${packet.length} bytes`)
         try {
             const res = proto.Network.decode(packet)
             switch (res.request) {
@@ -97,13 +96,15 @@ export abstract class BasePeer {
     }
 
     protected async send(route: number, data: proto.INetwork): Promise<void> {
-        const buffer: any = proto.Network.encode(data).finish()
+        const buffer = proto.Network.encode(data).finish()
+        try { const message = proto.Network.decode(buffer) } catch (e) {
+            logger.fatal("Packet not properly encoded, could not decode")
+        }
         return this.socketBuffer.send(route, buffer)
     }
 
     protected protocolError(e?: Error) {
-        logger.info(`Disconnecting due to protocol error: ${e}`)
-        this.socketBuffer.destroy()
+        this.socketBuffer.destroy(e)
     }
 
     private newReplyID(): number {

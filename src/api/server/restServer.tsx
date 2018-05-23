@@ -2,6 +2,7 @@ import { getLogger } from "log4js"
 import * as Long from "long"
 import { Address } from "../../common/address"
 import { BlockHeader } from "../../common/blockHeader"
+import { ITxPool } from "../../common/itxPool"
 import { Tx } from "../../common/tx"
 import { SignedTx } from "../../common/txSigned"
 import { IConsensus } from "../../consensus/iconsensus"
@@ -20,9 +21,11 @@ const googleMapsClient = require("@google/maps").createClient({
 // tslint:disable:no-bitwise
 export class RestServer implements IRest {
     private consensus: IConsensus
+    private txPool: ITxPool
 
-    constructor(consensus: IConsensus) {
+    constructor(consensus: IConsensus, txPool: ITxPool) {
         this.consensus = consensus
+        this.txPool = txPool
     }
 
     public setIsHyconWallet(isHyconWallet: boolean): void { }
@@ -582,7 +585,7 @@ export class RestServer implements IRest {
         let pageCount: number = 0
         const cntPerPage: number = 10
         const startIndex = cntPerPage * index
-        const txPoolTxs = this.consensus.getPendingTxs(startIndex, cntPerPage)
+        const txPoolTxs = this.txPool.getPending(startIndex, cntPerPage)
         pageCount = Math.ceil(txPoolTxs.length / cntPerPage)
         const txList: ITxProp[] = []
         for (const tx of txPoolTxs.txs) {

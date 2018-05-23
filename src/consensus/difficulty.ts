@@ -67,13 +67,7 @@ export class Difficulty {
         const target = Buffer.alloc(32)
         const index = Math.floor((256 - 24 - this.exponent) / 8)
         const alignment = (256 - 24 - this.exponent) - index * 8
-        let bytes
-        if (alignment === 0) {
-            bytes = 3
-        } else {
-            bytes = 4
-        }
-        target.writeUIntLE(((0xFFFFFF - this.mantissa) << alignment), index, bytes)
+        target.writeUIntLE(((0xFFFFFF - this.mantissa) << alignment), index, alignment === 0 ? 3 : 4)
         if (index <= 29) {
             target.fill(0xFF, 0, index)
         }
@@ -103,10 +97,10 @@ export class Difficulty {
         }
 
         for (let i = 31; i >= 0; i--) {
-            if ((0xFF - hash[i]) < target[i]) {
+            if (hash[i] < target[i]) {
                 return true
             }
-            if ((0xFF - hash[i]) > target[i]) {
+            if (hash[i] > target[i]) {
                 return false
             }
         }

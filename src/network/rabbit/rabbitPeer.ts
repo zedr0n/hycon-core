@@ -341,7 +341,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 const block = new Block(iblock)
                 statusChanges.push(await this.consensus.putBlock(block))
             }
-            relay = statusChanges.every((change) => (change.new !== BlockStatus.Rejected && change.old !== change.new))
+            relay = statusChanges.every((change) => (change.new !== undefined && change.new !== BlockStatus.Rejected && change.old !== change.new))
         } catch (e) {
             logger.error(`Failed to put block: ${e}`)
         }
@@ -431,7 +431,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 const header = new BlockHeader(iheader)
                 statusChanges.push(await this.consensus.putHeader(header))
             }
-            relay = statusChanges.every((change) => (change.new !== BlockStatus.Rejected && change.old !== change.new))
+            relay = statusChanges.every((change) => (change.new !== undefined && change.new !== BlockStatus.Rejected && change.old !== change.new))
         } catch (e) {
             logger.error(`Failed to put header: ${e}`)
         }

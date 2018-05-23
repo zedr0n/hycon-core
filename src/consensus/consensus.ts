@@ -107,7 +107,7 @@ export class Consensus extends EventEmitter implements IConsensus {
         }
         return this.worldState.getAccount(this.blockTip.header.stateRoot, address)
     }
-    public getLastTxs(address: Address, count?: number): Promise<TxList[]> {
+    public getLastTxs(address: Address, count?: number) {
         if (this.txdb === undefined) {
             throw new Error(`The database to get txs does not exist.`)
         }
@@ -125,7 +125,7 @@ export class Consensus extends EventEmitter implements IConsensus {
     public txValidity(tx: SignedTx): Promise<TxValidity> {
         return this.worldState.validateTx(this.blockTip.header.stateRoot, tx)
     }
-    public getTx(hash: Hash): Promise<TxList> {
+    public getTx(hash: Hash) {
         if (this.txdb === undefined) {
             throw new Error(`The database to get txs does not exist.`)
         }
@@ -169,7 +169,13 @@ export class Consensus extends EventEmitter implements IConsensus {
             return { old: status, new: newStatus }
         })
     }
-    private async process(hash: Hash, header: BlockHeader, block?: Block) {
+    private async process(hash: Hash, header: BlockHeader, block?: Block)
+        : Promise<{
+            status: BlockStatus,
+            newStatus?: BlockStatus,
+            dbBlock?: DBBlock,
+            dbBlockHasChanged?: boolean,
+        }> {
         const status = await this.db.getBlockStatus(hash)
         let newStatus: BlockStatus
         if (status === BlockStatus.Rejected) {
@@ -281,12 +287,13 @@ export class Consensus extends EventEmitter implements IConsensus {
             const header = new BlockHeader({
                 difficulty: difficulty.encode(),
                 merkleRoot: new Hash(),
+                miner,
                 nonce: -1,
                 previousHash: [previousHash],
                 stateRoot: currentStateRoot,
                 timeStamp,
             })
-            const newBlock = new Block({ header, txs: validTxs, miner })
+            const newBlock = new Block({ header, txs: validTxs })
             this.txPool.updateTxs(validTxs, 0)
             newBlock.updateMerkleRoot()
 

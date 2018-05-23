@@ -34,5 +34,4 @@ export interface IConsensus extends EventEmitter {
     txValidity(tx: SignedTx): Promise<TxValidity>
     getHash(height: number): Promise<Hash>
     getBlockHeight(hash: Hash): Promise<number | undefined>
-    getPendingTxs(index: number, count: number): { txs: SignedTx[], length: number, totalAmount: Long, totalFee: Long }
 }

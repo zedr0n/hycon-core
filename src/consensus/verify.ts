@@ -15,33 +15,41 @@ import { BlockStatus } from "./sync"
 
 const logger = getLogger("Verify")
 export class Verify {
-    public static async processHeader(previousDBBlock: DBBlock, header: BlockHeader, hash: Hash) {
+    public static async processHeader(previousDBBlock: DBBlock, header: BlockHeader, hash: Hash)
+        : Promise<{
+            newStatus: BlockStatus;
+            dbBlock?: DBBlock;
+        }> {
+        if (Date.now() - header.timeStamp < 0) {
+            return { newStatus: BlockStatus.Rejected }
+        }
         const { difficulty, workDelta, timeEMA, workEMA } = DifficultyAdjuster.adjustDifficulty(previousDBBlock, header.timeStamp)
 
-        let newStatus
         if (difficulty.encode() !== header.difficulty) {
             logger.warn(`Rejecting block(${hash.toString()}): Difficulty(${header.difficulty}) does not match calculated value(${difficulty.encode()})`)
-            newStatus = BlockStatus.Rejected
-            return { newStatus }
+            return { newStatus: BlockStatus.Rejected }
         }
 
         const preHash = header.preHash()
         const nonceCheck = await MinerServer.checkNonce(preHash, header.nonce, difficulty)
         if (!nonceCheck) {
             logger.warn(`Rejecting block(${hash.toString()}): Hash does not meet difficulty(${header.difficulty})`)
-            newStatus = BlockStatus.Rejected
-            return { newStatus }
+            return { newStatus: BlockStatus.Rejected }
         }
 
         const height = previousDBBlock.height + 1
         const totalWork = difficulty.add(workDelta)
         const dbBlock = new DBBlock({ header, height, timeEMA, workEMA: workEMA.encode(), totalWork: totalWork.encode() })
-        newStatus = BlockStatus.Header
 
-        return { newStatus, dbBlock }
+        return { newStatus: BlockStatus.Header, dbBlock }
     }
 
-    public static async processBlock(block: Block, dbBlock: DBBlock, hash: Hash, header: BlockHeader, previousDBBlock: DBBlock, database: Database, worldState: WorldState) {
+    public static async processBlock(block: Block, dbBlock: DBBlock, hash: Hash, header: BlockHeader, previousDBBlock: DBBlock, database: Database, worldState: WorldState)
+        : Promise<{
+            newStatus: BlockStatus;
+            dbBlock?: DBBlock;
+            dbBlockHasChanged?: boolean;
+        }> {
         const merkleRoot = block.calculateMerkleRoot()
         if (!merkleRoot.equals(header.merkleRoot)) {
             logger.warn(`Rejecting block(${hash.toString()}): Merkle root(${header.merkleRoot.toString()}) does not match calculated value(${merkleRoot.toString()})`)
@@ -75,13 +83,11 @@ export class Verify {
 
         const { offset, fileNumber, length } = await database.writeBlock(block)
         await worldState.putPending(stateTransition.batch, stateTransition.mapAccount)
-        if (dbBlock === undefined) {
-            dbBlock = await database.getDBBlock(hash)
-        }
+
         dbBlock.offset = offset
         dbBlock.fileNumber = fileNumber
         dbBlock.length = length
 
-        return { newStatus: BlockStatus.Block, dbBlockHasChanged: true }
+        return { newStatus: BlockStatus.Block, dbBlock, dbBlockHasChanged: true }
     }
 }
