@@ -59,7 +59,7 @@ export class SignedTx implements proto.ITx {
         this.fee = stx.fee instanceof Long ? stx.fee : Long.fromNumber(stx.fee, true)
         if (!this.amount.unsigned || !this.fee.unsigned) { logger.fatal(`Protobuf problem with SignedTx amount|fee `) }
         this.nonce = stx.nonce
-        this.signature = Buffer.from(stx.signature.buffer)
+        this.signature = Buffer.from(stx.signature as Buffer)
         this.recovery = stx.recovery
     }
 

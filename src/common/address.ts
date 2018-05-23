@@ -12,7 +12,7 @@ function checkSum(arr: Uint8Array): string {
     return str
 }
 
-function toUint8Array(address: (string | Uint8Array)): Uint8Array {
+function toUint8Array(address: (string | Uint8Array | Buffer)): Uint8Array {
     if (typeof address === "string") {
         if (address.charAt(0) !== "H") {
             throw new Error(`Address is invalid. Expected address to start with 'H'`)
@@ -39,7 +39,7 @@ export class Address extends Uint8Array {
         }
     }
 
-    constructor(address: string | Uint8Array | number) {
+    constructor(address: string | number | Uint8Array | Buffer) {
         typeof address === "number" ? super(address) : super(toUint8Array(address))
         // Need to allow for super constructor for number due to extension of Uint8Array
     }

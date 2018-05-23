@@ -1,6 +1,7 @@
 import { getLogger } from "log4js"
 import { Socket } from "net"
 import { AsyncLock } from "../../common/asyncLock"
+import { Hash } from "../../util/hash"
 
 const logger = getLogger("SocketBuffer")
 const defaultMaxPacketSize = 10 * 1024 * 1024
@@ -43,20 +44,21 @@ export class SocketParser {
         })
     }
 
-    public async send(route: number, buffer: Buffer): Promise<void> {
+    public async send(route: number, buffer: Uint8Array): Promise<void> {
         if (buffer.length > defaultMaxPacketSize) {
             throw new Error("Buffer too large")
         }
 
         // true: all queued to kernel buffer
         // false: user memory is used
+
         let kernel = true
         await this.sendLock.getLock()
         this.writeBuffer.writeUInt32LE(route, 0)
         this.writeBuffer.writeUInt32LE(buffer.length, 4)
         kernel = kernel && this.socket.write(headerPrefix)
         kernel = kernel && this.socket.write(this.writeBuffer)
-        kernel = kernel && this.socket.write(buffer)
+        kernel = kernel && this.socket.write(buffer as Buffer)
         if (kernel) {
             this.sendLock.releaseLock()
         } else {
@@ -67,7 +69,8 @@ export class SocketParser {
         }
     }
 
-    public destroy(): void {
+    public destroy(e?: Error): void {
+        logger.info(`Disconnecting from ${this.socket.remoteAddress}:${this.socket.remotePort} due to protocol error: ${e}, ${e ? e.stack : ""}`)
         this.sendLock.rejectAll()
         if (this.socket) {
             logger.debug(`Disconnect ${this.getInfo()}`)
@@ -125,7 +128,7 @@ export class SocketParser {
     private parseHeaderPrefix(newData: Buffer, newDataIndex: number): number {
         while (newDataIndex < newData.length && this.parseIndex < headerPrefix.length) {
             if (newData[newDataIndex] !== headerPrefix[this.parseIndex]) {
-                logger.warn("Packet parsing error")
+                logger.warn(`Packet parsing error ${this.socket.remoteAddress}:${this.socket.remotePort}`)
                 this.destroy()
             }
             this.parseIndex++
@@ -135,6 +138,8 @@ export class SocketParser {
         if (this.parseIndex === headerPrefix.length) {
             this.parseState++
             this.parseIndex = 0
+        } else {
+            logger.info(`Got partial HeaderPrefix ${this.parseIndex}/${headerPrefix.length}`)
         }
 
         return newDataIndex
@@ -146,7 +151,7 @@ export class SocketParser {
             newDataIndex += 4
             return { newDataIndex, uint32 }
         } else {
-            const sourceEnd = newDataIndex + Math.min(newBytesAvailable, 4)
+            const sourceEnd = newDataIndex + Math.min(newBytesAvailable, 4 - this.parseIndex)
             const bytesCopied = newData.copy(this.scrapBuffer, this.parseIndex, newDataIndex, sourceEnd)
             newDataIndex += bytesCopied
             this.parseIndex += bytesCopied

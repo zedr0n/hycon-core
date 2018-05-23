@@ -21,7 +21,7 @@ export abstract class BasePeer {
         this.socketBuffer = new SocketParser(socket, (route, buffer) => this.onPacket(route, buffer))
         socket.on("close", () => this.close())
     }
-    public async sendPacket(buffer: Buffer): Promise<void> {
+    public async sendPacket(buffer: Uint8Array): Promise<void> {
         return this.socketBuffer.send(0, buffer)
     }
 

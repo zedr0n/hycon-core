@@ -87,7 +87,7 @@ export class RabbitNetwork implements INetwork {
         return peerList
     }
 
-    public broadcast(packet: Buffer, exempt?: RabbitPeer): void {
+    public broadcast(packet: Uint8Array, exempt?: RabbitPeer): void {
         for (const [key, peer] of this.peers) {
             if (exempt !== peer) {
                 peer.sendPacket(packet).catch((e) => { logger.warn(e) })

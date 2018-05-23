@@ -13,11 +13,11 @@ import * as proto from "../serialization/proto"
 // tslint:disable-next-line:no-var-requires
 const cryptonight = require("node-cryptonight").asyncHash
 
-function toUint8Array(ob?: Tx | Block | GenesisBlockHeader | BlockHeader | string | Uint8Array | SignedTx | GenesisTx | GenesisSignedTx | StateNode | Account): Uint8Array {
+function toUint8Array(ob?: Tx | Block | GenesisBlockHeader | BlockHeader | string | SignedTx | GenesisTx | GenesisSignedTx | StateNode | Account | Uint8Array | Buffer): Uint8Array {
     if (ob !== undefined) {
         if (typeof ob === "string") {
             return Hash.hash(ob)
-        } else if (ob instanceof Uint8Array) {
+        } else if (ob instanceof Uint8Array || ob instanceof Buffer) {
             if (ob.length !== 32) {
                 throw new Error(`Hash length ${ob.length} but should be 32`)
             }
@@ -64,7 +64,7 @@ export class Hash extends Uint8Array {
         return new Hash(Base58.decode(str))
     }
 
-    constructor(ob?: Tx | Block | GenesisBlockHeader | BlockHeader | string | Uint8Array | SignedTx | GenesisTx | GenesisSignedTx | StateNode | Account) {
+    constructor(ob?: Tx | Block | GenesisBlockHeader | BlockHeader | string | SignedTx | GenesisTx | GenesisSignedTx | StateNode | Account | Uint8Array | Buffer) {
         super(toUint8Array(ob))
     }
 
@@ -73,11 +73,11 @@ export class Hash extends Uint8Array {
     }
 
     public toHex() {
-        return Buffer.from(this.buffer).toString("hex")
+        return Buffer.from(this as Uint8Array as Buffer).toString("hex")
     }
 
     public toBuffer(): Buffer {
-        return Buffer.from(this.buffer)
+        return Buffer.from(this as Uint8Array as Buffer)
     }
 
     public equals(other: Hash): boolean {
