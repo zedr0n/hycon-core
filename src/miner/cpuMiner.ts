@@ -21,9 +21,9 @@ export class CpuMiner {
         let endTime: number
         const nonce = new Promise<Long>(async (resolve, reject) => {
             try {
-                const buffer = new Buffer(72)
-                const preHashBuf: any = preHash // Typescript's type defs are out of date
-                buffer.copy(preHashBuf, 0, 0, 64)
+                const buffer = Buffer.allocUnsafe(72)
+                const tmpPreHash = preHash
+                buffer.fill(tmpPreHash, 0, 64)
                 buffer.writeUInt32LE(prefix, 64)
 
                 while (currentNonce < maxNonce && calculate) {
