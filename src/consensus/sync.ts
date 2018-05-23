@@ -6,11 +6,7 @@ import { IPeer } from "../network/ipeer"
 import { Server } from "../server"
 import { Hash } from "../util/hash"
 import { IConsensus } from "./iconsensus"
-// tslint:disable-next-line:no-var-requires
-const assert = require("assert")
 const logger = getLogger("Sync")
-// tslint:disable-next-line:no-var-requires
-const delay = require("delay")
 
 export enum BlockStatus {
     Rejected = -1,
@@ -49,17 +45,8 @@ export class Sync {
         this.consensus = server.consensus
     }
 
-    // in future, for dag
-    // if we keep storing order, maybe we can use this algorithm for dags, too.
     public async sync() {
-        if (this.isSyncing()) {
-            return
-        }
         logger.info(`Start Syncing`)
-
-        // const testTips = await this.consensus.getHeadersRange(0, 1)
-        // const testHash = new Hash(testTips[0])
-
         try {
             const localTip = this.consensus.getBlocksTip()
 
@@ -104,9 +91,6 @@ export class Sync {
             logger.error(`Syncing failed: ${e}`)
         }
         return
-    }
-    private isSyncing() {
-        return this.peer !== undefined
     }
 
     private async findCommons(localTip: ITip, remoteTip: ITip) {

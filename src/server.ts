@@ -43,6 +43,7 @@ main start of hycon
 export class Server {
     public static subsid = 0
     public static globalOptions: any
+    public static syncOnly: boolean = true
     public subscription: Map<number, any> | undefined
     public readonly consensus: IConsensus = undefined // the core
     public readonly network: INetwork = undefined // hycon network
@@ -80,7 +81,7 @@ export class Server {
             Server.globalOptions.networkid = "hycon"
         }
         if (Server.globalOptions.verbose) {
-            logger.level = 'debug';
+            logger.level = "debug"
         }
 
         const postfix = Server.globalOptions.postfix
@@ -91,8 +92,6 @@ export class Server {
         this.miner = new MinerServer(this, Server.globalOptions.str_port)
         this.txPool = new TxPool(this)
         this.rest = new RestManager(this)
-
-        // this.sync = new Sync(this)
     }
     public async run() {
         await this.consensus.init()
@@ -121,12 +120,12 @@ export class Server {
 
     public async runSync(): Promise<void> {
         logger.debug(`begin sync`)
-        let sync = new Sync(this)
+        const sync = new Sync(this)
         await sync.sync()
+        Server.syncOnly = false
         setTimeout(() => {
             this.runSync()
         }, 5000)
-        sync = null
         logger.debug(`end sync`)
     }
 }

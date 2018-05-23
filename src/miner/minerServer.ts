@@ -34,6 +34,7 @@ export class MinerServer implements IMiner {
     }
 
     public newCandidateBlock(candidateBlock: Block): void {
+        if (Server.syncOnly) { return }
         const prehash = candidateBlock.header.preHash()
         const difficulty = Difficulty.decode(candidateBlock.header.difficulty)
         const minersCount = this.getMinersCount()
