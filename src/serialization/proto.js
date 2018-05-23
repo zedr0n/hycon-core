@@ -7067,7 +7067,6 @@ $root.Block = (function() {
      * @exports IBlock
      * @interface IBlock
      * @property {IBlockHeader|null} [header] Block header
-     * @property {Uint8Array|null} [miner] Block miner
      * @property {Array.<ITx>|null} [txs] Block txs
      */
 
@@ -7094,14 +7093,6 @@ $root.Block = (function() {
      * @instance
      */
     Block.prototype.header = null;
-
-    /**
-     * Block miner.
-     * @member {Uint8Array} miner
-     * @memberof Block
-     * @instance
-     */
-    Block.prototype.miner = $util.newBuffer([]);
 
     /**
      * Block txs.
@@ -7137,8 +7128,6 @@ $root.Block = (function() {
             writer = $Writer.create();
         if (message.header != null && message.hasOwnProperty("header"))
             $root.BlockHeader.encode(message.header, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
-        if (message.miner != null && message.hasOwnProperty("miner"))
-            writer.uint32(/* id 2, wireType 2 =*/18).bytes(message.miner);
         if (message.txs != null && message.txs.length)
             for (var i = 0; i < message.txs.length; ++i)
                 $root.Tx.encode(message.txs[i], writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
@@ -7178,9 +7167,6 @@ $root.Block = (function() {
             switch (tag >>> 3) {
             case 1:
                 message.header = $root.BlockHeader.decode(reader, reader.uint32());
-                break;
-            case 2:
-                message.miner = reader.bytes();
                 break;
             case 3:
                 if (!(message.txs && message.txs.length))
@@ -7227,9 +7213,6 @@ $root.Block = (function() {
             if (error)
                 return "header." + error;
         }
-        if (message.miner != null && message.hasOwnProperty("miner"))
-            if (!(message.miner && typeof message.miner.length === "number" || $util.isString(message.miner)))
-                return "miner: buffer expected";
         if (message.txs != null && message.hasOwnProperty("txs")) {
             if (!Array.isArray(message.txs))
                 return "txs: array expected";
@@ -7259,11 +7242,6 @@ $root.Block = (function() {
                 throw TypeError(".Block.header: object expected");
             message.header = $root.BlockHeader.fromObject(object.header);
         }
-        if (object.miner != null)
-            if (typeof object.miner === "string")
-                $util.base64.decode(object.miner, message.miner = $util.newBuffer($util.base64.length(object.miner)), 0);
-            else if (object.miner.length)
-                message.miner = object.miner;
         if (object.txs) {
             if (!Array.isArray(object.txs))
                 throw TypeError(".Block.txs: array expected");
@@ -7292,14 +7270,10 @@ $root.Block = (function() {
         var object = {};
         if (options.arrays || options.defaults)
             object.txs = [];
-        if (options.defaults) {
+        if (options.defaults)
             object.header = null;
-            object.miner = options.bytes === String ? "" : [];
-        }
         if (message.header != null && message.hasOwnProperty("header"))
             object.header = $root.BlockHeader.toObject(message.header, options);
-        if (message.miner != null && message.hasOwnProperty("miner"))
-            object.miner = options.bytes === String ? $util.base64.encode(message.miner, 0, message.miner.length) : options.bytes === Array ? Array.prototype.slice.call(message.miner) : message.miner;
         if (message.txs && message.txs.length) {
             object.txs = [];
             for (var j = 0; j < message.txs.length; ++j)

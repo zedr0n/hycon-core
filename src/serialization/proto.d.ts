@@ -2853,9 +2853,6 @@ export interface IBlock {
     /** Block header */
     header?: IBlockHeader;
 
-    /** Block miner */
-    miner?: Uint8Array;
-
     /** Block txs */
     txs?: ITx[];
 }
@@ -2871,9 +2868,6 @@ export class Block implements IBlock {
 
     /** Block header. */
     public header?: IBlockHeader;
-
-    /** Block miner. */
-    public miner: Uint8Array;
 
     /** Block txs. */
     public txs: ITx[];
