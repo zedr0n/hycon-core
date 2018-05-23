@@ -353,7 +353,7 @@ export class RestServer implements IRest {
         try {
             const blockTip = await this.consensus.getBlocksTip()
             let indexCount = 20
-            let startIndex = blockTip.height - (indexCount * (Number(index) + 1))
+            let startIndex = blockTip.height - (indexCount * (Number(index) + 1)) + 1
             pageCount = Math.ceil(blockTip.height / 20)
             if (startIndex < 0) {
                 indexCount += startIndex
