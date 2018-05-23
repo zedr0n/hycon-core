@@ -28,6 +28,7 @@ export class AddWallet extends React.Component<any, any> {
     }
 
     public componentDidMount() {
+        this.props.rest.setLoading(false)
 
     }
     public componentWillUnmount() {

@@ -62,6 +62,7 @@ export class RecoverWallet extends React.Component<any, any> {
                     mnemonic = this.encodingString(mnemonic)
                 }
                 this.state.rest.recoverWallet({
+                    hint: this.state.hint,
                     language: this.state.language,
                     mnemonic,
                     name: this.state.name,
