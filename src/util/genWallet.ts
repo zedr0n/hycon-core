@@ -43,21 +43,25 @@ export const TestWalletMnemonics = [
 ]
 
 async function recoverWallet() {
-    await Wallet.walletInit()
-    const addressList = []
-    for (let i = 0; i < 18; i++) {
-        const address = await Wallet.recoverWallet({
-            hint: "",
-            language: "english",
-            mnemonic: TestWalletMnemonics[i].mnemonic,
-            name: TestWalletMnemonics[i].name,
-            password: "",
-        })
-        addressList.push(address)
-        logger.info(`Recovered Wallet : ${address}`)
+    try {
+        await Wallet.walletInit()
+        const addressList = []
+        for (let i = 0; i < 18; i++) {
+            const address = await Wallet.recoverWallet({
+                hint: "",
+                language: "english",
+                mnemonic: TestWalletMnemonics[i].mnemonic,
+                name: TestWalletMnemonics[i].name,
+                password: "",
+            })
+            addressList.push(address)
+            logger.debug(`Recovered Wallet : ${address}`)
+        }
+        logger.debug(`End of Recover Wallet`)
+    } catch (error) {
+        logger.debug(`Recover Wallet Error:${error}`)
     }
 }
 
-recoverWallet().then(() => {
-    logger.info(`End of Recover Wallet`)
-})
+// start recover wallets
+recoverWallet()

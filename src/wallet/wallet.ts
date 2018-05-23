@@ -231,18 +231,13 @@ export class Wallet {
             hint: string,
         }):
         Promise<string> {
-        try {
-            if (await fs.pathExists(`./wallet/rootKey/${recoveryParamets.name}`)) {
-                return Promise.reject("Duplicate wallet name...")
-            }
-            const wallet = Wallet.generate(recoveryParamets)
-            await wallet.save(recoveryParamets.name, recoveryParamets.password)
-            const addressString = await Wallet.getAddress(recoveryParamets.name)
-            return Promise.resolve(addressString.toString())
-        } catch (e) {
-            logger.error("Error while recoverWallet : " + e)
-            return Promise.reject("Error while recoverWallet : " + e)
+        if (await fs.pathExists(`./wallet/rootKey/${recoveryParamets.name}`)) {
+            throw new Error("Duplicate wallet name...")
         }
+        const wallet = Wallet.generate(recoveryParamets)
+        await wallet.save(recoveryParamets.name, recoveryParamets.password)
+        const addressString = await Wallet.getAddress(recoveryParamets.name)
+        return addressString.toString()
     }
 
     public static async getAllPubliclist(): Promise<Array<{ name: string, address: string }>> {
