@@ -43,7 +43,7 @@ main start of hycon
 export class Server {
     public static subsid = 0
     public static globalOptions: any
-    public static syncOnly: boolean = true
+    public static triedSync: boolean = false
     public subscription: Map<number, any> | undefined
     public readonly consensus: IConsensus = undefined // the core
     public readonly network: INetwork = undefined // hycon network
@@ -56,7 +56,9 @@ export class Server {
     public test: TestServer
     public httpServer: HttpServer
     public sync: Sync
+    private triggerMining: () => void
     constructor() {
+
         Server.globalOptions = commandLineArgs(optionDefinitions)
         logger.info(`Options=${JSON.stringify(Server.globalOptions)}`)
         logger.info(`Verbose=${Server.globalOptions.verbose}`)
@@ -93,6 +95,9 @@ export class Server {
         this.txPool = new TxPool(this)
         this.rest = new RestManager(this)
     }
+    public setTriggerMining(f: () => void) {
+        this.triggerMining = f
+    }
     public async run() {
         await this.consensus.init()
         logger.info("Starting server...")
@@ -122,9 +127,12 @@ export class Server {
         logger.debug(`begin sync`)
         const sync = new Sync(this)
         await sync.sync()
-        Server.syncOnly = false
-        setTimeout(() => {
-            this.runSync()
+        if (!Server.triedSync) {
+            Server.triedSync = true
+            this.triggerMining()
+        }
+        setTimeout(async () => {
+            await this.runSync()
         }, 5000)
         logger.debug(`end sync`)
     }

@@ -82,6 +82,9 @@ export class SingleChain implements IConsensus {
                     this.onMinedBlock(block)
                 })
             this.createCandidateBlock(this.server.txPool.getPending().slice(0, 10))
+            this.server.setTriggerMining(() => {
+                this.createCandidateBlock(this.server.txPool.getPending().slice(0, 10))
+            })
             logger.info(`Initialization of singlechain is over.`)
         } catch (e) {
             logger.error(`Initialization fail in singleChain : ${e}`)
@@ -283,7 +286,6 @@ export class SingleChain implements IConsensus {
     public async testMakeBlock(txs: SignedTx[], previous?: Block): Promise<Block> {
         return await this.createCandidateBlock(txs, previous)
     }
-
     private newBlock(block: AnyBlock): void {
         for (const callback of this.newBlockCallbacks) {
             callback(block)
@@ -317,8 +319,9 @@ export class SingleChain implements IConsensus {
         }
     }
 
-    private async createCandidateBlock(txs: SignedTx[], previous?: Block): Promise<Block> {
+    private async createCandidateBlock(txs: SignedTx[], previous?: Block): Promise<Block | undefined> {
         try {
+            if (!Server.triedSync) { return undefined }
             let previousDBBlock = this.blockTip
             let previousHash = new Hash(this.blockTip.header)
             if (previous !== undefined) {
@@ -360,7 +363,6 @@ export class SingleChain implements IConsensus {
             return Promise.reject(e)
         }
     }
-
     private async verifyBlock(block: Block, previousHeader: AnyBlockHeader): Promise<{ isVerified: boolean, stateTransition?: IStateTransition }> {
         const isValidHeader = await this.verifyHeader(block.header)
         if (!isValidHeader) {
