@@ -1,5 +1,4 @@
 import commandLineArgs = require("command-line-args")
-import { randomBytes } from "crypto"
 import { getLogger } from "log4js"
 import Long = require("long")
 import { IResponseError } from "./api/client/rest"
@@ -115,7 +114,7 @@ export class TestServer {
         this.server.network.broadcast(new Buffer(encoded), null)
     }
 
-    // TODO : Block, hash, SignedTx, randomBytes import, and testMakeBlock(db, consensus) remove
+    // TODO : Block, hash, SignedTx import, and testMakeBlock(db, consensus) remove
     // tslint:disable-next-line:member-ordering
     public async testConsensus() {
         const txs1 = this.txPool.updateTxs([], 8)
@@ -146,7 +145,7 @@ export class TestServer {
             const bblk1LastTxs = await this.server.consensus.getLastTxs(block1.txs[0].to)
             logger.error(`########################   Before Save Block1 Get Last Tx of tx[0].to`)
             for (const txList of bblk1LastTxs) {
-                logger.error(`Tx Hash : ${new Hash(txList.tx)}`)
+                logger.error(`Tx Hash : ${new Hash(txList.txList.tx)}`)
             }
             logger.error(`########################   Save block1 : ${new Hash(block1.header)}`)
             await this.server.consensus.putBlock(block1)
@@ -158,7 +157,7 @@ export class TestServer {
             logger.error(`########################   After Save Block1 Get Last Tx of tx[0].to`)
             const ablk1LastTxs = await this.server.consensus.getLastTxs(block1.txs[0].to)
             for (const txList of ablk1LastTxs) {
-                logger.error(`Tx Hash : ${new Hash(txList.tx)}`)
+                logger.error(`Tx Hash : ${new Hash(txList.txList.tx)}`)
             }
 
             logger.error(`########################   Save block2 : ${new Hash(block2.header)}`)
