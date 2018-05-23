@@ -72,31 +72,9 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
                                 <td className="tdSubTitle subTitle_width20">Address</td>
                                 <td>{this.state.hash}</td>
                             </tr>
-                        </tbody>
-                    </table>
-                    <table className="tablesInRow threeTablesInRow">
-                        <thead>
-                            <tr>
-                                <th
-                                    colSpan={2}
-                                    className="tableBorder_Header tableHeader_floatLeft"
-                                >
-                                    Transactions
-                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
                             <tr>
                                 <td className="tdSubTitle subTitle_width40">No.Transactions</td>
                                 <td>{this.state.address.txs.length}</td>
-                            </tr>
-                            <tr>
-                                <td className="tdSubTitle subTitle_width40">Total Received</td>
-                                <td>{this.state.totalReceive}</td>
-                            </tr>
-                            <tr>
-                                <td className="tdSubTitle subTitle_width40">Total Send</td>
-                                <td>{this.state.totalSend}</td>
                             </tr>
                             <tr>
                                 <td className="tdSubTitle subTitle_width40">Final balance</td>
@@ -107,14 +85,6 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
                     <span className="QRSpan">
                         <QRCode size={170} value={this.state.hash} />
                     </span>
-                </div>
-                <div className="AddrBtnDiv">
-                    <button className="mdl-button mdl-js-button addrBtn">
-                        Request Payment
-          </button>
-                    <button className="mdl-button mdl-js-button addrBtn">
-                        Donation Button
-          </button>
                 </div>
                 <div className="contentTitle">Transactions</div>
                 {this.state.address.txs.map((tx: ITxProp) => {
