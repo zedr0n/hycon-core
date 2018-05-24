@@ -95,7 +95,7 @@ export class Transaction extends React.Component<any, any> {
         if (name === "amount") {
             const temp: string = value
             try {
-                if (temp.match("(^[0-9]*)([.]{0,1}[0-9]{0,8})$") == null) {
+                if (temp.match("(^[0-9]*)([.]{0,1}[0-9]{0,9})$") == null) {
                     alert("Please enter only numbers")
                     return
                 }
@@ -122,7 +122,7 @@ export class Transaction extends React.Component<any, any> {
             })
         } else if (name === "minerFee") {
             const temp: string = value
-            if (temp.match("(^[0-9]*)([.]{0,1}[0-9]{0,8}$)") == null) {
+            if (temp.match("(^[0-9]*)([.]{0,1}[0-9]{0,9}$)") == null) {
                 alert("Please enter only numbers")
             } else if (value > this.currentMinerFee) {
                 alert("You can't spend the money you don't have")
