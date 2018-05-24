@@ -7,4 +7,6 @@ message Peer {
   int64 lastSeen = 3;
   int32 failCount = 4;
   int64 lastAttempt = 5;
+  bool active = 6;
+  int32 currentQueue = 7;
 }

@@ -26,16 +26,22 @@ export class PeersList extends React.Component<any, any> {
                                 <span>Port</span>
                             </th>
                             <th className="mdl-data-table__cell--non-numeric">
-                                <span>Location</span>
+                                <span>is Active</span>
                             </th>
                             <th className="mdl-data-table__cell--non-numeric">
                                 <span>FailCount</span>
+                            </th>
+                            <th className="mdl-data-table__cell--non-numeric">
+                                <span>Current Queue</span>
                             </th>
                             <th className="mdl-data-table__cell--non-numeric">
                                 <span>LastSeen</span>
                             </th>
                             <th className="mdl-data-table__cell--non-numeric">
                                 <span>LastAttempt</span>
+                            </th>
+                            <th className="mdl-data-table__cell--non-numeric">
+                                <span>Location</span>
                             </th>
                             <th className="mdl-data-table__cell--non-numeric">
                                 <span>Latitude</span>

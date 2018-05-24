@@ -163,6 +163,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
                             <Route exact path="/wallet" component={this.wallet} />
                             <Route exact path="/wallet/recoverWallet" component={this.recoverWallet} />
                             <Route exact path="/wallet/:name" component={this.walletDetail} />
+                            <Route exact path="/peersView" component={this.peersView} />
                         </Switch>
                     </div>
                 </main>

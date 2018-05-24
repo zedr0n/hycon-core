@@ -47,12 +47,14 @@ export interface IWalletAddress {
 export interface IPeer {
     host: string
     port: number
-    lastSeen: number | Long
-    failCount: number
-    lastAttempt: number | Long
-    location: string
-    latitude: number
-    longitude: number
+    lastSeen?: number | Long
+    failCount?: number
+    lastAttempt?: number | Long
+    active?: boolean
+    currentQueue?: number
+    location?: string
+    latitude?: number
+    longitude?: number
 }
 
 export interface ILocationDetails {
@@ -102,6 +104,7 @@ export interface IRest {
     // [Depreciated: Use above] recoverWalletForce(Hwallet: IHyconWallet): Promise<string | boolean>
     sendTx(tx: { name: string, password: string, address: string, amount: number, minerFee: number }, queueTx?: Function): Promise<boolean>
     getPeerList(): Promise<IPeer[]>
+    getPeerConnected(): Promise<IPeer[]>
     getPendingTxs(index: number): Promise<{ txs: ITxProp[], length: number, totalCount: number, totalAmount: string, totalFee: string }>
     getHint(name: string): Promise<string>
     getNextTxs(address: string, txHash: string): Promise<ITxProp[]>

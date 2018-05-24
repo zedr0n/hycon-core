@@ -598,21 +598,33 @@ export class RestServer implements IRest {
 
     public async getPeerList(): Promise<IPeer[]> {
         const peerList: IPeer[] = []
-        const peers: proto.IPeer[] = await this.network.getConnections()
+        const peers: proto.IPeer[] = await this.network.getPeerDb()
         for (const peer of peers) {
             const temp: IPeer = {
                 host: peer.host,
                 port: peer.port,
-                lastSeen: peer.lastSeen,
+                lastSeen: peer.lastSeen ? peer.lastSeen : 0,
                 failCount: peer.failCount,
-                lastAttempt: peer.lastAttempt,
-                location: undefined,
-                latitude: undefined,
-                longitude: undefined,
+                lastAttempt: peer.lastAttempt ? peer.lastSeen : 0,
+                active: peer.active,
             }
             peerList.push(temp)
         }
         return peerList
+    }
+
+    public getPeerConnected(): Promise<IPeer[]> {
+        const peerList: IPeer[] = []
+        const peers: proto.IPeer[] = this.network.getEndPoints()
+        for (const peer of peers) {
+            const temp: IPeer = {
+                host: peer.host,
+                port: peer.port,
+                currentQueue: peer.currentQueue,
+            }
+            peerList.push(temp)
+        }
+        return Promise.resolve(peerList)
     }
 
     public getHint(name: string): Promise<string> {

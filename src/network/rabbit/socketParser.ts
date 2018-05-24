@@ -90,6 +90,10 @@ export class SocketParser {
     public getInfo() {
         return `Local=${this.socket.localAddress}:${this.socket.localPort}  Remote=${this.socket.remoteAddress}:${this.socket.remotePort} CurrentQueue=${this.sendLock.queueLength()}`
     }
+
+    public getQueueLength() {
+        return this.sendLock.queueLength()
+    }
     private receive(src: Buffer): void {
         try {
             this.parse(src)

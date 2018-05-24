@@ -9377,6 +9377,8 @@ $root.Peer = (function() {
      * @property {number|Long|null} [lastSeen] Peer lastSeen
      * @property {number|null} [failCount] Peer failCount
      * @property {number|Long|null} [lastAttempt] Peer lastAttempt
+     * @property {boolean|null} [active] Peer active
+     * @property {number|null} [currentQueue] Peer currentQueue
      */
 
     /**
@@ -9435,6 +9437,22 @@ $root.Peer = (function() {
     Peer.prototype.lastAttempt = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
 
     /**
+     * Peer active.
+     * @member {boolean} active
+     * @memberof Peer
+     * @instance
+     */
+    Peer.prototype.active = false;
+
+    /**
+     * Peer currentQueue.
+     * @member {number} currentQueue
+     * @memberof Peer
+     * @instance
+     */
+    Peer.prototype.currentQueue = 0;
+
+    /**
      * Creates a new Peer instance using the specified properties.
      * @function create
      * @memberof Peer
@@ -9468,6 +9486,10 @@ $root.Peer = (function() {
             writer.uint32(/* id 4, wireType 0 =*/32).int32(message.failCount);
         if (message.lastAttempt != null && message.hasOwnProperty("lastAttempt"))
             writer.uint32(/* id 5, wireType 0 =*/40).int64(message.lastAttempt);
+        if (message.active != null && message.hasOwnProperty("active"))
+            writer.uint32(/* id 6, wireType 0 =*/48).bool(message.active);
+        if (message.currentQueue != null && message.hasOwnProperty("currentQueue"))
+            writer.uint32(/* id 7, wireType 0 =*/56).int32(message.currentQueue);
         return writer;
     };
 
@@ -9516,6 +9538,12 @@ $root.Peer = (function() {
                 break;
             case 5:
                 message.lastAttempt = reader.int64();
+                break;
+            case 6:
+                message.active = reader.bool();
+                break;
+            case 7:
+                message.currentQueue = reader.int32();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -9567,6 +9595,12 @@ $root.Peer = (function() {
         if (message.lastAttempt != null && message.hasOwnProperty("lastAttempt"))
             if (!$util.isInteger(message.lastAttempt) && !(message.lastAttempt && $util.isInteger(message.lastAttempt.low) && $util.isInteger(message.lastAttempt.high)))
                 return "lastAttempt: integer|Long expected";
+        if (message.active != null && message.hasOwnProperty("active"))
+            if (typeof message.active !== "boolean")
+                return "active: boolean expected";
+        if (message.currentQueue != null && message.hasOwnProperty("currentQueue"))
+            if (!$util.isInteger(message.currentQueue))
+                return "currentQueue: integer expected";
         return null;
     };
 
@@ -9606,6 +9640,10 @@ $root.Peer = (function() {
                 message.lastAttempt = object.lastAttempt;
             else if (typeof object.lastAttempt === "object")
                 message.lastAttempt = new $util.LongBits(object.lastAttempt.low >>> 0, object.lastAttempt.high >>> 0).toNumber();
+        if (object.active != null)
+            message.active = Boolean(object.active);
+        if (object.currentQueue != null)
+            message.currentQueue = object.currentQueue | 0;
         return message;
     };
 
@@ -9636,6 +9674,8 @@ $root.Peer = (function() {
                 object.lastAttempt = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.lastAttempt = options.longs === String ? "0" : 0;
+            object.active = false;
+            object.currentQueue = 0;
         }
         if (message.host != null && message.hasOwnProperty("host"))
             object.host = message.host;
@@ -9653,6 +9693,10 @@ $root.Peer = (function() {
                 object.lastAttempt = options.longs === String ? String(message.lastAttempt) : message.lastAttempt;
             else
                 object.lastAttempt = options.longs === String ? $util.Long.prototype.toString.call(message.lastAttempt) : options.longs === Number ? new $util.LongBits(message.lastAttempt.low >>> 0, message.lastAttempt.high >>> 0).toNumber() : message.lastAttempt;
+        if (message.active != null && message.hasOwnProperty("active"))
+            object.active = message.active;
+        if (message.currentQueue != null && message.hasOwnProperty("currentQueue"))
+            object.currentQueue = message.currentQueue;
         return object;
     };
 

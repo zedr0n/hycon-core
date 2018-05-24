@@ -210,6 +210,10 @@ export class HttpServer {
             res.json(await this.rest.getPeerList())
         })
 
+        router.get("/peerConnected", async (req: express.Request, res: express.Response) => {
+            res.json(await this.rest.getPeerConnected())
+        })
+
         router.get("/hint/:name", async (req: express.Request, res: express.Response) => {
             res.json(await this.rest.getHint(req.params.name))
         })

@@ -79,15 +79,36 @@ export class RabbitNetwork implements INetwork {
         }
     }
 
-    public async getConnections(): Promise<proto.IPeer[]> {
+    public async getPeerDb(): Promise<proto.IPeer[]> {
         const peerList: proto.IPeer[] = []
+        let isActive: boolean = false
         for (const key of this.peerDB.keys) {
-            peerList.push(await this.peerDB.get(key))
+            if (this.endPoints.has(key)) {
+                isActive = true
+            }
+            const value = await this.peerDB.get(key)
+            value.active = isActive
+            peerList.push(value)
         }
         return peerList
     }
 
-    public broadcast(packet: Uint8Array, exempt?: RabbitPeer): void {
+    public getEndPoints(): proto.IPeer[] {
+        const keys = Array.from(this.endPoints.keys())
+        const endPoints = []
+        let currentQueue: number
+        for (const key of keys) {
+            if (this.peers.has(key)) {
+                currentQueue = this.peers.get(key).socketBuffer.getQueueLength()
+            }
+            const value = this.endPoints.get(key)
+            value.currentQueue = currentQueue
+            endPoints.push(value)
+        }
+        return endPoints
+    }
+
+    public broadcast(packet: Buffer, exempt: RabbitPeer): void {
         for (const [key, peer] of this.peers) {
             if (exempt !== peer) {
                 peer.sendPacket(packet).catch((e) => { logger.warn(e) })
@@ -221,7 +242,9 @@ export class RabbitNetwork implements INetwork {
                         if (save) {
                             this.endPoints.set(key, ipeer)
                             socket.on("close", () => this.endPoints.delete(key))
-                            await this.peerDB.seen(ipeer)
+                            if (RabbitNetwork.isRemoteSocket(socket)) {
+                                await this.peerDB.seen(ipeer)
+                            }
                         }
                         resolve(peer)
                         logger.debug(`Peer ${key} ${socket.remoteAddress}:${socket.remotePort} Status=${JSON.stringify(await peer.status())}`)

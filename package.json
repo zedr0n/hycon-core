@@ -23,7 +23,7 @@
     "debugNetwork": "./node_modules/.bin/ts-node --inspect=9231 --inspect-brk --port=8148 --str_port=9081 --cpuMiners=3 --api --api_port=2442 --networkid=71 --writing",
     "startNetwork": "./node_modules/.bin/ts-node src/network/turtle/main.ts --port=8148",
     "startRabbit": "./node_modules/.bin/ts-node src/network/rabbit/main.ts --port=8148",
-    "testNetwork1": "./node_modules/.bin/ts-node src/main.ts --port=8151  --str_port=9081 --writing",
+    "testNetwork1": "./node_modules/.bin/ts-node src/main.ts --port=8149 --str_port=9082 --cpuMiners=3 --api --api_port=2443 --networkid=cat",
     "testNetwork2": "./node_modules/.bin/ts-node src/main.ts --port=8152 --str_port=9082 --writing",
     "testNetwork3": "./node_modules/.bin/ts-node src/main.ts --port=8153  --str_port=9083 --writing",
     "clear": "rm -rf blockdb* worldstate* rawblock* txDB* peerdb*",

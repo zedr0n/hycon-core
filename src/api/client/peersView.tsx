@@ -13,10 +13,10 @@ interface IPeersProps {
     peer: IPeer
 }
 
-// // tslint:disable-next-line:no-var-requires
-// const googleMapsClient = require("@google/maps").createClient({
-//     key: "AIzaSyAp-2W8_T6dZjq71yOhxW1kRkbY6E1iyuk",
-// })
+// tslint:disable-next-line:no-var-requires
+const googleMapsClient = require("@google/maps").createClient({
+    key: "AIzaSyAp-2W8_T6dZjq71yOhxW1kRkbY6E1iyuk",
+})
 
 export class PeersView extends React.Component<any, any> {
     public mounted: boolean = false

@@ -3752,6 +3752,12 @@ export interface IPeer {
 
     /** Peer lastAttempt */
     lastAttempt?: number|Long;
+
+    /** Peer active */
+    active?: boolean;
+
+    /** Peer currentQueue */
+    currentQueue?: number;
 }
 
 /** Represents a Peer. */
@@ -3777,6 +3783,12 @@ export class Peer implements IPeer {
 
     /** Peer lastAttempt. */
     public lastAttempt: (number|Long);
+
+    /** Peer active. */
+    public active: boolean;
+
+    /** Peer currentQueue. */
+    public currentQueue: number;
 
     /**
      * Creates a new Peer instance using the specified properties.
