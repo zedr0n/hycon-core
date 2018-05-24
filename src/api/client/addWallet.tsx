@@ -16,7 +16,7 @@ export class AddWallet extends React.Component<any, any> {
             isMnemonicTypeView: false,
             isMnemonicView: false,
             language: "",
-            languages: ["English", "Chinese_Simplified", "Chinese_Traditional", "Korean"],
+            languages: ["English", "Chinese - Simplified", "Chinese - Traditional", "Korean"],
             mnemonic: "",
             redirect: false,
             rest: props.rest,
@@ -157,7 +157,7 @@ export class AddWallet extends React.Component<any, any> {
         }
         this.state.rest.getMnemonic(opt).then((data: string) => {
             this.state.rest.setLoading(false)
-            this.setState({ isLanguageView: false, mnemonic: data, language: this.state.selectedOption })
+            this.setState({ isLanguageView: false, mnemonic: data, language: opt })
         })
     }
     public handleOptionChange(option: any) {
