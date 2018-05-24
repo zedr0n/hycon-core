@@ -16,6 +16,20 @@ export class Difficulty {
 
         return new Difficulty(mantissa, exponent)
     }
+
+    public static getTarget(mantissa: number, exponent: number): Uint8Array {
+        const target = Buffer.alloc(32)
+        // logger.info(`0xFFFFFF - mantissa: ${(0xFFFFFF - mantissa).toString(16)}`)
+        const targetMantissa = (0xFFFFFF - mantissa) * Math.pow(2, 8 - (exponent % 8)) + (Math.pow(2, 8 - (exponent % 8)) - 1)
+        // logger.info(`targetMantissa: ${(targetMantissa).toString(16)}`)
+        const index = 28 - Math.floor(exponent / 8)
+        target.writeUInt32LE(targetMantissa, index)
+        target.fill(0xFF, 0, index)
+
+        // logger.info(`Target: ${(target as Buffer).toString("hex")}`)
+
+        return new Uint8Array(target)
+    }
     private static normalize(mantissa: number, exponent: number) {
         if (mantissa === 0) {
             return { mantissa: 1, exponent: 0 }
