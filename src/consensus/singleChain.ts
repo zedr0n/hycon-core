@@ -78,14 +78,14 @@ export class SingleChain implements IConsensus {
                 await this.txdb.init(this, this.blockTip.height)
             }
 
-            this.server.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock(txs))
+            this.server.txPool.onTopTxChanges(1000, (txs: SignedTx[]) => this.createCandidateBlock(txs))
             this.server.miner.addCallbackNewBlock(
                 (block: Block) => {
                     this.onMinedBlock(block)
                 })
-            this.createCandidateBlock(this.server.txPool.updateTxs([], 10))
+            this.createCandidateBlock(this.server.txPool.updateTxs([], 1000))
             this.server.setTriggerMining(() => {
-                this.createCandidateBlock(this.server.txPool.updateTxs([], 10))
+                this.createCandidateBlock(this.server.txPool.updateTxs([], 1000))
             })
             logger.info(`Initialization of singlechain is over.`)
         } catch (e) {

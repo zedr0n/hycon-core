@@ -16,11 +16,11 @@ export class BlockList extends React.Component<any, any> {
     public mounted: boolean = false
     constructor(props: any) {
         super(props)
-        this.state = { blocks: [], rest: props.rest, length: 0, index: 0}
+        this.state = { blocks: [], rest: props.rest, length: 0, index: 0 }
     }
     public componentWillUnmount() {
         this.mounted = false
-        this.intervalId = null
+        window.clearTimeout()
     }
     public componentWillMount() {
     }
@@ -78,18 +78,18 @@ export class BlockList extends React.Component<any, any> {
                 <div className="contentTitle">
                     LATEST BLOCKS
                     <span className="seeMoreLink">
-                    <ReactPaginate previousLabel={"PREV"}
-                       nextLabel={"NEXT"}
-                       breakLabel={<a>...</a>}
-                       breakClassName={"break-me"}
-                       pageCount={this.state.length}
-                       marginPagesDisplayed={1}
-                       pageRangeDisplayed={9}
-                       onPageChange={this.handlePageClick}
-                       containerClassName={"pagination"}
-                       activeClassName={"active"}
-                       initialPage={this.state.index}
-                       disableInitialCallback={true}
+                        <ReactPaginate previousLabel={"PREV"}
+                            nextLabel={"NEXT"}
+                            breakLabel={<a>...</a>}
+                            breakClassName={"break-me"}
+                            pageCount={this.state.length}
+                            marginPagesDisplayed={1}
+                            pageRangeDisplayed={9}
+                            onPageChange={this.handlePageClick}
+                            containerClassName={"pagination"}
+                            activeClassName={"active"}
+                            initialPage={this.state.index}
+                            disableInitialCallback={true}
                         />
                     </span>
                 </div>
