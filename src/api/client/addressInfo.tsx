@@ -92,7 +92,7 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
                     )
                 })}
                 {this.state.hasMore && this.state.txs.length > 0 ?
-                    (<div><button onClick={() => this.fetchNextTxs()}>Load more</button></div>)
+                    (<div><button className="btn btn-block btn-info" onClick={() => this.fetchNextTxs()}>Load more</button></div>)
                     :
                     (<div></div>)}
 

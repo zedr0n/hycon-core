@@ -117,8 +117,6 @@ a {
 }
 .QRSpan {
   float: right;
-  margin-right: 8%;
-  margin-top: 2em;
 }
 table {
   border-collapse: collapse;
@@ -132,11 +130,6 @@ table {
 .txAmtBtn {
   float: right;
   margin: 0% 0% 3% 0.5%;
-  width: 18em;
-  height: 2.5em;
-}
-.txAmtBtn_margin0 {
-  float: right;
   width: 18em;
   height: 2.5em;
 }
