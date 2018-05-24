@@ -135,13 +135,8 @@ export class App extends React.Component<{ rest: IRest }, any> {
                                             className="mdl-textfield__input searchBox"
                                             type="text"
                                             id="search"
+                                            placeholder="Hash"
                                         />
-                                        <label
-                                            className="mdl-textfield__label"
-                                            htmlFor="sample-expandable"
-                                        >
-                                            Hash
-                    </label>
                                     </div>
                                 </div>
                             </form>
@@ -177,14 +172,9 @@ export class App extends React.Component<{ rest: IRest }, any> {
                                         <input
                                             className="mdl-textfield__input searchBox"
                                             type="text"
-                                            id="hyconSearch"
+                                            id="search"
+                                            placeholder="Hash"
                                         />
-                                        <label
-                                            className="mdl-textfield__label"
-                                            htmlFor="sample-expandable"
-                                        >
-                                            Hash
-                    </label>
                                     </div>
                                 </div>
                             </form>
