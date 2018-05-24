@@ -263,7 +263,7 @@ export class RestClient implements IRest {
         )
     }
 
-    public getNextTxs(address: string, txHash: string): Promise<Array<{ txList: ITxProp, timestamp: number }>> {
+    public getNextTxs(address: string, txHash: string): Promise<ITxProp[]> {
         return Promise.resolve(
             fetch(`/api/${this.apiVersion}/nextTxs/${address}/${txHash}`)
                 .then((response) => response.json())

@@ -110,5 +110,5 @@ export interface IRest {
     sendTx(tx: { name: string, password: string, address: string, amount: number, minerFee: number }, queueTx?: Function): Promise<boolean>
     getPendingTxs(index: number): Promise<{ txs: ITxProp[], length: number, totalCount: number, totalAmount: string, totalFee: string }>
     getHint(name: string): Promise<string>
-    getNextTxs(address: string, txHash: string): Promise<Array<{ txList: ITxProp, timestamp: number }>>
+    getNextTxs(address: string, txHash: string): Promise<ITxProp[]>
 }

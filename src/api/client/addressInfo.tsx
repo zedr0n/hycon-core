@@ -1,6 +1,7 @@
 import Long = require("long")
 import * as QRCode from "qrcode.react"
 import * as React from "react"
+import update = require("react-addons-update")
 import { IRest, ITxProp, IWalletAddress } from "./rest"
 import { TxLine } from "./txLine"
 import { hyconfromString, hycontoString } from "./util/commonUtil"
@@ -11,26 +12,26 @@ interface IAddressProps {
 interface IAddressView {
     rest: IRest
     hash: string
+    txs: ITxProp[],
+    hasMore: boolean,
     address?: IWalletAddress
-    totalReceive?: string
-    totalSend?: string
 }
 export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
     public mounted: boolean = false
     constructor(props: IAddressProps) {
         super(props)
-        this.state = { hash: props.hash, rest: props.rest }
+        this.state = { hash: props.hash, rest: props.rest, txs: [], hasMore: true }
     }
     public componentWillUnmount() {
         this.mounted = false
     }
-    public componentWillMount() {
+    public componentDidMount() {
         this.mounted = true
         this.state.rest.setLoading(true)
         this.state.rest.getAddressInfo(this.state.hash).then((data: IWalletAddress) => {
             if (this.mounted) {
                 this.setState({
-                    address: data,
+                    address: data, txs: data.txs,
                 })
             }
             this.state.rest.setLoading(false)
@@ -76,7 +77,7 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
                     </span>
                 </div>
                 <div className="contentTitle">Transactions</div>
-                {this.state.address.txs.map((tx: ITxProp) => {
+                {this.state.txs.map((tx: ITxProp) => {
                     return (
                         <div key={count++}>
                             <TxLine tx={tx} rest={this.state.rest} address={this.state.address} />
@@ -94,7 +95,20 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
                         </div>
                     )
                 })}
+                {this.state.hasMore ?
+                    (<div><button onClick={() => this.fetchNextTxs()}>Load more</button></div>)
+                    :
+                    (<div></div>)}
+
             </div>
         )
+    }
+    private fetchNextTxs() {
+        this.state.rest.getNextTxs(this.state.hash, this.state.txs[this.state.txs.length - 1].hash).then((result: ITxProp[]) => {
+            if (result.length === 0) { this.setState({ hasMore: false }) }
+            this.setState({
+                txs: update(this.state.txs, { $push: result }),
+            })
+        })
     }
 }

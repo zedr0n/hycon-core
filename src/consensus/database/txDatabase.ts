@@ -134,13 +134,18 @@ export class TxDatabase {
         while (txList) {
             if (txs.length === count) { break }
             if (txList.tx.to.equals(address)) {
-                if (txList.previousTo === undefined) {txList = undefined}
-                txList = await this.get(txList.previousTo)
-            }
-            if (txList.tx instanceof SignedTx) {
+                if (txList.previousTo !== undefined) {
+                    txList = await this.get(txList.previousTo)
+                } else {
+                    txList = undefined
+                }
+            } else if (txList.tx instanceof SignedTx) {
                 if (txList.tx.from.equals(address)) {
-                    if (txList.previousFrom === undefined) {txList = undefined}
-                    txList = await this.get(txList.previousFrom)
+                    if (txList.previousFrom !== undefined) {
+                         txList = await this.get(txList.previousFrom)
+                    } else {
+                        txList = undefined
+                    }
                 }
             }
             if (txList !== undefined) {

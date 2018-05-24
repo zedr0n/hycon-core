@@ -587,7 +587,7 @@ export class RestServer implements IRest {
         const txList: ITxProp[] = []
         for (const tx of txPoolTxs.txs) {
             txList.push({
-                hash: new Hash(tx).toHex(),
+                hash: new Hash(tx).toString(),
                 amount: hycontoString(tx.amount),
                 fee: hycontoString(tx.fee),
                 from: tx.from.toString(),
@@ -603,18 +603,19 @@ export class RestServer implements IRest {
         return Wallet.getHint(name)
     }
 
-    public async getNextTxs(address: string, txHash: string): Promise<Array<{ txList: ITxProp, timestamp: number }>> {
+    public async getNextTxs(address: string, txHash: string): Promise<ITxProp[]> {
         const cntPerPage: number = 10
         const nextTxs = await this.consensus.getNextTxs(new Address(address), Hash.decode(txHash), cntPerPage)
-        const txList: Array<{ txList: ITxProp, timestamp: number }> = []
+        const txList: ITxProp[] = []
         for (const next of nextTxs) {
             const tx = next.txList.tx
-            const txProp = {
-                hash: new Hash(tx).toHex(),
+            const txProp: ITxProp = {
+                hash: new Hash(tx).toString(),
                 amount: hycontoString(tx.amount),
                 to: tx.to.toString(),
                 signature: tx.signature.toString("hex"),
                 estimated: hycontoString(tx.amount),
+                receiveTime: next.timestamp,
             }
             if (tx instanceof SignedTx) {
                 Object.assign(txProp, {
@@ -622,7 +623,7 @@ export class RestServer implements IRest {
                     from: tx.from.toString(),
                 })
             }
-            txList.push({ txList: txProp, timestamp: next.timestamp })
+            txList.push(txProp)
         }
         return txList
     }

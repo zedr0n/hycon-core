@@ -18,7 +18,7 @@ export class WalletDetail extends React.Component<any, any> {
     public mounted: boolean = false
     constructor(props: any) {
         super(props)
-        this.state = { name: props.name, rest: props.rest, visible: false, accounts: [] }
+        this.state = { name: props.name, rest: props.rest, visible: false, accounts: [], address: "", txs: [], hasMore: true }
     }
     public componentWillUnmount() {
         this.mounted = false
@@ -30,7 +30,7 @@ export class WalletDetail extends React.Component<any, any> {
         this.props.rest.getWalletDetail(this.state.name).then((data: IHyconWallet) => {
             this.state.rest.setLoading(false)
             if (this.mounted) {
-                this.setState({ wallet: data })
+                this.setState({ wallet: data, address: data.address, txs: data.txs })
             }
         }).catch((e: Error) => {
             alert(e)
@@ -151,33 +151,13 @@ export class WalletDetail extends React.Component<any, any> {
                             </td>
                             <td />
                         </tr>
-                        <tr>
-                            <td className="walletNameTd walletTxTitle">Transactions</td>
-                            <td>
-                                <span className="seeMoreLink">
-                                    <ReactPaginate previousLabel={"PREV"}
-                                        nextLabel={"NEXT"}
-                                        breakLabel={<a>...</a>}
-                                        breakClassName={"break-me"}
-                                        pageCount={this.state.length}
-                                        marginPagesDisplayed={1}
-                                        pageRangeDisplayed={9}
-                                        onPageChange={this.handlePageClick}
-                                        containerClassName={"pagination"}
-                                        activeClassName={"active"}
-                                        initialPage={this.state.index}
-                                        disableInitialCallback={true}
-                                    />
-                                </span>
-                            </td>
-                        </tr>
-                        {this.state.wallet.txs.map((tx: ITxProp) => {
+                        {this.state.txs.map((tx: ITxProp) => {
                             return (
                                 <tr key={tx.hash}>
                                     <td colSpan={2}>
                                         <TxLine tx={tx} rest={this.state.rest} />
                                         <div>
-                                            {tx.from === this.state.wallet.address ?
+                                            {tx.from === this.state.address ?
                                                 (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent txAmtBtn_margin0">-{tx.amount} HYCON</button>)
                                                 :
                                                 (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored txAmtBtn_margin0">{tx.amount} HYCON</button>)}
@@ -186,6 +166,10 @@ export class WalletDetail extends React.Component<any, any> {
                                 </tr>
                             )
                         })}
+                        {this.state.hasMore ?
+                            (<tr><td><button onClick={() => this.fetchNextTxs()}>Load more</button></td></tr>)
+                            :
+                            (<tr><td></td></tr>)}
                     </tbody>
                 </table>
                 <Dialog className="dialog" open={this.state.visible}>
@@ -223,7 +207,12 @@ export class WalletDetail extends React.Component<any, any> {
             </div>
         )
     }
-    private handlePageClick = (data: any) => {
-        // this.getNextTxs(data.selected)
+    private fetchNextTxs() {
+        this.state.rest.getNextTxs(this.state.wallet.address, this.state.txs[this.state.txs.length - 1].hash).then((result: ITxProp[]) => {
+            if (result.length === 0) { this.setState({ hasMore: false }) }
+            this.setState({
+                txs: update(this.state.txs, { $push: result }),
+            })
+        })
     }
 }
