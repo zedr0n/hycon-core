@@ -61,7 +61,7 @@ export class TestServer {
             const w = this.wallets[i]
             const account = await this.server.consensus.getAccount(w.pubKey.address())
             assert(account)
-            assert(account.balance.compare(0) === 1)
+            //assert(account.balance.compare(0) === 1)
             logger.debug(`Wallet${i} Public=${w.pubKey.address().toString()} Balance=${hycontoString(account.balance)}`)
             assert(w)
         }
@@ -76,38 +76,46 @@ export class TestServer {
 
         setInterval(() => {
             this.makeTx()
-        }, 1000)
+        }, 10000)
     }
     private async makeTx() {
         const amt = hyconfromString("12345")
         const fee = hyconfromString("10")
 
-        const n = 10
+        const n = 100
         const lastWalletIndex = this.wallets.length - 1
         const txList: SignedTx[] = []
         for (let i = 0; i < n; i++) {
             // get nonce, increase 1
-            const toWallet = this.wallets[i]
+            const toWallet = this.wallets[randomInt(0, this.wallets.length - 1)]
             assert(toWallet)
             const toAddr = toWallet.pubKey.address()
-            const fromWallet = this.wallets[i + 1]
+            const fromWallet = this.wallets[randomInt(0, this.wallets.length - 1)]
             assert(fromWallet)
             const fromAddr = fromWallet.pubKey.address()
             const fromAddrString = fromAddr.toString()
 
-            const nonce = await this.server.consensus.getNonce(fromAddr) + 1
-
-            this.nonceTable.set(fromAddrString, nonce)
-            if (!fromAddr.equals(toAddr)) {
-                const a = amt.add(randomInt(0, 10) * Math.pow(10, 9)).add(randomInt(0, 10) * Math.pow(10, 9)).add(randomInt(0, 10) * Math.pow(10, 9))
-                const b = fee.add(randomInt(0, 10) * Math.pow(10, 9)).add(randomInt(0, 10) * Math.pow(10, 9))
-                // logger.info(`Amount : ${hycontoString(a)} / Fee : ${hycontoString(b)}`)
-                const tx = fromWallet.send(toAddr, a, nonce, b)
-                logger.error(`TX ${i + 1} Amount=${hycontoString(tx.amount)} Fee=${hycontoString(tx.fee)} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
-                txList.push(tx)
+            if (fromAddr.equals(toAddr)) {
+                continue
             }
+            let nonce = undefined
+            if (this.nonceTable.has(fromAddrString)) {
+                nonce = this.nonceTable.get(fromAddrString) + 1
+            }
+            else {
+                nonce = await this.server.consensus.getNonce(fromAddr) + 1
+            }
+
+            // record
+            this.nonceTable.set(fromAddrString, nonce)
+            const a = amt.add(randomInt(0, 10) * Math.pow(10, 9)).add(randomInt(0, 10) * Math.pow(10, 9)).add(randomInt(0, 10) * Math.pow(10, 9))
+            const b = fee.add(randomInt(0, 10) * Math.pow(10, 9)).add(randomInt(0, 10) * Math.pow(10, 9))
+            const tx = fromWallet.send(toAddr, a, nonce, b)
+            //logger.debug(`TX ${txList.length} Nonce=${nonce} Amount=${hycontoString(tx.amount)} Fee=${hycontoString(tx.fee)} From=${fromAddr.toString()} To = ${toAddr.toString()}`)
+            txList.push(tx)
         }
 
+        logger.debug(`Put TxList Size=${txList.length}`)
         const added = await this.txPool.putTxs(txList)
         // broadcast txs to hycon nework
         const encoded: Uint8Array = proto.Network.encode({ putTx: { txs: txList } }).finish()

@@ -22,6 +22,21 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "debugWriting",
+            "runtimeExecutable": "npm",
+            "windows": {
+                "runtimeExecutable": "npm.cmd"
+            },
+            "runtimeArgs": [
+                "run",
+                "debugWriting"
+            ],
+            "port": 9231,
+            "protocol": "inspector"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "debug2",
             "runtimeExecutable": "npm",
             "windows": {
