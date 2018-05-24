@@ -232,7 +232,10 @@ export class RabbitNetwork implements INetwork {
                     }
                     this.pendingConnections.delete(key)
                 } catch (e) {
-                    logger.debug(e)
+                    logger.warn(e)
+                    reject(e)
+                } finally {
+                    reject("Unknown connection failure")
                 }
             })
         })

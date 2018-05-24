@@ -1,4 +1,5 @@
 import { getLogger } from "log4js"
+import { MapField } from "protobufjs"
 import { Hash } from "../util/hash"
 const logger = getLogger("Difficulty")
 
@@ -42,6 +43,11 @@ export class Difficulty {
         }
         mantissa = Math.round(mantissa)
 
+        while (mantissa % 2 === 0) {
+            mantissa = mantissa / 2
+            exponent += 1
+        }
+
         return { mantissa, exponent }
     }
 
@@ -63,20 +69,49 @@ export class Difficulty {
         return this.exponent
     }
 
-    public getTarget(): Buffer {
+    public getTarget(): Uint8Array {
         const target = Buffer.alloc(32)
-        const index = Math.floor((256 - 24 - this.exponent) / 8)
-        const alignment = (256 - 24 - this.exponent) - index * 8
-        target.writeUIntLE(((0xFFFFFF - this.mantissa) << alignment), index, alignment === 0 ? 3 : 4)
-        if (index <= 29) {
-            target.fill(0xFF, 0, index)
-        }
 
-        let str = ""
-        for (let i = 24; i < 32; i++) {
-            str = target[i].toString(16) + str
+        const lowerBits = (this.exponent % 8)
+        const targetMantissa = (this.mantissa << lowerBits) | ((1 << lowerBits) - 1)
+        const mBits = Math.ceil(Math.log2(targetMantissa + 1))
+        const offset = Math.floor((256 - this.exponent) / 8)
+
+        target.writeUIntLE(targetMantissa, offset, 4)
+
+        for (let i = offset; i < target.length; i++) {
+            target[i] = 0xFF - target[i]
         }
-        logger.info(`Target: ${str}`)
+        return target
+    }
+
+    public getTarget2(): Buffer {
+        const target = Buffer.alloc(33)
+        const mantissaBits = Math.ceil(Math.log2(this.mantissa + 1))
+        const mantissaBytes = Math.ceil(mantissaBits / 8)
+        const targetNum = Math.pow(0x100, mantissaBytes) - 1 - this.mantissa
+        const targetBits = Math.ceil(Math.log2(targetNum + 1))
+        let targetBytes = Math.ceil(targetBits / 8)
+        if (targetBytes === 0) {
+            targetBytes = 1
+        }
+        const index = Math.floor(((256 - targetBytes * 8) - this.exponent) / 8)
+        const alignment = (256 - targetBits - this.exponent) - index * 8
+        // logger.warn(`mantissaBits: ${mantissaBits}, mantissa: ${this.mantissa}, targetBits: ${targetBits}, targetNum: ${targetNum}, index: ${index}, alignment: ${alignment}`)
+
+        // const targetMantissa = (Math.pow(2, mantissaBits) - 1 - this.mantissa)
+        // const index = Math.floor((256 - mantissaBytes * 8 - this.exponent) / 8)
+        // const alignment = (256 - mantissaBits - this.exponent) - index * 8
+        target.writeUIntLE(targetNum, index, targetBytes)
+        // if (index <= 29) {
+        target.fill(0xFF, 0, index)
+        // }
+
+        // let str = ""
+        // for (let i = 24; i < 32; i++) {
+        //     str = target[i].toString(16) + str
+        // }
+        // logger.info(`Target: ${str}`)
         return target
     }
 
@@ -88,7 +123,7 @@ export class Difficulty {
         return (this.exponent << 24) + this.mantissa
     }
 
-    public acceptable(hash: Uint8Array | Hash, target?: Buffer): boolean {
+    public acceptable(hash: Uint8Array | Hash, target?: Uint8Array): boolean {
         if (!(hash instanceof Hash) && hash.length !== 32) {
             throw new Error(`Expected 32 byte hash, got ${hash.length} bytes`)
         }
@@ -105,6 +140,28 @@ export class Difficulty {
             }
         }
         return true
+    }
+
+    public iterateMantissa() {
+        this.mantissa = 1
+        this.exponent = 0
+        const hashBytes = new Uint8Array(32)
+        while (this.mantissa <= 0xFFFF) {
+            let trueCount = 0
+            const target = this.getTarget()
+            for (let i = 0; i <= 0xFFFF; i++) {
+                hashBytes[31] = i & 0xFF
+                hashBytes[30] = (i & 0xFF00) >> 8
+                if (this.acceptable(hashBytes, target)) {
+                    trueCount++
+                }
+                // for (let j = 0; j <= 0xFF; j++) {
+                //     hashBytes[30] = j
+                // }
+            }
+            logger.warn(`Mantissa: ${this.mantissa.toString(16)}, target: ${target.reverse().toString("hex")}, trueCount: ${trueCount}, ratio: ${trueCount / 0x10000}`)
+            this.mantissa += Math.floor(Math.random() * 255)
+        }
     }
 
     public greaterThan(difficulty: Difficulty): boolean {

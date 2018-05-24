@@ -80,16 +80,16 @@ export class CpuMiner {
         return Math.round(this.miners.map((m) => m.hashrate()).reduce((a, b) => a + b))
     }
 
-    public async stop() {
+    public stop() {
         const promises: Array<Promise<number | void>> = []
         for (const miner of this.miners) {
             promises.push(miner.stop())
         }
-        await Promise.all(promises)
+        return Promise.all(promises)
     }
 
     public async putWork(block: Block, prehash: Uint8Array, difficulty: Difficulty) {
-        await this.stop()
+        this.stop()
         this.miners = []
         const hash = new Hash(block.header)
         for (let i = 0; i < this.minerCount; i++) {
