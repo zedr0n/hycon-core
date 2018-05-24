@@ -22,20 +22,27 @@ export class PeersLine extends React.Component<any, any> {
                 <td className="mdl-data-table__cell--non-numeric">
                     <span>{this.state.peer.port}</span>
                 </td>
-                <td className="mdl-data-table__cell--non-numeric">
-                    <span>{this.state.peer.active}</span>
-                </td>
+                {this.state.peer.active ? (
+                    <td className="mdl-data-table__cell--non-numeric">
+                        <div className="led-green"> </div>
+                    </td>
+                ) : (
+                        <td className="mdl-data-table__cell--non-numeric">
+                            <div className="led-red">  </div>
+                        </td>
+                    )
+                }
                 <td className="mdl-data-table__cell--non-numeric">
                     <span>{this.state.peer.failCount}</span>
-                </td>
-                <td className="mdl-data-table__cell--non-numeric">
-                    <span>{this.state.peer.currentQueue}</span>
                 </td>
                 <td className="mdl-data-table__cell--non-numeric">
                     <span>{this.state.peer.lastSeen}</span>
                 </td>
                 <td className="mdl-data-table__cell--non-numeric">
                     <span>{this.state.peer.lastAttempt}</span>
+                </td>
+                <td className="mdl-data-table__cell--non-numeric">
+                    <span>{this.state.peer.currentQueue}</span>
                 </td>
                 <td className="mdl-data-table__cell--non-numeric">
                     <span>{this.state.peer.location}</span>

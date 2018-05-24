@@ -89,6 +89,7 @@ export class RabbitNetwork implements INetwork {
             const value = await this.peerDB.get(key)
             value.active = isActive
             peerList.push(value)
+            isActive = false
         }
         return peerList
     }
@@ -103,6 +104,7 @@ export class RabbitNetwork implements INetwork {
             }
             const value = this.endPoints.get(key)
             value.currentQueue = currentQueue
+            value.active = true
             endPoints.push(value)
         }
         return endPoints

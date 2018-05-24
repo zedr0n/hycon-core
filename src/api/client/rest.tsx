@@ -47,9 +47,9 @@ export interface IWalletAddress {
 export interface IPeer {
     host: string
     port: number
-    lastSeen?: number | Long
+    lastSeen?: string
     failCount?: number
-    lastAttempt?: number | Long
+    lastAttempt?: string
     active?: boolean
     currentQueue?: number
     location?: string

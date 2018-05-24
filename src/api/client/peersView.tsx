@@ -9,7 +9,6 @@ import { ILocationDetails, IPeer, IRest } from "./rest"
 
 interface IPeersProps {
     rest: IRest
-    hash: string
     peer: IPeer
 }
 
@@ -41,6 +40,12 @@ export class PeersView extends React.Component<any, any> {
                 this.setState({ peer: data })
             }
         })
+        this.state.rest.getPeerConnected().then((data: IPeer[]) => {
+            this.state.rest.setLoading(false)
+            if (this.mounted) {
+                this.setState({ peerCon: data })
+            }
+        })
     }
     public render() {
         if (this.state.peer === undefined) {
@@ -48,9 +53,13 @@ export class PeersView extends React.Component<any, any> {
         }
         return (
             <div>
-                <div className="contentTitle">Peers</div>
+                <div className="contentTitle">Peers List</div>
                 <div>
                     <PeersList rest={this.state.rest} peer={this.state.peer} />
+                </div>
+                <div className="contentTitle">Peers Connected</div>
+                <div>
+                    <PeersList rest={this.state.rest} peer={this.state.peerCon} />
                 </div>
 
                 <div style={{ width: "90%", height: "400px", margin: "auto" }}>

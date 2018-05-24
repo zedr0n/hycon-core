@@ -603,9 +603,9 @@ export class RestServer implements IRest {
             const temp: IPeer = {
                 host: peer.host,
                 port: peer.port,
-                lastSeen: peer.lastSeen ? peer.lastSeen : 0,
+                lastSeen: peer.lastSeen ? peer.lastSeen.toLocaleString() : undefined,
                 failCount: peer.failCount,
-                lastAttempt: peer.lastAttempt ? peer.lastSeen : 0,
+                lastAttempt: peer.lastAttempt ? peer.lastSeen.toLocaleString() : undefined,
                 active: peer.active,
             }
             peerList.push(temp)
@@ -621,6 +621,7 @@ export class RestServer implements IRest {
                 host: peer.host,
                 port: peer.port,
                 currentQueue: peer.currentQueue,
+                active: peer.active,
             }
             peerList.push(temp)
         }
