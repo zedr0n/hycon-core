@@ -21,23 +21,18 @@ export class WalletDetail extends React.Component<any, any> {
     public componentWillUnmount() {
         this.mounted = false
     }
-    public componentWillMount() {
-        this.mounted = true
-        this.props.rest.setLoading(true)
-
-    }
 
     public componentDidMount() {
-        this.props.rest
-            .getWalletDetail(this.state.name)
-            .then((data: IHyconWallet) => {
-                this.state.rest.setLoading(false)
-                if (this.mounted) {
-                    this.setState({ wallet: data })
-                }
-            }).catch((e: Error) => {
-                alert(e)
-            })
+        this.mounted = true
+        this.props.rest.setLoading(true)
+        this.props.rest.getWalletDetail(this.state.name).then((data: IHyconWallet) => {
+            this.state.rest.setLoading(false)
+            if (this.mounted) {
+                this.setState({ wallet: data })
+            }
+        }).catch((e: Error) => {
+            alert(e)
+        })
     }
     public handleSelectAccount(option: any) {
         this.setState({ represent: option.target.value })

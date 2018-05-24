@@ -132,7 +132,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
                                     </label>
                                     <div className="mdl-textfield__expandable-holder">
                                         <input
-                                            className="mdl-textfield__input"
+                                            className="mdl-textfield__input searchBox"
                                             type="text"
                                             id="search"
                                         />
@@ -145,7 +145,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
                                     </div>
                                 </div>
                             </form>
-                            <Link className="mdl-navigation__link" to="/">Home</Link>
+                            <Link className="mdl-navigation__link navMargin" to="/">Home</Link>
                             {/* <Link className="mdl-navigation__link" to="/block">Block</Link> */}
                             <Link className="mdl-navigation__link" to="/txPool">Tx</Link>
                             <Link className="mdl-navigation__link" to="/wallet">Wallet</Link>
@@ -173,7 +173,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
                                     >
                                         <i className="material-icons">search</i>
                                     </label>
-                                    <div className="mdl-textfield__expandable-holder">
+                                    <div className="mdl-textfield__expandable-holder searchBox">
                                         <input
                                             className="mdl-textfield__input"
                                             type="text"
@@ -188,7 +188,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
                                     </div>
                                 </div>
                             </form>
-                            <Link className="mdl-navigation__link" to="/">Home</Link>
+                            <Link className="mdl-navigation__link navMargin" to="/">Home</Link>
                             {/* <Link className="mdl-navigation__link" to="/block">Block</Link> */}
                             <Link className="mdl-navigation__link" to="/txPool">Tx</Link>
                             <Link className="mdl-navigation__link" to="/wallet">Wallet</Link>
