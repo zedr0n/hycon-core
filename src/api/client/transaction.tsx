@@ -100,7 +100,7 @@ export class Transaction extends React.Component<any, any> {
                     return
                 }
             } catch (error) {
-                console.log(error)
+
             }
 
             newMinerFee = 1
@@ -150,7 +150,7 @@ export class Transaction extends React.Component<any, any> {
                     .then((result: boolean) => {
                         if (result === true) {
                             const newBank =
-                                hyconfromString(this.state.piggyBank).subtract(hyconfromString((this.state.amount + this.state.minerFee).toString()))
+                                hyconfromString(this.state.piggyBank).subtract(hyconfromString((this.state.amount)).subtract(hyconfromString(this.state.minerFee)))
                             alert(
                                 "A transaction of " +
                                 this.formatDecimal(this.state.amount + "") +

@@ -4,12 +4,10 @@ export function zeroPad(input: string, length: number) {
 }
 
 export function hycontoString(value: Long): string {
-    const str = value.toString()
-    const index = str.length - 9
-    let hycon = str.slice(0, index)
-    hycon = hycon.length === 0 ? "0" : hycon
-    const subCon = str.slice(index)
-    return hycon + "." + subCon
+    const valString = value.toString()
+    const integer = (valString.length >= 10) ? valString.slice(0, -9) : "0"
+    const decimal = (valString.length >= 10) ? valString.slice(-9) : zeroPad(valString, 9)
+    return integer + "." + decimal
 }
 
 export function hyconfromString(val: string): Long {
