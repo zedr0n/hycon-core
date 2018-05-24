@@ -63,10 +63,6 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
                                 <td>{this.state.hash}</td>
                             </tr>
                             <tr>
-                                <td className="tdSubTitle subTitle_width40">No.Transactions</td>
-                                <td>{this.state.address.txs.length}</td>
-                            </tr>
-                            <tr>
                                 <td className="tdSubTitle subTitle_width40">Final balance</td>
                                 <td>{this.state.address.balance}</td>
                             </tr>
@@ -95,7 +91,7 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
                         </div>
                     )
                 })}
-                {this.state.hasMore ?
+                {this.state.hasMore && this.state.txs.length > 0 ?
                     (<div><button onClick={() => this.fetchNextTxs()}>Load more</button></div>)
                     :
                     (<div></div>)}
