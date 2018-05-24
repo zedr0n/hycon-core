@@ -96,7 +96,7 @@ export class Transaction extends React.Component<any, any> {
             const temp: string = value
             try {
                 if (temp.match("(^[0-9]*)([.]{0,1}[0-9]{0,9})$") == null) {
-                    alert("Please enter only numbers")
+                    alert("Please enter a number with up to 9 decimal places")
                     return
                 }
             } catch (error) {
@@ -123,7 +123,7 @@ export class Transaction extends React.Component<any, any> {
         } else if (name === "minerFee") {
             const temp: string = value
             if (temp.match("(^[0-9]*)([.]{0,1}[0-9]{0,9}$)") == null) {
-                alert("Please enter only numbers")
+                alert("Please enter a number with up to 9 decimal places")
             } else if (value > this.currentMinerFee) {
                 alert("You can't spend the money you don't have")
             } else {
@@ -265,20 +265,18 @@ export class Transaction extends React.Component<any, any> {
                         <span className="dialogTitle">
                             {" "}Please select how much do you want to spend in the transaction fee:{" "}
                         </span>
-                        <input type="range" step={0.00000001} min="0" max={this.currentMinerFee} value={this.state.dialogFee.split(",")[0]}
+                        <input type="range" step={0.000000001} min="0" max={this.currentMinerFee} value={this.state.dialogFee.split(",")[0]}
                             className="slider" onChange={this.handleInputChange} name="minerFee" />
                         {/* <span className="infoText">Miner fee: {this.roundTo((this.state.dialogFee).split(",")[0])} Hc</span> */}
                         <div className="dialogForm">
                             <div className="divDialog">
                                 <span className="infoTextDialog">Miner fee: </span>
-                                <br />
                                 <input name="minerFee" type="text" value={this.state.dialogFee.split(",")[0]} max={this.currentMinerFee}
                                     onChange={this.handleInputChange} className="dialogInput" />
                             </div>
                             <div className="divDialog2">
-                                <span className="infoTextDialog">Returned fee:</span>
-                                <br />
-                                <span className="infoTextDialog">{this.roundTo(this.state.dialogFee.split(",")[1])}Hycon </span>
+                                <span className="infoTextDialog">Returned fee: </span>
+                                <span className="infoTextDialog">{this.roundTo(this.state.dialogFee.split(",")[1])} HYC</span>
                             </div>
                         </div>
 
