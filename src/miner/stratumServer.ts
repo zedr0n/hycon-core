@@ -40,7 +40,7 @@ export class StratumServer {
     }
 
     public putWork(block: Block, prehash: Uint8Array, difficulty: Difficulty, minerOffset: number) {
-        this.prehash = prehash
+        this.prehash = Uint8Array.from(prehash)
         this.difficulty = difficulty
         this.block = block
         const target = difficulty.getMinerTarget()
@@ -50,8 +50,9 @@ export class StratumServer {
             if (socket !== undefined) {
                 socket.notify([
                     index + minerOffset,      // job_id
-                    new Buffer(this.prehash).toString("hex"),       // prehash
+                    Buffer.from(this.prehash as Buffer).toString("hex"),       // prehash
                     target,                                         // difficulty (2byte hex)
+                    0,
                     "0", // empty
                     "0", // empty
                     "0", // empty
@@ -115,14 +116,18 @@ export class StratumServer {
             this.socketsId.splice(this.socketsId.indexOf(socketId), 1)
         })
     }
-
-    private completeWork(nonce: Long): boolean {
+    private async completeWork(nonceStr: string): Promise<boolean> {
         try {
-            if (this.prehash === undefined || this.difficulty === undefined) {
-                logger.debug(`This Block is already confirm (NONCE : ${nonce})`)
+            if (this.prehash === undefined || this.difficulty === undefined || this.block === undefined) {
+                logger.debug(`This Block is already confirm (NONCE : ${nonceStr})`)
+                return false
+            } else if (nonceStr.length !== 16) {
+                logger.debug(`Invalid Nonce (NONCE : ${nonceStr})`)
                 return false
             } else {
-                if (MinerServer.checkNonce(this.prehash, nonce, this.difficulty)) {
+                const nonce = this.hexToLongLE(nonceStr)
+                logger.debug(`before checkNonce ${Buffer.from(this.prehash.buffer).toString("hex")} ${nonceStr})`)
+                if (await MinerServer.checkNonce(this.prehash, nonce, this.difficulty)) {
                     this.block.header.nonce = nonce
                     this.minerServer.submitBlock(this.block)
                     this.block = undefined
@@ -136,6 +141,19 @@ export class StratumServer {
         } catch (e) {
             throw new Error(`Fail to submit nonce : ${e}`)
         }
+    }
+
+    private hexToLongLE(val: string): Long {
+        const buf = new Uint8Array(Buffer.from(val, "hex"))
+        let high = 0
+        let low = 0
+        for (let idx = 7; idx >= 4; --idx) {
+            high *= 256
+            high += buf[idx]
+            low *= 256
+            low += buf[idx - 4]
+        }
+        return new Long(low, high, true)
     }
 
 }
