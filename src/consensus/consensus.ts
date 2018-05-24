@@ -1,4 +1,5 @@
 import { EventEmitter } from "events"
+import fs = require("fs")
 import { stat } from "fs"
 import { getLogger } from "log4js"
 import { Address } from "../common/address"
@@ -24,9 +25,8 @@ import { DifficultyAdjuster } from "./difficultyAdjuster"
 import { IConsensus, NewBlockCallback } from "./iconsensus"
 import { BlockStatus } from "./sync"
 import { Verify } from "./verify"
-
 const logger = getLogger("Consensus")
-
+const conf = JSON.parse(fs.readFileSync("./data/config.json", "utf-8"))
 export interface IStatusChange { old: BlockStatus, new: BlockStatus }
 export class Consensus extends EventEmitter implements IConsensus {
     private txdb?: TxDatabase
@@ -281,7 +281,7 @@ export class Consensus extends EventEmitter implements IConsensus {
     private async createCandidateBlock(previousDBBlock: DBBlock = this.blockTip, previousHash: Hash = new Hash(previousDBBlock.header)) {
         try {
             const timeStamp = Date.now()
-            const miner: Address = undefined
+            const miner: Address = new Address(conf.minerAddress)
             const { difficulty } = DifficultyAdjuster.adjustDifficulty(previousDBBlock, timeStamp)
             const { invalidTxs, validTxs, stateTransition: { currentStateRoot } } = await this.worldState.next([], previousDBBlock.header.stateRoot, miner)
             const header = new BlockHeader({
@@ -296,7 +296,6 @@ export class Consensus extends EventEmitter implements IConsensus {
             const newBlock = new Block({ header, txs: validTxs })
             this.txPool.updateTxs(validTxs, 0)
             newBlock.updateMerkleRoot()
-
             this.miner.newCandidateBlock(newBlock)
         } catch (e) {
             logger.error(`Fail to createCandidateBlock: ${e}`)

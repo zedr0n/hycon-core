@@ -123,10 +123,10 @@ export class Server {
         logger.debug(`begin sync`)
         const sync = new Sync(this)
         await sync.sync()
-        if (!Server.triedSync) {
-            Server.triedSync = true
-            this.triggerMining()
-        }
+        // if (!Server.triedSync) {
+        //     Server.triedSync = true
+        //     this.triggerMining()
+        // }
         setTimeout(async () => {
             await this.runSync()
         }, 5000)

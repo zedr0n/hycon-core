@@ -9,8 +9,8 @@
     "assets": "mnemonic/*"
   },
   "scripts": {
-    "hycon": "./node_modules/.bin/ts-node src/main.ts --port=8148 --str_port=9081 --api --api_port=2442 --networkid=francis --cpuMiners=3",
-    "start": "./node_modules/.bin/ts-node src/main.ts --port=8148 --str_port=9081 --cpuMiners=3 --api --api_port=2442 --networkid=hycon",
+    "hycon": "./node_modules/.bin/ts-node src/main.ts --port=8148 --str_port=9081 --api --api_port=2442",
+    "start": "./node_modules/.bin/ts-node src/main.ts --port=8148 --str_port=9081 --cpuMiners=1 --api --api_port=2442 --networkid=`git rev-parse HEAD`",
     "start2": "./node_modules/.bin/ts-node src/main.ts  --port=8149 --str_port=9082 --writing --cpuMiners=1",
     "start3": "./node_modules/.bin/ts-node src/main.ts  --port=8148 --writing --str_port=9081 --api --api_port=2442 --cpuMiners=1",
     "start4": "./node_modules/.bin/ts-node src/main.ts  ",
