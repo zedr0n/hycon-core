@@ -9,24 +9,32 @@ import { MinerServer } from "./minerServer"
 const LibStratum = require("stratum").Server
 const logger = getLogger("Stratum")
 
+interface ICandidateBlock {
+    block: Block,
+    difficulty: Difficulty,
+    jobId: number,
+    prehash: Uint8Array,
+}
+
 export class StratumServer {
+    private jobId: number = 0
+    private readonly maxMapCount = 10
     private minerServer: MinerServer
 
     private port: number
     private net: any = undefined
-
-    private prehash: Uint8Array | undefined
-    private difficulty: Difficulty | undefined
-    private block: Block | undefined
     private socketsId: any[] = []
     private mapSocket: Map<string, any> = new Map<string, any>()
+
+    private mapCandidateBlock: Map<number, ICandidateBlock>
 
     constructor(minerServer: MinerServer, port: number = 9081) {
         logger.debug(`Stratum Server`)
         this.minerServer = minerServer
         this.port = port
         this.net = new LibStratum({ settings: { port: this.port } })
-
+        this.mapCandidateBlock = new Map<number, ICandidateBlock>()
+        this.jobId = 0
         this.initialize()
     }
 
@@ -35,24 +43,20 @@ export class StratumServer {
 
     }
     public stop() {
-        this.prehash = undefined
-        this.difficulty = undefined
+        this.mapCandidateBlock.clear()
     }
 
     public putWork(block: Block, prehash: Uint8Array, difficulty: Difficulty, minerOffset: number) {
-        this.prehash = Uint8Array.from(prehash)
-        this.difficulty = difficulty
-        this.block = block
-        const target = difficulty.getMinerTarget()
+        const jobId = this.newJob({ jobId: this.jobId, prehash, difficulty, block })
 
         for (let index = 0; index < this.socketsId.length; index++) {
             const socket = this.mapSocket.get(this.socketsId[index])
             if (socket !== undefined) {
                 socket.notify([
-                    index + minerOffset,      // job_id
-                    Buffer.from(this.prehash as Buffer).toString("hex"),       // prehash
-                    target,                                         // difficulty (2byte hex)
-                    0,
+                    index + minerOffset,      // job_prefix
+                    Buffer.from(prehash as Buffer).toString("hex"),
+                    difficulty.getMinerTarget(),
+                    jobId,
                     "0", // empty
                     "0", // empty
                     "0", // empty
@@ -93,8 +97,14 @@ export class StratumServer {
                     deferred.promise.then(() => { })
                     break
                 case "submit":
-                    logger.debug(`Submit id : ${req.id} / nonce : ${req.params.nonce} / result : ${req.params.result}`)
-                    const result = await this.completeWork(req.params.nonce)
+                    logger.debug(`Submit job id : ${req.params.job_id} / nonce : ${req.params.nonce} / result : ${req.params.result}`)
+                    const jobId: number = Number(req.params.job_id)
+                    let result = false
+                    if (this.jobId !== jobId) {
+                        deferred.resolve([result])
+                        break
+                    }
+                    result = await this.completeWork(jobId, req.params.nonce)
                     deferred.resolve([result])
                     break
                 default:
@@ -116,31 +126,43 @@ export class StratumServer {
             this.socketsId.splice(this.socketsId.indexOf(socketId), 1)
         })
     }
-    private async completeWork(nonceStr: string): Promise<boolean> {
+    private async completeWork(jobId: number, nonceStr: string): Promise<boolean> {
         try {
-            if (this.prehash === undefined || this.difficulty === undefined || this.block === undefined) {
-                logger.debug(`This Block is already confirm (NONCE : ${nonceStr})`)
-                return false
-            } else if (nonceStr.length !== 16) {
+            if (nonceStr.length !== 16) {
                 logger.debug(`Invalid Nonce (NONCE : ${nonceStr})`)
                 return false
-            } else {
-                const nonce = this.hexToLongLE(nonceStr)
-                logger.debug(`before checkNonce ${Buffer.from(this.prehash.buffer).toString("hex")} ${nonceStr})`)
-                if (await MinerServer.checkNonce(this.prehash, nonce, this.difficulty)) {
-                    this.block.header.nonce = nonce
-                    this.minerServer.submitBlock(this.block)
-                    this.block = undefined
-                    this.prehash = undefined
-                    this.difficulty = undefined
-                    return true
-                } else {
-                    return false
-                }
             }
+
+            const candiate = this.mapCandidateBlock.get(jobId)
+            if (candiate === undefined) {
+                return false
+            }
+
+            const nonce = this.hexToLongLE(nonceStr)
+
+            if (!(await MinerServer.checkNonce(candiate.prehash, nonce, candiate.difficulty))) {
+                return false
+            }
+
+            if (!this.mapCandidateBlock.has(jobId)) {
+                return false
+            }
+
+            const minedBlock = new Block(candiate.block)
+            minedBlock.header.nonce = nonce
+            this.minerServer.submitBlock(minedBlock)
+            return true
         } catch (e) {
             throw new Error(`Fail to submit nonce : ${e}`)
         }
+    }
+
+    private newJob(block: ICandidateBlock) {
+        this.jobId++
+        if (this.jobId > 0xFFFFFFFF) { this.jobId = 0 }
+        this.mapCandidateBlock.delete(this.jobId - this.maxMapCount)
+        this.mapCandidateBlock.set(this.jobId, block)
+        return this.jobId
     }
 
     private hexToLongLE(val: string): Long {
