@@ -323,6 +323,7 @@ export class SingleChain implements IConsensus {
 
     private async createCandidateBlock(txs: SignedTx[], previous?: Block): Promise<Block | undefined> {
         try {
+            logger.fatal(`TX Pool length ${txs.length}`)
             if (!Server.triedSync) { return undefined }
             let previousDBBlock = this.blockTip
             let previousHash = new Hash(this.blockTip.header)
