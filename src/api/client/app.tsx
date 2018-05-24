@@ -173,9 +173,9 @@ export class App extends React.Component<{ rest: IRest }, any> {
                                     >
                                         <i className="material-icons">search</i>
                                     </label>
-                                    <div className="mdl-textfield__expandable-holder searchBox">
+                                    <div className="mdl-textfield__expandable-holder">
                                         <input
-                                            className="mdl-textfield__input"
+                                            className="mdl-textfield__input searchBox"
                                             type="text"
                                             id="hyconSearch"
                                         />
