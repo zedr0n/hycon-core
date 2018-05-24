@@ -95,15 +95,11 @@ export class Transaction extends React.Component<any, any> {
         if (name === "amount") {
             const temp: string = value
             try {
-                if (temp.match("(^[0-9]*)([.]{0,1}[0-9]{0,8}$)") == null) {
+                if (temp.match("(^[0-9]*)([.]{0,1}[0-9]{0,8})$") == null) {
                     alert("Please enter only numbers")
                     return
-                } else if (hyconfromString(value).greaterThan(hyconfromString(this.state.piggyBank))) {
-                    alert("You can't spend the money you don't have")
-                    return
                 }
-            }
-            catch (error) {
+            } catch (error) {
                 console.log(error)
             }
 
