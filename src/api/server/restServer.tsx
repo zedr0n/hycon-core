@@ -405,12 +405,6 @@ export class RestServer implements IRest {
         }
         return Promise.resolve({ blocks: blockList, length: pageCount })
     }
-    public async getLanguage(): Promise<string[]> {
-        await Wallet.walletInit()
-        let languages: string[] = []
-        languages = await Wallet.getLang()
-        return Promise.resolve(languages)
-    }
     public async getMnemonic(lang: string): Promise<string> {
         await Wallet.walletInit()
         logger.debug(lang)

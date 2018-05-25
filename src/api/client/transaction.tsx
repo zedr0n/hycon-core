@@ -74,13 +74,10 @@ export class Transaction extends React.Component<any, any> {
             } catch (error) {
 
             }
-
             if (hyconfromString(target.value).add(hyconfromString(this.state.minerFee)).greaterThan(hyconfromString(this.state.piggyBank))) {
                 alert(`You can't spend the money you don't have`)
             } else {
-                this.setState({
-                    [name]: value,
-                })
+                this.setState({ [name]: value })
                 this.currentMinerFee = hycontoString(hyconfromString(this.state.piggyBank).subtract(hyconfromString(target.value)))
             }
         } else if (name === "address") {

@@ -15,9 +15,6 @@ export class TxPoolLine extends React.Component<any, any> {
         this.mounted = false
     }
 
-    public componentWillMount() {
-    }
-
     public componentDidMount() {
         this.mounted = true
     }

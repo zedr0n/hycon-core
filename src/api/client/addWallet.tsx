@@ -22,14 +22,6 @@ export class AddWallet extends React.Component<any, any> {
             rest: props.rest,
         }
     }
-    public componentWillMount() {
-        this.props.rest.setLoading(true)
-    }
-
-    public componentDidMount() {
-        this.props.rest.setLoading(false)
-
-    }
 
     public handleName(data: any) {
         this.setState({ name: data.target.value })

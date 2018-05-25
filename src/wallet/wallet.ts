@@ -61,6 +61,7 @@ export class Wallet {
     }
 
     public static validateMnemonic(mnemonic: string, language: string): boolean {
+        logger.error(`ValidateMnemonic Lang : ${language}`)
         return bip39.validateMnemonic(mnemonic, Wallet.getWordList(language))
     }
 
@@ -253,27 +254,6 @@ export class Wallet {
             return Promise.reject(e)
         }
     }
-
-    public static async getLang(): Promise<string[]> {
-        let lst: string[] = []
-        const languageList: string[] = []
-        try {
-            lst = await fs.readdir("./mnemonic/")
-            if (lst) {
-                for (let i = 0; i < lst.length; i++) {
-                    if (lst[i].search(".json") > -1) {
-                        lst[i] = lst[i].replace(".json", "")
-                        languageList.push(lst[i])
-                    }
-                }
-            }
-            return Promise.resolve(languageList)
-        } catch (e) {
-            logger.error(`Fail to getLanguages : ${e}`)
-            return Promise.reject(e)
-        }
-    }
-
     public static async delete(name: string): Promise<boolean> {
         try {
             if (await fs.pathExists(`./wallet/rootKey/${name}`)) {

@@ -10,7 +10,6 @@ export class WalletSummary extends React.Component<any, any> {
         super(props)
         this.state = { wallet: props.wallet, rest: props.rest }
     }
-    public componentWillMount() { }
     public componentDidMount() { }
     public componentWillUnmount() { }
     public render() {

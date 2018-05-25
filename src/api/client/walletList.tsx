@@ -15,7 +15,7 @@ export class WalletList extends React.Component<any, any> {
     public componentWillUnmount() {
         this.mounted = false
     }
-    public componentWillMount() {
+    public componentDidMount() {
         this.mounted = true
         this.state.rest.setLoading(true)
         this.state.rest.getWalletList().then((data: IHyconWallet[]) => {

@@ -96,7 +96,6 @@ export interface IRest {
     getAllAccounts(name: string): Promise<{ represent: number, accounts: Array<{ address: string, balance: string }> } | boolean>
     getBlock(hash: string): Promise<IBlock>
     getBlockList(index: number): Promise<{ blocks: IBlock[], length: number }>
-    getLanguage(): Promise<string[]>
     getMnemonic(lang: string): Promise<string>
     // [ipeer.ts not implemented] getPeerDetails(hash: string): Promise<IPeer>
     // [ipeer.ts not implemented] getPeersList(hash: string): Promise<IPeer[]>

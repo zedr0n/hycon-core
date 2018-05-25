@@ -13,19 +13,13 @@ export class RecoverWallet extends React.Component<any, any> {
         this.state = {
             isUnValid: false,
             language: "english",
-            languages: ["english", "chinese_simplified", "chinese_traditional", "korean"],
+            languages: ["english", "Chinese - Simplified", "Chinese - Traditional", "korean"],
             mnemonic: "",
             redirect: false,
             rest: props.rest,
         }
     }
-    public componentWillMount() {
-        this.state.rest.setLoading(true)
-        this.state.rest.getLanguage().then((data: string[]) => {
-            // this.setState({ languages: data })
-            this.state.rest.setLoading(false)
-        })
-    }
+
     public handleName(data: any) {
         this.setState({ name: data.target.value })
     }
@@ -43,7 +37,14 @@ export class RecoverWallet extends React.Component<any, any> {
     }
 
     public handleLanguage(data: any) {
-        this.setState({ language: data.target.value })
+        let opt = data.target.value
+        console.log(`Selected language : ${opt}`)
+        if (opt === "Chinese - Traditional") {
+            opt = "chinese_traditional"
+        } else if (opt === "Chinese - Simplified") {
+            opt = "chinese_simplified"
+        }
+        this.setState({ language: opt })
     }
 
     public recoverWallet() {

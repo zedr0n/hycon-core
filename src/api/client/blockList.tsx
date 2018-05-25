@@ -22,8 +22,6 @@ export class BlockList extends React.Component<any, any> {
         this.mounted = false
         window.clearTimeout(this.intervalId)
     }
-    public componentWillMount() {
-    }
 
     public componentDidMount() {
         this.getRecentBlockList(this.state.index)
