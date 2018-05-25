@@ -110,9 +110,9 @@ export class RabbitNetwork implements INetwork {
         return endPoints
     }
 
-    public broadcast(packet: Buffer, exempt: RabbitPeer): void {
+    public broadcast(packet: Buffer, exempt?: RabbitPeer): void {
         for (const [key, peer] of this.peers) {
-            if (exempt !== peer) {
+            if (peer !== exempt) {
                 peer.sendPacket(packet).catch((e) => { logger.warn(e) })
             }
         }
@@ -143,14 +143,12 @@ export class RabbitNetwork implements INetwork {
         }
 
         if (useUpnp) {
-            // upnp
             this.upnpServer = new UpnpServer(this.port, this.hycon)
             this.upnpClient = new UpnpClient(this, this.hycon)
 
         }
 
         if (useNat) {
-            // nat
             this.natUpnp = new NatUpnp(this.port, this)
             await this.natUpnp.run()
             if (!isNaN(this.natUpnp.publicPort)) {

@@ -12,14 +12,15 @@ import { BlockStatus } from "../consensus/sync"
 import { Hash } from "../util/hash"
 import { TxValidity } from "./database/worldState"
 
+export interface IStatusChange { oldStatus?: BlockStatus, status?: BlockStatus }
+
 export type AnySignedTx = (GenesisSignedTx | SignedTx)
 
 export type NewBlockCallback = (block: AnyBlock) => void
 export interface IConsensus extends EventEmitter {
     init(): Promise<void>
-    // HEY CHecks the Refs
-    putBlock(block: Block): Promise<{ old: BlockStatus, new: BlockStatus }>
-    putHeader(header: BlockHeader): Promise<{ old: BlockStatus, new: BlockStatus }>
+    putBlock(block: Block): Promise<IStatusChange>
+    putHeader(header: BlockHeader): Promise<IStatusChange>
     getBlockByHash(hash: Hash): Promise<AnyBlock>
     getHeaderByHash(hash: Hash): Promise<AnyBlockHeader>
     getBlocksRange(fromHeight: number, count?: number): Promise<AnyBlock[]>

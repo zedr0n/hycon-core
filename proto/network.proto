@@ -91,7 +91,7 @@ message PutBlock {
 }
 
 message PutBlockReturn {
-    bool success=1;
+    repeated StatusChange statusChanges = 1;
 }
 
 
@@ -172,7 +172,7 @@ message PutHeaders {
 }
 
 message PutHeadersReturn {
-    bool success= 1;
+    repeated StatusChange statusChanges = 1;
 }
 
 message GetHash {   
@@ -182,4 +182,10 @@ message GetHash {
 message GetHashReturn {
     bool success =1;
     bytes hash=2;    
+}
+
+
+message StatusChange {
+    int32 status = 1;
+    int32 oldStatus = 2;
 }

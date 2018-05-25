@@ -22,12 +22,12 @@ import { TxList } from "./database/txList"
 import { TxValidity, WorldState } from "./database/worldState"
 import { Difficulty } from "./difficulty"
 import { DifficultyAdjuster } from "./difficultyAdjuster"
-import { IConsensus, NewBlockCallback } from "./iconsensus"
+import { IConsensus, IStatusChange, NewBlockCallback } from "./iconsensus"
 import { BlockStatus } from "./sync"
 import { Verify } from "./verify"
 const logger = getLogger("Consensus")
 const conf = JSON.parse(fs.readFileSync("./data/config.json", "utf-8"))
-export interface IStatusChange { old: BlockStatus, new: BlockStatus }
+
 export class Consensus extends EventEmitter implements IConsensus {
     private txdb?: TxDatabase
     private miner: IMiner
@@ -78,11 +78,11 @@ export class Consensus extends EventEmitter implements IConsensus {
         }
     }
 
-    public putBlock(block: Block) {
+    public putBlock(block: Block): Promise<IStatusChange> {
         return this.put(block.header, block)
     }
 
-    public putHeader(header: BlockHeader) {
+    public putHeader(header: BlockHeader): Promise<IStatusChange> {
         return this.put(header)
     }
 
@@ -150,12 +150,12 @@ export class Consensus extends EventEmitter implements IConsensus {
     public getBlockHeight(hash: Hash): Promise<number> {
         return this.db.getBlockHeight(hash)
     }
-    private async put(header: BlockHeader, block?: Block) {
+    private async put(header: BlockHeader, block?: Block): Promise<IStatusChange> {
         return this.lock.critical(async () => {
             const hash = new Hash(header)
-            const { status, newStatus, dbBlock, dbBlockHasChanged } = await this.process(hash, header, block)
-            if (newStatus !== undefined && status !== newStatus) {
-                await this.db.setBlockStatus(hash, newStatus)
+            const { oldStatus, status, dbBlock, dbBlockHasChanged } = await this.process(hash, header, block)
+            if (status !== undefined && oldStatus !== status) {
+                await this.db.setBlockStatus(hash, status)
             }
             if (dbBlockHasChanged) {
                 if (dbBlock === undefined) {
@@ -179,26 +179,26 @@ export class Consensus extends EventEmitter implements IConsensus {
 
                 logger.info(`Put ${block ? "Block" : "Header"}(${dbBlock.height}) ${hash}, BTip(${this.blockTip.height}) HTip(${this.headerTip.height})`)
             }
-            return { old: status, new: newStatus }
+            return { oldStatus, status }
         })
     }
     private async process(hash: Hash, header: BlockHeader, block?: Block)
         : Promise<{
-            status: BlockStatus,
-            newStatus?: BlockStatus,
+            oldStatus: BlockStatus,
+            status?: BlockStatus,
             dbBlock?: DBBlock,
             dbBlockHasChanged?: boolean,
         }> {
-        const status = await this.db.getBlockStatus(hash)
-        let newStatus: BlockStatus
-        if (status === BlockStatus.Rejected) {
-            return { status }
+        const oldStatus = await this.db.getBlockStatus(hash)
+        let status: BlockStatus
+        if (oldStatus === BlockStatus.Rejected) {
+            return { oldStatus }
         }
 
         if (header.previousHash.length <= 0) {
             logger.warn(`Rejecting block(${hash.toString()}): No previousHash`)
-            newStatus = BlockStatus.Rejected
-            return { status, newStatus }
+            status = BlockStatus.Rejected
+            return { oldStatus, status }
         }
 
         let dbBlock: DBBlock
@@ -206,36 +206,36 @@ export class Consensus extends EventEmitter implements IConsensus {
         const previousHash = header.previousHash[0]
         const previousDBBlock = await this.db.getDBBlock(previousHash)
         if (previousDBBlock === undefined) {
-            return { status }
+            return { oldStatus }
         }
-        if (status === BlockStatus.Nothing) {
+        if (oldStatus === BlockStatus.Nothing) {
             const headerResult = await Verify.processHeader(previousDBBlock, header, hash)
-            newStatus = headerResult.newStatus
+            status = headerResult.newStatus
             dbBlock = headerResult.dbBlock
             dbBlockHasChanged = true
 
-            if (newStatus === BlockStatus.Rejected) {
-                return { status, newStatus }
+            if (status === BlockStatus.Rejected) {
+                return { oldStatus, status }
             }
         }
 
         if (block === undefined) {
-            return { status, newStatus, dbBlock, dbBlockHasChanged }
+            return { oldStatus, status, dbBlock, dbBlockHasChanged }
         }
 
-        if (status === BlockStatus.Nothing || status === BlockStatus.Header) {
+        if (oldStatus === BlockStatus.Nothing || oldStatus === BlockStatus.Header) {
             if (dbBlock === undefined) {
                 dbBlock = await this.db.getDBBlock(hash)
             }
             const result = await Verify.processBlock(block, dbBlock, hash, header, previousDBBlock, this.db, this.worldState)
             if (result.newStatus === BlockStatus.Rejected) {
-                return { status, newStatus }
+                return { oldStatus, status }
             }
             dbBlockHasChanged = dbBlockHasChanged || result.dbBlockHasChanged
-            newStatus = result.newStatus
+            status = result.newStatus
         }
 
-        return { status, newStatus, dbBlock, dbBlockHasChanged }
+        return { oldStatus, status, dbBlock, dbBlockHasChanged }
 
     }
 

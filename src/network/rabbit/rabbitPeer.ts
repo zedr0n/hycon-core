@@ -6,8 +6,7 @@ import { AnyBlock, Block } from "../../common/block"
 import { AnyBlockHeader, BlockHeader } from "../../common/blockHeader"
 import { ITxPool } from "../../common/itxPool"
 import { SignedTx } from "../../common/txSigned"
-import { IStatusChange } from "../../consensus/consensus"
-import { IConsensus } from "../../consensus/iconsensus"
+import { IConsensus, IStatusChange } from "../../consensus/iconsensus"
 import { BlockStatus } from "../../consensus/sync"
 import * as proto from "../../serialization/proto"
 import { Server } from "../../server"
@@ -64,13 +63,13 @@ export class RabbitPeer extends BasePeer implements IPeer {
         return { hash: new Hash(reply.getTipReturn.hash), height: Number(reply.getTipReturn.height) }
     }
 
-    public async putHeaders(header: AnyBlockHeader[]): Promise<boolean> {
+    public async putHeaders(header: AnyBlockHeader[]): Promise<IStatusChange[]> {
         const { reply, packet } = await this.sendRequest({ putHeaders: { headers: [] } })
         if (reply.putHeadersReturn === undefined) {
             this.protocolError()
             throw new Error("Invalid response")
         }
-        return reply.putHeadersReturn.success
+        return reply.putHeadersReturn.statusChanges
     }
 
     public async getHash(height: number): Promise<Hash> {
@@ -85,10 +84,10 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public async status(): Promise<proto.IStatus> {
         const { reply, packet } = await this.sendRequest({
             status: {
+                guid: this.network.guid,
                 networkid: this.network.networkid,
                 port: this.network.port,
                 version: this.network.version,
-                guid: this.network.guid
             },
         })
         if (reply.statusReturn === undefined) {
@@ -143,14 +142,14 @@ export class RabbitPeer extends BasePeer implements IPeer {
         return txs
     }
 
-    public async putBlocks(blocks: Block[]): Promise<boolean> {
+    public async putBlocks(blocks: Block[]): Promise<IStatusChange[]> {
         const { reply, packet } = await this.sendRequest({ putBlock: { blocks } })
         if (reply.putBlockReturn === undefined) {
             this.protocolError()
             throw new Error("Invalid response")
         }
 
-        return reply.putBlockReturn.success
+        return reply.putBlockReturn.statusChanges
     }
 
     public async getBlocksByHashes(hashes: Hash[]): Promise<Block[]> {
@@ -271,15 +270,15 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     private async respondStatus(reply: boolean, request: proto.IStatus): Promise<IResponse> {
-        let receviedStatus = new proto.Status(request)
+        const receviedStatus = new proto.Status(request)
         await this.network.guidCheck(this, receviedStatus)
         const message: proto.INetwork = {
             statusReturn: {
                 status: {
+                    guid: this.network.guid,
                     networkid: this.network.networkid,
                     port: this.network.port,
                     version: this.network.version,
-                    guid: this.network.guid
                 },
                 success: true,
             },
@@ -334,19 +333,19 @@ export class RabbitPeer extends BasePeer implements IPeer {
 
     private async respondPutBlock(reply: boolean, request: proto.IPutBlock): Promise<IResponse> {
         let relay = false
+        const statusChanges: IStatusChange[] = []
         try {
 
-            const statusChanges: IStatusChange[] = []
             for (const iblock of request.blocks) {
                 const block = new Block(iblock)
                 statusChanges.push(await this.consensus.putBlock(block))
             }
-            relay = statusChanges.every((change) => (change.new !== undefined && change.new !== BlockStatus.Rejected && change.old !== change.new))
+            relay = statusChanges.every((change) => (change.status !== undefined && change.status !== BlockStatus.Rejected && change.oldStatus !== change.status))
         } catch (e) {
             logger.error(`Failed to put block: ${e}`)
         }
         logger.debug(`PutBlock Relay=${relay}`)
-        return { message: { putBlockReturn: { success: relay } }, relay }
+        return { message: { putBlockReturn: { statusChanges } }, relay }
     }
 
     private async respondGetBlocksByHash(reply: boolean, request: proto.IGetBlocksByHash): Promise<IResponse> {
@@ -425,18 +424,18 @@ export class RabbitPeer extends BasePeer implements IPeer {
 
     private async respondPutHeaders(reply: boolean, request: proto.IPutHeaders): Promise<IResponse> {
         let relay = false
+        const statusChanges: IStatusChange[] = []
         try {
-            const statusChanges: IStatusChange[] = []
             for (const iheader of request.headers) {
                 const header = new BlockHeader(iheader)
                 statusChanges.push(await this.consensus.putHeader(header))
             }
-            relay = statusChanges.every((change) => (change.new !== undefined && change.new !== BlockStatus.Rejected && change.old !== change.new))
+            relay = statusChanges.every((change) => (change.status !== undefined && change.status !== BlockStatus.Rejected && change.oldStatus !== change.status))
         } catch (e) {
             logger.error(`Failed to put header: ${e}`)
         }
         logger.debug(`PutHeader`)
-        return { message: { putHeadersReturn: { success: relay } }, relay }
+        return { message: { putHeadersReturn: { statusChanges } }, relay }
     }
 
     private async respondGetHash(reply: boolean, request: proto.IGetHash): Promise<IResponse> {

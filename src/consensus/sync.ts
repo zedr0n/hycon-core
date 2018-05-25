@@ -32,12 +32,10 @@ interface ISyncInfo {
 export class Sync {
     public peer: IPeer
     private consensus: IConsensus
-
     private differentHeight: number
     private commonMainChain: ISyncInfo
     private commonBlock: ISyncInfo
     private commonHeader: ISyncInfo
-
     private network: INetwork
 
     constructor(server: Server) {
@@ -185,7 +183,10 @@ export class Sync {
                 headers = await this.peer.getHeadersByRange(height, headerCount)
                 for (const header of headers) {
                     if (header instanceof BlockHeader) {
-                        await this.consensus.putHeader(header)
+                        const result = await this.consensus.putHeader(header)
+                        if (result.status === undefined || result.status <= BlockStatus.Nothing) {
+                            throw new Error("Header Rejected")
+                        }
                     }
                 }
                 height += headers.length
@@ -200,7 +201,10 @@ export class Sync {
         try {
             do {
                 headers = await this.consensus.getHeadersRange(height, headerCount)
-                await this.peer.putHeaders(headers)
+                const results = await this.peer.putHeaders(headers)
+                if (results.some((result) => result.status === undefined || result.status < BlockStatus.Header)) {
+                    throw new Error("Header Rejected")
+                }
                 height += headers.length
             } while (headers.length > 0)
         } catch (e) {
@@ -239,7 +243,10 @@ export class Sync {
                 blocks = await this.peer.getBlocksByRange(height, blockCount)
                 for (const block of blocks) {
                     if (block instanceof Block) {
-                        await this.consensus.putBlock(block)
+                        const { status } = await this.consensus.putBlock(block)
+                        if (status <= BlockStatus.Block) {
+                            throw new Error("Block rejected")
+                        }
                     }
                 }
                 height += blocks.length
@@ -254,7 +261,10 @@ export class Sync {
         try {
             do {
                 blocks = await this.consensus.getBlocksRange(height, blockCount)
-                await this.peer.putBlocks(blocks)
+                const results = await this.peer.putBlocks(blocks)
+                if (results.some((result) => result.status === undefined || result.status < BlockStatus.Block)) {
+                    throw new Error("Block rejected")
+                }
                 height += blocks.length
             } while (blocks.length > 0)
         } catch (e) {

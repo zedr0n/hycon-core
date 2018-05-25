@@ -1086,8 +1086,8 @@ export class PutBlock implements IPutBlock {
 /** Properties of a PutBlockReturn. */
 export interface IPutBlockReturn {
 
-    /** PutBlockReturn success */
-    success?: boolean;
+    /** PutBlockReturn statusChanges */
+    statusChanges?: IStatusChange[];
 }
 
 /** Represents a PutBlockReturn. */
@@ -1099,8 +1099,8 @@ export class PutBlockReturn implements IPutBlockReturn {
      */
     constructor(properties?: IPutBlockReturn);
 
-    /** PutBlockReturn success. */
-    public success: boolean;
+    /** PutBlockReturn statusChanges. */
+    public statusChanges: IStatusChange[];
 
     /**
      * Creates a new PutBlockReturn instance using the specified properties.
@@ -2580,8 +2580,8 @@ export class PutHeaders implements IPutHeaders {
 /** Properties of a PutHeadersReturn. */
 export interface IPutHeadersReturn {
 
-    /** PutHeadersReturn success */
-    success?: boolean;
+    /** PutHeadersReturn statusChanges */
+    statusChanges?: IStatusChange[];
 }
 
 /** Represents a PutHeadersReturn. */
@@ -2593,8 +2593,8 @@ export class PutHeadersReturn implements IPutHeadersReturn {
      */
     constructor(properties?: IPutHeadersReturn);
 
-    /** PutHeadersReturn success. */
-    public success: boolean;
+    /** PutHeadersReturn statusChanges. */
+    public statusChanges: IStatusChange[];
 
     /**
      * Creates a new PutHeadersReturn instance using the specified properties.
@@ -2848,6 +2848,102 @@ export class GetHashReturn implements IGetHashReturn {
 
     /**
      * Converts this GetHashReturn to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a StatusChange. */
+export interface IStatusChange {
+
+    /** StatusChange status */
+    status?: number;
+
+    /** StatusChange oldStatus */
+    oldStatus?: number;
+}
+
+/** Represents a StatusChange. */
+export class StatusChange implements IStatusChange {
+
+    /**
+     * Constructs a new StatusChange.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IStatusChange);
+
+    /** StatusChange status. */
+    public status: number;
+
+    /** StatusChange oldStatus. */
+    public oldStatus: number;
+
+    /**
+     * Creates a new StatusChange instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns StatusChange instance
+     */
+    public static create(properties?: IStatusChange): StatusChange;
+
+    /**
+     * Encodes the specified StatusChange message. Does not implicitly {@link StatusChange.verify|verify} messages.
+     * @param message StatusChange message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: IStatusChange, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified StatusChange message, length delimited. Does not implicitly {@link StatusChange.verify|verify} messages.
+     * @param message StatusChange message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: IStatusChange, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a StatusChange message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns StatusChange
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): StatusChange;
+
+    /**
+     * Decodes a StatusChange message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns StatusChange
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): StatusChange;
+
+    /**
+     * Verifies a StatusChange message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a StatusChange message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns StatusChange
+     */
+    public static fromObject(object: { [k: string]: any }): StatusChange;
+
+    /**
+     * Creates a plain object from a StatusChange message. Also converts values to other types if specified.
+     * @param message StatusChange
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: StatusChange, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this StatusChange to JSON.
      * @returns JSON object
      */
     public toJSON(): { [k: string]: any };

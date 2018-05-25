@@ -2996,7 +2996,7 @@ $root.PutBlockReturn = (function() {
      * Properties of a PutBlockReturn.
      * @exports IPutBlockReturn
      * @interface IPutBlockReturn
-     * @property {boolean|null} [success] PutBlockReturn success
+     * @property {Array.<IStatusChange>|null} [statusChanges] PutBlockReturn statusChanges
      */
 
     /**
@@ -3008,6 +3008,7 @@ $root.PutBlockReturn = (function() {
      * @param {IPutBlockReturn=} [properties] Properties to set
      */
     function PutBlockReturn(properties) {
+        this.statusChanges = [];
         if (properties)
             for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                 if (properties[keys[i]] != null)
@@ -3015,12 +3016,12 @@ $root.PutBlockReturn = (function() {
     }
 
     /**
-     * PutBlockReturn success.
-     * @member {boolean} success
+     * PutBlockReturn statusChanges.
+     * @member {Array.<IStatusChange>} statusChanges
      * @memberof PutBlockReturn
      * @instance
      */
-    PutBlockReturn.prototype.success = false;
+    PutBlockReturn.prototype.statusChanges = $util.emptyArray;
 
     /**
      * Creates a new PutBlockReturn instance using the specified properties.
@@ -3046,8 +3047,9 @@ $root.PutBlockReturn = (function() {
     PutBlockReturn.encode = function encode(message, writer) {
         if (!writer)
             writer = $Writer.create();
-        if (message.success != null && message.hasOwnProperty("success"))
-            writer.uint32(/* id 1, wireType 0 =*/8).bool(message.success);
+        if (message.statusChanges != null && message.statusChanges.length)
+            for (var i = 0; i < message.statusChanges.length; ++i)
+                $root.StatusChange.encode(message.statusChanges[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
         return writer;
     };
 
@@ -3083,7 +3085,9 @@ $root.PutBlockReturn = (function() {
             var tag = reader.uint32();
             switch (tag >>> 3) {
             case 1:
-                message.success = reader.bool();
+                if (!(message.statusChanges && message.statusChanges.length))
+                    message.statusChanges = [];
+                message.statusChanges.push($root.StatusChange.decode(reader, reader.uint32()));
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -3120,9 +3124,15 @@ $root.PutBlockReturn = (function() {
     PutBlockReturn.verify = function verify(message) {
         if (typeof message !== "object" || message === null)
             return "object expected";
-        if (message.success != null && message.hasOwnProperty("success"))
-            if (typeof message.success !== "boolean")
-                return "success: boolean expected";
+        if (message.statusChanges != null && message.hasOwnProperty("statusChanges")) {
+            if (!Array.isArray(message.statusChanges))
+                return "statusChanges: array expected";
+            for (var i = 0; i < message.statusChanges.length; ++i) {
+                var error = $root.StatusChange.verify(message.statusChanges[i]);
+                if (error)
+                    return "statusChanges." + error;
+            }
+        }
         return null;
     };
 
@@ -3138,8 +3148,16 @@ $root.PutBlockReturn = (function() {
         if (object instanceof $root.PutBlockReturn)
             return object;
         var message = new $root.PutBlockReturn();
-        if (object.success != null)
-            message.success = Boolean(object.success);
+        if (object.statusChanges) {
+            if (!Array.isArray(object.statusChanges))
+                throw TypeError(".PutBlockReturn.statusChanges: array expected");
+            message.statusChanges = [];
+            for (var i = 0; i < object.statusChanges.length; ++i) {
+                if (typeof object.statusChanges[i] !== "object")
+                    throw TypeError(".PutBlockReturn.statusChanges: object expected");
+                message.statusChanges[i] = $root.StatusChange.fromObject(object.statusChanges[i]);
+            }
+        }
         return message;
     };
 
@@ -3156,10 +3174,13 @@ $root.PutBlockReturn = (function() {
         if (!options)
             options = {};
         var object = {};
-        if (options.defaults)
-            object.success = false;
-        if (message.success != null && message.hasOwnProperty("success"))
-            object.success = message.success;
+        if (options.arrays || options.defaults)
+            object.statusChanges = [];
+        if (message.statusChanges && message.statusChanges.length) {
+            object.statusChanges = [];
+            for (var j = 0; j < message.statusChanges.length; ++j)
+                object.statusChanges[j] = $root.StatusChange.toObject(message.statusChanges[j], options);
+        }
         return object;
     };
 
@@ -6487,7 +6508,7 @@ $root.PutHeadersReturn = (function() {
      * Properties of a PutHeadersReturn.
      * @exports IPutHeadersReturn
      * @interface IPutHeadersReturn
-     * @property {boolean|null} [success] PutHeadersReturn success
+     * @property {Array.<IStatusChange>|null} [statusChanges] PutHeadersReturn statusChanges
      */
 
     /**
@@ -6499,6 +6520,7 @@ $root.PutHeadersReturn = (function() {
      * @param {IPutHeadersReturn=} [properties] Properties to set
      */
     function PutHeadersReturn(properties) {
+        this.statusChanges = [];
         if (properties)
             for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                 if (properties[keys[i]] != null)
@@ -6506,12 +6528,12 @@ $root.PutHeadersReturn = (function() {
     }
 
     /**
-     * PutHeadersReturn success.
-     * @member {boolean} success
+     * PutHeadersReturn statusChanges.
+     * @member {Array.<IStatusChange>} statusChanges
      * @memberof PutHeadersReturn
      * @instance
      */
-    PutHeadersReturn.prototype.success = false;
+    PutHeadersReturn.prototype.statusChanges = $util.emptyArray;
 
     /**
      * Creates a new PutHeadersReturn instance using the specified properties.
@@ -6537,8 +6559,9 @@ $root.PutHeadersReturn = (function() {
     PutHeadersReturn.encode = function encode(message, writer) {
         if (!writer)
             writer = $Writer.create();
-        if (message.success != null && message.hasOwnProperty("success"))
-            writer.uint32(/* id 1, wireType 0 =*/8).bool(message.success);
+        if (message.statusChanges != null && message.statusChanges.length)
+            for (var i = 0; i < message.statusChanges.length; ++i)
+                $root.StatusChange.encode(message.statusChanges[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
         return writer;
     };
 
@@ -6574,7 +6597,9 @@ $root.PutHeadersReturn = (function() {
             var tag = reader.uint32();
             switch (tag >>> 3) {
             case 1:
-                message.success = reader.bool();
+                if (!(message.statusChanges && message.statusChanges.length))
+                    message.statusChanges = [];
+                message.statusChanges.push($root.StatusChange.decode(reader, reader.uint32()));
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -6611,9 +6636,15 @@ $root.PutHeadersReturn = (function() {
     PutHeadersReturn.verify = function verify(message) {
         if (typeof message !== "object" || message === null)
             return "object expected";
-        if (message.success != null && message.hasOwnProperty("success"))
-            if (typeof message.success !== "boolean")
-                return "success: boolean expected";
+        if (message.statusChanges != null && message.hasOwnProperty("statusChanges")) {
+            if (!Array.isArray(message.statusChanges))
+                return "statusChanges: array expected";
+            for (var i = 0; i < message.statusChanges.length; ++i) {
+                var error = $root.StatusChange.verify(message.statusChanges[i]);
+                if (error)
+                    return "statusChanges." + error;
+            }
+        }
         return null;
     };
 
@@ -6629,8 +6660,16 @@ $root.PutHeadersReturn = (function() {
         if (object instanceof $root.PutHeadersReturn)
             return object;
         var message = new $root.PutHeadersReturn();
-        if (object.success != null)
-            message.success = Boolean(object.success);
+        if (object.statusChanges) {
+            if (!Array.isArray(object.statusChanges))
+                throw TypeError(".PutHeadersReturn.statusChanges: array expected");
+            message.statusChanges = [];
+            for (var i = 0; i < object.statusChanges.length; ++i) {
+                if (typeof object.statusChanges[i] !== "object")
+                    throw TypeError(".PutHeadersReturn.statusChanges: object expected");
+                message.statusChanges[i] = $root.StatusChange.fromObject(object.statusChanges[i]);
+            }
+        }
         return message;
     };
 
@@ -6647,10 +6686,13 @@ $root.PutHeadersReturn = (function() {
         if (!options)
             options = {};
         var object = {};
-        if (options.defaults)
-            object.success = false;
-        if (message.success != null && message.hasOwnProperty("success"))
-            object.success = message.success;
+        if (options.arrays || options.defaults)
+            object.statusChanges = [];
+        if (message.statusChanges && message.statusChanges.length) {
+            object.statusChanges = [];
+            for (var j = 0; j < message.statusChanges.length; ++j)
+                object.statusChanges[j] = $root.StatusChange.toObject(message.statusChanges[j], options);
+        }
         return object;
     };
 
@@ -7080,6 +7122,216 @@ $root.GetHashReturn = (function() {
     };
 
     return GetHashReturn;
+})();
+
+$root.StatusChange = (function() {
+
+    /**
+     * Properties of a StatusChange.
+     * @exports IStatusChange
+     * @interface IStatusChange
+     * @property {number|null} [status] StatusChange status
+     * @property {number|null} [oldStatus] StatusChange oldStatus
+     */
+
+    /**
+     * Constructs a new StatusChange.
+     * @exports StatusChange
+     * @classdesc Represents a StatusChange.
+     * @implements IStatusChange
+     * @constructor
+     * @param {IStatusChange=} [properties] Properties to set
+     */
+    function StatusChange(properties) {
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * StatusChange status.
+     * @member {number} status
+     * @memberof StatusChange
+     * @instance
+     */
+    StatusChange.prototype.status = 0;
+
+    /**
+     * StatusChange oldStatus.
+     * @member {number} oldStatus
+     * @memberof StatusChange
+     * @instance
+     */
+    StatusChange.prototype.oldStatus = 0;
+
+    /**
+     * Creates a new StatusChange instance using the specified properties.
+     * @function create
+     * @memberof StatusChange
+     * @static
+     * @param {IStatusChange=} [properties] Properties to set
+     * @returns {StatusChange} StatusChange instance
+     */
+    StatusChange.create = function create(properties) {
+        return new StatusChange(properties);
+    };
+
+    /**
+     * Encodes the specified StatusChange message. Does not implicitly {@link StatusChange.verify|verify} messages.
+     * @function encode
+     * @memberof StatusChange
+     * @static
+     * @param {IStatusChange} message StatusChange message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    StatusChange.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.status != null && message.hasOwnProperty("status"))
+            writer.uint32(/* id 1, wireType 0 =*/8).int32(message.status);
+        if (message.oldStatus != null && message.hasOwnProperty("oldStatus"))
+            writer.uint32(/* id 2, wireType 0 =*/16).int32(message.oldStatus);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified StatusChange message, length delimited. Does not implicitly {@link StatusChange.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof StatusChange
+     * @static
+     * @param {IStatusChange} message StatusChange message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    StatusChange.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a StatusChange message from the specified reader or buffer.
+     * @function decode
+     * @memberof StatusChange
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {StatusChange} StatusChange
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    StatusChange.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StatusChange();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.status = reader.int32();
+                break;
+            case 2:
+                message.oldStatus = reader.int32();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a StatusChange message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof StatusChange
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {StatusChange} StatusChange
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    StatusChange.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a StatusChange message.
+     * @function verify
+     * @memberof StatusChange
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    StatusChange.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.status != null && message.hasOwnProperty("status"))
+            if (!$util.isInteger(message.status))
+                return "status: integer expected";
+        if (message.oldStatus != null && message.hasOwnProperty("oldStatus"))
+            if (!$util.isInteger(message.oldStatus))
+                return "oldStatus: integer expected";
+        return null;
+    };
+
+    /**
+     * Creates a StatusChange message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof StatusChange
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {StatusChange} StatusChange
+     */
+    StatusChange.fromObject = function fromObject(object) {
+        if (object instanceof $root.StatusChange)
+            return object;
+        var message = new $root.StatusChange();
+        if (object.status != null)
+            message.status = object.status | 0;
+        if (object.oldStatus != null)
+            message.oldStatus = object.oldStatus | 0;
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a StatusChange message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof StatusChange
+     * @static
+     * @param {StatusChange} message StatusChange
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    StatusChange.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.defaults) {
+            object.status = 0;
+            object.oldStatus = 0;
+        }
+        if (message.status != null && message.hasOwnProperty("status"))
+            object.status = message.status;
+        if (message.oldStatus != null && message.hasOwnProperty("oldStatus"))
+            object.oldStatus = message.oldStatus;
+        return object;
+    };
+
+    /**
+     * Converts this StatusChange to JSON.
+     * @function toJSON
+     * @memberof StatusChange
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    StatusChange.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return StatusChange;
 })();
 
 $root.Block = (function() {

@@ -31,7 +31,7 @@ export class RestManager {
 
     public broadcastTxs(txList: SignedTx[]) {
         const encoded: Uint8Array = proto.Network.encode({ putTx: { txs: txList } }).finish()
-        this.server.network.broadcast(encoded as Buffer, null)
+        this.server.network.broadcast(encoded as Buffer)
     }
 
     // tslint:disable:object-literal-sort-keys
