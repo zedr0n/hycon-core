@@ -13,6 +13,9 @@ import { Hash } from "../../util/hash"
 import { Wallet } from "../../wallet/wallet"
 import { IBlock, IHyconWallet, IPeer, IResponseError, IRest, ITxProp, IUser, IWalletAddress } from "../client/rest"
 const logger = getLogger("RestServer")
+
+// tslint:disable-next-line:no-var-requires
+const ipLocation = require("ip-location")
 // tslint:disable-next-line:no-var-requires
 const googleMapsClient = require("@google/maps").createClient({
     key: "AIzaSyAp-2W8_T6dZjq71yOhxW1kRkbY6E1iyuk",
@@ -599,7 +602,13 @@ export class RestServer implements IRest {
     public async getPeerList(): Promise<IPeer[]> {
         const peerList: IPeer[] = []
         const peers: proto.IPeer[] = await this.network.getPeerDb()
+        let result: any
         for (const peer of peers) {
+            try {
+                result = await ipLocation(peer.host)
+            } catch (e) {
+                logger.info(`Peer Geoinfo error: ${e}`)
+            }
             const temp: IPeer = {
                 host: peer.host,
                 port: peer.port,
@@ -607,6 +616,9 @@ export class RestServer implements IRest {
                 failCount: peer.failCount,
                 lastAttempt: peer.lastAttempt ? peer.lastSeen.toLocaleString() : undefined,
                 active: peer.active,
+                location: result ? result.region_name : undefined,
+                latitude: result ? result.latitude : undefined,
+                longitude: result ? result.longitude : undefined,
             }
             peerList.push(temp)
         }

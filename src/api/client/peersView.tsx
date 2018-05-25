@@ -23,7 +23,7 @@ export class PeersView extends React.Component<any, any> {
     constructor(props: any) {
         super(props)
         this.state = {
-            center: [59.938043, 30.337157],
+            center: [37.4951, 127.0628],
             rest: props.rest,
             zoom: 0,
         }
@@ -49,7 +49,7 @@ export class PeersView extends React.Component<any, any> {
     }
     public render() {
         if (this.state.peer === undefined) {
-            return <div />
+            return <div className="contentTitle">Loading...</div>
         }
         return (
             <div>
