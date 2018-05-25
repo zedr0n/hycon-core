@@ -61,7 +61,6 @@ export class Wallet {
     }
 
     public static validateMnemonic(mnemonic: string, language: string): boolean {
-        logger.error(`ValidateMnemonic Lang : ${language}`)
         return bip39.validateMnemonic(mnemonic, Wallet.getWordList(language))
     }
 
