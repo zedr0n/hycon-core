@@ -244,7 +244,7 @@ export class RabbitNetwork implements INetwork {
                         if (save) {
                             this.endPoints.set(key, ipeer)
                             socket.on("close", () => this.endPoints.delete(key))
-                            if (RabbitNetwork.isRemoteSocket(socket)) {
+                            if (peerStatus.guid !== this.guid) { // if it is not local
                                 await this.peerDB.seen(ipeer)
                             }
                         }
