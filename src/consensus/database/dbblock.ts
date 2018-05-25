@@ -14,7 +14,7 @@ export class DBBlock {
     public offset?: number
     public length?: number
     public timeEMA: number
-    public workEMA: Difficulty
+    public nextDifficulty: Difficulty
     public totalWork: Difficulty
 
     constructor(dbBlock: proto.IBlockDB) {
@@ -31,7 +31,7 @@ export class DBBlock {
         if (block.timeEMA === undefined) {
             throw new Error("DBBlock timeEMA is missing")
         }
-        if (block.workEMA === undefined) {
+        if (block.nextDifficulty === undefined) {
             throw new Error("DBBlock workEMA is missing")
         }
         if (block.totalWork === undefined) {
@@ -50,8 +50,8 @@ export class DBBlock {
         if (block.timeEMA !== undefined) {
             this.timeEMA = block.timeEMA
         }
-        if (block.workEMA !== undefined) {
-            this.workEMA = Difficulty.decode(block.workEMA)
+        if (block.nextDifficulty !== undefined) {
+            this.nextDifficulty = Difficulty.decode(block.nextDifficulty)
         }
         if (block.totalWork !== undefined) {
             this.totalWork = Difficulty.decode(block.totalWork)
@@ -75,10 +75,10 @@ export class DBBlock {
             header: this.header,
             height: this.height,
             length: this.length,
+            nextDifficulty: this.nextDifficulty.encode(),
             offset: this.offset,
             timeEMA: this.timeEMA,
             totalWork: this.totalWork.encode(),
-            workEMA: this.workEMA.encode(),
         }).finish()
     }
 }

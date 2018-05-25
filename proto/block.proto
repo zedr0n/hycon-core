@@ -15,6 +15,6 @@ message BlockDB {
     uint32 offset = 4;
     uint32 length = 5;
     double timeEMA = 6;
-    uint32 workEMA = 7;
+    uint32 nextDifficulty = 7;
     uint32 totalWork = 8;
 }

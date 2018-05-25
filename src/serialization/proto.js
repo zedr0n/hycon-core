@@ -7582,7 +7582,7 @@ $root.BlockDB = (function() {
      * @property {number|null} [offset] BlockDB offset
      * @property {number|null} [length] BlockDB length
      * @property {number|null} [timeEMA] BlockDB timeEMA
-     * @property {number|null} [workEMA] BlockDB workEMA
+     * @property {number|null} [nextDifficulty] BlockDB nextDifficulty
      * @property {number|null} [totalWork] BlockDB totalWork
      */
 
@@ -7650,12 +7650,12 @@ $root.BlockDB = (function() {
     BlockDB.prototype.timeEMA = 0;
 
     /**
-     * BlockDB workEMA.
-     * @member {number} workEMA
+     * BlockDB nextDifficulty.
+     * @member {number} nextDifficulty
      * @memberof BlockDB
      * @instance
      */
-    BlockDB.prototype.workEMA = 0;
+    BlockDB.prototype.nextDifficulty = 0;
 
     /**
      * BlockDB totalWork.
@@ -7701,8 +7701,8 @@ $root.BlockDB = (function() {
             writer.uint32(/* id 5, wireType 0 =*/40).uint32(message.length);
         if (message.timeEMA != null && message.hasOwnProperty("timeEMA"))
             writer.uint32(/* id 6, wireType 1 =*/49).double(message.timeEMA);
-        if (message.workEMA != null && message.hasOwnProperty("workEMA"))
-            writer.uint32(/* id 7, wireType 0 =*/56).uint32(message.workEMA);
+        if (message.nextDifficulty != null && message.hasOwnProperty("nextDifficulty"))
+            writer.uint32(/* id 7, wireType 0 =*/56).uint32(message.nextDifficulty);
         if (message.totalWork != null && message.hasOwnProperty("totalWork"))
             writer.uint32(/* id 8, wireType 0 =*/64).uint32(message.totalWork);
         return writer;
@@ -7758,7 +7758,7 @@ $root.BlockDB = (function() {
                 message.timeEMA = reader.double();
                 break;
             case 7:
-                message.workEMA = reader.uint32();
+                message.nextDifficulty = reader.uint32();
                 break;
             case 8:
                 message.totalWork = reader.uint32();
@@ -7818,9 +7818,9 @@ $root.BlockDB = (function() {
         if (message.timeEMA != null && message.hasOwnProperty("timeEMA"))
             if (typeof message.timeEMA !== "number")
                 return "timeEMA: number expected";
-        if (message.workEMA != null && message.hasOwnProperty("workEMA"))
-            if (!$util.isInteger(message.workEMA))
-                return "workEMA: integer expected";
+        if (message.nextDifficulty != null && message.hasOwnProperty("nextDifficulty"))
+            if (!$util.isInteger(message.nextDifficulty))
+                return "nextDifficulty: integer expected";
         if (message.totalWork != null && message.hasOwnProperty("totalWork"))
             if (!$util.isInteger(message.totalWork))
                 return "totalWork: integer expected";
@@ -7854,8 +7854,8 @@ $root.BlockDB = (function() {
             message.length = object.length >>> 0;
         if (object.timeEMA != null)
             message.timeEMA = Number(object.timeEMA);
-        if (object.workEMA != null)
-            message.workEMA = object.workEMA >>> 0;
+        if (object.nextDifficulty != null)
+            message.nextDifficulty = object.nextDifficulty >>> 0;
         if (object.totalWork != null)
             message.totalWork = object.totalWork >>> 0;
         return message;
@@ -7881,7 +7881,7 @@ $root.BlockDB = (function() {
             object.offset = 0;
             object.length = 0;
             object.timeEMA = 0;
-            object.workEMA = 0;
+            object.nextDifficulty = 0;
             object.totalWork = 0;
         }
         if (message.height != null && message.hasOwnProperty("height"))
@@ -7896,8 +7896,8 @@ $root.BlockDB = (function() {
             object.length = message.length;
         if (message.timeEMA != null && message.hasOwnProperty("timeEMA"))
             object.timeEMA = options.json && !isFinite(message.timeEMA) ? String(message.timeEMA) : message.timeEMA;
-        if (message.workEMA != null && message.hasOwnProperty("workEMA"))
-            object.workEMA = message.workEMA;
+        if (message.nextDifficulty != null && message.hasOwnProperty("nextDifficulty"))
+            object.nextDifficulty = message.nextDifficulty;
         if (message.totalWork != null && message.hasOwnProperty("totalWork"))
             object.totalWork = message.totalWork;
         return object;

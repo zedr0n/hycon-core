@@ -9,18 +9,15 @@ const logger = getLogger("Difficulty")
 
 export class DifficultyAdjuster {
     public static adjustDifficulty(previousDBBlock: DBBlock, timeStamp: number, hash?: Hash) {
-        const previousTimeEMA = previousDBBlock.timeEMA
-
         const timeDelta = timeStamp - previousDBBlock.header.timeStamp
         if (timeDelta <= 0) {
             throw new Error("Invalid block timestamp")
         }
-        const workDelta = Difficulty.decode(previousDBBlock.header.difficulty)
-        const timeEMA = DifficultyAdjuster.calcTimeEMA(timeDelta, previousTimeEMA)
-        const workEMA = DifficultyAdjuster.calcWorkEMA(workDelta, previousDBBlock.workEMA)
 
-        const difficulty = DifficultyAdjuster.calcNewDifficulty(timeEMA, workDelta)
-        return { difficulty, workDelta, timeEMA, workEMA }
+        const workDelta = Difficulty.decode(previousDBBlock.header.difficulty)
+        const timeEMA = DifficultyAdjuster.calcTimeEMA(timeDelta, previousDBBlock.timeEMA)
+        const nextDifficulty = DifficultyAdjuster.calcNewDifficulty(timeEMA, workDelta)
+        return { nextDifficulty, workDelta, timeEMA }
     }
 
     public static calcNewDifficulty(timeEMA: number, workEMA: Difficulty, targetTime: number = DifficultyAdjuster.targetTime): Difficulty {

@@ -21,6 +21,11 @@ export class Block implements proto.IBlock {
         }
         return new Block(block)
     }
+    public static calculateMerkleRoot(txs: SignedTx[]): Hash {
+        const values: Uint8Array[] = txs.map((tx) => new Hash(tx))
+        const tree = merkle(values, Hash.hash)
+        return new Hash(tree[tree.length - 1])
+    }
 
     public header: BlockHeader
     public txs: SignedTx[]
@@ -46,21 +51,11 @@ export class Block implements proto.IBlock {
         }
     }
 
-    public updateMerkleRoot(): void {
-        this.header.merkleRoot = this.calculateMerkleRoot()
+    public recalculateMerkleRoot(): void {
+        this.header.merkleRoot = Block.calculateMerkleRoot(this.txs)
     }
 
     public encode(): Uint8Array {
         return proto.Block.encode(this).finish()
-    }
-
-    public calculateMerkleRoot(): Hash {
-        const values: Uint8Array[] = []
-        this.txs.forEach((tx) => {
-            const hash = new Hash(tx)
-            values.push(hash)
-        })
-        const outArr = merkle(values, Hash.hash)
-        return new Hash(outArr[outArr.length - 1])
     }
 }

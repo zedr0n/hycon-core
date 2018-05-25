@@ -23,23 +23,23 @@ export class Verify {
         if (Date.now() - header.timeStamp < 0) {
             return { newStatus: BlockStatus.Rejected }
         }
-        const { difficulty, workDelta, timeEMA, workEMA } = DifficultyAdjuster.adjustDifficulty(previousDBBlock, header.timeStamp)
+        const { nextDifficulty, workDelta, timeEMA } = DifficultyAdjuster.adjustDifficulty(previousDBBlock, header.timeStamp)
 
-        if (difficulty.encode() !== header.difficulty) {
-            logger.warn(`Rejecting block(${hash.toString()}): Difficulty(${header.difficulty}) does not match calculated value(${difficulty.encode()})`)
+        if (previousDBBlock.nextDifficulty.encode() !== header.difficulty) {
+            logger.warn(`Rejecting block(${hash.toString()}): Difficulty(${header.difficulty}) does not match calculated value(${previousDBBlock.nextDifficulty.encode()})`)
             return { newStatus: BlockStatus.Rejected }
         }
 
         const preHash = header.preHash()
-        const nonceCheck = await MinerServer.checkNonce(preHash, header.nonce, difficulty)
+        const nonceCheck = await MinerServer.checkNonce(preHash, header.nonce, previousDBBlock.nextDifficulty)
         if (!nonceCheck) {
             logger.warn(`Rejecting block(${hash.toString()}): Hash does not meet difficulty(${header.difficulty})`)
             return { newStatus: BlockStatus.Rejected }
         }
 
         const height = previousDBBlock.height + 1
-        const totalWork = difficulty.add(workDelta)
-        const dbBlock = new DBBlock({ header, height, timeEMA, workEMA: workEMA.encode(), totalWork: totalWork.encode() })
+        const totalWork = previousDBBlock.totalWork.add(workDelta)
+        const dbBlock = new DBBlock({ header, height, timeEMA, nextDifficulty: nextDifficulty.encode(), totalWork: totalWork.encode() })
         return { newStatus: BlockStatus.Header, dbBlock }
     }
 
@@ -49,7 +49,7 @@ export class Verify {
             dbBlock?: DBBlock;
             dbBlockHasChanged?: boolean;
         }> {
-        const merkleRoot = block.calculateMerkleRoot()
+        const merkleRoot = Block.calculateMerkleRoot(block.txs)
         if (!merkleRoot.equals(header.merkleRoot)) {
             logger.warn(`Rejecting block(${hash.toString()}): Merkle root(${header.merkleRoot.toString()}) does not match calculated value(${merkleRoot.toString()})`)
 

@@ -33,10 +33,10 @@ describe("DBBlock Test", () => {
             header: new BlockHeader(iBlockHeader),
             height: 0,
             length: 0,
+            nextDifficulty: new Difficulty(0x0000FF, 0x00).encode(),
             offset: 0,
             timeEMA: 30,
             totalWork: new Difficulty(0x0000FF, 0x00).encode(),
-            workEMA: new Difficulty(0x0000FF, 0x00).encode(),
         }
         dbBlock = new DBBlock(iDBBlock)
     })
@@ -51,7 +51,7 @@ describe("DBBlock Test", () => {
         expect(block.length).toEqual(0)
         expect(block.timeEMA).toEqual(30)
         expect(block.totalWork.encode()).toEqual(0x100000FF)
-        expect(block.workEMA.encode()).toEqual(0x100000FF)
+        expect(block.nextDifficulty.encode()).toEqual(0x100000FF)
     })
 
     it("set(block) : if set method set property", () => {
@@ -78,10 +78,10 @@ describe("DBBlock Test", () => {
             header: iBlockHeader,
             height: 7,
             length: 9,
+            nextDifficulty: new Difficulty(0x0000EE, 0x00).encode(),
             offset: 8,
             timeEMA: 30,
             totalWork: new Difficulty(0x0000FF, 0x00).encode(),
-            workEMA: new Difficulty(0x0000EE, 0x00).encode(),
         })
 
         expect(dbBlock.height).toEqual(7)
@@ -90,7 +90,7 @@ describe("DBBlock Test", () => {
         expect(dbBlock.length).toEqual(9)
         expect(dbBlock.timeEMA).toEqual(30)
         expect(dbBlock.totalWork.encode()).toEqual(0xFF)
-        expect(dbBlock.workEMA.encode()).toEqual(0xEE)
+        expect(dbBlock.nextDifficulty.encode()).toEqual(0xEE)
         expect(setSpy).toHaveBeenCalled()
     })
 

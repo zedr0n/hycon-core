@@ -309,20 +309,19 @@ export class Consensus extends EventEmitter implements IConsensus {
         try {
             const timeStamp = Date.now()
             const miner: Address = new Address(conf.minerAddress)
-            const { difficulty } = DifficultyAdjuster.adjustDifficulty(previousDBBlock, timeStamp)
             const { invalidTxs, validTxs, stateTransition: { currentStateRoot } } = await this.worldState.next(previousDBBlock.header.stateRoot, miner)
-            const header = new BlockHeader({
-                difficulty: difficulty.encode(),
-                merkleRoot: new Hash(),
-                miner,
-                nonce: -1,
-                previousHash: [previousHash],
-                stateRoot: currentStateRoot,
-                timeStamp,
+            const newBlock = new Block({
+                header: new BlockHeader({
+                    difficulty: previousDBBlock.nextDifficulty.encode(),
+                    merkleRoot: Block.calculateMerkleRoot(validTxs),
+                    miner,
+                    nonce: -1,
+                    previousHash: [previousHash],
+                    stateRoot: currentStateRoot,
+                    timeStamp,
+                }),
+                txs: validTxs,
             })
-            const newBlock = new Block({ header, txs: validTxs })
-            this.txPool.updateTxs(invalidTxs, 0)
-            newBlock.updateMerkleRoot()
             this.miner.newCandidateBlock(newBlock)
         } catch (e) {
             logger.error(`Fail to createCandidateBlock: ${e}`)
@@ -340,7 +339,7 @@ export class Consensus extends EventEmitter implements IConsensus {
             genesis.header.merkleRoot = new Hash("Centralization is the root of all evil.")
             const genesisHash = new Hash(genesis.header)
             const { fileNumber, length, filePosition, offset } = await this.db.writeBlock(genesis)
-            const dbBlock = new DBBlock({ fileNumber, header: genesis.header, height: 0, length, offset, timeEMA: 0, totalWork: 0, workEMA: 0 })
+            const dbBlock = new DBBlock({ fileNumber, header: genesis.header, height: 0, length, offset, timeEMA: 0, totalWork: 0, nextDifficulty: 0 })
             await this.db.putDBBlock(genesisHash, dbBlock)
             this.blockTip = this.headerTip = dbBlock
             await this.db.setBlockStatus(genesisHash, BlockStatus.MainChain)

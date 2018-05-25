@@ -3066,8 +3066,8 @@ export interface IBlockDB {
     /** BlockDB timeEMA */
     timeEMA?: number;
 
-    /** BlockDB workEMA */
-    workEMA?: number;
+    /** BlockDB nextDifficulty */
+    nextDifficulty?: number;
 
     /** BlockDB totalWork */
     totalWork?: number;
@@ -3100,8 +3100,8 @@ export class BlockDB implements IBlockDB {
     /** BlockDB timeEMA. */
     public timeEMA: number;
 
-    /** BlockDB workEMA. */
-    public workEMA: number;
+    /** BlockDB nextDifficulty. */
+    public nextDifficulty: number;
 
     /** BlockDB totalWork. */
     public totalWork: number;

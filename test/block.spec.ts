@@ -42,15 +42,15 @@ describe("Block", () => {
 
     it("UpdateMerkleRoot() should call the calculateMerkleRoot method and update the merkleRoot", () => {
         const merkle = new Hash(randomBytes(32))
-        const merkleSpy = spyOn(block, "calculateMerkleRoot").and.returnValue(merkle)
-        block.updateMerkleRoot()
+        const merkleSpy = spyOn(Block, "calculateMerkleRoot").and.returnValue(merkle)
+        block.recalculateMerkleRoot()
         expect(merkleSpy).toHaveBeenCalled()
         expect(block.header.merkleRoot).toEqual(merkle)
     })
 
     it("calculateMarkleRoot() should generate a merkle root based on transactions", () => {
         const merkle = block.header.merkleRoot
-        const newMerkle = block.calculateMerkleRoot()
+        const newMerkle = Block.calculateMerkleRoot(block.txs)
         expect(merkle === newMerkle).toBeFalsy()
     })
 
@@ -61,9 +61,9 @@ describe("Block", () => {
             nonce: 1234, recovery: 10, signature: randomBytes(32),
             to: new Address(randomBytes(20)),
         })
-        const merkle1 = block.calculateMerkleRoot()
+        const merkle1 = Block.calculateMerkleRoot(block.txs)
         block.txs.push(stx)
-        const merkle2 = block.calculateMerkleRoot()
+        const merkle2 = Block.calculateMerkleRoot(block.txs)
         expect(merkle1 === merkle2).toBeFalsy()
     })
 
