@@ -25,11 +25,11 @@ export class DifficultyAdjuster {
 
     public static calcNewDifficulty(timeEMA: number, workEMA: Difficulty, targetTime: number = DifficultyAdjuster.targetTime): Difficulty {
         let timeRatio = targetTime / timeEMA
-        logger.fatal(`workEMA m: ${workEMA.getMantissa().toString(16)} e: ${workEMA.getExponent()}, timeEMA: ${timeEMA}, targetTime: ${targetTime}, alpha: ${DifficultyAdjuster.alpha}, timeRatio: ${timeRatio}`)
+        logger.debug(`workEMA m: ${workEMA.getMantissa().toString(16)} e: ${workEMA.getExponent()}, timeEMA: ${timeEMA}, targetTime: ${targetTime}, alpha: ${DifficultyAdjuster.alpha}, timeRatio: ${timeRatio}`)
         timeRatio = timeRatio > 3 ? 3 : timeRatio
         timeRatio = timeRatio < 0.25 ? 0.25 : timeRatio
         const newDifficulty = workEMA.multiply(timeRatio)
-        logger.fatal(`newDifficulty m: ${newDifficulty.getMantissa().toString(16)}, e: ${newDifficulty.getExponent()}`)
+        logger.debug(`newDifficulty m: ${newDifficulty.getMantissa().toString(16)}, e: ${newDifficulty.getExponent()}`)
         return newDifficulty
     }
 
