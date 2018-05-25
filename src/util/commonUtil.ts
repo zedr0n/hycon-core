@@ -3,17 +3,11 @@ export function zeroPad(input: string, length: number) {
     return (Array(length + 1).join("0") + input).slice(-length)
 }
 
-export function hycontoString(val: Long): string {
-    const valStr = val.toString()
-    const integer = (valStr.length >= 10) ? valStr.slice(0, -9) : "0"
-    const decimal = (valStr.length >= 10) ? valStr.slice(-9) : zeroPad(valStr, 9)
-
-    let trimed
-    for (const d of decimal.split("").reverse().join("")) {
-        if (d !== "0") { trimed = decimal.slice(0, decimal.indexOf(d) + 1); break }
-    }
-    const result = trimed === undefined ? integer : integer + "." + trimed
-    return result
+export function hycontoString(value: Long): string {
+    const valString = value.toString()
+    const integer = (valString.length >= 10) ? valString.slice(0, -9) : "0"
+    const decimal = (valString.length >= 10) ? valString.slice(-9) : zeroPad(valString, 9)
+    return integer + "." + decimal
 }
 
 export function hyconfromString(val: string): Long {
