@@ -28,10 +28,6 @@ export class RestServer implements IRest {
         this.txPool = txPool
     }
 
-    public setIsHyconWallet(isHyconWallet: boolean): void { }
-    public hyconWalletListener(callback: (isHyconWallet: boolean) => void): void {
-        callback(false)
-    }
     public loadingListener(callback: (loading: boolean) => void): void {
         callback(false)
     }

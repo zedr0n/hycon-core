@@ -71,9 +71,6 @@ export class App extends React.Component<{ rest: IRest }, any> {
         this.rest.loadingListener((loading: boolean) => {
             this.setState({ loading })
         })
-        this.rest.hyconWalletListener((isParity: boolean) => {
-            this.setState({ isParity })
-        })
         this.blockView = ({ match }: RouteComponentProps<{ hash: string }>) => (
             <BlockView hash={match.params.hash} rest={this.rest} />
         )
@@ -115,49 +112,9 @@ export class App extends React.Component<{ rest: IRest }, any> {
     public render() {
         return (
             <div className="mdl-layout mdl-js-layout">
-                <header
-                    className={`mdl-layout__header ${this.state.isParity ? "hide" : ""}`}
-                >
+                <header className="mdl-layout__header" >
                     <div className="mdl-layout__header-row">
                         <span className="mdl-layout-title">Hycon Blockexplorer</span>
-                        <div className="mdl-layout-spacer" />
-                        <nav className="mdl-navigation mdl-layout--large-screen-only">
-                            <form action="#">
-                                <div className="mdl-textfield mdl-js-textfield mdl-textfield--expandable">
-                                    <label
-                                        className="mdl-button mdl-js-button mdl-button--icon"
-                                        htmlFor="search"
-                                    >
-                                        <i className="material-icons">search</i>
-                                    </label>
-                                    <div className="mdl-textfield__expandable-holder">
-                                        <input
-                                            className="mdl-textfield__input searchBox"
-                                            type="text"
-                                            id="search"
-                                            placeholder="Hash"
-                                        />
-                                    </div>
-                                </div>
-                            </form>
-                            <Link className="mdl-navigation__link navMargin" to="/">Home</Link>
-                            {/* <Link className="mdl-navigation__link" to="/block">Block</Link> */}
-                            <Link className="mdl-navigation__link" to="/txPool">Tx</Link>
-                            <Link className="mdl-navigation__link" to="/wallet">Wallet</Link>
-                            {/* <Link className="mdl-navigation__link" to="/peersView">Peers List</Link> */}
-                        </nav>
-                    </div>
-                    <div
-                        className={`mdl-progress mdl-js-progress mdl-progress__indeterminate progressBar ${
-                            this.state.loading ? "" : "hide"
-                            }`}
-                    />
-                </header>
-                <header
-                    className={`mdl-layout__header ${this.state.isParity ? "" : "hide"}`}
-                >
-                    <div className="mdl-layout__header-row">
-                        <span className="mdl-layout-title">HYCON Wallet</span>
                         <div className="mdl-layout-spacer" />
                         <nav className="mdl-navigation mdl-layout--large-screen-only">
                             <form action="#">

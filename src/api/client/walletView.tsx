@@ -9,10 +9,8 @@ export class WalletView extends React.Component<any, any> {
         this.state = { rest: props.rest }
     }
     public componentDidMount() {
-        this.state.rest.setIsHyconWallet(true)
     }
     public componentWillUnmount() {
-        this.state.rest.setIsHyconWallet(false)
     }
     public render() {
         return (

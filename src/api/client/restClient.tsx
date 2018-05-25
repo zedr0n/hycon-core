@@ -20,7 +20,6 @@ export class RestClient implements IRest {
     public loading: boolean
     public isHyconWallet: boolean
     public callback: (loading: boolean) => void
-    public hyconWalletCallback: (isHyconWallet: boolean) => void
 
     public loadingListener(callback: (loading: boolean) => void): void {
         this.callback = callback
@@ -28,16 +27,6 @@ export class RestClient implements IRest {
     public setLoading(loading: boolean): void {
         this.loading = loading
         this.callback(this.loading)
-    }
-
-    public hyconWalletListener(
-        hyconWalletCallback: (isHyconWallet: boolean) => void,
-    ): void {
-        this.hyconWalletCallback = hyconWalletCallback
-    }
-    public setIsHyconWallet(isHyconWallet: boolean): void {
-        this.isHyconWallet = isHyconWallet
-        this.hyconWalletCallback(this.isHyconWallet)
     }
 
     public createNewWallet(meta: IHyconWallet): Promise<IHyconWallet | IResponseError> {

@@ -102,10 +102,10 @@ export class WalletDetail extends React.Component<any, any> {
                                     <i className="material-icons">send</i>TRANSFER</button>
                                 <button onClick={() => { this.deleteWallet() }} className="mdl-button">
                                     <i className="material-icons">delete</i>FORGET</button>
-                                <button className="mdl-button">
+                                {/* <button className="mdl-button">
                                     <i className="material-icons">mode_edit</i>EDIT</button>
                                 <button className="mdl-button">
-                                    <i className="material-icons">settings</i>SETTING</button>
+                                    <i className="material-icons">settings</i>SETTING</button> */}
                             </td>
                         </tr>
                     </thead>

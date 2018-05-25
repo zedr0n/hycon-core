@@ -19,11 +19,7 @@ export class RecoverWallet extends React.Component<any, any> {
             rest: props.rest,
         }
     }
-    public componentWillUnmount() {
-        this.state.rest.setIsHyconWallet(false)
-    }
     public componentWillMount() {
-        this.state.rest.setIsHyconWallet(true)
         this.state.rest.setLoading(true)
         this.state.rest.getLanguage().then((data: string[]) => {
             // this.setState({ languages: data })

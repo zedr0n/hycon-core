@@ -78,9 +78,7 @@ export interface IHyconWallet {
 }
 export interface IRest {
     loadingListener(callback: (loading: boolean) => void): void
-    hyconWalletListener(callback: (isHyconWallet: boolean) => void): void
     setLoading(loading: boolean): void
-    setIsHyconWallet(isHyconWallet: boolean): void
     // Exchange Featured
     createNewWallet(meta: IHyconWallet): Promise<IHyconWallet | IResponseError>
     getWalletBalance(address: string): Promise<{ balance: string } | IResponseError>

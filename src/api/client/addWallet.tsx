@@ -23,16 +23,12 @@ export class AddWallet extends React.Component<any, any> {
         }
     }
     public componentWillMount() {
-        this.props.rest.setIsHyconWallet(true)
         this.props.rest.setLoading(true)
     }
 
     public componentDidMount() {
         this.props.rest.setLoading(false)
 
-    }
-    public componentWillUnmount() {
-        this.state.rest.setIsHyconWallet(false)
     }
 
     public handleName(data: any) {
