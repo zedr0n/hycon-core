@@ -54,7 +54,7 @@ export class DifficultyAdjuster {
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
     ]))
-    private static alpha: number = 0.3
-    private static targetTime: number = 5000
+    private static alpha: number = 0.1
+    private static targetTime: number = 10000
 
 }

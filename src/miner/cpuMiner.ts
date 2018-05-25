@@ -24,7 +24,7 @@ export class CpuMiner {
                 const buffer = Buffer.allocUnsafe(72)
                 buffer.fill(preHash, 0, 64)
                 buffer.writeUInt32LE(prefix, 64)
-                const target = difficulty.getTarget()
+                const target = Difficulty.getTarget(difficulty.getMantissa(), difficulty.getExponent())
 
                 while (currentNonce < maxNonce && calculate) {
                     buffer.writeUInt32LE(currentNonce, 68)

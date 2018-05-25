@@ -19,14 +19,10 @@ export class Difficulty {
 
     public static getTarget(mantissa: number, exponent: number): Uint8Array {
         const target = Buffer.alloc(32)
-        // logger.info(`0xFFFFFF - mantissa: ${(0xFFFFFF - mantissa).toString(16)}`)
         const targetMantissa = (0xFFFFFF - mantissa) * Math.pow(2, 8 - (exponent % 8)) + (Math.pow(2, 8 - (exponent % 8)) - 1)
-        // logger.info(`targetMantissa: ${(targetMantissa).toString(16)}`)
         const index = 28 - Math.floor(exponent / 8)
         target.writeUInt32LE(targetMantissa, index)
         target.fill(0xFF, 0, index)
-
-        // logger.info(`Target: ${(target as Buffer).toString("hex")}`)
 
         return new Uint8Array(target)
     }
@@ -55,9 +51,9 @@ export class Difficulty {
             mantissa = mantissa / Math.pow(2, shift)
             exponent = exponent + shift
         }
-        mantissa = Math.round(mantissa)
+        mantissa = Math.ceil(mantissa)
 
-        while (mantissa % 2 === 0) {
+        while (mantissa % 2 === 0 && mantissa > 0) {
             mantissa = mantissa / 2
             exponent += 1
         }
@@ -83,54 +79,9 @@ export class Difficulty {
         return this.exponent
     }
 
-    public getTarget(): Uint8Array {
-        const target = Buffer.alloc(32)
-
-        const lowerBits = (this.exponent % 8)
-        const targetMantissa = (this.mantissa << lowerBits) | ((1 << lowerBits) - 1)
-        const mBits = Math.ceil(Math.log2(targetMantissa + 1))
-        const offset = Math.floor((256 - this.exponent) / 8)
-
-        target.writeUIntLE(targetMantissa, offset, 4)
-
-        for (let i = offset; i < target.length; i++) {
-            target[i] = 0xFF - target[i]
-        }
-        return target
-    }
-
-    public getTarget2(): Buffer {
-        const target = Buffer.alloc(33)
-        const mantissaBits = Math.ceil(Math.log2(this.mantissa + 1))
-        const mantissaBytes = Math.ceil(mantissaBits / 8)
-        const targetNum = Math.pow(0x100, mantissaBytes) - 1 - this.mantissa
-        const targetBits = Math.ceil(Math.log2(targetNum + 1))
-        let targetBytes = Math.ceil(targetBits / 8)
-        if (targetBytes === 0) {
-            targetBytes = 1
-        }
-        const index = Math.floor(((256 - targetBytes * 8) - this.exponent) / 8)
-        const alignment = (256 - targetBits - this.exponent) - index * 8
-        // logger.warn(`mantissaBits: ${mantissaBits}, mantissa: ${this.mantissa}, targetBits: ${targetBits}, targetNum: ${targetNum}, index: ${index}, alignment: ${alignment}`)
-
-        // const targetMantissa = (Math.pow(2, mantissaBits) - 1 - this.mantissa)
-        // const index = Math.floor((256 - mantissaBytes * 8 - this.exponent) / 8)
-        // const alignment = (256 - mantissaBits - this.exponent) - index * 8
-        target.writeUIntLE(targetNum, index, targetBytes)
-        // if (index <= 29) {
-        target.fill(0xFF, 0, index)
-        // }
-
-        // let str = ""
-        // for (let i = 24; i < 32; i++) {
-        //     str = target[i].toString(16) + str
-        // }
-        // logger.info(`Target: ${str}`)
-        return target
-    }
-
     public getMinerTarget(): string {
-        return this.getTarget().slice(24, 32).toString("hex")
+        const buffer = Buffer.from(Difficulty.getTarget(this.mantissa, this.exponent))
+        return buffer.toString("hex")
     }
 
     public encode(): number {
@@ -142,7 +93,7 @@ export class Difficulty {
             throw new Error(`Expected 32 byte hash, got ${hash.length} bytes`)
         }
         if (target === undefined) {
-            target = this.getTarget()
+            target = Difficulty.getTarget(this.mantissa, this.exponent)
         }
 
         for (let i = 31; i >= 0; i--) {
@@ -157,15 +108,14 @@ export class Difficulty {
     }
 
     public iterateMantissa() {
-        this.mantissa = 1
+        this.mantissa = 0xFFFF00
         this.exponent = 0
         const hashBytes = new Uint8Array(32)
-        while (this.mantissa <= 0xFFFF) {
+        while (this.mantissa <= 0xFFFFFF) {
             let trueCount = 0
-            const target = this.getTarget()
-            for (let i = 0; i <= 0xFFFF; i++) {
-                hashBytes[31] = i & 0xFF
-                hashBytes[30] = (i & 0xFF00) >> 8
+            const target = Difficulty.getTarget(this.mantissa, this.exponent)
+            for (let i = 0; i <= 0xFF; i++) {
+                hashBytes[29] = i
                 if (this.acceptable(hashBytes, target)) {
                     trueCount++
                 }
@@ -173,8 +123,8 @@ export class Difficulty {
                 //     hashBytes[30] = j
                 // }
             }
-            logger.warn(`Mantissa: ${this.mantissa.toString(16)}, target: ${target.reverse().toString("hex")}, trueCount: ${trueCount}, ratio: ${trueCount / 0x10000}`)
-            this.mantissa += Math.floor(Math.random() * 255)
+            logger.warn(`Mantissa: ${this.mantissa.toString(16)}, target: ${(Buffer.from(target.reverse())).toString("hex")}, trueCount: ${trueCount}, ratio: ${trueCount / 0x10000}`)
+            this.mantissa += 1
         }
     }
 

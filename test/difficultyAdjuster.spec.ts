@@ -52,11 +52,16 @@ describe("DifficultyAdjuster", () => {
                 expect(newDifficulty.encode()).toEqual(correctDifficulty.encode())
         })
 
-        fit("calcNewDifficuly: 3 should correctly calculate a new difficulty value", () => {
+        xit("calcNewDifficuly: 3 should correctly calculate a new difficulty value", () => {
                 const timeRatio = 0.7485525341780098
                 const difficulty = new Difficulty(0xb684ad, 8)
 
                 const result = difficulty.multiply(timeRatio)
 
+        })
+
+        xit("getTarget: Should get the target", () => {
+                const difficulty = new Difficulty(0x01, 0x0)
+                const target = Difficulty.getTarget(0x1, 0x0)
         })
 })

@@ -40,7 +40,6 @@ export class Verify {
         const height = previousDBBlock.height + 1
         const totalWork = difficulty.add(workDelta)
         const dbBlock = new DBBlock({ header, height, timeEMA, workEMA: workEMA.encode(), totalWork: totalWork.encode() })
-
         return { newStatus: BlockStatus.Header, dbBlock }
     }
 
