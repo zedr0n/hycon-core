@@ -47,4 +47,5 @@ cp -rf ../src/api/clientDist ./src/api/
 cp -f ../launch.sh.command .
 cd ..
 zip -r $file_name $output_dir
-cp $file_name ~/$file_name
+cp $file_name ../$file_name
+
