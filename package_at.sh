@@ -16,7 +16,7 @@ fi
 npm run clear
 npm run block:build
 echo "==================UI build finish==============="
-pkg . --target $platform -o hycon-$platform
+pkg . --target $platform -o hycon
 mkdir $output_dir
 if [ -e "wallet" ]
 then
@@ -33,7 +33,7 @@ cd $output_dir
 cp -rf ../data . 
 cp -rf ../mnemonic . 
 cp -rf ../wallet . 
-cp -f ../hycon-$platform . 
+cp -f ../hycon . 
 cp -f ../documents/* .
 
 mkdir node_modules
