@@ -64,7 +64,7 @@ export class Verify {
             }
         }
 
-        const { stateTransition, validTxs, invalidTxs } = await worldState.next(block.txs, previousDBBlock.header.stateRoot, block.header.miner)
+        const { stateTransition, validTxs, invalidTxs } = await worldState.next(previousDBBlock.header.stateRoot, block.header.miner, block.txs)
         if (!stateTransition.currentStateRoot.equals(block.header.stateRoot)) {
             logger.warn(`Rejecting block(${hash.toString()}): stateRoot(${header.stateRoot}) does not match calculated value(${stateTransition.currentStateRoot})`)
             return { newStatus: BlockStatus.Rejected }

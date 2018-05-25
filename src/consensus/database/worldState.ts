@@ -7,6 +7,7 @@ import { Address } from "../../common/address"
 import { AsyncLock } from "../../common/asyncLock"
 import { Block } from "../../common/block"
 import { GenesisBlock } from "../../common/blockGenesis"
+import { ITxPool } from "../../common/itxPool"
 import { PublicKey } from "../../common/publicKey"
 import { GenesisSignedTx } from "../../common/txGenesisSigned"
 import { SignedTx } from "../../common/txSigned"
@@ -65,11 +66,12 @@ export interface IStateTransition { currentStateRoot: Hash, batch: DBState[], ma
 export class WorldState {
     private accountDB: levelup.LevelUp
     private accountLock: AsyncLock
-
-    constructor(path: string) {
+    private txPool: ITxPool
+    constructor(path: string, txPool: ITxPool) {
         const rocks: any = rocksdb(path)
         this.accountDB = levelup(rocks)
         this.accountLock = new AsyncLock()
+        this.txPool = txPool
     }
 
     public async print(hash: Hash, n: number = 0, prefix: Uint8Array = new Uint8Array([])) {
@@ -120,7 +122,8 @@ export class WorldState {
         }
     }
 
-    public async next(txs: SignedTx[], previousState: Hash, minerAddress?: Address): Promise<{ stateTransition: IStateTransition, validTxs: SignedTx[], invalidTxs: SignedTx[] }> {
+    public async next(previousState: Hash, minerAddress?: Address, txs?: SignedTx[]): Promise<{ stateTransition: IStateTransition, validTxs: SignedTx[], invalidTxs: SignedTx[] }> {
+        txs === undefined ? txs = this.txPool.getTxs() : txs = txs
         const batch: DBState[] = []
         const changes: IChange[] = []
         const mapAccount: Map<string, DBState> = new Map<string, DBState>()

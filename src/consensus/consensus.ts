@@ -45,7 +45,7 @@ export class Consensus extends EventEmitter implements IConsensus {
         this.txPool = txPool
         this.db = new Database(dbPath, filePath)
         if (txPath) { this.txdb = new TxDatabase(txPath) }
-        this.worldState = new WorldState(wsPath)
+        this.worldState = new WorldState(wsPath, txPool)
         this.newBlockCallbacks = []
 
     }
@@ -296,7 +296,7 @@ export class Consensus extends EventEmitter implements IConsensus {
             const timeStamp = Date.now()
             const miner: Address = new Address(conf.minerAddress)
             const { difficulty } = DifficultyAdjuster.adjustDifficulty(previousDBBlock, timeStamp)
-            const { invalidTxs, validTxs, stateTransition: { currentStateRoot } } = await this.worldState.next(this.txPool.getPending(0, conf.blockLimit).txs, previousDBBlock.header.stateRoot, miner)
+            const { invalidTxs, validTxs, stateTransition: { currentStateRoot } } = await this.worldState.next(previousDBBlock.header.stateRoot, miner)
             const header = new BlockHeader({
                 difficulty: difficulty.encode(),
                 merkleRoot: new Hash(),
@@ -307,7 +307,7 @@ export class Consensus extends EventEmitter implements IConsensus {
                 timeStamp,
             })
             const newBlock = new Block({ header, txs: validTxs })
-            this.txPool.updateTxs(validTxs, 0)
+            this.txPool.updateTxs(invalidTxs, 0)
             newBlock.updateMerkleRoot()
             this.miner.newCandidateBlock(newBlock)
         } catch (e) {

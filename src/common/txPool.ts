@@ -84,6 +84,10 @@ export class TxPool implements ITxPool {
         return { txs: txs.slice(index, final), length: txs.length, totalAmount, totalFee }
     }
 
+    public getTxs(): SignedTx[] {
+        return this.txs
+    }
+
     private insert(newTxs: SignedTx[]): { count: number, lowestIndex?: number } {
         newTxs.sort((a, b) => b.fee.compare(a.fee))
         let lowestIndex
