@@ -79,7 +79,9 @@ export class TxPool implements ITxPool {
             totalAmount = totalAmount.add(tx.amount)
             totalFee = totalFee.add(tx.fee)
         }
-        return { txs: txs.slice(index, index + count), length: txs.length, totalAmount, totalFee }
+        let final = index + count
+        final > txs.length ? final = txs.length : final = final
+        return { txs: txs.slice(index, final), length: txs.length, totalAmount, totalFee }
     }
 
     private insert(newTxs: SignedTx[]): { count: number, lowestIndex?: number } {

@@ -296,7 +296,7 @@ export class Consensus extends EventEmitter implements IConsensus {
             const timeStamp = Date.now()
             const miner: Address = new Address(conf.minerAddress)
             const { difficulty } = DifficultyAdjuster.adjustDifficulty(previousDBBlock, timeStamp)
-            const { invalidTxs, validTxs, stateTransition: { currentStateRoot } } = await this.worldState.next([], previousDBBlock.header.stateRoot, miner)
+            const { invalidTxs, validTxs, stateTransition: { currentStateRoot } } = await this.worldState.next(this.txPool.getPending(0, conf.blockLimit).txs, previousDBBlock.header.stateRoot, miner)
             const header = new BlockHeader({
                 difficulty: difficulty.encode(),
                 merkleRoot: new Hash(),
