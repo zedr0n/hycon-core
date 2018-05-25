@@ -1,10 +1,10 @@
-import { Block } from "./block"
-
 export class PriorityQueue<T> {
     private queue: T[]
+    private maxLength: number
 
-    constructor() {
+    constructor(maxLength: number) {
         this.queue = []
+        this.maxLength = maxLength
     }
 
     public insert(value: T, comparator: (a: T, b: T) => number) {
@@ -18,6 +18,7 @@ export class PriorityQueue<T> {
                 const lowerQueue = this.queue.slice(0, i)
                 lowerQueue.push(item)
                 this.queue = lowerQueue.concat(upperQueue)
+                return i
             }
         }
     }
