@@ -80,7 +80,7 @@ export class Difficulty {
     }
 
     public getMinerTarget(): string {
-        const buffer = Buffer.from(Difficulty.getTarget(this.mantissa, this.exponent))
+        const buffer = Buffer.from(Difficulty.getTarget(this.mantissa, this.exponent) as Buffer)
         return buffer.toString("hex")
     }
 
@@ -123,7 +123,7 @@ export class Difficulty {
                 //     hashBytes[30] = j
                 // }
             }
-            logger.warn(`Mantissa: ${this.mantissa.toString(16)}, target: ${(Buffer.from(target.reverse())).toString("hex")}, trueCount: ${trueCount}, ratio: ${trueCount / 0x10000}`)
+            logger.warn(`Mantissa: ${this.mantissa.toString(16)}, target: ${(Buffer.from(target.reverse() as Buffer)).toString("hex")}, trueCount: ${trueCount}, ratio: ${trueCount / 0x10000}`)
             this.mantissa += 1
         }
     }

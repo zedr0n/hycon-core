@@ -20,7 +20,7 @@ export class BlockList extends React.Component<any, any> {
     }
     public componentWillUnmount() {
         this.mounted = false
-        window.clearTimeout()
+        window.clearTimeout(this.intervalId)
     }
     public componentWillMount() {
     }

@@ -113,6 +113,19 @@ export class Consensus extends EventEmitter implements IConsensus {
         }
         return this.txdb.getLastTxs(address, count)
     }
+
+    public async getNextTxs(address: Address, txHash: Hash, count?: number): Promise<Array<{ txList: TxList, timestamp: number }>> {
+        try {
+            if (this.txdb) {
+                return await this.txdb.getNextTxs(address, txHash, count)
+            } else {
+                return Promise.reject(`The database to get txs does not exist.`)
+            }
+        } catch (e) {
+            logger.error(`Fail to getNextTxs : ${e}`)
+            return e
+        }
+    }
     public getBlockStatus(hash: Hash): Promise<BlockStatus> {
         return this.db.getBlockStatus(hash)
     }
