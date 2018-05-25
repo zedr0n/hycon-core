@@ -184,7 +184,7 @@ export class Consensus extends EventEmitter implements IConsensus {
                 }
 
                 // TODO: Check timestamp, wait until timestamp has passed
-                if (block !== undefined && this.blockTip === undefined || this.blockTip.height < dbBlock.height) {
+                if (block !== undefined && (this.blockTip === undefined || this.blockTip.height < dbBlock.height)) {
                     await this.reorganize(hash, block, dbBlock.height)
                     this.blockTip = dbBlock
                     await this.db.setBlockTip(hash)
@@ -204,9 +204,9 @@ export class Consensus extends EventEmitter implements IConsensus {
             dbBlockHasChanged?: boolean,
         }> {
         const oldStatus = await this.db.getBlockStatus(hash)
-        let status: BlockStatus
+        let status = oldStatus
         if (oldStatus === BlockStatus.Rejected) {
-            return { oldStatus }
+            return { oldStatus, status }
         }
 
         if (header.previousHash.length <= 0) {
@@ -220,7 +220,7 @@ export class Consensus extends EventEmitter implements IConsensus {
         const previousHash = header.previousHash[0]
         const previousDBBlock = await this.db.getDBBlock(previousHash)
         if (previousDBBlock === undefined) {
-            return { oldStatus }
+            return { oldStatus, status }
         }
         if (oldStatus === BlockStatus.Nothing) {
             const headerResult = await Verify.processHeader(previousDBBlock, header, hash)

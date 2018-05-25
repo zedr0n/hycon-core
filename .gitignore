@@ -14,7 +14,7 @@ peerdb*
 PeerList.db
 rawblock*
 src/keys
-txDB/*
+txDB*
 tx/
 wallet/
 worldstate*

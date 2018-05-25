@@ -184,8 +184,8 @@ export class Sync {
                 for (const header of headers) {
                     if (header instanceof BlockHeader) {
                         const result = await this.consensus.putHeader(header)
-                        if (result.status === undefined || result.status <= BlockStatus.Nothing) {
-                            throw new Error("Header Rejected")
+                        if (result.status === undefined || result.status < BlockStatus.Header) {
+                            throw new Error(`Header Rejected ${result.status}`)
                         }
                     }
                 }
@@ -244,8 +244,8 @@ export class Sync {
                 for (const block of blocks) {
                     if (block instanceof Block) {
                         const { status } = await this.consensus.putBlock(block)
-                        if (status <= BlockStatus.Block) {
-                            throw new Error("Block rejected")
+                        if (status < BlockStatus.Block) {
+                            throw new Error(`Block rejected ${status}`)
                         }
                     }
                 }
@@ -263,7 +263,7 @@ export class Sync {
                 blocks = await this.consensus.getBlocksRange(height, blockCount)
                 const results = await this.peer.putBlocks(blocks)
                 if (results.some((result) => result.status === undefined || result.status < BlockStatus.Block)) {
-                    throw new Error("Block rejected")
+                    throw new Error(`Block rejected`)
                 }
                 height += blocks.length
             } while (blocks.length > 0)

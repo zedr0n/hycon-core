@@ -136,11 +136,14 @@ export class Database {
     }
 
     public async getDBBlocksRange(fromHeight: number, count?: number): Promise<DBBlock[]> {
-        const dbblockPromises: Array<Promise<DBBlock>> = []
+        const heights: number[] = []
         for (let height = fromHeight; height < fromHeight + count; height++) {
-            dbblockPromises.push(this.getHashAtHeight(height).then((hash) => this.getDBBlock(hash)))
+            heights.push(height)
         }
-        return Promise.all(dbblockPromises)
+        let hashes = await Promise.all(heights.map((height) => this.getHashAtHeight(height)))
+        hashes = hashes.filter((hash) => hash !== undefined)
+        const blocks = await Promise.all(hashes.map((hash) => this.getDBBlock(hash)))
+        return blocks.filter((block) => block !== undefined)
     }
 
     public async getDBBlock(hash: Hash): Promise<DBBlock | undefined> {
