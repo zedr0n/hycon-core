@@ -16,11 +16,21 @@ export class PriorityQueue<T> {
                 // insert the value before the retrieved item
                 const upperQueue = this.queue.slice(i)
                 const lowerQueue = this.queue.slice(0, i)
-                lowerQueue.push(item)
+                lowerQueue.push(value)
                 this.queue = lowerQueue.concat(upperQueue)
-                return i
+                return { index: i }
             }
         }
+
+        this.queue.push(value)
+        if (this.queue.length > this.maxLength) {
+            return { index: this.queue.length, overflow: this.queue.pop() }
+        }
+        return { index: this.queue.length }
+    }
+
+    public pop() {
+        return this.queue.pop()
     }
 
     public peek(index: number) {
