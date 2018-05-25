@@ -89,17 +89,30 @@ export class Consensus extends EventEmitter implements IConsensus {
     public getBlockByHash(hash: Hash): Promise<AnyBlock> {
         return this.db.getBlock(hash)
     }
-    public async getHeaderByHash(hash: Hash): Promise<AnyBlockHeader> {
-        const header = await this.db.getBlockHeader(hash)
-        if (header === undefined) { throw new Error(`Not found header ${hash.toString()}`) }
-        return header
+    public async getHeaderByHash(hash: Hash): Promise<AnyBlockHeader | undefined> {
+        const dbBlock = await this.db.getDBBlock(hash)
+        if (dbBlock === undefined) { return undefined }
+        return dbBlock.header
     }
-    public getBlocksRange(fromHeight: number, count?: number): Promise<AnyBlock[]> {
-        return this.db.getBlocksRange(fromHeight, count)
+    public async getBlocksRange(fromHeight: number, count?: number): Promise<AnyBlock[]> {
+        try {
+            const dbblocks = await this.db.getDBBlocksRange(fromHeight, count)
+            const blockPromises = dbblocks.map((dbblock) => this.db.dbBlockToBlock(dbblock))
+            return Promise.all(blockPromises)
+        } catch (e) {
+            logger.error(`getBlocksRange failed\n${e}`)
+            throw e
+        }
 
     }
-    public getHeadersRange(fromHeight: number, count?: number): Promise<AnyBlockHeader[]> {
-        return this.db.getHeadersRange(fromHeight, count)
+    public async getHeadersRange(fromHeight: number, count?: number): Promise<AnyBlockHeader[]> {
+        try {
+            const dbblocks = await this.db.getDBBlocksRange(fromHeight, count)
+            return dbblocks.map((dbblock) => dbblock.header)
+        } catch (e) {
+            logger.error(`getHeadersRange failed\n${e}`)
+            throw e
+        }
     }
     public getAccount(address: Address): Promise<Account> {
         if (this.blockTip === undefined) {
@@ -147,8 +160,9 @@ export class Consensus extends EventEmitter implements IConsensus {
     public getHash(height: number): Promise<Hash> {
         return this.db.getHashAtHeight(height)
     }
-    public getBlockHeight(hash: Hash): Promise<number> {
-        return this.db.getBlockHeight(hash)
+    public async getBlockHeight(hash: Hash): Promise<number> {
+        const block = await this.db.getDBBlock(hash)
+        return (block !== undefined) ? block.height : undefined
     }
     private async put(header: BlockHeader, block?: Block): Promise<IStatusChange> {
         return this.lock.critical(async () => {

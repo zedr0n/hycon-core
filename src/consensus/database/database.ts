@@ -59,19 +59,6 @@ export class Database {
         return this.database.put("b" + hash, dbBlock.encode())
     }
 
-    public async putBlock(hash: Hash, block: AnyBlock): Promise<{ current: DBBlock, previous: DBBlock }> {
-        // Async problem, block could be inserted twice
-        return await this.blockLock.critical<{ current: DBBlock, previous: DBBlock }>(async () => {
-            const { current, previous } = await this.putHeader(hash, block.header)
-            const { fileNumber, offset, length } = await this.writeBlock(block)
-            current.offset = offset
-            current.length = length
-            current.fileNumber = fileNumber
-            await this.database.put("b" + hash, current.encode())
-            return { current, previous }
-        })
-    }
-
     public async writeBlock(block: AnyBlock) {
         const writeLocation = await this.blockFile.put(block)
         if (this.fileNumber !== writeLocation.fileNumber) {
@@ -80,23 +67,6 @@ export class Database {
         }
         await this.database.put("filePosition", writeLocation.filePosition)
         return writeLocation
-    }
-
-    public async putHeader(hash: Hash, header: AnyBlockHeader): Promise<{ current: DBBlock, previous: DBBlock }> {
-
-        return await this.headerLock.critical<{ current: DBBlock, previous: DBBlock }>(async () => {
-            const currentBlock = await this.getDBBlock(hash)
-            if (currentBlock) {
-                let previousBlock: DBBlock | undefined
-                if (header instanceof BlockHeader) {
-                    previousBlock = await this.getDBBlock(header.previousHash[0])
-                }
-                return { current: currentBlock, previous: previousBlock }
-            }
-            const { current, previous } = await this.makeDBBlock(header)
-            await this.database.put("b" + hash, current.encode())
-            return { current, previous }
-        })
     }
 
     public async setHashAtHeight(height: number, hash: Hash): Promise<void> {
@@ -111,7 +81,7 @@ export class Database {
         } catch (e) {
             if (e.notFound) { return undefined }
             logger.error(`Fail to getHashAtHeight : ${e}`)
-            return Promise.reject(e)
+            throw e
         }
     }
 
@@ -127,7 +97,7 @@ export class Database {
         } catch (e) {
             if (e.notFound) { return 0 }
             logger.error(`Fail to getBlockStatus : ${e}`)
-            return Promise.reject(e)
+            throw e
         }
     }
 
@@ -147,7 +117,7 @@ export class Database {
         return this.getTip("__headerTip")
     }
 
-    public async getBlock(hash: Hash): Promise<AnyBlock> {
+    public async getBlock(hash: Hash): Promise<AnyBlock | undefined> {
         try {
             const dbBlock = await this.getDBBlock(hash)
             logger.debug(`DBBlock Key=${"b" + hash} Data=${dbBlock.offset}/${dbBlock.length}`)
@@ -155,83 +125,22 @@ export class Database {
         } catch (e) {
             if (e.notFound) {
                 e.error(`Block not found : ${e}`)
+                return undefined
             }
             if (e instanceof DecodeError) {
                 // TODO: Schedule rerequest or file lookup
                 logger.error(`Could not decode block ${hash}`)
-                throw e
             }
-            return Promise.reject(e)
-        }
-    }
-
-    public async getBlockHeader(hash: Hash): Promise<AnyBlockHeader | undefined> {
-        try {
-            const dbBlock = await this.getDBBlock(hash)
-            if (dbBlock === undefined) { return undefined }
-            return dbBlock.header
-        } catch (e) {
-            logger.error(`getBlockHeader failed : Hash=${hash}\n${e}`)
-            return Promise.reject(e)
-        }
-    }
-
-    public async getBlocksRange(fromHeight: number, count?: number): Promise<AnyBlock[]> {
-        try {
-            const dbBlockArray = await this.getDBBlocksRange(fromHeight, count)
-            const blockArray: AnyBlock[] = []
-            for (const dbBlock of dbBlockArray) {
-                const block = await this.dbBlockToBlock(dbBlock)
-                blockArray.push(block)
-            }
-            return blockArray
-        } catch (e) {
-            logger.error(`getBlocksRange failed\n${e}`)
-            return Promise.reject(e)
-        }
-    }
-    public async getHeadersRange(fromHeight: number, count?: number): Promise<AnyBlockHeader[]> {
-        try {
-            const dbBlockArray = await this.getDBBlocksRange(fromHeight, count)
-            const headerArray: AnyBlockHeader[] = []
-            for (const dbBlock of dbBlockArray) {
-                headerArray.push(dbBlock.header)
-            }
-            return headerArray
-        } catch (e) {
-            logger.error(`getHeadersRange failed\n${e}`)
-            return Promise.reject(e)
+            throw e
         }
     }
 
     public async getDBBlocksRange(fromHeight: number, count?: number): Promise<DBBlock[]> {
-        try {
-            const dbBlockArray: DBBlock[] = []
-            let height = fromHeight
-            let hash = await this.getHashAtHeight(height)
-            while (hash) {
-                if (dbBlockArray.length === count) { break }
-                const dbBlock = await this.getDBBlock(hash)
-                dbBlockArray.push(dbBlock)
-                height++
-                hash = await this.getHashAtHeight(height)
-            }
-            return dbBlockArray
-        } catch (e) {
-            logger.error(`getBlocksRange failed\n${e}`)
-            return Promise.reject(e)
+        const dbblockPromises: Array<Promise<DBBlock>> = []
+        for (let height = fromHeight; height < fromHeight + count; height++) {
+            dbblockPromises.push(this.getHashAtHeight(height).then((hash) => this.getDBBlock(hash)))
         }
-    }
-
-    public async getBlockHeight(hash: Hash): Promise<number | undefined> {
-        try {
-            const block = await this.getDBBlock(hash)
-            const height = (block !== undefined) ? block.height : undefined
-            return Promise.resolve(height)
-        } catch (e) {
-            logger.error(`getBlockHeight failed: ${e}`)
-            return Promise.reject(e)
-        }
+        return Promise.all(dbblockPromises)
     }
 
     public async getDBBlock(hash: Hash): Promise<DBBlock | undefined> {
@@ -259,45 +168,11 @@ export class Database {
                 decodeError.hash = hash
                 throw decodeError
             }
-            return Promise.reject(e)
-        }
-    }
-
-    // Async safe, block height will not change, previous block will not change
-    private async makeDBBlock(header: AnyBlockHeader): Promise<{ current: DBBlock, previous?: DBBlock }> {
-        try {
-            let height = 0
-            let previous: DBBlock
-            let workEMA = 1
-            let timeEMA = DifficultyAdjuster.getTargetTime()
-            let totalWork = new Difficulty(0x0, 0)
-
-            if (header instanceof BlockHeader) {
-                if (header.previousHash.length <= 0) {
-                    return Promise.reject(`Block has no previous hashes`)
-                }
-                // Async safe, previousBlock's height will not change
-                previous = await this.getDBBlock(header.previousHash[0])
-                const prevTimeEMA = previous.timeEMA
-
-                const timeDelta = header.timeStamp - previous.header.timeStamp
-                const workDelta = Difficulty.decode(header.difficulty)
-
-                timeEMA = DifficultyAdjuster.calcTimeEMA(timeDelta, prevTimeEMA)
-                workEMA = DifficultyAdjuster.calcWorkEMA(workDelta, previous.workEMA).encode()
-                totalWork = previous.totalWork.add(workDelta)
-
-                height = previous.height + 1
-            }
-
-            return { current: new DBBlock({ header, height, timeEMA, workEMA, totalWork: totalWork.encode() }), previous }
-        } catch (e) {
-            logger.error(`failed to make DBBlock : ${e}`)
             throw e
         }
     }
 
-    private async dbBlockToBlock(dbBlock: DBBlock): Promise<AnyBlock> {
+    public async dbBlockToBlock(dbBlock: DBBlock): Promise<AnyBlock> {
         if (dbBlock.offset !== undefined && dbBlock.length !== undefined && dbBlock.fileNumber !== undefined) {
             return this.blockFile.get(dbBlock.fileNumber, dbBlock.offset, dbBlock.length)
         } else {
