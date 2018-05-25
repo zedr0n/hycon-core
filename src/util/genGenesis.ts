@@ -75,7 +75,7 @@ async function editGenesis(genesis: GenesisBlock) {
         signature: Buffer.from("Everyone connected to everyone through GLObal tranSFER"),
         to: Buffer.from("The world"),
     }))
-    const ws = new WorldState("./deleteme.ws")
+    const ws = new WorldState("./deleteme.ws", undefined)
     const firstResult = await ws.first(genesis)
     genesis.header.stateRoot = firstResult.currentStateRoot
     logger.info(`Genesis hash : ${new Hash(genesis.header)}`)

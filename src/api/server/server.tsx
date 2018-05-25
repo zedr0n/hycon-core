@@ -162,7 +162,8 @@ export class HttpServer {
             res.json(await this.rest.getBlockList(req.params.index))
         })
         router.get("/language", async (req: express.Request, res: express.Response) => {
-            res.json(await this.rest.getLanguage())
+            res.json("error TS2339: Property 'getLanguage' does not exist on type 'RestServer'.")
+            // res.json(await this.rest.getLanguage())
         })
         router.get("/getMnemonic/:lang", async (req: express.Request, res: express.Response) => {
             res.json(await this.rest.getMnemonic(req.params.lang))

@@ -62,6 +62,6 @@ describe("DifficultyAdjuster", () => {
 
         xit("getTarget: Should get the target", () => {
                 const difficulty = new Difficulty(0x01, 0x0)
-                const target = Difficulty.getTarget(0x1, 0x0)
+                const target = difficulty.getTarget()
         })
 })
