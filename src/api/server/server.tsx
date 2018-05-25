@@ -2,6 +2,7 @@ import * as bodyParser from "body-parser"
 import * as express from "express"
 import * as jwt from "jsonwebtoken"
 import { getLogger } from "log4js"
+import opn = require("opn")
 import * as React from "react"
 import { matchPath } from "react-router"
 import { matchRoutes, renderRoutes } from "react-router-config"
@@ -50,7 +51,7 @@ export class HttpServer {
                 message: "resource not found",
             })
         })
-        this.app.listen(port)
+        this.app.listen(port, () => { opn(`http://localhost:${port}`) })
         this.hyconServer = hyconServer
         logger.info(">>>>>>> Started RESTful API")
     }
