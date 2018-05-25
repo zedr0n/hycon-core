@@ -4,13 +4,13 @@ message DBState {
     oneof state {
         Account account = 1;
         StateNode node = 2;
-        int32 refCount = 3;
+        uint32 refCount = 3;
     }
 }
 
 message Account {
     uint64 balance = 1;
-    int32 nonce = 2;
+    uint32 nonce = 2;
 }
 
 message StateNode {

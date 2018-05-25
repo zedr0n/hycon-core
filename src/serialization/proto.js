@@ -8244,11 +8244,11 @@ $root.Tx = (function() {
         if (message.fee != null && message.hasOwnProperty("fee"))
             writer.uint32(/* id 4, wireType 0 =*/32).uint64(message.fee);
         if (message.nonce != null && message.hasOwnProperty("nonce"))
-            writer.uint32(/* id 5, wireType 0 =*/40).int32(message.nonce);
+            writer.uint32(/* id 5, wireType 0 =*/40).uint32(message.nonce);
         if (message.signature != null && message.hasOwnProperty("signature"))
             writer.uint32(/* id 6, wireType 2 =*/50).bytes(message.signature);
         if (message.recovery != null && message.hasOwnProperty("recovery"))
-            writer.uint32(/* id 7, wireType 0 =*/56).int32(message.recovery);
+            writer.uint32(/* id 7, wireType 0 =*/56).uint32(message.recovery);
         return writer;
     };
 
@@ -8296,13 +8296,13 @@ $root.Tx = (function() {
                 message.fee = reader.uint64();
                 break;
             case 5:
-                message.nonce = reader.int32();
+                message.nonce = reader.uint32();
                 break;
             case 6:
                 message.signature = reader.bytes();
                 break;
             case 7:
-                message.recovery = reader.int32();
+                message.recovery = reader.uint32();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -8404,14 +8404,14 @@ $root.Tx = (function() {
             else if (typeof object.fee === "object")
                 message.fee = new $util.LongBits(object.fee.low >>> 0, object.fee.high >>> 0).toNumber(true);
         if (object.nonce != null)
-            message.nonce = object.nonce | 0;
+            message.nonce = object.nonce >>> 0;
         if (object.signature != null)
             if (typeof object.signature === "string")
                 $util.base64.decode(object.signature, message.signature = $util.newBuffer($util.base64.length(object.signature)), 0);
             else if (object.signature.length)
                 message.signature = object.signature;
         if (object.recovery != null)
-            message.recovery = object.recovery | 0;
+            message.recovery = object.recovery >>> 0;
         return message;
     };
 
@@ -8570,9 +8570,9 @@ $root.TxDB = (function() {
         if (message.blockHash != null && message.hasOwnProperty("blockHash"))
             writer.uint32(/* id 2, wireType 2 =*/18).bytes(message.blockHash);
         if (message.blockHeight != null && message.hasOwnProperty("blockHeight"))
-            writer.uint32(/* id 3, wireType 0 =*/24).int32(message.blockHeight);
+            writer.uint32(/* id 3, wireType 0 =*/24).uint32(message.blockHeight);
         if (message.txNumber != null && message.hasOwnProperty("txNumber"))
-            writer.uint32(/* id 4, wireType 0 =*/32).int32(message.txNumber);
+            writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.txNumber);
         return writer;
     };
 
@@ -8614,10 +8614,10 @@ $root.TxDB = (function() {
                 message.blockHash = reader.bytes();
                 break;
             case 3:
-                message.blockHeight = reader.int32();
+                message.blockHeight = reader.uint32();
                 break;
             case 4:
-                message.txNumber = reader.int32();
+                message.txNumber = reader.uint32();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -8692,9 +8692,9 @@ $root.TxDB = (function() {
             else if (object.blockHash.length)
                 message.blockHash = object.blockHash;
         if (object.blockHeight != null)
-            message.blockHeight = object.blockHeight | 0;
+            message.blockHeight = object.blockHeight >>> 0;
         if (object.txNumber != null)
-            message.txNumber = object.txNumber | 0;
+            message.txNumber = object.txNumber >>> 0;
         return message;
     };
 
@@ -9079,7 +9079,7 @@ $root.BlockHeader = (function() {
      * @memberof BlockHeader
      * @instance
      */
-    BlockHeader.prototype.timeStamp = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    BlockHeader.prototype.timeStamp = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
     /**
      * BlockHeader nonce.
@@ -9087,7 +9087,7 @@ $root.BlockHeader = (function() {
      * @memberof BlockHeader
      * @instance
      */
-    BlockHeader.prototype.nonce = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    BlockHeader.prototype.nonce = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
     /**
      * BlockHeader miner.
@@ -9129,11 +9129,11 @@ $root.BlockHeader = (function() {
         if (message.stateRoot != null && message.hasOwnProperty("stateRoot"))
             writer.uint32(/* id 3, wireType 2 =*/26).bytes(message.stateRoot);
         if (message.difficulty != null && message.hasOwnProperty("difficulty"))
-            writer.uint32(/* id 4, wireType 0 =*/32).int32(message.difficulty);
+            writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.difficulty);
         if (message.timeStamp != null && message.hasOwnProperty("timeStamp"))
-            writer.uint32(/* id 5, wireType 0 =*/40).int64(message.timeStamp);
+            writer.uint32(/* id 5, wireType 0 =*/40).uint64(message.timeStamp);
         if (message.nonce != null && message.hasOwnProperty("nonce"))
-            writer.uint32(/* id 6, wireType 0 =*/48).int64(message.nonce);
+            writer.uint32(/* id 6, wireType 0 =*/48).uint64(message.nonce);
         if (message.miner != null && message.hasOwnProperty("miner"))
             writer.uint32(/* id 7, wireType 2 =*/58).bytes(message.miner);
         return writer;
@@ -9182,13 +9182,13 @@ $root.BlockHeader = (function() {
                 message.stateRoot = reader.bytes();
                 break;
             case 4:
-                message.difficulty = reader.int32();
+                message.difficulty = reader.uint32();
                 break;
             case 5:
-                message.timeStamp = reader.int64();
+                message.timeStamp = reader.uint64();
                 break;
             case 6:
-                message.nonce = reader.int64();
+                message.nonce = reader.uint64();
                 break;
             case 7:
                 message.miner = reader.bytes();
@@ -9289,25 +9289,25 @@ $root.BlockHeader = (function() {
             else if (object.stateRoot.length)
                 message.stateRoot = object.stateRoot;
         if (object.difficulty != null)
-            message.difficulty = object.difficulty | 0;
+            message.difficulty = object.difficulty >>> 0;
         if (object.timeStamp != null)
             if ($util.Long)
-                (message.timeStamp = $util.Long.fromValue(object.timeStamp)).unsigned = false;
+                (message.timeStamp = $util.Long.fromValue(object.timeStamp)).unsigned = true;
             else if (typeof object.timeStamp === "string")
                 message.timeStamp = parseInt(object.timeStamp, 10);
             else if (typeof object.timeStamp === "number")
                 message.timeStamp = object.timeStamp;
             else if (typeof object.timeStamp === "object")
-                message.timeStamp = new $util.LongBits(object.timeStamp.low >>> 0, object.timeStamp.high >>> 0).toNumber();
+                message.timeStamp = new $util.LongBits(object.timeStamp.low >>> 0, object.timeStamp.high >>> 0).toNumber(true);
         if (object.nonce != null)
             if ($util.Long)
-                (message.nonce = $util.Long.fromValue(object.nonce)).unsigned = false;
+                (message.nonce = $util.Long.fromValue(object.nonce)).unsigned = true;
             else if (typeof object.nonce === "string")
                 message.nonce = parseInt(object.nonce, 10);
             else if (typeof object.nonce === "number")
                 message.nonce = object.nonce;
             else if (typeof object.nonce === "object")
-                message.nonce = new $util.LongBits(object.nonce.low >>> 0, object.nonce.high >>> 0).toNumber();
+                message.nonce = new $util.LongBits(object.nonce.low >>> 0, object.nonce.high >>> 0).toNumber(true);
         if (object.miner != null)
             if (typeof object.miner === "string")
                 $util.base64.decode(object.miner, message.miner = $util.newBuffer($util.base64.length(object.miner)), 0);
@@ -9336,12 +9336,12 @@ $root.BlockHeader = (function() {
             object.stateRoot = options.bytes === String ? "" : [];
             object.difficulty = 0;
             if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
+                var long = new $util.Long(0, 0, true);
                 object.timeStamp = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.timeStamp = options.longs === String ? "0" : 0;
             if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
+                var long = new $util.Long(0, 0, true);
                 object.nonce = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.nonce = options.longs === String ? "0" : 0;
@@ -9362,12 +9362,12 @@ $root.BlockHeader = (function() {
             if (typeof message.timeStamp === "number")
                 object.timeStamp = options.longs === String ? String(message.timeStamp) : message.timeStamp;
             else
-                object.timeStamp = options.longs === String ? $util.Long.prototype.toString.call(message.timeStamp) : options.longs === Number ? new $util.LongBits(message.timeStamp.low >>> 0, message.timeStamp.high >>> 0).toNumber() : message.timeStamp;
+                object.timeStamp = options.longs === String ? $util.Long.prototype.toString.call(message.timeStamp) : options.longs === Number ? new $util.LongBits(message.timeStamp.low >>> 0, message.timeStamp.high >>> 0).toNumber(true) : message.timeStamp;
         if (message.nonce != null && message.hasOwnProperty("nonce"))
             if (typeof message.nonce === "number")
                 object.nonce = options.longs === String ? String(message.nonce) : message.nonce;
             else
-                object.nonce = options.longs === String ? $util.Long.prototype.toString.call(message.nonce) : options.longs === Number ? new $util.LongBits(message.nonce.low >>> 0, message.nonce.high >>> 0).toNumber() : message.nonce;
+                object.nonce = options.longs === String ? $util.Long.prototype.toString.call(message.nonce) : options.longs === Number ? new $util.LongBits(message.nonce.low >>> 0, message.nonce.high >>> 0).toNumber(true) : message.nonce;
         if (message.miner != null && message.hasOwnProperty("miner"))
             object.miner = options.bytes === String ? $util.base64.encode(message.miner, 0, message.miner.length) : options.bytes === Array ? Array.prototype.slice.call(message.miner) : message.miner;
         return object;
@@ -9385,237 +9385,6 @@ $root.BlockHeader = (function() {
     };
 
     return BlockHeader;
-})();
-
-$root.BlockHeaders = (function() {
-
-    /**
-     * Properties of a BlockHeaders.
-     * @exports IBlockHeaders
-     * @interface IBlockHeaders
-     * @property {Array.<IBlockHeader>|null} [blockHeaders] BlockHeaders blockHeaders
-     * @property {number|null} [maxHeight] BlockHeaders maxHeight
-     */
-
-    /**
-     * Constructs a new BlockHeaders.
-     * @exports BlockHeaders
-     * @classdesc Represents a BlockHeaders.
-     * @implements IBlockHeaders
-     * @constructor
-     * @param {IBlockHeaders=} [properties] Properties to set
-     */
-    function BlockHeaders(properties) {
-        this.blockHeaders = [];
-        if (properties)
-            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                if (properties[keys[i]] != null)
-                    this[keys[i]] = properties[keys[i]];
-    }
-
-    /**
-     * BlockHeaders blockHeaders.
-     * @member {Array.<IBlockHeader>} blockHeaders
-     * @memberof BlockHeaders
-     * @instance
-     */
-    BlockHeaders.prototype.blockHeaders = $util.emptyArray;
-
-    /**
-     * BlockHeaders maxHeight.
-     * @member {number} maxHeight
-     * @memberof BlockHeaders
-     * @instance
-     */
-    BlockHeaders.prototype.maxHeight = 0;
-
-    /**
-     * Creates a new BlockHeaders instance using the specified properties.
-     * @function create
-     * @memberof BlockHeaders
-     * @static
-     * @param {IBlockHeaders=} [properties] Properties to set
-     * @returns {BlockHeaders} BlockHeaders instance
-     */
-    BlockHeaders.create = function create(properties) {
-        return new BlockHeaders(properties);
-    };
-
-    /**
-     * Encodes the specified BlockHeaders message. Does not implicitly {@link BlockHeaders.verify|verify} messages.
-     * @function encode
-     * @memberof BlockHeaders
-     * @static
-     * @param {IBlockHeaders} message BlockHeaders message or plain object to encode
-     * @param {$protobuf.Writer} [writer] Writer to encode to
-     * @returns {$protobuf.Writer} Writer
-     */
-    BlockHeaders.encode = function encode(message, writer) {
-        if (!writer)
-            writer = $Writer.create();
-        if (message.blockHeaders != null && message.blockHeaders.length)
-            for (var i = 0; i < message.blockHeaders.length; ++i)
-                $root.BlockHeader.encode(message.blockHeaders[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
-        if (message.maxHeight != null && message.hasOwnProperty("maxHeight"))
-            writer.uint32(/* id 2, wireType 0 =*/16).int32(message.maxHeight);
-        return writer;
-    };
-
-    /**
-     * Encodes the specified BlockHeaders message, length delimited. Does not implicitly {@link BlockHeaders.verify|verify} messages.
-     * @function encodeDelimited
-     * @memberof BlockHeaders
-     * @static
-     * @param {IBlockHeaders} message BlockHeaders message or plain object to encode
-     * @param {$protobuf.Writer} [writer] Writer to encode to
-     * @returns {$protobuf.Writer} Writer
-     */
-    BlockHeaders.encodeDelimited = function encodeDelimited(message, writer) {
-        return this.encode(message, writer).ldelim();
-    };
-
-    /**
-     * Decodes a BlockHeaders message from the specified reader or buffer.
-     * @function decode
-     * @memberof BlockHeaders
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @param {number} [length] Message length if known beforehand
-     * @returns {BlockHeaders} BlockHeaders
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    BlockHeaders.decode = function decode(reader, length) {
-        if (!(reader instanceof $Reader))
-            reader = $Reader.create(reader);
-        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.BlockHeaders();
-        while (reader.pos < end) {
-            var tag = reader.uint32();
-            switch (tag >>> 3) {
-            case 1:
-                if (!(message.blockHeaders && message.blockHeaders.length))
-                    message.blockHeaders = [];
-                message.blockHeaders.push($root.BlockHeader.decode(reader, reader.uint32()));
-                break;
-            case 2:
-                message.maxHeight = reader.int32();
-                break;
-            default:
-                reader.skipType(tag & 7);
-                break;
-            }
-        }
-        return message;
-    };
-
-    /**
-     * Decodes a BlockHeaders message from the specified reader or buffer, length delimited.
-     * @function decodeDelimited
-     * @memberof BlockHeaders
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @returns {BlockHeaders} BlockHeaders
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    BlockHeaders.decodeDelimited = function decodeDelimited(reader) {
-        if (!(reader instanceof $Reader))
-            reader = new $Reader(reader);
-        return this.decode(reader, reader.uint32());
-    };
-
-    /**
-     * Verifies a BlockHeaders message.
-     * @function verify
-     * @memberof BlockHeaders
-     * @static
-     * @param {Object.<string,*>} message Plain object to verify
-     * @returns {string|null} `null` if valid, otherwise the reason why it is not
-     */
-    BlockHeaders.verify = function verify(message) {
-        if (typeof message !== "object" || message === null)
-            return "object expected";
-        if (message.blockHeaders != null && message.hasOwnProperty("blockHeaders")) {
-            if (!Array.isArray(message.blockHeaders))
-                return "blockHeaders: array expected";
-            for (var i = 0; i < message.blockHeaders.length; ++i) {
-                var error = $root.BlockHeader.verify(message.blockHeaders[i]);
-                if (error)
-                    return "blockHeaders." + error;
-            }
-        }
-        if (message.maxHeight != null && message.hasOwnProperty("maxHeight"))
-            if (!$util.isInteger(message.maxHeight))
-                return "maxHeight: integer expected";
-        return null;
-    };
-
-    /**
-     * Creates a BlockHeaders message from a plain object. Also converts values to their respective internal types.
-     * @function fromObject
-     * @memberof BlockHeaders
-     * @static
-     * @param {Object.<string,*>} object Plain object
-     * @returns {BlockHeaders} BlockHeaders
-     */
-    BlockHeaders.fromObject = function fromObject(object) {
-        if (object instanceof $root.BlockHeaders)
-            return object;
-        var message = new $root.BlockHeaders();
-        if (object.blockHeaders) {
-            if (!Array.isArray(object.blockHeaders))
-                throw TypeError(".BlockHeaders.blockHeaders: array expected");
-            message.blockHeaders = [];
-            for (var i = 0; i < object.blockHeaders.length; ++i) {
-                if (typeof object.blockHeaders[i] !== "object")
-                    throw TypeError(".BlockHeaders.blockHeaders: object expected");
-                message.blockHeaders[i] = $root.BlockHeader.fromObject(object.blockHeaders[i]);
-            }
-        }
-        if (object.maxHeight != null)
-            message.maxHeight = object.maxHeight | 0;
-        return message;
-    };
-
-    /**
-     * Creates a plain object from a BlockHeaders message. Also converts values to other types if specified.
-     * @function toObject
-     * @memberof BlockHeaders
-     * @static
-     * @param {BlockHeaders} message BlockHeaders
-     * @param {$protobuf.IConversionOptions} [options] Conversion options
-     * @returns {Object.<string,*>} Plain object
-     */
-    BlockHeaders.toObject = function toObject(message, options) {
-        if (!options)
-            options = {};
-        var object = {};
-        if (options.arrays || options.defaults)
-            object.blockHeaders = [];
-        if (options.defaults)
-            object.maxHeight = 0;
-        if (message.blockHeaders && message.blockHeaders.length) {
-            object.blockHeaders = [];
-            for (var j = 0; j < message.blockHeaders.length; ++j)
-                object.blockHeaders[j] = $root.BlockHeader.toObject(message.blockHeaders[j], options);
-        }
-        if (message.maxHeight != null && message.hasOwnProperty("maxHeight"))
-            object.maxHeight = message.maxHeight;
-        return object;
-    };
-
-    /**
-     * Converts this BlockHeaders to JSON.
-     * @function toJSON
-     * @memberof BlockHeaders
-     * @instance
-     * @returns {Object.<string,*>} JSON object
-     */
-    BlockHeaders.prototype.toJSON = function toJSON() {
-        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-    };
-
-    return BlockHeaders;
 })();
 
 $root.Peer = (function() {
@@ -9670,7 +9439,7 @@ $root.Peer = (function() {
      * @memberof Peer
      * @instance
      */
-    Peer.prototype.lastSeen = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    Peer.prototype.lastSeen = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
     /**
      * Peer failCount.
@@ -9686,7 +9455,7 @@ $root.Peer = (function() {
      * @memberof Peer
      * @instance
      */
-    Peer.prototype.lastAttempt = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    Peer.prototype.lastAttempt = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
     /**
      * Peer active.
@@ -9731,13 +9500,13 @@ $root.Peer = (function() {
         if (message.host != null && message.hasOwnProperty("host"))
             writer.uint32(/* id 1, wireType 2 =*/10).string(message.host);
         if (message.port != null && message.hasOwnProperty("port"))
-            writer.uint32(/* id 2, wireType 0 =*/16).int32(message.port);
+            writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.port);
         if (message.lastSeen != null && message.hasOwnProperty("lastSeen"))
-            writer.uint32(/* id 3, wireType 0 =*/24).int64(message.lastSeen);
+            writer.uint32(/* id 3, wireType 0 =*/24).uint64(message.lastSeen);
         if (message.failCount != null && message.hasOwnProperty("failCount"))
-            writer.uint32(/* id 4, wireType 0 =*/32).int32(message.failCount);
+            writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.failCount);
         if (message.lastAttempt != null && message.hasOwnProperty("lastAttempt"))
-            writer.uint32(/* id 5, wireType 0 =*/40).int64(message.lastAttempt);
+            writer.uint32(/* id 5, wireType 0 =*/40).uint64(message.lastAttempt);
         if (message.active != null && message.hasOwnProperty("active"))
             writer.uint32(/* id 6, wireType 0 =*/48).bool(message.active);
         if (message.currentQueue != null && message.hasOwnProperty("currentQueue"))
@@ -9780,16 +9549,16 @@ $root.Peer = (function() {
                 message.host = reader.string();
                 break;
             case 2:
-                message.port = reader.int32();
+                message.port = reader.uint32();
                 break;
             case 3:
-                message.lastSeen = reader.int64();
+                message.lastSeen = reader.uint64();
                 break;
             case 4:
-                message.failCount = reader.int32();
+                message.failCount = reader.uint32();
                 break;
             case 5:
-                message.lastAttempt = reader.int64();
+                message.lastAttempt = reader.uint64();
                 break;
             case 6:
                 message.active = reader.bool();
@@ -9871,27 +9640,27 @@ $root.Peer = (function() {
         if (object.host != null)
             message.host = String(object.host);
         if (object.port != null)
-            message.port = object.port | 0;
+            message.port = object.port >>> 0;
         if (object.lastSeen != null)
             if ($util.Long)
-                (message.lastSeen = $util.Long.fromValue(object.lastSeen)).unsigned = false;
+                (message.lastSeen = $util.Long.fromValue(object.lastSeen)).unsigned = true;
             else if (typeof object.lastSeen === "string")
                 message.lastSeen = parseInt(object.lastSeen, 10);
             else if (typeof object.lastSeen === "number")
                 message.lastSeen = object.lastSeen;
             else if (typeof object.lastSeen === "object")
-                message.lastSeen = new $util.LongBits(object.lastSeen.low >>> 0, object.lastSeen.high >>> 0).toNumber();
+                message.lastSeen = new $util.LongBits(object.lastSeen.low >>> 0, object.lastSeen.high >>> 0).toNumber(true);
         if (object.failCount != null)
-            message.failCount = object.failCount | 0;
+            message.failCount = object.failCount >>> 0;
         if (object.lastAttempt != null)
             if ($util.Long)
-                (message.lastAttempt = $util.Long.fromValue(object.lastAttempt)).unsigned = false;
+                (message.lastAttempt = $util.Long.fromValue(object.lastAttempt)).unsigned = true;
             else if (typeof object.lastAttempt === "string")
                 message.lastAttempt = parseInt(object.lastAttempt, 10);
             else if (typeof object.lastAttempt === "number")
                 message.lastAttempt = object.lastAttempt;
             else if (typeof object.lastAttempt === "object")
-                message.lastAttempt = new $util.LongBits(object.lastAttempt.low >>> 0, object.lastAttempt.high >>> 0).toNumber();
+                message.lastAttempt = new $util.LongBits(object.lastAttempt.low >>> 0, object.lastAttempt.high >>> 0).toNumber(true);
         if (object.active != null)
             message.active = Boolean(object.active);
         if (object.currentQueue != null)
@@ -9916,13 +9685,13 @@ $root.Peer = (function() {
             object.host = "";
             object.port = 0;
             if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
+                var long = new $util.Long(0, 0, true);
                 object.lastSeen = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.lastSeen = options.longs === String ? "0" : 0;
             object.failCount = 0;
             if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
+                var long = new $util.Long(0, 0, true);
                 object.lastAttempt = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.lastAttempt = options.longs === String ? "0" : 0;
@@ -9937,14 +9706,14 @@ $root.Peer = (function() {
             if (typeof message.lastSeen === "number")
                 object.lastSeen = options.longs === String ? String(message.lastSeen) : message.lastSeen;
             else
-                object.lastSeen = options.longs === String ? $util.Long.prototype.toString.call(message.lastSeen) : options.longs === Number ? new $util.LongBits(message.lastSeen.low >>> 0, message.lastSeen.high >>> 0).toNumber() : message.lastSeen;
+                object.lastSeen = options.longs === String ? $util.Long.prototype.toString.call(message.lastSeen) : options.longs === Number ? new $util.LongBits(message.lastSeen.low >>> 0, message.lastSeen.high >>> 0).toNumber(true) : message.lastSeen;
         if (message.failCount != null && message.hasOwnProperty("failCount"))
             object.failCount = message.failCount;
         if (message.lastAttempt != null && message.hasOwnProperty("lastAttempt"))
             if (typeof message.lastAttempt === "number")
                 object.lastAttempt = options.longs === String ? String(message.lastAttempt) : message.lastAttempt;
             else
-                object.lastAttempt = options.longs === String ? $util.Long.prototype.toString.call(message.lastAttempt) : options.longs === Number ? new $util.LongBits(message.lastAttempt.low >>> 0, message.lastAttempt.high >>> 0).toNumber() : message.lastAttempt;
+                object.lastAttempt = options.longs === String ? $util.Long.prototype.toString.call(message.lastAttempt) : options.longs === Number ? new $util.LongBits(message.lastAttempt.low >>> 0, message.lastAttempt.high >>> 0).toNumber(true) : message.lastAttempt;
         if (message.active != null && message.hasOwnProperty("active"))
             object.active = message.active;
         if (message.currentQueue != null && message.hasOwnProperty("currentQueue"))
@@ -10059,7 +9828,7 @@ $root.DBState = (function() {
         if (message.node != null && message.hasOwnProperty("node"))
             $root.StateNode.encode(message.node, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
         if (message.refCount != null && message.hasOwnProperty("refCount"))
-            writer.uint32(/* id 3, wireType 0 =*/24).int32(message.refCount);
+            writer.uint32(/* id 3, wireType 0 =*/24).uint32(message.refCount);
         return writer;
     };
 
@@ -10101,7 +9870,7 @@ $root.DBState = (function() {
                 message.node = $root.StateNode.decode(reader, reader.uint32());
                 break;
             case 3:
-                message.refCount = reader.int32();
+                message.refCount = reader.uint32();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -10190,7 +9959,7 @@ $root.DBState = (function() {
             message.node = $root.StateNode.fromObject(object.node);
         }
         if (object.refCount != null)
-            message.refCount = object.refCount | 0;
+            message.refCount = object.refCount >>> 0;
         return message;
     };
 
@@ -10307,7 +10076,7 @@ $root.Account = (function() {
         if (message.balance != null && message.hasOwnProperty("balance"))
             writer.uint32(/* id 1, wireType 0 =*/8).uint64(message.balance);
         if (message.nonce != null && message.hasOwnProperty("nonce"))
-            writer.uint32(/* id 2, wireType 0 =*/16).int32(message.nonce);
+            writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.nonce);
         return writer;
     };
 
@@ -10346,7 +10115,7 @@ $root.Account = (function() {
                 message.balance = reader.uint64();
                 break;
             case 2:
-                message.nonce = reader.int32();
+                message.nonce = reader.uint32();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -10414,7 +10183,7 @@ $root.Account = (function() {
             else if (typeof object.balance === "object")
                 message.balance = new $util.LongBits(object.balance.low >>> 0, object.balance.high >>> 0).toNumber(true);
         if (object.nonce != null)
-            message.nonce = object.nonce | 0;
+            message.nonce = object.nonce >>> 0;
         return message;
     };
 

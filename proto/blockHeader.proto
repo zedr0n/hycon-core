@@ -5,13 +5,8 @@ message BlockHeader {
     repeated bytes previousHash = 1;
     bytes merkleRoot = 2;
     bytes stateRoot = 3; 
-    int32 difficulty = 4;
-    int64 timeStamp = 5; 
-    int64 nonce = 6;
+    uint32 difficulty = 4;
+    uint64 timeStamp = 5; 
+    uint64 nonce = 6;
     bytes miner = 7;
-}
-
-message BlockHeaders {
-  repeated BlockHeader blockHeaders = 1;
-  int32 maxHeight = 2;
 }
