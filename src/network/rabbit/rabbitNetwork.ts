@@ -258,6 +258,8 @@ export class RabbitNetwork implements INetwork {
         this.peers.set(key, peer)
         socket.on("close", async (error) => {
             this.peers.delete(key)
+            if (this.endPoints.has(key))
+                this.endPoints.delete(key)
             logger.debug(`disconnected from ${key} ${ipeer.host}:${ipeer.port}`)
 
         })
