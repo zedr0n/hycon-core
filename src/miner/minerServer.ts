@@ -16,8 +16,8 @@ export class MinerServer implements IMiner {
     public static async checkNonce(preHash: Uint8Array, nonce: Long, difficulty: Difficulty): Promise<boolean> {
         const buffer = Buffer.allocUnsafe(72)
         buffer.fill(preHash, 0, 64)
-        buffer.writeUInt32LE(nonce.low, 64)
-        buffer.writeUInt32LE(nonce.high, 68)
+        buffer.writeUInt32LE(nonce.getLowBitsUnsigned(), 64)
+        buffer.writeUInt32LE(nonce.getHighBitsUnsigned(), 68)
         return difficulty.acceptable(await Hash.hashCryptonight(buffer))
     }
 
