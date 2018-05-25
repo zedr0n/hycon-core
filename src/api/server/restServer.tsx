@@ -327,7 +327,7 @@ export class RestServer implements IRest {
             if (hyconBlock.header instanceof BlockHeader) {
                 Object.assign(webBlock, {
                     prevBlock: hyconBlock.header.previousHash.toString(),
-                    nonce: zeroPad(hyconBlock.header.nonce.low.toString(), 8) + zeroPad(hyconBlock.header.nonce.high.toString(), 8),
+                    nonce: zeroPad(hyconBlock.header.nonce.low.toString(16), 8) + zeroPad(hyconBlock.header.nonce.high.toString(16), 8),
                     miner: hyconBlock.header.miner.toString(),
                 })
 
@@ -395,7 +395,7 @@ export class RestServer implements IRest {
                 if (dbblock.header instanceof BlockHeader) {
                     Object.assign(webBlock, {
                         prevBlock: dbblock.header.previousHash,
-                        nonce: zeroPad(dbblock.header.nonce.low.toString(), 8) + zeroPad(dbblock.header.nonce.high.toString(), 8),
+                        nonce: zeroPad(dbblock.header.nonce.low.toString(16), 8) + zeroPad(dbblock.header.nonce.high.toString(16), 8),
                         miner: dbblock.header.miner.toString(),
                     })
                 }
