@@ -9,7 +9,7 @@
     "assets": "mnemonic/*"
   },
   "scripts": {
-    "hycon": "./node_modules/.bin/ts-node src/main.ts --port=8148 --str_port=9081 --api --api_port=2442",
+    "hycon": "./node_modules/.bin/ts-node src/main.ts --port=8148 --str_port=9081 --api --api_port=2442 --networkid=francis --cpuMiners=3",
     "start": "./node_modules/.bin/ts-node src/main.ts --port=8148 --str_port=9081 --cpuMiners=3 --api --api_port=2442 --networkid=hycon",
     "start2": "./node_modules/.bin/ts-node src/main.ts  --port=8149 --str_port=9082 --writing --cpuMiners=1",
     "start3": "./node_modules/.bin/ts-node src/main.ts  --port=8148 --writing --str_port=9081 --api --api_port=2442 --cpuMiners=1",
@@ -27,7 +27,7 @@
     "testNetwork2": "./node_modules/.bin/ts-node src/main.ts --port=8152 --str_port=9082 --writing",
     "testNetwork3": "./node_modules/.bin/ts-node src/main.ts --port=8153  --str_port=9083 --writing",
     "clear": "rm -rf blockdb* worldstate* rawblock* txDB* peerdb*",
-    "wallet": "./node_modules/.bin/ts-node src/util/genWallet.ts --wallet",
+    "wallet": "./node_modules/.bin/ts-node src/util/genWallet.ts",
     "visTest": "./node_modules/.bin/ts-node src/util/visTest.ts",
     "package": "tsc && pkg package.json",
     "block:build": "cd ./src/api/client && webpack",
@@ -126,6 +126,7 @@
     "try-require": "^1.2.1",
     "tunnel-agent": "^0.6.0",
     "typescript-collections": "^1.3.2",
+    "uuid": "^3.2.1",
     "wallet.ts": "^0.2.5"
   }
 }

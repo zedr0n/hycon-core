@@ -254,6 +254,9 @@ export interface IStatus {
 
     /** Status port */
     port?: number;
+
+    /** Status guid */
+    guid?: string;
 }
 
 /** Represents a Status. */
@@ -273,6 +276,9 @@ export class Status implements IStatus {
 
     /** Status port. */
     public port: number;
+
+    /** Status guid. */
+    public guid: string;
 
     /**
      * Creates a new Status instance using the specified properties.

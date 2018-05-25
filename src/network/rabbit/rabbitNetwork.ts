@@ -14,6 +14,7 @@ import { NatUpnp } from "../nat"
 import { PeerDb } from "../peerDb"
 import { UpnpClient, UpnpServer } from "../upnp"
 import { RabbitPeer } from "./rabbitPeer"
+const uuidv4 = require('uuid/v4');
 
 const logger = getLogger("Network")
 
@@ -25,43 +26,7 @@ export class RabbitNetwork implements INetwork {
         { host: "rapid3.hycon.io", port: 8148 },
     ]
     public static failLimit: number
-    public static isRemoteSocket(socket: net.Socket) {
-        let host = socket.remoteAddress
-        if (!net.isIP(host)) {
-            return true
-        }
-        if (net.isIPv6(host)) {
-            // TODO: fd00::/8
-            host = RabbitNetwork.ipNormalise(host)
-        }
-        if (net.isIPv4(host)) {
-            // 10.0.0.0 – 10.255.255.255      10/8
-            const block1 = new netmask.Netmask("10.0.0.0/8")
-            if (block1.contains(host)) {
-                return false
-            }
-            // 172.16.0.0 – 172.31.255.255    172.16/12
-            const block2 = new netmask.Netmask("172.16.0.0/12")
-            if (block2.contains(host)) {
-                return false
-            }
-            // 192.168.0.0 – 192.168.255.255  192.168/16
-            const block3 = new netmask.Netmask("192.168.0.0/16")
-            if (block3.contains(host)) {
-                return false
-            }
-            // 127.0.0.0 – 127.255.255.255    127/8
-            const block4 = new netmask.Netmask("127.0.0.0/8")
-            if (block4.contains(host)) {
-                return false
-            }
-            // 0.0.0.0
-            if (host === "0.0.0.0") {
-                return false
-            }
-        }
-        return true
-    }
+
 
     public static ipNormalise(ipv6: string): string {
         const ipTemp: string[] = ipv6.split(":")
@@ -72,6 +37,7 @@ export class RabbitNetwork implements INetwork {
     public networkid: string = "hycon"
     public readonly version: number = 3
     public port: number
+    public guid: string // unique id to prevent self connecting
 
     private hycon: Server
     private server: net.Server
@@ -84,6 +50,7 @@ export class RabbitNetwork implements INetwork {
     private upnpClient: UpnpClient
     private natUpnp: NatUpnp
 
+
     constructor(hycon: Server, port: number = 8148, peerDbPath: string = "peerdb", networkid: string = "hycon") {
         RabbitNetwork.failLimit = 10
         this.port = port
@@ -94,8 +61,25 @@ export class RabbitNetwork implements INetwork {
         this.endPoints = new Map<number, proto.IPeer>()
         this.pendingConnections = new Map<number, proto.IPeer>()
         this.peerDB = new PeerDb(peerDbPath)
+        this.guid = uuidv4()
+        logger.info(`TcpNetwork Port=${port} Session Guid=${this.guid}`)
+    }
 
-        logger.debug(`TcpNetwork Port=${port}`)
+    public async guidCheck(peer: RabbitPeer, peerStatus: proto.IStatus): Promise<void> {
+        if (peerStatus && peerStatus.guid !== this.guid) {
+            // it's not my self
+            const socket = peer.getSocket()
+            const ipeer = { host: RabbitNetwork.ipNormalise(socket.remoteAddress), port: peerStatus.port }
+            await this.peerDB.seen(ipeer)
+            const key = PeerDb.ipeer2key(ipeer)
+            this.endPoints.set(key, ipeer)
+            // ok
+        }
+        else {
+            // the self connection
+            logger.debug(`GuidCheck Self-Connection Disconnect ${peer.socketBuffer.getInfo()}`)
+            peer.disconnect()
+        }
     }
 
     public async getConnections(): Promise<proto.IPeer[]> {
@@ -229,14 +213,14 @@ export class RabbitNetwork implements INetwork {
                     const peer = await this.newConnection(socket)
                     logger.info(`Connected to ${key}: ${host}:${port} Info ${peer.socketBuffer.getInfo()}`)
                     ipeer.host = socket.remoteAddress
-
+                    const peerStatus = await peer.detectStatus()
                     if (!RabbitNetwork.useSelfConnection) {
-                        if (peer.isSelfConnection(this.port)) {
+                        if (peerStatus.guid === this.guid) {
                             reject("Peer is myself")
                             peer.disconnect()
                         }
                     }
-                    if (await peer.detectStatus()) {
+                    if (peerStatus) {
                         if (save) {
                             this.endPoints.set(key, ipeer)
                             socket.on("close", () => this.endPoints.delete(key))
@@ -261,20 +245,11 @@ export class RabbitNetwork implements INetwork {
         try {
             logger.debug(`Detect a incoming peer ${RabbitNetwork.ipNormalise(socket.remoteAddress)}:${socket.remotePort}`)
             const peer = await this.newConnection(socket)
-            if (RabbitNetwork.isRemoteSocket(socket)) {
-                const status = await peer.status()
-                if (await peer.detectStatus()) {
-                    const ipeer = { host: RabbitNetwork.ipNormalise(socket.remoteAddress), port: status.port }
-                    await this.peerDB.seen(ipeer)
-                    const key = PeerDb.ipeer2key(ipeer)
-                    this.endPoints.set(key, ipeer)
-                    socket.on("close", () => this.endPoints.delete(key))
-                }
-            }
         } catch (e) {
             logger.debug(e)
         }
     }
+
 
     private async newConnection(socket: Socket): Promise<RabbitPeer> {
         const peer = new RabbitPeer(socket, this, this.hycon.consensus, this.hycon.txPool, this.peerDB)

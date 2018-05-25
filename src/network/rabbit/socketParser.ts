@@ -76,6 +76,9 @@ export class SocketParser {
         }
     }
 
+    public getSocket(): Socket {
+        return this.socket
+    }
     public isSelfConnection(port: number): boolean {
         const ret = this.socket.localAddress === this.socket.remoteAddress && this.socket.remotePort === port
         return ret

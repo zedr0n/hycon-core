@@ -33,10 +33,13 @@ export class RabbitPeer extends BasePeer implements IPeer {
         this.txPool = txPool
         this.peerDB = peerDB
     }
+    public getSocket(): Socket {
+        return this.socketBuffer.getSocket()
+    }
     public isSelfConnection(port: number): boolean {
         return this.socketBuffer.isSelfConnection(port)
     }
-    public async detectStatus(): Promise<boolean> {
+    public async detectStatus(): Promise<proto.IStatus> {
         const status = await this.status()
         const remoteNetworkId = status.networkid
         const myNetworkId = Server.globalOptions.networkid
@@ -45,9 +48,9 @@ export class RabbitPeer extends BasePeer implements IPeer {
         } else {
             logger.info(`Different NetworkID LocalNetworkID=${myNetworkId} RemoteNetworkID=${remoteNetworkId}`)
             this.disconnect()
-            return false
+            return undefined
         }
-        return true
+        return status
     }
 
     public async getTip(): Promise<{ hash: Hash, height: number }> {
@@ -83,6 +86,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 networkid: this.network.networkid,
                 port: this.network.port,
                 version: this.network.version,
+                guid: this.network.guid
             },
         })
         if (reply.statusReturn === undefined) {
@@ -265,12 +269,15 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     private async respondStatus(reply: boolean, request: proto.IStatus): Promise<IResponse> {
+        let receviedStatus = new proto.Status(request)
+        await this.network.guidCheck(this, receviedStatus)
         const message: proto.INetwork = {
             statusReturn: {
                 status: {
                     networkid: this.network.networkid,
                     port: this.network.port,
                     version: this.network.version,
+                    guid: this.network.guid
                 },
                 success: true,
             },
