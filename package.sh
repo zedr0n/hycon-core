@@ -1,7 +1,7 @@
 platform=${1:?"requires an argument macos | linux | win" }
 output_dir=bundle-$platform
 build_time=$(date +"%Y%m%d_%I%M")
-file_name=$build_time_$platform.zip
+file_name=$build_time'_'$platform'.zip'
 npm i
 npm run clear
 rm -rf build
@@ -46,4 +46,4 @@ cp -rf ../src/api/clientDist ./src/api/
 cp -f ../launch.sh.command .
 cd ..
 zip -r $file_name $output_dir
-mv $file_name ../
+cp $file_name ~/$file_name
