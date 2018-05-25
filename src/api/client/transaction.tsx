@@ -8,7 +8,7 @@ import { Link } from "react-router-dom"
 import { IBlock, IHyconWallet, IRest } from "./rest"
 import { hyconfromString, hycontoString } from "./util/commonUtil"
 export class Transaction extends React.Component<any, any> {
-    public currentMinerFee = 0
+    public currentMinerFee = "0"
     public currentReturnedFee = 0
 
     public mounted = false
@@ -21,12 +21,10 @@ export class Transaction extends React.Component<any, any> {
         this.state = {
             address: "",
             amount: 0,
-            dialogFee: "0,0",
             hint: "",
             isHint: false,
             isLoading: false,
-            left: 0,
-            minerFee: 0,
+            minerFee: 1,
             name: props.name,
             piggyBank: "0",
             rest: props.rest,
@@ -36,8 +34,6 @@ export class Transaction extends React.Component<any, any> {
         this.handleInputChange = this.handleInputChange.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
 
-        this.handleOpenDialog = this.handleOpenDialog.bind(this)
-        this.handleCloseDialog = this.handleCloseDialog.bind(this)
     }
 
     public getRandomInt(min: number, max: number): number {
@@ -58,39 +54,15 @@ export class Transaction extends React.Component<any, any> {
                 }
             })
     }
-    public handleOpenDialog() {
-        if (this.state.amount !== 0) {
-            this.setState({ visible: true })
-        } else {
-            alert("Please select a trasaction amount")
-        }
-    }
-
-    public handleCloseDialog() {
-        this.setState({ visible: false })
-    }
 
     public handlePassword(data: any) {
         this.setState({ password: data.target.value })
-    }
-
-    public handleSubmitDialog() {
-        const tempMinerFee = this.state.dialogFee.split(",")[0]
-        const tempLeft = this.state.dialogFee.split(",")[1]
-        this.setState({
-            left: tempLeft,
-            minerFee: tempMinerFee,
-        })
-        this.handleCloseDialog()
     }
 
     public handleInputChange(event: any) {
         const target = event.target
         const value = target.value
         const name = target.name
-
-        let newMinerFee = 0
-        const newReturnedFee = 0
 
         if (name === "amount") {
             const temp: string = value
@@ -103,38 +75,31 @@ export class Transaction extends React.Component<any, any> {
 
             }
 
-            newMinerFee = 1
-            if (target.value === 0) {
-                newMinerFee = 0
+            if (hyconfromString(target.value).add(hyconfromString(this.state.minerFee)).greaterThan(hyconfromString(this.state.piggyBank))) {
+                alert(`You can't spend the money you don't have`)
+            } else {
+                this.setState({
+                    [name]: value,
+                })
+                this.currentMinerFee = hycontoString(hyconfromString(this.state.piggyBank).subtract(hyconfromString(target.value)))
             }
-            this.setState({
-                dialogFee: newMinerFee + "," + 0,
-                left: newReturnedFee,
-                minerFee: newMinerFee,
-                [name]: value,
-            })
-            this.currentMinerFee = newMinerFee
-            this.currentReturnedFee = 0
-
         } else if (name === "address") {
             this.setState({
                 [name]: value,
             })
         } else if (name === "minerFee") {
-            const temp: string = value
-            if (temp.match("(^[0-9]*)([.]{0,1}[0-9]{0,9}$)") == null) {
-                alert("Please enter a number with up to 9 decimal places")
-            } else if (value > this.currentMinerFee) {
-                alert("You can't spend the money you don't have")
+            if (this.state.amount === 0 || this.state.address === "") {
+                alert(`Please should enter amount and address before enter miner fee.`)
             } else {
-                newMinerFee = this.state.piggyBank - target.value
-                if (target.value === 0) {
-                    newMinerFee = 0
+                const temp: string = value
+                if (temp.match("(^[0-9]*)([.]{0,1}[0-9]{0,9}$)") == null) {
+                    alert("Please enter a number with up to 9 decimal places")
+                } else if (hyconfromString(value).greaterThan(hyconfromString(this.currentMinerFee))) {
+                    alert("You can't spend the money you don't have")
+                    this.setState({ minerFee: 0 })
+                } else {
+                    this.setState({ minerFee: target.value })
                 }
-                this.currentReturnedFee = this.currentMinerFee - target.value
-                this.setState({
-                    dialogFee: target.value + "," + this.currentReturnedFee,
-                })
             }
         }
     }
@@ -151,27 +116,11 @@ export class Transaction extends React.Component<any, any> {
                         if (result === true) {
                             const newBank =
                                 hyconfromString(this.state.piggyBank).subtract(hyconfromString((this.state.amount)).subtract(hyconfromString(this.state.minerFee)))
-                            alert(
-                                "A transaction of " +
-                                this.formatDecimal(this.state.amount + "") +
-                                "Hc has been submitted to " +
-                                this.state.address +
-                                " with " +
-                                this.roundTo(this.state.minerFee) +
-                                "Hc as miner fees.",
+                            alert("A transaction of " + this.state.amount +
+                                "HYCON has been submitted to " + this.state.address +
+                                " with " + this.state.minerFee + "HYCON as miner fees.",
                             )
-
-                            this.setState({
-                                address: "who",
-                                amount: 0,
-                                dialogFee: "0,0",
-                                isLoading: false,
-                                left: 0,
-                                minerFee: 0,
-                                piggyBank: hycontoString(newBank),
-                                redirect: true,
-                                visible: false,
-                            })
+                            this.setState({ redirect: true })
                         } else {
                             alert("Fail to transfer hycon")
                             this.setState({ redirect: true })
@@ -186,30 +135,12 @@ export class Transaction extends React.Component<any, any> {
         event.preventDefault()
     }
 
-    public formatDecimal(num: string): string {
-        let x
-        if (num.toString().split("e").length !== 0) {
-            x = Number(num)
-            const s = x.toExponential().split("e")
-            const r = s[0].split(".")
-            let length = Math.abs(Number(s[1]))
-            if (r.length > 1) { length += r[1].length }
-            return x.toFixed(length)
-        } else {
-            return num
-        }
-    }
-
     public roundTo(n: number) {
-        const digits = 8
+        const digits = 9
         const multiplicator = Math.pow(10, digits)
         n = parseFloat((n * multiplicator).toFixed(11))
         const test = Math.round(n) / multiplicator
         return +test.toFixed(digits)
-    }
-
-    public precise(value: string) {
-        return (value = Number(value).toFixed(8))
     }
 
     public render() {
@@ -222,70 +153,37 @@ export class Transaction extends React.Component<any, any> {
         return (
             <div>
                 <h1 className="contentTransactionTitle">Transaction Process</h1>
-                <h2 className="contentSubTitle">Money Box : {this.state.piggyBank} Hycon</h2>
-                {/* <GoogleMapReact
-                    bootstrapURLKeys={{ key: "AIzaSyAp-2W8_T6dZjq71yOhxW1kRkbY6E1iyuk" }}
-                    defaultCenter={this.state.center}
-                    defaultZoom={this.state.zoom}
-                /> */}
+                <h2 className="contentSubTitle">{this.state.name} Balance : {this.state.piggyBank} Hycon</h2>
 
-                <form className="form">
+                <form className="form" >
                     <label className="">From Address : {this.state.wallet.address}
                     </label>
                     <br />
                     <br />
-                    <label className="">To Address :
-                        <input name="address" type="text" value={this.state.address} onChange={this.handleInputChange} />
+                    <label className="txLabel">To Address<br />
+                        <input name="address" className="txSendInput" type="text" value={this.state.address} onChange={this.handleInputChange} />
                     </label>
                     <br />
-                    <label className="">Amount :
-                        <input name="amount" type="text" value={this.state.amount} max={this.state.piggyBank} onChange={this.handleInputChange} />
+                    <label className="txLabel">Amount<br />
+                        <input name="amount" className="txSendInput" type="text" value={this.state.amount} max={this.state.piggyBank} onChange={this.handleInputChange} />
                     </label>
                     <br />
-                    <div className="feeDiv">
-                        <div className="inlineDiv">
-                            <p className="infoText">
-                                {" "}
-                                Miner fee : {this.roundTo(this.state.minerFee)}{" "}
-                            </p>
+                    <label className="txLabel">Miner fee<br />
+                        <input name="minerFee" className="txSendInput" type="text" value={this.state.minerFee} onChange={this.handleInputChange} />
+                    </label>
+                    <br />
+                    <label className="txLabel">Wallet Password<br />
+                        <div>
+                            <input name="password" className="txSendInput txSendInputPwd" type="password" onChange={(data) => { this.handlePassword(data) }} />
+                            {this.state.isHint ? (this.state.hint) : (<button className="btn btn-block btn-info blue hintBtn" onClick={(e) => this.showHint(e)}>Hint</button>)}
                         </div>
-                        <div className="inlineDiv">
-                            <button type="button" onClick={this.handleOpenDialog} className="buttonAjust" >Adjust the fee</button>
-                        </div>
-                        <div className="inlineDiv">
-                            <span> Wallet Password : <input name="password" type="password" onChange={(data) => { this.handlePassword(data) }} /></span>
-                            <span>
-                                {this.state.isHint ? (this.state.hint) : (<button className="btn btn-block btn-info blue" onClick={(e) => this.showHint(e)}>hint</button>)}
-                            </span>
-                        </div>
-                    </div>
-                    <Dialog title="Dialog With Actions" open={this.state.visible} className="dialog" >
-                        <span className="dialogTitle">
-                            {" "}Please select how much do you want to spend in the transaction fee:{" "}
-                        </span>
-                        <input type="range" step={0.000000001} min="0" max={this.currentMinerFee} value={this.state.dialogFee.split(",")[0]}
-                            className="slider" onChange={this.handleInputChange} name="minerFee" />
-                        {/* <span className="infoText">Miner fee: {this.roundTo((this.state.dialogFee).split(",")[0])} Hc</span> */}
-                        <div className="dialogForm">
-                            <div className="divDialog">
-                                <span className="infoTextDialog">Miner fee: </span>
-                                <input name="minerFee" type="text" value={this.state.dialogFee.split(",")[0]} max={this.currentMinerFee}
-                                    onChange={this.handleInputChange} className="dialogInput" />
-                            </div>
-                            <div className="divDialog2">
-                                <span className="infoTextDialog">Returned fee: </span>
-                                <span className="infoTextDialog">{this.roundTo(this.state.dialogFee.split(",")[1])} HYC</span>
-                            </div>
-                        </div>
+                    </label>
+                    <br />
 
-                        <button onClick={this.handleCloseDialog.bind(this)} className="btn btn--close dialog__btn" >Close</button>
-                        <button onClick={this.handleSubmitDialog.bind(this)} className="btn btn--sumit dialog__btn" >Submit</button>
-                    </Dialog>
                     <br />
                     {this.state.isLoading ? (
                         <CircularProgress size={50} thickness={2} />
                     ) : (
-                            // <input type="submit" value="Submit" />
                             <button className="btn btn-block btn-info green" onClick={this.handleSubmit}>Submit</button>
                         )}
                 </form>

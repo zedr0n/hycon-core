@@ -328,6 +328,30 @@ table {
   height: 2.5em;
   margin: 0 0 0 0 !important;
 }
+
+.txSendInput{
+  padding: 10px 20px !important;
+  width: 100%;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.txSendInputPwd{
+  width: 75% !important;
+}
+
+.txLabel{
+  width: 33em !important;
+}
+
+.hintBtn{
+  display: initial;
+  margin-left: 1em !important;
+  width: 21% !important;
+}
 /* .selectAccountDiv{
     padding: 1em 2em 1em 2em;
 } */

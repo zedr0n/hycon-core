@@ -567,9 +567,9 @@ export class RestServer implements IRest {
             logger.warn(`Account Balance: ${account.balance}`)
             logger.warn(`TX Amount: ${tx.amount}`)
             logger.warn(`TX Miner Fee: ${tx.minerFee}`)
-            const amt = parseInt(tx.amount.toString(), 10) + parseInt(tx.minerFee.toString(), 10)
-            logger.warn(`TX Total: ${amt}`)
-            if (hyconfromString(amt.toString()).greaterThan(account.balance)) {
+            const amt = hyconfromString(tx.amount.toString()).add(hyconfromString(tx.minerFee.toString()))
+            logger.warn(`TX Total: ${hycontoString(amt)}`)
+            if (amt.greaterThan(account.balance)) {
                 throw new Error("insufficient wallet balance to send transaction")
             }
             const signedTx = wallet.send(address, hyconfromString(tx.amount.toString()), account.nonce + 1, hyconfromString(tx.minerFee.toString()))
