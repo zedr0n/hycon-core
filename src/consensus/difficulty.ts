@@ -17,15 +17,6 @@ export class Difficulty {
         return new Difficulty(mantissa, exponent)
     }
 
-    public static getTarget(mantissa: number, exponent: number): Uint8Array {
-        const target = Buffer.alloc(32)
-        const targetMantissa = (0xFFFFFF - mantissa) * Math.pow(2, 8 - (exponent % 8)) + (Math.pow(2, 8 - (exponent % 8)) - 1)
-        const index = 28 - Math.floor(exponent / 8)
-        target.writeUInt32LE(targetMantissa, index)
-        target.fill(0xFF, 0, index)
-
-        return new Uint8Array(target)
-    }
     private static normalize(mantissa: number, exponent: number) {
         if (mantissa === 0) {
             return { mantissa: 1, exponent: 0 }
@@ -79,21 +70,35 @@ export class Difficulty {
         return this.exponent
     }
 
+    public getTarget(): Buffer {
+        const target = Buffer.alloc(32)
+        const targetMantissa = (0xFFFFFF - this.mantissa) * Math.pow(2, 8 - (this.exponent % 8)) + (Math.pow(2, 8 - (this.exponent % 8)) - 1)
+        const index = 28 - Math.floor(this.exponent / 8)
+        target.writeUInt32LE(targetMantissa, index)
+        target.fill(0xFF, 0, index)
+        return target
+    }
+
     public getMinerTarget(): string {
-        const buffer = Buffer.from(Difficulty.getTarget(this.mantissa, this.exponent) as Buffer)
-        return buffer.toString("hex")
+        return this.getTarget().slice(24, 32).toString("hex")
     }
 
     public encode(): number {
-        return (this.exponent << 24) + this.mantissa
+        if (this.mantissa > 0xFFFFFF || this.mantissa < 0) {
+            throw new Error(`Mantissa(0x${this.mantissa.toString(16)}) out of range, can not encode`)
+        }
+        if (this.exponent > 0xFF || this.exponent < 0) {
+            throw new Error(`Exponent(0x${this.exponent.toString(16)}) out of range, can not encode`)
+        }
+        return (this.exponent * Math.pow(2, 24)) + this.mantissa
     }
 
-    public acceptable(hash: Uint8Array | Hash, target?: Uint8Array): boolean {
+    public acceptable(hash: Uint8Array | Hash, target?: Buffer): boolean {
         if (!(hash instanceof Hash) && hash.length !== 32) {
             throw new Error(`Expected 32 byte hash, got ${hash.length} bytes`)
         }
         if (target === undefined) {
-            target = Difficulty.getTarget(this.mantissa, this.exponent)
+            target = this.getTarget()
         }
 
         for (let i = 31; i >= 0; i--) {
@@ -105,27 +110,6 @@ export class Difficulty {
             }
         }
         return true
-    }
-
-    public iterateMantissa() {
-        this.mantissa = 0xFFFF00
-        this.exponent = 0
-        const hashBytes = new Uint8Array(32)
-        while (this.mantissa <= 0xFFFFFF) {
-            let trueCount = 0
-            const target = Difficulty.getTarget(this.mantissa, this.exponent)
-            for (let i = 0; i <= 0xFF; i++) {
-                hashBytes[29] = i
-                if (this.acceptable(hashBytes, target)) {
-                    trueCount++
-                }
-                // for (let j = 0; j <= 0xFF; j++) {
-                //     hashBytes[30] = j
-                // }
-            }
-            logger.warn(`Mantissa: ${this.mantissa.toString(16)}, target: ${(Buffer.from(target.reverse() as Buffer)).toString("hex")}, trueCount: ${trueCount}, ratio: ${trueCount / 0x10000}`)
-            this.mantissa += 1
-        }
     }
 
     public greaterThan(difficulty: Difficulty): boolean {
