@@ -248,18 +248,16 @@ export class Transaction extends React.Component<any, any> {
                                 {" "}
                                 Miner fee : {this.roundTo(this.state.minerFee)}{" "}
                             </p>
-                            <p className="infoText">
-                                Returned fee : {this.roundTo(this.state.left)}
-                            </p>
                         </div>
                         <div className="inlineDiv">
                             <button type="button" onClick={this.handleOpenDialog} className="buttonAjust" >Adjust the fee</button>
                         </div>
-                        <label className="">
-                            Wallet Password : <input name="password" type="password" onChange={(data) => { this.handlePassword(data) }} />
-                        </label>
-                        {this.state.isHint ? (this.state.hint) : (<button onClick={(e) => this.showHint(e)}>hint</button>)}
-
+                        <div className="inlineDiv">
+                            <span> Wallet Password : <input name="password" type="password" onChange={(data) => { this.handlePassword(data) }} /></span>
+                            <span>
+                                {this.state.isHint ? (this.state.hint) : (<button className="btn btn-block btn-info blue" onClick={(e) => this.showHint(e)}>hint</button>)}
+                            </span>
+                        </div>
                     </div>
                     <Dialog title="Dialog With Actions" open={this.state.visible} className="dialog" >
                         <span className="dialogTitle">
@@ -288,7 +286,7 @@ export class Transaction extends React.Component<any, any> {
                         <CircularProgress size={50} thickness={2} />
                     ) : (
                             // <input type="submit" value="Submit" />
-                            <button onClick={this.handleSubmit}>Submit</button>
+                            <button className="btn btn-block btn-info green" onClick={this.handleSubmit}>Submit</button>
                         )}
                 </form>
             </div >
