@@ -1,5 +1,5 @@
 import * as React from "react"
-import { match, RouteComponentProps, RouteProps } from "react-router"
+import { match, Redirect, RouteComponentProps, RouteProps } from "react-router"
 import { RouteConfig } from "react-router-config"
 import { Link, Route, Switch } from "react-router-dom"
 
@@ -65,6 +65,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
             isParity: false,
             loading: false,
             name: "BlockExplorer",
+            searchVal: "",
             tx: "Tx 1",
         }
         this.rest = props.rest
@@ -108,7 +109,6 @@ export class App extends React.Component<{ rest: IRest }, any> {
             <WalletDetail name={match.params.name} rest={this.rest} />
         )
     }
-
     public render() {
         return (
             <div className="mdl-layout mdl-js-layout">
@@ -117,7 +117,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
                         <span className="mdl-layout-title">Hycon Blockexplorer</span>
                         <div className="mdl-layout-spacer" />
                         <nav className="mdl-navigation mdl-layout--large-screen-only">
-                            <form action="#">
+                            <form action={`/block/${this.state.searchVal}`}>
                                 <div className="mdl-textfield mdl-js-textfield mdl-textfield--expandable">
                                     <label
                                         className="mdl-button mdl-js-button mdl-button--icon"
@@ -130,7 +130,8 @@ export class App extends React.Component<{ rest: IRest }, any> {
                                             className="mdl-textfield__input searchBox"
                                             type="text"
                                             id="search"
-                                            placeholder="Hash"
+                                            placeholder="Block Hash"
+                                            onChange={(event) => this.updateSearchVal(event)}
                                         />
                                     </div>
                                 </div>
@@ -167,5 +168,8 @@ export class App extends React.Component<{ rest: IRest }, any> {
                 </main>
             </div>
         )
+    }
+    public updateSearchVal(event: any) {
+        this.setState({ searchVal: event.target.value })
     }
 }
