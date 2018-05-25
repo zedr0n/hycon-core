@@ -333,8 +333,8 @@ export class RestServer implements IRest {
 
                 const buffer = Buffer.allocUnsafe(72)
                 buffer.fill(hyconBlock.header.preHash(), 0, 64)
-                buffer.writeUInt32LE(hyconBlock.header.nonce.low, 64)
-                buffer.writeUInt32LE(hyconBlock.header.nonce.high, 68)
+                buffer.writeUInt32LE(hyconBlock.header.nonce.getLowBitsUnsigned(), 64)
+                buffer.writeUInt32LE(hyconBlock.header.nonce.getHighBitsUnsigned(), 68)
                 const result = await Hash.hashCryptonight(buffer)
 
                 Object.assign(webBlock, {
