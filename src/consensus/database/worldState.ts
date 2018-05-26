@@ -177,11 +177,12 @@ export class WorldState {
                 }
 
                 validTxs.push(tx)
-
+                logger.error(`Before tx from : ${hycontoString(fromAccount.balance)}(n:${fromAccount.nonce}) -> to : ${hycontoString(toAccount.balance)}(n:${toAccount.nonce}) / (amount: ${hycontoString(tx.amount)} / fee:${hycontoString(tx.fee)})`)
                 fees = fees.add(tx.fee)
                 fromAccount.balance = fromAccount.balance.sub(total)
                 toAccount.balance = toAccount.balance.add(tx.amount)
                 fromAccount.nonce++
+                logger.error(`After tx from : ${hycontoString(fromAccount.balance)}(n:${fromAccount.nonce}) -> to : ${hycontoString(toAccount.balance)}(n:${toAccount.nonce}) / (amount: ${hycontoString(tx.amount)} / fee:${hycontoString(tx.fee)})`)
                 if (fromIndex === undefined) {
                     mapIndex.set(tx.from.toString(), changes.push({ address: tx.from, account: fromAccount }) - 1)
                 } else {
@@ -206,9 +207,10 @@ export class WorldState {
                 }
                 if (minerAccount === undefined) { minerAccount = new Account({ balance: 0, nonce: 0 }) }
 
+                logger.error(`Before Miner Reward(${minerAddress.toString()}) : ${hycontoString(minerAccount.balance)} / Fees: ${hycontoString(fees)}`)
                 fees = fees.add(hyconfromString("240"))
                 minerAccount.balance = minerAccount.balance.add(fees)
-
+                logger.error(`After Miner Reward(${minerAddress.toString()}) : ${hycontoString(minerAccount.balance)}`)
                 if (minerIndex === undefined) {
                     mapIndex.set(minerAddress.toString(), changes.push({ address: minerAddress, account: minerAccount }) - 1)
                 } else {
