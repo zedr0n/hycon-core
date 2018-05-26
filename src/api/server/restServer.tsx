@@ -560,19 +560,25 @@ export class RestServer implements IRest {
         try {
             await Wallet.walletInit()
             const wallet = await Wallet.loadKeys(tx.name, tx.password)
-            const address = new Address(tx.address)
-            const account = await this.consensus.getAccount(wallet.pubKey.address())
-            logger.warn(`Account Balance: ${account.balance}`)
-            logger.warn(`TX Amount: ${tx.amount}`)
-            logger.warn(`TX Miner Fee: ${tx.minerFee}`)
-            const amt = hyconfromString(tx.amount.toString()).add(hyconfromString(tx.minerFee.toString()))
-            logger.warn(`TX Total: ${hycontoString(amt)}`)
-            if (amt.greaterThan(account.balance)) {
-                throw new Error("insufficient wallet balance to send transaction")
+            const isExsited = this.txPool.isExsited(wallet.pubKey.address())
+            if (!isExsited) {
+                const address = new Address(tx.address)
+                const account = await this.consensus.getAccount(wallet.pubKey.address())
+                logger.warn(`Account Balance: ${account.balance}`)
+                logger.warn(`TX Amount: ${tx.amount}`)
+                logger.warn(`TX Miner Fee: ${tx.minerFee}`)
+                const amt = hyconfromString(tx.amount.toString()).add(hyconfromString(tx.minerFee.toString()))
+                logger.warn(`TX Total: ${hycontoString(amt)}`)
+                if (amt.greaterThan(account.balance)) {
+                    throw new Error("insufficient wallet balance to send transaction")
+                }
+                const signedTx = wallet.send(address, hyconfromString(tx.amount.toString()), account.nonce + 1, hyconfromString(tx.minerFee.toString()))
+                if (queueTx) { queueTx(signedTx) } else { return Promise.reject(false) }
+                return Promise.resolve(true)
+            } else {
+                logger.warn(`Already exsited from Address in txPool (Related with nonce)`)
+                return Promise.resolve(false)
             }
-            const signedTx = wallet.send(address, hyconfromString(tx.amount.toString()), account.nonce + 1, hyconfromString(tx.minerFee.toString()))
-            if (queueTx) { queueTx(signedTx) } else { return Promise.reject(false) }
-            return Promise.resolve(true)
         } catch (e) {
             logger.warn(e)
             return Promise.resolve(false)

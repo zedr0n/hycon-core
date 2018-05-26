@@ -3,6 +3,7 @@ import { NewTx } from "../serialization/proto"
 import { Server } from "../server"
 import { hyconfromString } from "../util/commonUtil"
 import { Hash } from "../util/hash"
+import { Address } from "./address"
 import { ITxPool } from "./itxPool"
 import { SignedTx } from "./txSigned"
 // tslint:disable-next-line:no-var-requires
@@ -86,6 +87,17 @@ export class TxPool implements ITxPool {
 
     public getTxs(): SignedTx[] {
         return this.txs
+    }
+
+    public isExsited(address: Address): boolean {
+        let isExsited = false
+        for (const tx of this.txs) {
+            if (tx.from.equals(address)) {
+                isExsited = true
+                break
+            }
+        }
+        return isExsited
     }
 
     private insert(newTxs: SignedTx[]): { count: number, lowestIndex?: number } {
