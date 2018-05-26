@@ -81,9 +81,13 @@ export class Transaction extends React.Component<any, any> {
                 this.currentMinerFee = hycontoString(hyconfromString(this.state.piggyBank).subtract(hyconfromString(target.value)))
             }
         } else if (name === "address") {
-            this.setState({
-                [name]: value,
-            })
+            if (value === this.state.wallet.address) {
+                alert(`You can not send HYCON to yourself.`)
+            } else {
+                this.setState({
+                    [name]: value,
+                })
+            }
         } else if (name === "minerFee") {
             if (this.state.amount === 0 || this.state.address === "") {
                 alert(`Please should enter amount and address before enter miner fee.`)
@@ -104,25 +108,26 @@ export class Transaction extends React.Component<any, any> {
     public handleSubmit(event: any) {
         if (this.state.address !== "" && this.state.address !== undefined) {
             if (this.state.amount > 0) {
-                this.setState({
-                    isLoading: true,
-                })
-                this.state.rest
-                    .sendTx({ name: this.state.name, password: this.state.password, address: this.state.address, amount: this.state.amount.toString(), minerFee: this.state.minerFee.toString() })
-                    .then((result: boolean) => {
-                        if (result === true) {
-                            const newBank =
-                                hyconfromString(this.state.piggyBank).subtract(hyconfromString((this.state.amount)).subtract(hyconfromString(this.state.minerFee)))
-                            alert("A transaction of " + this.state.amount +
-                                "HYCON has been submitted to " + this.state.address +
-                                " with " + this.state.minerFee + "HYCON as miner fees.",
-                            )
-                            this.setState({ redirect: true })
-                        } else {
-                            alert("Fail to transfer hycon")
-                            this.setState({ redirect: true })
-                        }
-                    })
+                if (this.state.wallet.address === this.state.address) {
+                    alert(`You can not send HYCON to yourself.`)
+                } else {
+                    this.setState({ isLoading: true })
+                    this.state.rest.sendTx({ name: this.state.name, password: this.state.password, address: this.state.address, amount: this.state.amount.toString(), minerFee: this.state.minerFee.toString() })
+                        .then((result: boolean) => {
+                            if (result === true) {
+                                const newBank =
+                                    hyconfromString(this.state.piggyBank).subtract(hyconfromString((this.state.amount)).subtract(hyconfromString(this.state.minerFee)))
+                                alert("A transaction of " + this.state.amount +
+                                    "HYCON has been submitted to " + this.state.address +
+                                    " with " + this.state.minerFee + "HYCON as miner fees.",
+                                )
+                                this.setState({ redirect: true })
+                            } else {
+                                alert("Fail to transfer hycon")
+                                this.setState({ redirect: true })
+                            }
+                        })
+                }
             } else {
                 alert("Enter a valid transaction amount")
             }
