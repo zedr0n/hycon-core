@@ -295,6 +295,9 @@ export class Wallet {
 
     public async save(name: string, password: string, hint?: string): Promise<undefined> {
         try {
+            if (name.charCodeAt(0) >= 0xAC00 && name.charCodeAt(0) <= 0xD7A3) {
+                name = encodingString(name)
+            }
             const walletExist = await fs.existsSync(`./wallet/rootKey/${name}`)
             if (!walletExist) {
                 const encryptedPrivateKey = Wallet.encryptAES(password, this.privKey.privKey.toString("hex"))
