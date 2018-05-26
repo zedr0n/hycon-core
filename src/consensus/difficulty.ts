@@ -83,6 +83,10 @@ export class Difficulty {
         return this.getTarget().slice(24, 32).toString("hex")
     }
 
+    public getShowMinerTarget(): string {
+        return Buffer.from(this.getTarget().reverse().buffer).slice(0, 8).toString("hex")
+    }
+
     public encode(): number {
         if (this.mantissa > 0xFFFFFF || this.mantissa < 0) {
             throw new Error(`Mantissa(0x${this.mantissa.toString(16)}) out of range, can not encode`)

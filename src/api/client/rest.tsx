@@ -30,7 +30,7 @@ export interface IBlock {
     height?: number
     txs: ITxProp[]
     timeStamp: number
-    difficulty: number
+    difficulty: string
     prevBlock?: string
     nonce?: string
     txSummary?: string

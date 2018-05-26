@@ -5,6 +5,7 @@ import { BlockHeader } from "../../common/blockHeader"
 import { ITxPool } from "../../common/itxPool"
 import { Tx } from "../../common/tx"
 import { SignedTx } from "../../common/txSigned"
+import { Difficulty } from "../../consensus/difficulty"
 import { IConsensus } from "../../consensus/iconsensus"
 import { INetwork } from "../../network/inetwork"
 import * as proto from "../../serialization/proto"
@@ -322,7 +323,7 @@ export class RestServer implements IRest {
 
             const webBlock = {
                 hash,
-                difficulty: hyconBlock.header.difficulty,
+                difficulty: Difficulty.decode(hyconBlock.header.difficulty).getShowMinerTarget(),
                 stateRoot: hyconBlock.header.stateRoot.toString(),
                 merkleRoot: hyconBlock.header.merkleRoot.toString(),
                 txs,
@@ -344,7 +345,7 @@ export class RestServer implements IRest {
                 const result = await Hash.hashCryptonight(buffer)
 
                 Object.assign(webBlock, {
-                    resultHash: Buffer.from(result.buffer).toString("hex"),
+                    resultHash: Buffer.from(result.reverse().buffer).toString("hex"),
                 })
             }
 
@@ -392,7 +393,7 @@ export class RestServer implements IRest {
                 const hash = new Hash(dbblock.header)
                 const webBlock = {
                     hash: hash.toString(),
-                    difficulty: dbblock.header.difficulty,
+                    difficulty: Difficulty.decode(dbblock.header.difficulty).getShowMinerTarget(),
                     height: await this.consensus.getBlockHeight(hash),
                     size,
                     txs,
