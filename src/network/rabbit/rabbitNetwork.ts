@@ -233,7 +233,7 @@ export class RabbitNetwork implements INetwork {
                     ipeer.host = socket.remoteAddress
                     const peerStatus = await peer.detectStatus()
                     if (!RabbitNetwork.useSelfConnection) {
-                        if (peerStatus.guid === this.guid) {
+                        if (peerStatus !== undefined && peerStatus.guid === this.guid) {
                             reject("Peer is myself")
                             peer.disconnect()
                         }
