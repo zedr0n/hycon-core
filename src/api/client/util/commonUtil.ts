@@ -22,3 +22,33 @@ export function hyconfromString(val: string): Long {
     }
     return hycon.toUnsigned()
 }
+
+export function encodingMnemonic(mnemonic: string): string {
+    const wordList = mnemonic.split(" ")
+    let strCode
+    let returnStr = ""
+    for (let j = 0; j < wordList.length; j++) {
+        for (let i = 0; i < wordList[j].length; i++) {
+            strCode = wordList[j].charCodeAt(i)
+            let consonant
+            let vowel
+            let finalConsonant
+            let tmp = strCode - 0xAC00
+            finalConsonant = tmp % 28
+            tmp = (tmp - finalConsonant) / 28
+            vowel = tmp % 21
+            consonant = (tmp - vowel) / 21
+            consonant += 0x1100
+            vowel += 0x1161
+            returnStr += String.fromCharCode(consonant) + String.fromCharCode(vowel)
+            if (finalConsonant > 0) {
+                finalConsonant += 0x11A7
+                returnStr += String.fromCharCode(finalConsonant)
+            }
+        }
+        if (j !== wordList.length - 1) {
+            returnStr += " "
+        }
+    }
+    return returnStr
+}

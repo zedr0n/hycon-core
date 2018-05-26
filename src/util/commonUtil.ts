@@ -22,3 +22,27 @@ export function hyconfromString(val: string): Long {
     }
     return hycon.toUnsigned()
 }
+
+export function encodingString(str: string): string {
+    let strCode
+    let returnStr = ""
+    for (let i = 0; i < str.length; i++) {
+        strCode = str.charCodeAt(i)
+        let consonant
+        let vowel
+        let finalConsonant
+        let tmp = strCode - 0xAC00
+        finalConsonant = tmp % 28
+        tmp = (tmp - finalConsonant) / 28
+        vowel = tmp % 21
+        consonant = (tmp - vowel) / 21
+        consonant += 0x1100
+        vowel += 0x1161
+        returnStr += String.fromCharCode(consonant) + String.fromCharCode(vowel)
+        if (finalConsonant > 0) {
+            finalConsonant += 0x11A7
+            returnStr += String.fromCharCode(finalConsonant)
+        }
+    }
+    return returnStr
+}

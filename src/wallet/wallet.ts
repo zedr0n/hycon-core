@@ -11,6 +11,7 @@ import { PublicKey } from "../common/publicKey"
 import { Tx } from "../common/tx"
 import { SignedTx } from "../common/txSigned"
 import * as proto from "../serialization/proto"
+import { encodingString } from "../util/commonUtil"
 import {
     CHINESE_SIMPLIFIED_WORDLIST,
     CHINESE_TRADITIONAL_WORDLIST,
@@ -195,7 +196,14 @@ export class Wallet {
         try {
             const walletList = await Wallet.getAllPubliclist()
             for (const wallet of walletList) {
-                if (wallet.name === name) {
+                let nameOfWallet = wallet.name
+                if (nameOfWallet.charCodeAt(0) >= 0xAC00 && nameOfWallet.charCodeAt(0) <= 0xD7A3) {
+                    nameOfWallet = encodingString(nameOfWallet)
+                }
+                if (name.charCodeAt(0) >= 0xAC00 && name.charCodeAt(0) <= 0xD7A3) {
+                    name = encodingString(name)
+                }
+                if (nameOfWallet === name) {
                     return wallet.address
                 }
             }

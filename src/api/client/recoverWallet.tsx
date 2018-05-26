@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Redirect } from "react-router"
 import { IBlock, IHyconWallet, IRest } from "./rest"
+import { encodingMnemonic } from "./util/commonUtil"
 
 export class RecoverWallet extends React.Component<any, any> {
     public mounted: boolean = false
@@ -38,7 +39,6 @@ export class RecoverWallet extends React.Component<any, any> {
 
     public handleLanguage(data: any) {
         let opt = data.target.value
-        console.log(`Selected language : ${opt}`)
         if (opt === "Chinese - Traditional") {
             opt = "chinese_traditional"
         } else if (opt === "Chinese - Simplified") {
@@ -56,7 +56,7 @@ export class RecoverWallet extends React.Component<any, any> {
             } else {
                 let mnemonic = this.state.mnemonic
                 if (mnemonic.charCodeAt(0) >= 0xAC00 && mnemonic.charCodeAt(0) <= 0xD7A3) {
-                    mnemonic = this.encodingString(mnemonic)
+                    mnemonic = encodingMnemonic(mnemonic)
                 }
                 this.state.rest.recoverWallet({
                     hint: this.state.hint,
@@ -78,7 +78,7 @@ export class RecoverWallet extends React.Component<any, any> {
     public recoverWalletForce() {
         let mnemonic = this.state.mnemonic
         if (mnemonic.charCodeAt(0) >= 0xAC00 && mnemonic.charCodeAt(0) <= 0xD7A3) {
-            mnemonic = this.encodingString(mnemonic)
+            mnemonic = encodingMnemonic(mnemonic)
         }
         this.state.rest
             .recoverWalletForce({
@@ -96,35 +96,6 @@ export class RecoverWallet extends React.Component<any, any> {
             })
     }
 
-    public encodingString(mnemonic: string): string {
-        const wordList = mnemonic.split(" ")
-        let strCode
-        let returnStr = ""
-        for (let j = 0; j < wordList.length; j++) {
-            for (let i = 0; i < wordList[j].length; i++) {
-                strCode = wordList[j].charCodeAt(i)
-                let consonant
-                let vowel
-                let finalConsonant
-                let tmp = strCode - 0xAC00
-                finalConsonant = tmp % 28
-                tmp = (tmp - finalConsonant) / 28
-                vowel = tmp % 21
-                consonant = (tmp - vowel) / 21
-                consonant += 0x1100
-                vowel += 0x1161
-                returnStr += String.fromCharCode(consonant) + String.fromCharCode(vowel)
-                if (finalConsonant > 0) {
-                    finalConsonant += 0x11A7
-                    returnStr += String.fromCharCode(finalConsonant)
-                }
-            }
-            if (j !== wordList.length - 1) {
-                returnStr += " "
-            }
-        }
-        return returnStr
-    }
     public cancelWallet() {
         this.setState({ redirect: true })
     }

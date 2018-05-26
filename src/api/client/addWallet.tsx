@@ -2,6 +2,7 @@ import * as QRCode from "qrcode.react"
 import * as React from "react"
 import { Redirect } from "react-router"
 import { IBlock, IHyconWallet, IRest } from "./rest"
+import { encodingMnemonic } from "./util/commonUtil"
 
 export class AddWallet extends React.Component<any, any> {
     public mounted: boolean = false
@@ -59,45 +60,16 @@ export class AddWallet extends React.Component<any, any> {
             }
         }
     }
-    public encodingString(mnemonic: string): string {
-        const wordList = mnemonic.split(" ")
-        let strCode
-        let returnStr = ""
-        for (let j = 0; j < wordList.length; j++) {
-            for (let i = 0; i < wordList[j].length; i++) {
-                strCode = wordList[j].charCodeAt(i)
-                let consonant
-                let vowel
-                let finalConsonant
-                let tmp = strCode - 0xAC00
-                finalConsonant = tmp % 28
-                tmp = (tmp - finalConsonant) / 28
-                vowel = tmp % 21
-                consonant = (tmp - vowel) / 21
-                consonant += 0x1100
-                vowel += 0x1161
-                returnStr += String.fromCharCode(consonant) + String.fromCharCode(vowel)
-                if (finalConsonant > 0) {
-                    finalConsonant += 0x11A7
-                    returnStr += String.fromCharCode(finalConsonant)
-                }
-            }
-            if (j !== wordList.length - 1) {
-                returnStr += " "
-            }
-        }
-        return returnStr
-    }
     public checkConfirmMnemonic() {
         let mnemonicString = ""
         let coinfirmMnemonicString = ""
         if (this.state.mnemonic.charCodeAt(0) >= 0xAC00 && this.state.mnemonic.charCodeAt(0) <= 0xD7A3) {
-            mnemonicString = this.encodingString(this.state.mnemonic)
+            mnemonicString = encodingMnemonic(this.state.mnemonic)
         } else {
             mnemonicString = this.state.mnemonic
         }
         if (this.state.confirmMnemonic.charCodeAt(0) >= 0xAC00 && this.state.confirmMnemonic.charCodeAt(0) <= 0xD7A3) {
-            coinfirmMnemonicString = this.encodingString(this.state.confirmMnemonic)
+            coinfirmMnemonicString = encodingMnemonic(this.state.confirmMnemonic)
         } else {
             coinfirmMnemonicString = this.state.confirmMnemonic
         }
@@ -112,11 +84,11 @@ export class AddWallet extends React.Component<any, any> {
     public createWallet() {
         let mnemonicString = this.state.mnemonic
         if (mnemonicString.charCodeAt(0) >= 0xAC00 && mnemonicString.charCodeAt(0) <= 0xD7A3) {
-            mnemonicString = this.encodingString(mnemonicString)
+            mnemonicString = encodingMnemonic(mnemonicString)
         }
         let typedMnemonicString = this.state.typedMnemonic
         if (typedMnemonicString.charCodeAt(0) >= 0xAC00 && typedMnemonicString.charCodeAt(0) <= 0xD7A3) {
-            typedMnemonicString = this.encodingString(typedMnemonicString)
+            typedMnemonicString = encodingMnemonic(typedMnemonicString)
         }
         if (mnemonicString === typedMnemonicString || typedMnemonicString === "pass") {
             this.state.rest.generateWallet({
