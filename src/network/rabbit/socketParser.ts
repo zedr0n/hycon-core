@@ -101,7 +101,7 @@ export class SocketParser {
             if (this.socket) {
                 logger.fatal(`Disconnecting from ${this.socket.remoteAddress}:${this.socket.remotePort} due to internal parser error: ${e}`)
             }
-            this.destroy()
+            this.destroy(e)
         }
     }
 
@@ -123,8 +123,9 @@ export class SocketParser {
                     break
                 default:
                     logger.fatal(`Disconnecting due to invalid parseState '${this.parseState}'`)
-                    this.destroy()
-                    throw new Error("Invalid parseState")
+                    const e = new Error(`Invalid parseState '${this.parseState}'`)
+                    this.destroy(e)
+                    throw e
             }
         }
     }
@@ -133,7 +134,7 @@ export class SocketParser {
         while (newDataIndex < newData.length && this.parseIndex < headerPrefix.length) {
             if (newData[newDataIndex] !== headerPrefix[this.parseIndex]) {
                 logger.warn(`Packet parsing error ${this.socket.remoteAddress}:${this.socket.remotePort}`)
-                this.destroy()
+                this.destroy(new Error("Header prefix mismatch"))
             }
             this.parseIndex++
             newDataIndex++
@@ -143,7 +144,7 @@ export class SocketParser {
             this.parseState++
             this.parseIndex = 0
         } else {
-            logger.info(`Got partial HeaderPrefix ${this.parseIndex}/${headerPrefix.length}`)
+            logger.debug(`Got partial HeaderPrefix ${this.parseIndex}/${headerPrefix.length}`)
         }
 
         return newDataIndex
@@ -163,7 +164,7 @@ export class SocketParser {
                 const uint32 = this.scrapBuffer.readUInt32LE(0)
                 return { newDataIndex, uint32 }
             } else {
-                logger.info(`Got partial Uint32, copied ${bytesCopied} into scrapBuffer ${this.parseIndex}/${this.scrapBuffer.length}`)
+                logger.debug(`Got partial Uint32, copied ${bytesCopied} into scrapBuffer ${this.parseIndex}/${this.scrapBuffer.length}`)
             }
         }
         return { newDataIndex }
@@ -184,7 +185,7 @@ export class SocketParser {
         if (result.uint32 !== undefined) {
             if (result.uint32 > defaultMaxPacketSize) {
                 logger.debug(`Disconnecting client ${this.socket.remoteAddress}:${this.socket.remotePort}, packet too large`)
-                this.destroy()
+                this.destroy(new Error(`Packet size(${result.uint32}) too large`))
                 return
             }
             // Body buffer does not need to be initialized and will be short lived

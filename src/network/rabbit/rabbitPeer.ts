@@ -57,7 +57,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public async getTip(): Promise<{ hash: Hash, height: number }> {
         const { reply, packet } = await this.sendRequest({ getTip: { dummy: 0 } })
         if (reply.getTipReturn === undefined) {
-            this.protocolError()
+            this.protocolError(new Error(`Reply has no 'getTipReturn': ${JSON.stringify(reply)}`))
             throw new Error("Invalid response")
         }
         return { hash: new Hash(reply.getTipReturn.hash), height: Number(reply.getTipReturn.height) }
@@ -66,7 +66,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public async putHeaders(header: AnyBlockHeader[]): Promise<IStatusChange[]> {
         const { reply, packet } = await this.sendRequest({ putHeaders: { headers: [] } })
         if (reply.putHeadersReturn === undefined) {
-            this.protocolError()
+            this.protocolError(new Error(`Reply has no 'putHeadersReturn': ${JSON.stringify(reply)}`))
             throw new Error("Invalid response")
         }
         return reply.putHeadersReturn.statusChanges
@@ -75,7 +75,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public async getHash(height: number): Promise<Hash> {
         const { reply, packet } = await this.sendRequest({ getHash: { height } })
         if (reply.getHashReturn === undefined) {
-            this.protocolError()
+            this.protocolError(new Error(`Reply has no 'getHashReturn': ${JSON.stringify(reply)}`))
             throw new Error("Invalid response")
         }
         return new Hash(reply.getHashReturn.hash)
@@ -91,7 +91,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
             },
         })
         if (reply.statusReturn === undefined) {
-            this.protocolError()
+            this.protocolError(new Error(`Reply has no 'statusReturn': ${JSON.stringify(reply)}`))
             throw new Error("Invalid response")
         }
         return reply.statusReturn.status
@@ -113,7 +113,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public async getPeers(count?: number): Promise<proto.IPeer[]> {
         const { reply, packet } = await this.sendRequest({ getPeers: { count } })
         if (reply.getPeersReturn === undefined) {
-            this.protocolError()
+            this.protocolError(new Error(`Reply has no 'getPeersReturn': ${JSON.stringify(reply)}`))
             throw new Error("Invalid response")
         }
         return reply.getPeersReturn.peers
@@ -122,7 +122,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public async putTxs(txs: SignedTx[]): Promise<boolean> {
         const { reply, packet } = await this.sendRequest({ putTx: { txs } })
         if (reply.putTxReturn === undefined) {
-            this.protocolError()
+            this.protocolError(new Error(`Reply has no 'putTxReturn': ${JSON.stringify(reply)}`))
             throw new Error("Invalid response")
         }
 
@@ -132,7 +132,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public async getTxs(minFee?: number): Promise<SignedTx[]> {
         const { reply, packet } = await this.sendRequest({ getTxs: { minFee } })
         if (reply.getTxsReturn === undefined) {
-            this.protocolError()
+            this.protocolError(new Error(`Reply has no 'getTxsReturn': ${JSON.stringify(reply)}`))
             throw new Error("Invalid response")
         }
         const txs: SignedTx[] = []
@@ -145,7 +145,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public async putBlocks(blocks: Block[]): Promise<IStatusChange[]> {
         const { reply, packet } = await this.sendRequest({ putBlock: { blocks } })
         if (reply.putBlockReturn === undefined) {
-            this.protocolError()
+            this.protocolError(new Error(`Reply has no 'putBlockReturn': ${JSON.stringify(reply)}`))
             throw new Error("Invalid response")
         }
 
@@ -155,7 +155,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public async getBlocksByHashes(hashes: Hash[]): Promise<Block[]> {
         const { reply, packet } = await this.sendRequest({ getBlocksByHash: { hashes } })
         if (reply.getBlocksByHashReturn === undefined) {
-            this.protocolError()
+            this.protocolError(new Error(`Reply has no 'getBlocksByHashReturn': ${JSON.stringify(reply)}`))
             throw new Error("Invalid response")
         }
         const blocks: Block[] = []
@@ -168,7 +168,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public async getHeadersByHashes(hashes: Hash[]): Promise<AnyBlockHeader[]> {
         const { reply, packet } = await this.sendRequest({ getHeadersByHash: { hashes } })
         if (reply.getHeadersByHashReturn === undefined) {
-            this.protocolError()
+            this.protocolError(new Error(`Reply has no 'getHeadersByHashReturn': ${JSON.stringify(reply)}`))
             throw new Error("Invalid response")
         }
         const headers: AnyBlockHeader[] = []
@@ -181,7 +181,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public async getBlocksByRange(fromHeight: number, count: number): Promise<Block[]> {
         const { reply, packet } = await this.sendRequest({ getBlocksByRange: { fromHeight, count } })
         if (reply.getBlocksByRangeReturn === undefined) {
-            this.protocolError()
+            this.protocolError(new Error(`Reply has no 'getBlocksByRangeReturn': ${JSON.stringify(reply)}`))
             throw new Error("Invalid response")
         }
         const blocks: Block[] = []
@@ -194,7 +194,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public async getHeadersByRange(fromHeight: number, count: number): Promise<AnyBlockHeader[]> {
         const { reply, packet } = await this.sendRequest({ getHeadersByRange: { fromHeight, count } })
         if (reply.getHeadersByRangeReturn === undefined) {
-            this.protocolError()
+            this.protocolError(new Error(`Reply has no 'getHeadersByRangeReturn': ${JSON.stringify(reply)}`))
             throw new Error("Invalid response")
         }
 
@@ -251,7 +251,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 break
             default:
                 logger.fatal(`Unknown network message ${request.request}`)
-                this.protocolError()
+                this.protocolError(new Error(`Unknown network message '${request.request}': ${JSON.stringify(request)}`))
                 break
         }
         if (reply) { // i'm replying for the request
