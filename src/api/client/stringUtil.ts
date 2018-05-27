@@ -15,6 +15,10 @@ export function hycontoString(val: Long): string {
         decimals = "0" + decimals
     }
 
+    while (decimals.charAt(decimals.length - 1) === "0") {
+        decimals = decimals.substr(0, decimals.length - 1)
+    }
+
     return int.toString() + "." + decimals
 }
 
