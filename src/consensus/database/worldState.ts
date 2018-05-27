@@ -3,6 +3,7 @@ import levelup = require("levelup")
 import { getLogger } from "log4js"
 import Long = require("long")
 import rocksdb = require("rocksdb")
+import { hyconfromString, hycontoString } from "../../api/client/stringUtil"
 import { Address } from "../../common/address"
 import { AsyncLock } from "../../common/asyncLock"
 import { Block } from "../../common/block"
@@ -12,7 +13,6 @@ import { PublicKey } from "../../common/publicKey"
 import { GenesisSignedTx } from "../../common/txGenesisSigned"
 import { SignedTx } from "../../common/txSigned"
 import { Server } from "../../server"
-import { hyconfromString, hycontoString } from "../../util/commonUtil"
 import { Hash } from "../../util/hash"
 import * as mnemonic from "../../wallet/mnemonic"
 import { Wallet } from "../../wallet/wallet"
@@ -93,7 +93,7 @@ export class WorldState {
                 logger.error(`${indent}Could not find '${hash.toString()}'`)
             }
         } catch (e) {
-            return Promise.reject("Print Error : " + e)
+            throw new Error(`Print Error: ${e}`)
         }
     }
     public async validateTx(stateRoot: Hash, tx: SignedTx): Promise<TxValidity> {
@@ -122,101 +122,38 @@ export class WorldState {
         }
     }
 
-    public async next(previousState: Hash, minerAddress?: Address, txs?: SignedTx[]): Promise<{ stateTransition: IStateTransition, validTxs: SignedTx[], invalidTxs: SignedTx[] }> {
+    public async next(previousState: Hash, minerAddress?: Address, txs?: SignedTx[]): Promise<{ stateTransition: IStateTransition, validTxs: SignedTx[] }> {
         txs === undefined ? txs = this.txPool.getTxs() : txs = txs
         const batch: DBState[] = []
         const changes: IChange[] = []
         const mapAccount: Map<string, DBState> = new Map<string, DBState>()
         const mapIndex: Map<string, number> = new Map<string, number>()
-        let fees: Long = Long.fromNumber(0, true)
+        const fees: Long = Long.fromNumber(0, true)
         const validTxs: SignedTx[] = []
-        const invalidTxs: SignedTx[] = []
-        return await this.accountLock.critical<{ stateTransition: IStateTransition, validTxs: SignedTx[], invalidTxs: SignedTx[] }>(async () => {
+        return await this.accountLock.critical<{ stateTransition: IStateTransition, validTxs: SignedTx[] }>(async () => {
             logger.error(`Start: ${previousState.toString()}`)
             for (const tx of txs) {
-                if (tx.from.equals(tx.to)) {
-                    // TODO: Remove this if function and test
-                    invalidTxs.push(tx)
-                    continue
-                }
-                let fromAccount: Account | undefined
-                const fromIndex = mapIndex.get(tx.from.toString())
-                if (fromIndex === undefined) {
-                    fromAccount = await this.getAccount(previousState, tx.from)
-                    if (fromAccount === undefined) {
-                        invalidTxs.push(tx)
-                        logger.error(`Tx ${new Hash(tx)} Rejected: ${tx.from.toString()} has not been seen before, so it has insufficient balance.`)
-                        continue
-                    }
-                } else {
-                    fromAccount = changes[fromIndex].account
-                }
-
-                let toAccount: Account | undefined
-                const toIndex = mapIndex.get(tx.to.toString())
-                if (toIndex === undefined) {
-                    toAccount = await this.getAccount(previousState, tx.to)
-                    if (toAccount === undefined) {
-                        toAccount = new Account({ balance: 0, nonce: 0 })
-                    }
-                } else {
-                    toAccount = changes[toIndex].account
-                }
-
-                if (tx.nonce !== (fromAccount.nonce + 1)) {
-                    invalidTxs.push(tx)
-                    logger.info(`Tx ${new Hash(tx)} Rejected: TxNonce=${tx.nonce}  ${tx.from}Nonce=${fromAccount.nonce}`)
-                    continue
-                }
-
-                const total = minerAddress === undefined ? tx.amount : tx.amount.add(tx.fee)
-                if (fromAccount.balance.lessThan(total)) {
-                    invalidTxs.push(tx)
-                    logger.info(`Tx ${new Hash(tx)} Rejected: The balance of the account is insufficient.`)
-                    continue
-                }
-
-                validTxs.push(tx)
-                fees = fees.add(tx.fee)
-                fromAccount.balance = fromAccount.balance.sub(total)
-                toAccount.balance = toAccount.balance.add(tx.amount)
-                fromAccount.nonce++
-                if (fromIndex === undefined) {
-                    mapIndex.set(tx.from.toString(), changes.push({ address: tx.from, account: fromAccount }) - 1)
-                } else {
-                    changes[fromIndex].account = fromAccount
-                }
-                if (toIndex === undefined) {
-                    mapIndex.set(tx.to.toString(), changes.push({ address: tx.to, account: toAccount }) - 1)
-                } else {
-                    changes[toIndex].account = toAccount
+                const validity = await this.processTx(tx, previousState, mapIndex, changes)
+                switch (validity) {
+                    case TxValidity.Invalid:
+                        this.txPool.updateTxs([tx])
+                        break
+                    case TxValidity.Waiting:
+                        break
+                    case TxValidity.Valid:
+                        validTxs.push(tx)
+                        fees.add(tx.fee)
+                        break
                 }
             }
 
-            // TODO: Handle coin burn
-            if (minerAddress !== undefined) {
-                let minerAccount: Account | undefined
-                const minerIndex = mapIndex.get(minerAddress.toString())
-                if (minerIndex === undefined) {
-                    minerAccount = await this.getAccount(previousState, minerAddress)
-                    if (minerAccount === undefined) {
-                        minerAccount = new Account({ balance: 0, nonce: 0 })
-                    }
-                } else {
-                    minerAccount = changes[minerIndex].account
-                }
+            const miner = await this.getModifiedAccount(minerAddress, previousState, mapIndex, changes)
+            miner.account.balance = fees.add(hyconfromString("240"))
+            this.putChange(miner, mapIndex, changes)
 
-                const reward = fees.add(hyconfromString("240"))
-                minerAccount.balance = minerAccount.balance.add(reward)
-                if (minerIndex === undefined) {
-                    mapIndex.set(minerAddress.toString(), changes.push({ address: minerAddress, account: minerAccount }) - 1)
-                } else {
-                    changes[minerIndex].account = minerAccount
-                }
-            }
             const currentStateRoot = await this.putAccount(batch, mapAccount, changes, previousState)
 
-            return { stateTransition: { currentStateRoot, batch, mapAccount }, validTxs, invalidTxs }
+            return { stateTransition: { currentStateRoot, batch, mapAccount }, validTxs }
         })
     }
 
@@ -237,9 +174,9 @@ export class WorldState {
             if (!isMatched) { break }
         }
         if (state === undefined || state instanceof StateNode) {
-            return Promise.resolve(undefined)
+            return
         }
-        return Promise.resolve(state)
+        return state
     }
 
     public async putPending(pendings: DBState[], mapAccount: Map<string, DBState>): Promise<undefined> {
@@ -287,130 +224,185 @@ export class WorldState {
         })
     }
 
+    private async processTx(tx: SignedTx, previousState: Hash, mapIndex: Map<string, number>, changes: IChange[]) {
+        if (tx.from.equals(tx.to)) {
+            // TODO: Remove this if function and test
+            return TxValidity.Invalid
+        }
+
+        const from = await this.getModifiedAccount(tx.from, previousState, mapIndex, changes)
+        if (tx.nonce < (from.account.nonce + 1)) {
+            logger.info(`Tx ${new Hash(tx)} Rejected: TxNonce=${tx.nonce} ${tx.from} Nonce=${from.account.nonce}`)
+            return TxValidity.Invalid
+        }
+
+        if (tx.nonce > (from.account.nonce + 1)) {
+            return TxValidity.Waiting
+        }
+
+        const total = tx.amount.add(tx.fee)
+        if (from.account.balance.lessThan(total)) {
+            logger.info(`Tx ${new Hash(tx)} Rejected: The balance of the account is insufficient.`)
+            return TxValidity.Invalid
+        }
+
+        from.account.balance = from.account.balance.sub(total)
+        from.account.nonce++
+
+        this.putChange(from, mapIndex, changes)
+        if (tx.to === undefined) {
+            // Burn
+            return TxValidity.Valid
+        }
+
+        const to = await this.getModifiedAccount(tx.to, previousState, mapIndex, changes)
+        to.account.balance = to.account.balance.add(tx.amount)
+        this.putChange(to, mapIndex, changes)
+
+        return TxValidity.Valid
+    }
+
+    private async getModifiedAccount(address: Address, state: Hash, mapIndex: Map<string, number>, changes: IChange[]) {
+        const index = mapIndex.get(address.toString())
+        if (index !== undefined) {
+            return { index, account: changes[index].account, address }
+        }
+        const account = await this.getAccount(state, address)
+        if (account !== undefined) {
+            return { account, address }
+        }
+        return { account: new Account({ balance: 0, nonce: 0 }), address }
+    }
+
+    private async putChange(change: { index?: number, account: Account, address: Address }, mapIndex: Map<string, number>, changes: IChange[]) {
+        if (change.index === undefined) {
+            mapIndex.set(change.address.toString(), changes.push(change) - 1)
+        } else {
+            changes[change.index] = change
+        }
+    }
+
     private async putAccount(batch: DBState[], mapAccount: Map<string, DBState>, changes: IChange[], objectHash?: Hash, offset: number = 0, prefix: Uint8Array = new Uint8Array(0), objectAddress?: Uint8Array): Promise<Hash> {
-        try {
-            let object: StateNode | Account | undefined
-            if (objectHash === undefined) {
-                if (changes.length === 1) {
-                    return this.put(batch, mapAccount, changes[0].account)
-                } else if (changes.length === 0) {
-                    logger.error(`No changes to make no where in putAccount.`)
-                    return Promise.reject("No changes to make no where")
-                } else {
-                    object = new StateNode()
-                }
+        let object: StateNode | Account | undefined
+        if (objectHash === undefined) {
+            if (changes.length === 1) {
+                return this.put(batch, mapAccount, changes[0].account)
+            } else if (changes.length === 0) {
+                logger.error(`No changes to make no where in putAccount.`)
+                throw new Error("No changes to make no where")
             } else {
-                if (changes.length === 0) { return objectHash }
-
-                const dbObject = await this.get(objectHash)
-                if (dbObject === undefined) {
-                    logger.error(`Object missing from database : ${objectHash}`)
-                    return Promise.reject("Object missing from database." + objectHash)
-                }
-
-                object = dbObject
-                if (object instanceof StateNode) {
-                    if (objectAddress && (prefix.length !== objectAddress.length)) {
-                        const newStateNode = new StateNode()
-                        const restOfAddress = objectAddress.slice(prefix.length, objectAddress.length)
-                        const nodeRef = new NodeRef({ address: restOfAddress, child: objectHash })
-                        newStateNode.nodeRefs.push(nodeRef)
-                        object = newStateNode
-                    }
-                }
-            }
-
-            if (object instanceof Account) {
-                if (objectAddress === undefined) {
-                    logger.error(`Object address is missing : ${objectHash}`)
-                    return Promise.reject("Object address is missing : " + objectHash)
-                }
-                const objectAddr = new Address(objectAddress)
-                if (changes.length === 1 && changes[0].address.equals(objectAddr)) {
-                    return this.put(batch, mapAccount, changes[0].account)
-                }
-                let isDuple = false
-                for (const change of changes) {
-                    if (change.address.equals(objectAddr)) {
-                        isDuple = true
-                        break
-                    }
-                }
-                if (!isDuple) {
-                    changes.push({ address: objectAddr, account: object })
-                }
                 object = new StateNode()
             }
+        } else {
+            if (changes.length === 0) { return objectHash }
 
-            changes.sort((a, b) => {
-                const length = Math.min(a.address.length, b.address.length)
-                for (let index = 0; index < length; index++) {
-                    const diff = a.address[index] - b.address[index]
-                    if (diff !== 0) {
-                        return diff
-                    }
-                }
-                return 0
-            })
-
-            const changeGroups: IChange[][] = []
-            {
-                let subChanges: IChange[] = []
-                for (const change of changes) {
-                    if ((subChanges.length === 0) || (subChanges[0].address[offset] === change.address[offset])) {
-                        subChanges.push(change)
-                    } else {
-                        changeGroups.push(subChanges)
-                        subChanges = [change]
-                    }
-                }
-                changeGroups.push(subChanges)
+            const dbObject = await this.get(objectHash)
+            if (dbObject === undefined) {
+                logger.error(`Object missing from database : ${objectHash}`)
+                throw new Error(`Object missing from database : ${objectHash}`)
             }
 
-            let i = 0
-            for (const subChanges of changeGroups) {
-
-                let objectAddress2: Uint8Array | undefined
-                let minMatchLength = matchLength(subChanges[0].address, offset, subChanges[subChanges.length - 1].address, offset)
-                while ((i < object.nodeRefs.length) && object.nodeRefs[i].address[0] < subChanges[0].address[offset]) {
-                    i++
+            object = dbObject
+            if (object instanceof StateNode) {
+                if (objectAddress && (prefix.length !== objectAddress.length)) {
+                    const newStateNode = new StateNode()
+                    const restOfAddress = objectAddress.slice(prefix.length, objectAddress.length)
+                    const nodeRef = new NodeRef({ address: restOfAddress, child: objectHash })
+                    newStateNode.nodeRefs.push(nodeRef)
+                    object = newStateNode
                 }
-                if (i < object.nodeRefs.length) {
-                    if (object.nodeRefs[i].address[0] === subChanges[0].address[offset]) {
-                        minMatchLength = matchLength(object.nodeRefs[i].address, 0, subChanges[0].address, offset, minMatchLength)
-                        objectAddress2 = concat(prefix, object.nodeRefs[i].address)
-                    } else {
-                        object.nodeRefs.splice(i, 0, new NodeRef())
-                    }
-                } else {
-                    object.nodeRefs.push(new NodeRef())
-                }
-                object.nodeRefs[i].address = subChanges[0].address.slice(offset, offset + minMatchLength)
-                const prefix2 = concat(prefix, object.nodeRefs[i].address)
-
-                object.nodeRefs[i].child = await this.putAccount(batch, mapAccount, subChanges, object.nodeRefs[i].child, offset + minMatchLength, prefix2, objectAddress2)
             }
-            return this.put(batch, mapAccount, object)
-        } catch (e) {
-            return Promise.reject(e)
         }
+
+        if (object instanceof Account) {
+            if (objectAddress === undefined) {
+                logger.error(`Object address is missing : ${objectHash}`)
+                throw new Error("Object address is missing : " + objectHash)
+            }
+            const objectAddr = new Address(objectAddress)
+            if (changes.length === 1 && changes[0].address.equals(objectAddr)) {
+                return this.put(batch, mapAccount, changes[0].account)
+            }
+            let isDuple = false
+            for (const change of changes) {
+                if (change.address.equals(objectAddr)) {
+                    isDuple = true
+                    break
+                }
+            }
+            if (!isDuple) {
+                changes.push({ address: objectAddr, account: object })
+            }
+            object = new StateNode()
+        }
+
+        changes.sort((a, b) => {
+            const length = Math.min(a.address.length, b.address.length)
+            for (let index = 0; index < length; index++) {
+                const diff = a.address[index] - b.address[index]
+                if (diff !== 0) {
+                    return diff
+                }
+            }
+            return 0
+        })
+
+        const changeGroups: IChange[][] = []
+        {
+            let subChanges: IChange[] = []
+            for (const change of changes) {
+                if ((subChanges.length === 0) || (subChanges[0].address[offset] === change.address[offset])) {
+                    subChanges.push(change)
+                } else {
+                    changeGroups.push(subChanges)
+                    subChanges = [change]
+                }
+            }
+            changeGroups.push(subChanges)
+        }
+
+        let i = 0
+        for (const subChanges of changeGroups) {
+
+            let objectAddress2: Uint8Array | undefined
+            let minMatchLength = matchLength(subChanges[0].address, offset, subChanges[subChanges.length - 1].address, offset)
+            while ((i < object.nodeRefs.length) && object.nodeRefs[i].address[0] < subChanges[0].address[offset]) {
+                i++
+            }
+            if (i < object.nodeRefs.length) {
+                if (object.nodeRefs[i].address[0] === subChanges[0].address[offset]) {
+                    minMatchLength = matchLength(object.nodeRefs[i].address, 0, subChanges[0].address, offset, minMatchLength)
+                    objectAddress2 = concat(prefix, object.nodeRefs[i].address)
+                } else {
+                    object.nodeRefs.splice(i, 0, new NodeRef())
+                }
+            } else {
+                object.nodeRefs.push(new NodeRef())
+            }
+            object.nodeRefs[i].address = subChanges[0].address.slice(offset, offset + minMatchLength)
+            const prefix2 = concat(prefix, object.nodeRefs[i].address)
+
+            object.nodeRefs[i].child = await this.putAccount(batch, mapAccount, subChanges, object.nodeRefs[i].child, offset + minMatchLength, prefix2, objectAddress2)
+        }
+        return this.put(batch, mapAccount, object)
+
     }
 
     private async get(hash: Hash): Promise<StateNode | Account> {
         try {
             const dbState = await this.getDBState(hash)
             if (dbState.account !== undefined) {
-                return Promise.resolve(dbState.account)
+                return dbState.account
             } else if (dbState.node !== undefined) {
-                return Promise.resolve(dbState.node)
+                return dbState.node
             } else {
                 logger.error(`Invalid DBState data`)
-                return Promise.reject(`Invalid DBState data`)
+                throw new Error(`Invalid DBState data`)
             }
         } catch (e) {
             if (e.notFound) { logger.error(`NotFound in accountDB : ${hash}`) }
             if (!e.notFound) { logger.error(`Fail to get data from accountDB in get : ${e}`) }
-            return Promise.reject(e)
+            throw e
         }
     }
 
@@ -420,7 +412,7 @@ export class WorldState {
             const data = await this.accountDB.get(hash.toBuffer())
             decodeingDBState = true
             const dbState = DBState.decode(data)
-            return Promise.resolve(dbState)
+            return dbState
         } catch (e) {
             if (e.notFound) {
                 logger.debug(`DBState not found in getDBState`)
@@ -429,7 +421,7 @@ export class WorldState {
             } else {
                 logger.error(`Fail to getDBState : ${e}`)
             }
-            return Promise.reject(e)
+            throw e
         }
     }
 

@@ -1,7 +1,6 @@
 import { getLogger } from "log4js"
 import Long = require("long")
 import * as proto from "../../serialization/proto"
-import {hyconfromString} from "../../util/commonUtil"
 const logger = getLogger("Account")
 export class Account implements proto.IAccount {
     public static decode(data: Uint8Array): Account {
@@ -21,7 +20,7 @@ export class Account implements proto.IAccount {
         if (account.balance === undefined) { throw new Error("Balance is missing") }
         if (account.nonce === undefined) { throw new Error("Nonce is missing") }
         this.balance = account.balance instanceof Long ? account.balance : Long.fromNumber(account.balance, true)
-        if (!this.balance.unsigned) {logger.fatal(`Protobuf problem with account balance`)}
+        if (!this.balance.unsigned) { logger.fatal(`Protobuf problem with account balance`) }
         this.nonce = account.nonce
     }
 

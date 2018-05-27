@@ -9,10 +9,10 @@ import { Difficulty } from "../../consensus/difficulty"
 import { IConsensus } from "../../consensus/iconsensus"
 import { INetwork } from "../../network/inetwork"
 import * as proto from "../../serialization/proto"
-import { hyconfromString, hycontoString, zeroPad } from "../../util/commonUtil"
 import { Hash } from "../../util/hash"
 import { Wallet } from "../../wallet/wallet"
 import { IBlock, IHyconWallet, IPeer, IResponseError, IRest, ITxProp, IUser, IWalletAddress } from "../client/rest"
+import { hyconfromString, hycontoString, zeroPad } from "../client/stringUtil"
 const logger = getLogger("RestServer")
 
 // tslint:disable-next-line:no-var-requires

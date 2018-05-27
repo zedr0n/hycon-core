@@ -1,8 +1,8 @@
 import Long = require("long")
 import * as React from "react"
 import { IBlock, IRest } from "./rest"
+import { hyconfromString, hycontoString } from "./stringUtil"
 import { TxList } from "./txList"
-import { hyconfromString, hycontoString } from "./util/commonUtil"
 interface IBlockProps {
     rest: IRest
     hash: string

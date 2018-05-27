@@ -5,7 +5,7 @@ import * as ReactPaginate from "react-paginate"
 import { Link } from "react-router-dom"
 import { BlockLine } from "./blockLine"
 import { IBlock, IRest } from "./rest"
-import { hyconfromString, hycontoString } from "./util/commonUtil"
+import { hyconfromString, hycontoString } from "./stringUtil"
 
 interface IBlockListView {
     rest: IRest

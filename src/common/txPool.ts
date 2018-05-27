@@ -1,7 +1,7 @@
 import { getLogger } from "log4js"
+import { hyconfromString } from "../api/client/stringUtil"
 import { NewTx } from "../serialization/proto"
 import { Server } from "../server"
-import { hyconfromString } from "../util/commonUtil"
 import { Hash } from "../util/hash"
 import { Address } from "./address"
 import { ITxPool } from "./itxPool"
@@ -14,14 +14,12 @@ interface ITxCallback {
     n: number
 }
 export class TxPool implements ITxPool {
-    private server: Server
     private txs: SignedTx[]
     private txMap: Map<string, SignedTx>
     private callbacks: ITxCallback[]
     private minFee: number
 
-    constructor(server: Server, minFee?: number) {
-        this.server = server
+    constructor(minFee?: number) {
         this.txs = []
         this.callbacks = []
         this.minFee = minFee === undefined ? 0 : minFee

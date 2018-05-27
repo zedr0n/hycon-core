@@ -141,6 +141,7 @@ export class StratumServer {
             const nonce = this.hexToLongLE(nonceStr)
 
             if (!(await MinerServer.checkNonce(candiate.prehash, nonce, candiate.difficulty))) {
+                logger.warn(`Stratum server recieved incorect nonce`)
                 return false
             }
 

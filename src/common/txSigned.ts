@@ -4,7 +4,6 @@ import { deprecate } from "util"
 import { Address } from "../common/address"
 import { PublicKey } from "../common/publicKey"
 import * as proto from "../serialization/proto"
-import { hyconfromString } from "../util/commonUtil"
 import { Hash } from "../util/hash"
 import { Tx } from "./tx"
 const logger = getLogger("TxSigned")
@@ -56,8 +55,17 @@ export class SignedTx implements proto.ITx {
         this.from = new Address(stx.from)
         this.to = new Address(stx.to)
         this.amount = stx.amount instanceof Long ? stx.amount : Long.fromNumber(stx.amount, true)
+        if (this.amount.lessThan(0)) {
+            throw new Error("Transaction amount can not be negative")
+        }
         this.fee = stx.fee instanceof Long ? stx.fee : Long.fromNumber(stx.fee, true)
-        if (!this.amount.unsigned || !this.fee.unsigned) { logger.fatal(`Protobuf problem with SignedTx amount|fee `) }
+        if (this.fee.lessThan(0)) {
+            throw new Error("Transaction fee can not be negative")
+        }
+        if (!this.amount.unsigned || !this.fee.unsigned) {
+            logger.fatal(`Protobuf problem with SignedTx amount|fee `)
+            throw new Error("Protobuf decoding error")
+        }
         this.nonce = stx.nonce
         this.signature = Buffer.from(stx.signature as Buffer)
         this.recovery = stx.recovery

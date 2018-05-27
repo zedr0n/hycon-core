@@ -88,7 +88,7 @@ export class CpuMiner {
         return Promise.all(promises)
     }
 
-    public async putWork(block: Block, prehash: Uint8Array, difficulty: Difficulty) {
+    public putWork(block: Block, prehash: Uint8Array, difficulty: Difficulty) {
         this.stop()
         this.miners = []
         const hash = new Hash(block.header)
@@ -97,7 +97,6 @@ export class CpuMiner {
             miner.nonce.then((nonce) => {
                 const minedBlock = new Block(block)
                 minedBlock.header.nonce = nonce
-                const hash2 = new Hash(minedBlock.header)
                 this.minerServer.submitBlock(minedBlock)
             }).catch(() => { })
             this.miners.push(miner)

@@ -6,12 +6,11 @@ import { ITxPool } from "../src/common/itxPool"
 import { Consensus } from "../src/consensus/consensus"
 import { Database } from "../src/consensus/database/database"
 import { IConsensus } from "../src/consensus/iconsensus"
-import { IMiner } from "../src/miner/iminer"
+import { MinerServer } from "../src/miner/minerServer"
 import { Server } from "../src/server"
 
 xdescribe("SingleChain", () => {
     let serverSpy: jasmine.SpyObj<Server> = jasmine.createSpyObj("Server", ["run"])
-    const minerSpy: jasmine.SpyObj<IMiner> = jasmine.createSpyObj("MinerSpy", [])
     const txPool: jasmine.SpyObj<ITxPool> = jasmine.createSpyObj("TxPoolSpy", [])
     let consensus: Consensus
     let dbSpy: jasmine.SpyObj<Database> = jasmine.createSpyObj("Database", ["init"])
@@ -36,7 +35,7 @@ xdescribe("SingleChain", () => {
         dbSpy.getHeaderTip.and.callFake(() => {
 
         })
-        consensus = new Consensus(minerSpy, txPool, "./garbage", "./garbage", "./garbage")
+        consensus = new Consensus(txPool, "./garbage", "./garbage", "./garbage")
         // Dirty trick to prevent an actual DB from forming
         // tslint:disable-next-line:no-string-literal
         consensus["db"] = dbSpy

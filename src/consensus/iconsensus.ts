@@ -16,7 +16,6 @@ export interface IStatusChange { oldStatus?: BlockStatus, status?: BlockStatus }
 
 export type AnySignedTx = (GenesisSignedTx | SignedTx)
 
-export type NewBlockCallback = (block: AnyBlock) => void
 export interface IConsensus extends EventEmitter {
     init(): Promise<void>
     putBlock(block: Block): Promise<IStatusChange>

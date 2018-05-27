@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Redirect } from "react-router"
 import { IBlock, IHyconWallet, IRest } from "./rest"
-import { encodingMnemonic } from "./util/commonUtil"
+import { encodingMnemonic } from "./stringUtil"
 
 export class RecoverWallet extends React.Component<any, any> {
     public mounted: boolean = false

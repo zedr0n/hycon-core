@@ -2,6 +2,7 @@ import * as fs from "fs-extra"
 import { configure, getLogger } from "log4js"
 import Long = require("long")
 import merkle = require("merkle-lib")
+import { hycontoString } from "../api/client/stringUtil"
 import { Address } from "../common/address"
 import { GenesisBlock } from "../common/blockGenesis"
 import { GenesisTx } from "../common/txGenesis"
@@ -10,7 +11,6 @@ import { SignedTx } from "../common/txSigned"
 import { WorldState } from "../consensus/database/worldState"
 import { Block } from "../serialization/proto"
 import { Wallet } from "../wallet/wallet"
-import { hycontoString } from "./commonUtil"
 import { Hash } from "./hash"
 
 // When generate genesisBlock, you should remove extends BaseBlockHeader from BlockHeader !!

@@ -1,10 +1,10 @@
 
 import * as fs from "fs-extra"
 import { getLogger } from "log4js"
+import { zeroPad } from "../../api/client/stringUtil"
 import { AsyncLock } from "../../common/asyncLock"
 import { AnyBlock, Block } from "../../common/block"
 import * as proto from "../../serialization/proto"
-import { zeroPad } from "../../util/commonUtil"
 import { FileUtil } from "../../util/fileUtil"
 
 const logger = getLogger("BlockFile")

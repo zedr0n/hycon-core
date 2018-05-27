@@ -4,7 +4,7 @@
 build
 blockdb*
 coverage
-deleteme*/
+deleteme*
 garbage/
 hycon-*
 logs
@@ -13,10 +13,8 @@ package-lock.json
 peerdb*
 PeerList.db
 rawblock*
-src/keys
 txDB*
-tx/
-wallet/
+wallet*
 worldstate*
 *.png
 

@@ -2,7 +2,6 @@
 import { getLogger } from "log4js"
 import Long = require("long")
 import * as proto from "../serialization/proto"
-import { hyconfromString } from "../util/commonUtil"
 import { Hash } from "../util/hash"
 import { Address } from "./address"
 import { PublicKey } from "./publicKey"

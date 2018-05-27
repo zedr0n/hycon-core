@@ -1,18 +1,16 @@
 import { getLogger } from "log4js"
 import Long = require("long")
 import { Block } from "../common/block"
-import { Server } from "../server"
-import { zeroPad } from "../util/commonUtil"
+import { IConsensus } from "../consensus/iconsensus"
+import { INetwork } from "../network/inetwork"
 import { Hash } from "../util/hash"
 import { Difficulty } from "./../consensus/difficulty"
 import { CpuMiner } from "./cpuMiner"
-import { IMiner } from "./iminer"
 import { StratumServer } from "./stratumServer"
 
 const logger = getLogger("Miner")
 
-export class MinerServer implements IMiner {
-
+export class MinerServer {
     public static async checkNonce(preHash: Uint8Array, nonce: Long, difficulty: Difficulty): Promise<boolean> {
         const buffer = Buffer.allocUnsafe(72)
         buffer.fill(preHash, 0, 64)
@@ -21,47 +19,34 @@ export class MinerServer implements IMiner {
         return difficulty.acceptable(await Hash.hashCryptonight(buffer))
     }
 
-    private server: Server
+    private consensus: IConsensus
+    private network: INetwork
     private stratumServer: StratumServer
     private cpuMiner: CpuMiner
-    private listCallBackNewBlock: (block: Block) => void
 
-    public constructor(server: Server, stratumPort: number) {
-        this.server = server
-
+    public constructor(consensus: IConsensus, network: INetwork, cpuMiners: number, stratumPort: number) {
+        this.consensus = consensus
+        this.network = network
         this.stratumServer = new StratumServer(this, stratumPort)
-        this.cpuMiner = new CpuMiner(this, Server.globalOptions.cpuMiners)
+        this.cpuMiner = new CpuMiner(this, cpuMiners)
+        this.consensus.on("candidate", (block: Block) => this.candidate(block))
     }
 
-    public newCandidateBlock(candidateBlock: Block): void {
-        const prehash = candidateBlock.header.preHash()
-        const difficulty = Difficulty.decode(candidateBlock.header.difficulty)
-        const minersCount = this.getMinersCount()
-
-        logger.info(`New Candidate Block Hash: ${new Hash(candidateBlock).toString()}, Difficulty: 0x${difficulty.getMantissa().toString(16)} e${difficulty.getExponent()} Target: ${difficulty.getMinerTarget()}`)
-        this.cpuMiner.putWork(candidateBlock, prehash, difficulty)
-        this.stratumServer.putWork(candidateBlock, prehash, difficulty, this.cpuMiner.minerCount)
-    }
-    public submitBlock(block: Block) {
-        logger.info(`Mined Block Hash: ${new Hash(block).toString()}`)
+    public async submitBlock(block: Block) {
         this.stop()
-        if (this.listCallBackNewBlock !== undefined) {
-            this.listCallBackNewBlock(block)
+        if (await this.consensus.putBlock(block)) {
+            this.network.broadcastBlocks([block])
         }
     }
     public stop(): void {
         this.cpuMiner.stop()
         this.stratumServer.stop()
     }
-    public addCallbackNewBlock(callback: (block: Block) => void, priority?: number): void {
-        this.listCallBackNewBlock = callback
-    }
-    public removeCallbackNewBlock(callback: (block: Block) => void): void {
-        this.listCallBackNewBlock = undefined
-    }
-
-    private getMinersCount(): number {
-        const miners = this.stratumServer.getMinerCount() + this.cpuMiner.minerCount
-        return miners
+    private candidate(block: Block): void {
+        const prehash = block.header.preHash()
+        const difficulty = Difficulty.decode(block.header.difficulty)
+        logger.info(`New Candidate Block Hash: ${new Hash(block).toString()}, Difficulty: 0x${difficulty.getMantissa().toString(16)} e${difficulty.getExponent()} Target: ${difficulty.getMinerTarget()}`)
+        this.cpuMiner.putWork(block, prehash, difficulty)
+        this.stratumServer.putWork(block, prehash, difficulty, this.cpuMiner.minerCount)
     }
 }

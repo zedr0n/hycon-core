@@ -8,7 +8,6 @@ import { Database } from "./consensus/database/database"
 import { WorldState } from "./consensus/database/worldState"
 import { IConsensus } from "./consensus/iconsensus"
 import { Sync } from "./consensus/sync"
-import { IMiner } from "./miner/iminer"
 import { MinerServer } from "./miner/minerServer"
 import { INetwork } from "./network/inetwork"
 import { RabbitNetwork } from "./network/rabbit/rabbitNetwork" // for speed
@@ -43,12 +42,12 @@ export class Server {
     public static globalOptions: any
     public static triedSync: boolean = false
     public subscription: Map<number, any> | undefined
-    public readonly consensus: IConsensus = undefined // the core
-    public readonly network: INetwork = undefined // hycon network
-    public readonly miner: IMiner = undefined // miner
-    public readonly wallet: WalletManager = undefined
-    public readonly txPool: ITxPool = undefined // tx pool
-    public readonly rest: RestManager = undefined // api server for hycon
+    public readonly consensus: IConsensus
+    public readonly network: INetwork
+    public readonly miner: MinerServer
+    public readonly wallet: WalletManager
+    public readonly txPool: ITxPool
+    public readonly rest: RestManager
     public db: Database
     public accountDB: WorldState
     public httpServer: HttpServer
@@ -60,12 +59,12 @@ export class Server {
         logger.info(`Options=${JSON.stringify(Server.globalOptions)}`)
         logger.info(`Verbose=${Server.globalOptions.verbose}`)
 
-        if (Server.globalOptions.port === undefined) {
+        if (Server.globalOptions.port === 0) {
             Server.globalOptions.port = 20000 + Math.floor(40000 * Math.random())
         }
         logger.info(`Port=${Server.globalOptions.port}`)
 
-        if (Server.globalOptions.str_port === undefined) {
+        if (Server.globalOptions.str_port === 0) {
             Server.globalOptions.str_port = 20000 + Math.floor(40000 * Math.random())
         }
         logger.info(`Stratum Port=${Server.globalOptions.str_port}`)
@@ -82,12 +81,15 @@ export class Server {
         if (Server.globalOptions.verbose) {
             logger.level = "debug"
         }
+        if (Server.globalOptions.cpuMiners === undefined) {
+            Server.globalOptions.cpuMiners = 0
+        }
 
         const postfix = Server.globalOptions.postfix
-        this.txPool = new TxPool(this)
-        this.miner = new MinerServer(this, Server.globalOptions.str_port)
-        this.consensus = new Consensus(this.miner, this.txPool, "blockdb" + postfix, "worldstate" + postfix, "rawblock" + postfix, "txDB" + postfix)
-        this.network = new RabbitNetwork(this, Server.globalOptions.port, "peerdb" + postfix, Server.globalOptions.networkid)
+        this.txPool = new TxPool()
+        this.consensus = new Consensus(this.txPool, "blockdb" + postfix, "worldstate" + postfix, "rawblock" + postfix, "txDB" + postfix)
+        this.network = new RabbitNetwork(this.txPool, this.consensus, Server.globalOptions.port, "peerdb" + postfix, Server.globalOptions.networkid)
+        this.miner = new MinerServer(this.consensus, this.network, Server.globalOptions.cpuMiners, Server.globalOptions.str_port)
         this.wallet = new WalletManager(this)
         this.rest = new RestManager(this)
     }

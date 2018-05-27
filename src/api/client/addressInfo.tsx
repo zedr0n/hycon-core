@@ -4,7 +4,6 @@ import * as React from "react"
 import update = require("react-addons-update")
 import { IRest, ITxProp, IWalletAddress } from "./rest"
 import { TxLine } from "./txLine"
-import { hyconfromString, hycontoString } from "./util/commonUtil"
 interface IAddressProps {
     rest: IRest
     hash: string

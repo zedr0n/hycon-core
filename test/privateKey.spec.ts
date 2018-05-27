@@ -2,12 +2,12 @@ import { randomBytes } from "crypto"
 import * as fs from "fs"
 import { } from "jasmine"
 import secp256k1 = require("secp256k1")
+import { hyconfromString } from "../src/api/client/stringUtil"
 import { Address } from "../src/common/address"
 import { PrivateKey } from "../src/common/privateKey"
 import { Tx } from "../src/common/tx"
 import { SignedTx } from "../src/common/txSigned"
 import * as proto from "../src/serialization/proto"
-import { hyconfromString } from "../src/util/commonUtil"
 import { Wallet } from "../src/wallet/wallet"
 
 describe("PrivateKey", () => {

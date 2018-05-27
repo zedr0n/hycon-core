@@ -2,10 +2,7 @@ import * as ip from "ip"
 import { getLogger } from "log4js"
 import { Server } from "../server"
 import { INetwork } from "./inetwork"
-
 const logger = getLogger("Upnp")
-logger.level = "debug"
-type TurtleNetwork = any
 
 export class UpnpServer {
 
@@ -13,11 +10,9 @@ export class UpnpServer {
     public static product: string = "hycon"
     public static networkid: string = "1"
     public static version: string = "1.0.0"
-    private server: Server
 
-    constructor(port: number, server: Server) {
+    constructor(port: number) {
         UpnpServer.port = port
-        this.server = server
 
         if (Server.globalOptions.networkid) {
             UpnpServer.networkid = Server.globalOptions.networkid
@@ -43,12 +38,9 @@ export class UpnpServer {
 // tslint:disable-next-line:max-classes-per-file
 export class UpnpClient {
     public rabbitNetwork: INetwork
-    private server: Server
 
-    constructor(rabbitNetwork: INetwork, server: Server) {
+    constructor(rabbitNetwork: INetwork) {
         this.rabbitNetwork = rabbitNetwork
-        this.server = server
-
         this.run()
     }
     public run() {

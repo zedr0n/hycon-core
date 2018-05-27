@@ -5,13 +5,13 @@ import * as fs from "fs-extra"
 import { getLogger } from "log4js"
 import secp256k1 = require("secp256k1")
 import { HDKey } from "wallet.ts"
+import { encodingMnemonic } from "../api/client/stringUtil"
 import { Address } from "../common/address"
 import { PrivateKey } from "../common/privateKey"
 import { PublicKey } from "../common/publicKey"
 import { Tx } from "../common/tx"
 import { SignedTx } from "../common/txSigned"
 import * as proto from "../serialization/proto"
-import { encodingString } from "../util/commonUtil"
 import {
     CHINESE_SIMPLIFIED_WORDLIST,
     CHINESE_TRADITIONAL_WORDLIST,
@@ -198,10 +198,10 @@ export class Wallet {
             for (const wallet of walletList) {
                 let nameOfWallet = wallet.name
                 if (nameOfWallet.charCodeAt(0) >= 0xAC00 && nameOfWallet.charCodeAt(0) <= 0xD7A3) {
-                    nameOfWallet = encodingString(nameOfWallet)
+                    nameOfWallet = encodingMnemonic(nameOfWallet)
                 }
                 if (name.charCodeAt(0) >= 0xAC00 && name.charCodeAt(0) <= 0xD7A3) {
-                    name = encodingString(name)
+                    name = encodingMnemonic(name)
                 }
                 if (nameOfWallet === name) {
                     return wallet.address

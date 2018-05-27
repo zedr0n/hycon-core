@@ -1,14 +1,12 @@
-import { stat } from "fs"
-import * as ip from "ip"
 import { getLogger } from "log4js"
-import { createConnection, createServer, Socket } from "net"
+import { createServer, Socket } from "net"
 import * as net from "net"
 import * as netmask from "netmask"
 import uuidv4 = require("uuid/v4")
+import { ITxPool } from "../../common/itxPool"
 import { IConsensus } from "../../consensus/iconsensus"
 import * as proto from "../../serialization/proto"
 import { Server } from "../../server"
-import { Hash } from "../../util/hash"
 import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"
 import { NatUpnp } from "../nat"
@@ -37,8 +35,8 @@ export class RabbitNetwork implements INetwork {
     public readonly version: number = 3
     public port: number
     public guid: string // unique id to prevent self connecting
-
-    private hycon: Server
+    private txPool: ITxPool
+    private consensus: IConsensus
     private server: net.Server
     private peerDB: PeerDb
     private targetConnectedPeers: number
@@ -49,12 +47,13 @@ export class RabbitNetwork implements INetwork {
     private upnpClient: UpnpClient
     private natUpnp: NatUpnp
 
-    constructor(hycon: Server, port: number = 8148, peerDbPath: string = "peerdb", networkid: string = "hycon") {
+    constructor(txPool: ITxPool, consensus: IConsensus, port: number = 8148, peerDbPath: string = "peerdb", networkid: string = "hycon") {
         RabbitNetwork.failLimit = 10
+        this.txPool = txPool
+        this.consensus = consensus
         this.port = port
         this.networkid = networkid
         this.targetConnectedPeers = 5
-        this.hycon = hycon
         this.peers = new Map<number, RabbitPeer>()
         this.endPoints = new Map<number, proto.IPeer>()
         this.pendingConnections = new Map<number, proto.IPeer>()
@@ -110,7 +109,17 @@ export class RabbitNetwork implements INetwork {
         return endPoints
     }
 
-    public broadcast(packet: Buffer, exempt?: RabbitPeer): void {
+    public broadcastTxs(txs: proto.ITx[]): void {
+        const packet = proto.Network.encode({ putTx: { txs } }).finish()
+        this.broadcast(packet)
+    }
+
+    public broadcastBlocks(blocks: proto.IBlock[]): void {
+        const packet = proto.Network.encode({ putBlock: { blocks } }).finish()
+        this.broadcast(packet)
+    }
+
+    public broadcast(packet: Uint8Array, exempt?: RabbitPeer): void {
         for (const [key, peer] of this.peers) {
             if (peer !== exempt) {
                 peer.sendPacket(packet).catch((e) => { logger.warn(e) })
@@ -143,8 +152,8 @@ export class RabbitNetwork implements INetwork {
         }
 
         if (useUpnp) {
-            this.upnpServer = new UpnpServer(this.port, this.hycon)
-            this.upnpClient = new UpnpClient(this, this.hycon)
+            this.upnpServer = new UpnpServer(this.port)
+            this.upnpClient = new UpnpClient(this)
 
         }
 
@@ -274,7 +283,7 @@ export class RabbitNetwork implements INetwork {
     }
 
     private async newConnection(socket: Socket): Promise<RabbitPeer> {
-        const peer = new RabbitPeer(socket, this, this.hycon.consensus, this.hycon.txPool, this.peerDB)
+        const peer = new RabbitPeer(socket, this, this.consensus, this.txPool, this.peerDB)
         const ipeer = { host: socket.remoteAddress, port: socket.remotePort }
         const key = PeerDb.ipeer2key(ipeer)
         this.peers.set(key, peer)

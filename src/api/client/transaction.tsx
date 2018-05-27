@@ -6,7 +6,7 @@ import * as React from "react"
 import { Redirect } from "react-router"
 import { Link } from "react-router-dom"
 import { IBlock, IHyconWallet, IRest } from "./rest"
-import { hyconfromString, hycontoString } from "./util/commonUtil"
+import { hyconfromString, hycontoString } from "./stringUtil"
 export class Transaction extends React.Component<any, any> {
     public currentMinerFee = "0"
     public currentReturnedFee = 0

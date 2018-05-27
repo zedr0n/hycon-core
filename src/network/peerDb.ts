@@ -13,7 +13,6 @@ export class PeerDb {
         const hash = new Hash(peer.host + "!" + peer.port.toString())
         let key = 0
         for (let i = 0; i < 6; i++) {
-            // tslint:disable-next-line:no-bitwise
             key = key * 256 + hash[i]
         }
         return key

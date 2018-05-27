@@ -1,6 +1,5 @@
 import { EventEmitter } from "events"
 import fs = require("fs")
-import { stat } from "fs"
 import { getLogger } from "log4js"
 import { Address } from "../common/address"
 import { AsyncLock } from "../common/asyncLock"
@@ -9,20 +8,14 @@ import { GenesisBlock } from "../common/blockGenesis"
 import { AnyBlockHeader, BlockHeader } from "../common/blockHeader"
 import { ITxPool } from "../common/itxPool"
 import { SignedTx } from "../common/txSigned"
-import { IMiner } from "../miner/iminer"
-import { MinerServer } from "../miner/minerServer"
-import { INetwork } from "../network/inetwork"
 import { Hash } from "../util/hash"
 import { Account } from "./database/account"
-import { BlockFile } from "./database/blockFile"
 import { Database } from "./database/database"
 import { DBBlock } from "./database/dbblock"
 import { TxDatabase } from "./database/txDatabase"
 import { TxList } from "./database/txList"
 import { TxValidity, WorldState } from "./database/worldState"
-import { Difficulty } from "./difficulty"
-import { DifficultyAdjuster } from "./difficultyAdjuster"
-import { IConsensus, IStatusChange, NewBlockCallback } from "./iconsensus"
+import { IConsensus, IStatusChange } from "./iconsensus"
 import { BlockStatus } from "./sync"
 import { Verify } from "./verify"
 const logger = getLogger("Consensus")
@@ -30,24 +23,19 @@ const conf = JSON.parse(fs.readFileSync("./data/config.json", "utf-8"))
 
 export class Consensus extends EventEmitter implements IConsensus {
     private txdb?: TxDatabase
-    private miner: IMiner
     private txPool: ITxPool
     private worldState: WorldState
     private db: Database
     private blockTip: DBBlock
     private headerTip: DBBlock
-    private newBlockCallbacks: NewBlockCallback[]
     private lock: AsyncLock
 
-    constructor(miner: IMiner, txPool: ITxPool, dbPath: string, wsPath: string, filePath: string, txPath?: string) {
+    constructor(txPool: ITxPool, dbPath: string, wsPath: string, filePath: string, txPath?: string) {
         super()
-        this.miner = miner
         this.txPool = txPool
         this.db = new Database(dbPath, filePath)
         if (txPath) { this.txdb = new TxDatabase(txPath) }
         this.worldState = new WorldState(wsPath, txPool)
-        this.newBlockCallbacks = []
-
     }
 
     public async init(): Promise<void> {
@@ -66,8 +54,7 @@ export class Consensus extends EventEmitter implements IConsensus {
             if (this.txdb !== undefined) {
                 await this.txdb.init(this, this.blockTip.height)
             }
-            this.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock()) // TODO: Move?
-            this.miner.addCallbackNewBlock((block: Block) => { this.put(block.header, block) })
+            this.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock()) // TODO: move/remove?
             this.createCandidateBlock()
             logger.info(`Initialization of consensus is over.`)
         } catch (e) {
@@ -309,7 +296,7 @@ export class Consensus extends EventEmitter implements IConsensus {
         try {
             const timeStamp = Date.now()
             const miner: Address = new Address(conf.minerAddress)
-            const { invalidTxs, validTxs, stateTransition: { currentStateRoot } } = await this.worldState.next(previousDBBlock.header.stateRoot, miner)
+            const { validTxs, stateTransition: { currentStateRoot } } = await this.worldState.next(previousDBBlock.header.stateRoot, miner)
             const newBlock = new Block({
                 header: new BlockHeader({
                     difficulty: previousDBBlock.nextDifficulty.encode(),
@@ -322,7 +309,7 @@ export class Consensus extends EventEmitter implements IConsensus {
                 }),
                 txs: validTxs,
             })
-            this.miner.newCandidateBlock(newBlock)
+            this.emit("candidate", newBlock)
         } catch (e) {
             logger.error(`Fail to createCandidateBlock: ${e}`)
             throw e

@@ -3,7 +3,6 @@ import * as Long from "long"
 import { Address } from "../common/address"
 import { PublicKey } from "../common/publicKey"
 import * as proto from "../serialization/proto"
-import { hyconfromString } from "../util/commonUtil"
 import { Hash } from "../util/hash"
 
 const logger = getLogger("Tx")

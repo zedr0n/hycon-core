@@ -1,6 +1,6 @@
-import { Address} from "./address"
+import { Address } from "./address"
 import { SignedTx } from "./txSigned"
-type TopTxCallback = (txs: SignedTx[]) => void // TODO: define type
+type TopTxCallback = (txs: SignedTx[]) => void
 export interface ITxPool {
     putTxs(txs: SignedTx[]): number
     getTxs(): SignedTx[]
