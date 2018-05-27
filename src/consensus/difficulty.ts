@@ -120,7 +120,7 @@ export class Difficulty {
         if (this.exponent < difficulty.exponent) {
             return !difficulty.greaterThan(this)
         }
-        const expDiff = this.exponent - difficulty.exponent
+        const expDiff = difficulty.exponent - this.exponent
         return this.mantissa > Math.pow(2, expDiff) * difficulty.mantissa
     }
     public multiply(num: number): Difficulty {
