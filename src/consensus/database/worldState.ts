@@ -137,34 +137,30 @@ export class WorldState {
                 if (tx.from.equals(tx.to)) {
                     // TODO: Remove this if function and test
                     invalidTxs.push(tx)
-                    logger.debug(`Tx ${new Hash(tx)} Removed: from address ${tx.from.toString()}) == to address (${tx.to.toString()}`)
                     continue
                 }
                 let fromAccount: Account | undefined
                 const fromIndex = mapIndex.get(tx.from.toString())
                 if (fromIndex === undefined) {
                     fromAccount = await this.getAccount(previousState, tx.from)
-                    logger.error(`Before ${tx.from.toString()} (${fromAccount.nonce}): ${fromAccount.balance}`)
+                    if (fromAccount === undefined) {
+                        invalidTxs.push(tx)
+                        logger.error(`Tx ${new Hash(tx)} Rejected: ${tx.from.toString()} has not been seen before, so it has insufficient balance.`)
+                        continue
+                    }
                 } else {
                     fromAccount = changes[fromIndex].account
-                }
-                if (fromAccount === undefined) {
-                    invalidTxs.push(tx)
-                    logger.error(`Tx ${new Hash(tx)} Rejected: ${tx.from.toString()} has not been seen before, so it has insufficient balance.`)
-                    continue
                 }
 
                 let toAccount: Account | undefined
                 const toIndex = mapIndex.get(tx.to.toString())
                 if (toIndex === undefined) {
                     toAccount = await this.getAccount(previousState, tx.to)
-                    logger.error(`Before ${tx.from.toString()} (${fromAccount.nonce}): ${fromAccount.balance}`)
+                    if (toAccount === undefined) {
+                        toAccount = new Account({ balance: 0, nonce: 0 })
+                    }
                 } else {
                     toAccount = changes[toIndex].account
-                }
-                if (toAccount === undefined) {
-                    toAccount = new Account({ balance: 0, nonce: 0 })
-                    logger.error(`Before ${tx.from.toString()} (${fromAccount.nonce}): ${fromAccount.balance}`)
                 }
 
                 if (tx.nonce !== (fromAccount.nonce + 1)) {
@@ -173,7 +169,7 @@ export class WorldState {
                     continue
                 }
 
-                const total = tx.amount.add(tx.fee)
+                const total = minerAddress === undefined ? tx.amount : tx.amount.add(tx.fee)
                 if (fromAccount.balance.lessThan(total)) {
                     invalidTxs.push(tx)
                     logger.info(`Tx ${new Hash(tx)} Rejected: The balance of the account is insufficient.`)
@@ -185,7 +181,6 @@ export class WorldState {
                 fromAccount.balance = fromAccount.balance.sub(total)
                 toAccount.balance = toAccount.balance.add(tx.amount)
                 fromAccount.nonce++
-                logger.error(`${tx.from.toString()} (${tx.amount.toString()} + ${tx.fee.toString()} = ${total.toSigned()}) -> ${tx.to.toString()} (+${tx.amount.toString()})`)
                 if (fromIndex === undefined) {
                     mapIndex.set(tx.from.toString(), changes.push({ address: tx.from, account: fromAccount }) - 1)
                 } else {
@@ -204,13 +199,15 @@ export class WorldState {
                 const minerIndex = mapIndex.get(minerAddress.toString())
                 if (minerIndex === undefined) {
                     minerAccount = await this.getAccount(previousState, minerAddress)
+                    if (minerAccount === undefined) {
+                        minerAccount = new Account({ balance: 0, nonce: 0 })
+                    }
                 } else {
                     minerAccount = changes[minerIndex].account
                 }
-                if (minerAccount === undefined) { minerAccount = new Account({ balance: 0, nonce: 0 }) }
+
                 const reward = fees.add(hyconfromString("240"))
-                minerAccount.balance = minerAccount.balance.add(fees)
-                logger.error(`Fees (${fees.toString()}) + Reward (${hyconfromString("240").toString()}) = ${reward.toString()} -> ${minerAddress.toString()} (${reward.toString()})`)
+                minerAccount.balance = minerAccount.balance.add(reward)
                 if (minerIndex === undefined) {
                     mapIndex.set(minerAddress.toString(), changes.push({ address: minerAddress, account: minerAccount }) - 1)
                 } else {
@@ -218,10 +215,6 @@ export class WorldState {
                 }
             }
             const currentStateRoot = await this.putAccount(batch, mapAccount, changes, previousState)
-
-            for (const change of changes) {
-                logger.error(`After ${change.address.toString()} (${change.account.nonce}): ${change.account.balance}`)
-            }
 
             return { stateTransition: { currentStateRoot, batch, mapAccount }, validTxs, invalidTxs }
         })

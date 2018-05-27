@@ -322,7 +322,6 @@ export class Consensus extends EventEmitter implements IConsensus {
                 }),
                 txs: validTxs,
             })
-            this.txPool.updateTxs(invalidTxs, 0)
             this.miner.newCandidateBlock(newBlock)
         } catch (e) {
             logger.error(`Fail to createCandidateBlock: ${e}`)
