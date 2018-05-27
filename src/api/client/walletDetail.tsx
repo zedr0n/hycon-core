@@ -158,7 +158,7 @@ export class WalletDetail extends React.Component<any, any> {
                         <div key={accountIndex++}>
                             <TxLine tx={tx} rest={this.state.rest} />
                             {tx.from === this.state.address ?
-                                (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent txAmtBtn">-{tx.amount} HYCON</button>)
+                                (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent txAmtBtn">-{tx.estimated} HYCON</button>)
                                 :
                                 (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored txAmtBtn">{tx.amount} HYCON</button>)}
                         </div>

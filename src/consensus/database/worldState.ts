@@ -206,17 +206,9 @@ export class WorldState {
                     minerAccount = changes[minerIndex].account
                 }
                 if (minerAccount === undefined) { minerAccount = new Account({ balance: 0, nonce: 0 }) }
-                const beforeB = hycontoString(minerAccount.balance)
-                logger.error(`Before Miner Reward(${minerAddress.toString()}) : ${hycontoString(minerAccount.balance)} / Fees: ${hycontoString(fees)}`)
                 fees = fees.add(hyconfromString("240"))
                 minerAccount.balance = minerAccount.balance.add(fees)
-                logger.error(`After Miner Reward(${minerAddress.toString()}) : ${hycontoString(minerAccount.balance)}`)
-                const afterB = hycontoString(minerAccount.balance)
-                if (beforeB.split(".").length > 1 && afterB.split(".").length > 1) {
-                    if (beforeB.split(".")[1] !== afterB.split(".")[1]) {
-                        logger.error(`소수점안맞음.`)
-                    }
-                }
+
                 if (minerIndex === undefined) {
                     mapIndex.set(minerAddress.toString(), changes.push({ address: minerAddress, account: minerAccount }) - 1)
                 } else {
