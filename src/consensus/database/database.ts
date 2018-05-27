@@ -75,7 +75,7 @@ export class Database {
 
     public async getHashAtHeight(height: number): Promise<Hash> {
         try {
-            const hashData = new Uint8Array(await this.database.get(height))
+            const hashData = await this.database.get(height)
             const hash = new Hash(hashData)
             return hash
         } catch (e) {
@@ -95,7 +95,7 @@ export class Database {
             const status = await this.database.get(key)
             return Number(status)
         } catch (e) {
-            if (e.notFound) { return 0 }
+            if (e.notFound) { return BlockStatus.Nothing }
             logger.error(`Fail to getBlockStatus : ${e}`)
             throw e
         }

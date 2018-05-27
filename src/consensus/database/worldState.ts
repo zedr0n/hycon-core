@@ -122,7 +122,7 @@ export class WorldState {
         }
     }
 
-    public async next(previousState: Hash, minerAddress?: Address, txs?: SignedTx[]): Promise<{ stateTransition: IStateTransition, validTxs: SignedTx[] }> {
+    public async next(previousState: Hash, minerAddress: Address, txs?: SignedTx[]): Promise<{ stateTransition: IStateTransition, validTxs: SignedTx[], invalidTxs: SignedTx[] }> {
         txs === undefined ? txs = this.txPool.getTxs() : txs = txs
         const batch: DBState[] = []
         const changes: IChange[] = []
@@ -130,12 +130,13 @@ export class WorldState {
         const mapIndex: Map<string, number> = new Map<string, number>()
         const fees: Long = Long.fromNumber(0, true)
         const validTxs: SignedTx[] = []
-        return await this.accountLock.critical<{ stateTransition: IStateTransition, validTxs: SignedTx[] }>(async () => {
+        const invalidTxs: SignedTx[] = []
+        return await this.accountLock.critical(async () => {
             for (const tx of txs) {
                 const validity = await this.processTx(tx, previousState, mapIndex, changes)
                 switch (validity) {
                     case TxValidity.Invalid:
-                        this.txPool.updateTxs([tx])
+                        invalidTxs.push(tx)
                         break
                     case TxValidity.Waiting:
                         break
@@ -152,7 +153,7 @@ export class WorldState {
 
             const currentStateRoot = await this.putAccount(batch, mapAccount, changes, previousState)
 
-            return { stateTransition: { currentStateRoot, batch, mapAccount }, validTxs }
+            return { stateTransition: { currentStateRoot, batch, mapAccount }, validTxs, invalidTxs }
         })
     }
 
@@ -241,7 +242,7 @@ export class WorldState {
 
         const total = tx.amount.add(tx.fee)
         if (from.account.balance.lessThan(total)) {
-            logger.info(`Tx ${new Hash(tx)} Rejected: The balance of the account is insufficient.`)
+            logger.info(`Tx ${new Hash(tx)} Rejected: The balance (${hycontoString(from.account.balance)}) is insufficient (${hycontoString(tx.amount)} + ${hycontoString(tx.fee)} = ${hycontoString(total)})`)
             return TxValidity.Invalid
         }
 
@@ -250,7 +251,7 @@ export class WorldState {
 
         this.putChange(from, mapIndex, changes)
         if (tx.to === undefined) {
-            // Burn
+            logger.warn(`TX ${new Hash(tx).toString()} burned ${hycontoString(tx.amount)} HYC from ${tx.from.toString()}`)
             return TxValidity.Valid
         }
 

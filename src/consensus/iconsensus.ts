@@ -32,6 +32,6 @@ export interface IConsensus extends EventEmitter {
     getBlocksTip(): { hash: Hash, height: number }
     getTx(hash: Hash): Promise<{ tx: TxList, timestamp: number, confirmation: number } | undefined>
     txValidity(tx: SignedTx): Promise<TxValidity>
-    getHash(height: number): Promise<Hash>
+    getHash(height: number): Promise<Hash | undefined>
     getBlockHeight(hash: Hash): Promise<number | undefined>
 }

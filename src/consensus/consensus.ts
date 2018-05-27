@@ -126,7 +126,10 @@ export class Consensus extends EventEmitter implements IConsensus {
             return e
         }
     }
-    public getBlockStatus(hash: Hash): Promise<BlockStatus> {
+    public getBlockStatus(hash?: Hash): Promise<BlockStatus> {
+        if (hash === undefined) {
+            return Promise.resolve(BlockStatus.Nothing)
+        }
         return this.db.getBlockStatus(hash)
     }
     public getHeaderTip(): { hash: Hash; height: number } {
@@ -144,7 +147,7 @@ export class Consensus extends EventEmitter implements IConsensus {
         }
         return this.txdb.getTx(hash)
     }
-    public getHash(height: number): Promise<Hash> {
+    public getHash(height: number): Promise<Hash | undefined> {
         return this.db.getHashAtHeight(height)
     }
     public async getBlockHeight(hash: Hash): Promise<number> {
@@ -172,8 +175,7 @@ export class Consensus extends EventEmitter implements IConsensus {
 
                 // TODO: Check timestamp, wait until timestamp has passed
                 if (block !== undefined && (this.blockTip === undefined || dbBlock.totalWork.greaterThan(this.blockTip.totalWork))) {
-                    await this.reorganize(hash, block, dbBlock.height)
-                    this.blockTip = dbBlock
+                    await this.reorganize(hash, block, dbBlock)
                     await this.db.setBlockTip(hash)
                     this.createCandidateBlock(this.blockTip, hash)
                 }
@@ -267,9 +269,9 @@ export class Consensus extends EventEmitter implements IConsensus {
 
         let popHeight = this.blockTip.height
         let popHash = new Hash(this.blockTip.header)
-
-        if (newBlocks.length > 1) {
-            logger.info(`Reorganizing, removing ${popHeight - popStopHeight + 1} blocks for ${newBlocks.length} new blocks on a longer chain, `
+        const popCount = popHeight - popStopHeight + 1
+        if (popCount >= 1) {
+            logger.info(`Reorganizing, removing ${popCount} blocks for ${newBlocks.length} new blocks on a longer chain, `
                 + `new tip ${newBlockHash.toString()}(${newDBBlock.height}, ${newDBBlock.totalWork.getMantissa()}e${newDBBlock.totalWork.getExponent()}), `
                 + `previous tip ${popHash.toString()}(${popHeight}, ${this.blockTip.totalWork.getMantissa()}e${this.blockTip.totalWork.getExponent()}`)
         }
@@ -300,13 +302,15 @@ export class Consensus extends EventEmitter implements IConsensus {
             if (this.txdb) { await this.txdb.putTxs(hash, block.txs) }
             this.emit("block", block)
         }
+
+        this.blockTip = newDBBlock
     }
 
     private async createCandidateBlock(previousDBBlock: DBBlock = this.blockTip, previousHash: Hash = new Hash(previousDBBlock.header)) {
         try {
             const timeStamp = Date.now()
             const miner: Address = new Address(conf.minerAddress)
-            const { validTxs, stateTransition: { currentStateRoot } } = await this.worldState.next(previousDBBlock.header.stateRoot, miner)
+            const { stateTransition: { currentStateRoot }, validTxs, invalidTxs } = await this.worldState.next(previousDBBlock.header.stateRoot, miner)
             const newBlock = new Block({
                 header: new BlockHeader({
                     difficulty: previousDBBlock.nextDifficulty.encode(),
@@ -319,6 +323,7 @@ export class Consensus extends EventEmitter implements IConsensus {
                 }),
                 txs: validTxs,
             })
+            this.txPool.updateTxs(invalidTxs, 0)
             this.emit("candidate", newBlock)
         } catch (e) {
             logger.error(`Fail to createCandidateBlock: ${e}`)

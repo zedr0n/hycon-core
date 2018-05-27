@@ -15,7 +15,7 @@ export interface IPeer {
     getTxs(minFee?: number): Promise<SignedTx[]>
     putBlocks(blocks: AnyBlock[]): Promise<IStatusChange[]>
     putHeaders(header: AnyBlockHeader[]): Promise<IStatusChange[]>
-    getHash(height: number): Promise<Hash>
+    getHash(height: number): Promise<Hash | undefined>
     getBlocksByHashes(hashes: Hash[]): Promise<Block[]>
     getHeadersByHashes(hashes: Hash[]): Promise<AnyBlockHeader[]>
     getBlocksByRange(fromHeight: number, count: number): Promise<Block[]>

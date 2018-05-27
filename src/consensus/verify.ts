@@ -64,14 +64,14 @@ export class Verify {
             }
         }
 
-        const { stateTransition, validTxs } = await worldState.next(previousDBBlock.header.stateRoot, block.header.miner, block.txs)
+        const { stateTransition, validTxs, invalidTxs } = await worldState.next(previousDBBlock.header.stateRoot, block.header.miner, block.txs)
         if (!stateTransition.currentStateRoot.equals(block.header.stateRoot)) {
             logger.warn(`Rejecting block(${hash.toString()}): stateRoot(${header.stateRoot}) does not match calculated value(${stateTransition.currentStateRoot})`)
             return { newStatus: BlockStatus.Rejected }
         }
 
-        if (validTxs.length !== block.txs.length) {
-            logger.warn(`Rejecting block(${hash.toString()}): expected ${block.txs.length} transactions to be processed, but ${validTxs.length} were processed`)
+        if (invalidTxs.length > 0 || validTxs.length !== block.txs.length) {
+            logger.warn(`Rejecting block(${hash.toString()}): expected ${block.txs.length} transactions to be processed, but ${validTxs.length} were processed and ${invalidTxs.length} were rejected`)
             return { newStatus: BlockStatus.Rejected }
         }
 

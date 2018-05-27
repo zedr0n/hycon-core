@@ -72,13 +72,23 @@ export class RabbitPeer extends BasePeer implements IPeer {
         return reply.putHeadersReturn.statusChanges
     }
 
-    public async getHash(height: number): Promise<Hash> {
-        const { reply, packet } = await this.sendRequest({ getHash: { height } })
-        if (reply.getHashReturn === undefined) {
-            this.protocolError(new Error(`Reply has no 'getHashReturn': ${JSON.stringify(reply)}`))
-            throw new Error("Invalid response")
+    public async getHash(height: number): Promise<Hash | undefined> {
+        try {
+            const { reply, packet } = await this.sendRequest({ getHash: { height } })
+            if (reply.getHashReturn === undefined) {
+                this.protocolError(new Error(`Reply has no 'getHashReturn': ${JSON.stringify(reply)}`))
+                throw new Error("Invalid response")
+            }
+
+            if (!reply.getHashReturn.success || reply.getHashReturn.hash === undefined || reply.getHashReturn.hash.length !== 32) {
+                return
+            }
+
+            return new Hash(reply.getHashReturn.hash)
+        } catch (e) {
+            logger.warn(`Could not getHash() from peer: ${e}`)
+            return
         }
-        return new Hash(reply.getHashReturn.hash)
     }
 
     public async status(): Promise<proto.IStatus> {
@@ -443,7 +453,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
         const height = Number(request.height)
         try {
             const hash = await this.consensus.getHash(height)
-            message = { getHashReturn: { success: true, hash } }
+            message = { getHashReturn: { success: hash !== undefined, hash } }
         } catch (e) {
             logger.error(`Failed to getHash: ${e}`)
             message = { getHashReturn: { success: false } }
