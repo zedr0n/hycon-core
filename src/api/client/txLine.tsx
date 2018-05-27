@@ -34,7 +34,10 @@ export class TxLine extends React.Component<ITxLineProps, ITxLineView> {
 
                                 </div>
                             ) : (
-                                    <div >{this.state.tx.hash}</div>
+                                    <div>
+                                        <span>{this.state.tx.hash}</span>
+                                        <span className="timeStampArea textRed"> Pending </span>
+                                    </div>
                                 )}
                         </th>
                     </tr>

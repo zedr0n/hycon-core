@@ -8,4 +8,5 @@ export interface ITxPool {
     onTopTxChanges(count: number, callback: TopTxCallback): void
     getPending(index: number, count: number): { txs: SignedTx[], length: number, totalAmount: Long, totalFee: Long }
     isExsited(address: Address): boolean
+    getTxsOfAddress(address: Address): SignedTx[]
 }

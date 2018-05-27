@@ -100,6 +100,16 @@ export class TxPool implements ITxPool {
         return isExsited
     }
 
+    public getTxsOfAddress(address: Address): SignedTx[] {
+        const pendings: SignedTx[] = []
+        for (const tx of this.txs) {
+            if (tx.from.equals(address) || tx.to.equals(address)) {
+                pendings.push(tx)
+            }
+        }
+        return pendings
+    }
+
     private insert(newTxs: SignedTx[]): { count: number, lowestIndex?: number } {
         newTxs.sort((a, b) => b.fee.compare(a.fee))
         let lowestIndex
