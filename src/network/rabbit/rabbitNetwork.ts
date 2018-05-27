@@ -1,12 +1,13 @@
+import { randomBytes } from "crypto"
 import { getLogger } from "log4js"
-import { createServer, Socket } from "net"
 import * as net from "net"
+import { createServer, Socket } from "net"
 import * as netmask from "netmask"
-import uuidv4 = require("uuid/v4")
 import { ITxPool } from "../../common/itxPool"
 import { IConsensus } from "../../consensus/iconsensus"
 import * as proto from "../../serialization/proto"
 import { Server } from "../../server"
+import { Hash } from "../../util/hash"
 import { INetwork } from "../inetwork"
 import { IPeer } from "../ipeer"
 import { NatUpnp } from "../nat"
@@ -58,7 +59,7 @@ export class RabbitNetwork implements INetwork {
         this.endPoints = new Map<number, proto.IPeer>()
         this.pendingConnections = new Map<number, proto.IPeer>()
         this.peerDB = new PeerDb(peerDbPath)
-        this.guid = uuidv4()
+        this.guid = new Hash(randomBytes(32)).toString()
         logger.info(`TcpNetwork Port=${port} Session Guid=${this.guid}`)
     }
 
