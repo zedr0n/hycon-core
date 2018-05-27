@@ -12,9 +12,10 @@ interface ReplyAndPacket { reply: proto.Network, packet: Buffer }
 type replyResolve = (reply: ReplyAndPacket) => void
 type replyReject = (reason?: any) => void
 export abstract class BasePeer {
+    public static DefaultTimeoutTime = 30000
     public socketBuffer: SocketParser
     private replyId: number
-    private replyMap: Map<number, { resolved: replyResolve, reject: replyReject }>
+    private replyMap: Map<number, { resolved: replyResolve, reject: replyReject, timeout: NodeJS.Timer }>
 
     constructor(socket: Socket) {
         this.replyId = 1
@@ -27,6 +28,13 @@ export abstract class BasePeer {
     }
     public disconnect() {
         this.socketBuffer.destroy()
+        this.rejectAllReplies("Disconnect")
+    }
+
+    protected rejectAllReplies(reason?: string) {
+        for (const [id, { reject }] of this.replyMap) {
+            reject(reason)
+        }
     }
 
     protected onPacket(route: number, packet: Buffer): void {
@@ -85,13 +93,23 @@ export abstract class BasePeer {
 
     protected async sendRequest(request: proto.INetwork): Promise<ReplyAndPacket> {
         const id = this.newReplyID()
+        let timeout: NodeJS.Timer
         try {
             return await new Promise<ReplyAndPacket>((resolved, reject) => {
-                this.replyMap.set(id, { resolved, reject })
+                timeout = setTimeout(() => reject("Timeout"), BasePeer.DefaultTimeoutTime)
+                this.replyMap.set(id, { resolved, reject, timeout })
                 this.send(id, request).catch(reject)
             })
+        } catch (e) {
+            if (e === "Timeout") {
+                timeout = undefined
+            }
+            throw e
         } finally {
             this.replyMap.delete(id)
+            if (timeout !== undefined) {
+                clearTimeout(timeout)
+            }
         }
     }
 
@@ -103,7 +121,7 @@ export abstract class BasePeer {
         return this.socketBuffer.send(route, buffer)
     }
 
-    protected protocolError(e?: Error) {
+    protected protocolError(e: Error) {
         this.socketBuffer.destroy(e)
     }
 
