@@ -172,9 +172,6 @@ export class Consensus extends EventEmitter implements IConsensus {
 
                 // TODO: Check timestamp, wait until timestamp has passed
                 if (block !== undefined && (this.blockTip === undefined || dbBlock.totalWork.greaterThan(this.blockTip.totalWork))) {
-                    logger.info(`Reorganizing, block ${hash.toString()}(${dbBlock.height}) has more totalwork `
-                        + `(${dbBlock.totalWork.getMantissa()}e${dbBlock.totalWork.getExponent()}) than current tip ${new Hash(this.blockTip.header).toString()}`
-                        + `(${this.blockTip.height}) ${this.blockTip.totalWork.getMantissa()}e${this.blockTip.totalWork.getExponent()}`)
                     await this.reorganize(hash, block, dbBlock.height)
                     this.blockTip = dbBlock
                     await this.db.setBlockTip(hash)
@@ -246,10 +243,10 @@ export class Consensus extends EventEmitter implements IConsensus {
 
     }
 
-    private async reorganize(newBlockHash: Hash, newBlock: Block, newBlockHeight: number) {
+    private async reorganize(newBlockHash: Hash, newBlock: Block, newDBBlock: DBBlock) {
         const newBlockHashes: Hash[] = []
         const newBlocks: Block[] = []
-        let popStopHeight = newBlockHeight
+        let popStopHeight = newDBBlock.height
         let hash = newBlockHash
         let block: Block = newBlock
         while (popStopHeight > 0) {
@@ -270,6 +267,13 @@ export class Consensus extends EventEmitter implements IConsensus {
 
         let popHeight = this.blockTip.height
         let popHash = new Hash(this.blockTip.header)
+
+        if (newBlocks.length > 1) {
+            logger.info(`Reorganizing, removing ${popHeight - popStopHeight + 1} blocks for ${newBlocks.length} new blocks on a longer chain, `
+                + `new tip ${newBlockHash.toString()}(${newDBBlock.height}, ${newDBBlock.totalWork.getMantissa()}e${newDBBlock.totalWork.getExponent()}), `
+                + `previous tip ${popHash.toString()}(${popHeight}, ${this.blockTip.totalWork.getMantissa()}e${this.blockTip.totalWork.getExponent()}`)
+        }
+
         while (popHeight >= popStopHeight) {
             const popBlock = await this.db.getBlock(popHash)
             if (!(popBlock instanceof Block)) {
