@@ -131,7 +131,6 @@ export class WorldState {
         const fees: Long = Long.fromNumber(0, true)
         const validTxs: SignedTx[] = []
         return await this.accountLock.critical<{ stateTransition: IStateTransition, validTxs: SignedTx[] }>(async () => {
-            logger.error(`Start: ${previousState.toString()}`)
             for (const tx of txs) {
                 const validity = await this.processTx(tx, previousState, mapIndex, changes)
                 switch (validity) {
