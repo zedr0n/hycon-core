@@ -128,7 +128,7 @@ export class WorldState {
         const changes: IChange[] = []
         const mapAccount: Map<string, DBState> = new Map<string, DBState>()
         const mapIndex: Map<string, number> = new Map<string, number>()
-        const fees: Long = Long.fromNumber(0, true)
+        let fees: Long = Long.fromNumber(240e9, true)
         const validTxs: SignedTx[] = []
         const invalidTxs: SignedTx[] = []
         return await this.accountLock.critical(async () => {
@@ -142,13 +142,13 @@ export class WorldState {
                         break
                     case TxValidity.Valid:
                         validTxs.push(tx)
-                        fees.add(tx.fee)
+                        fees = fees.add(tx.fee)
                         break
                 }
             }
 
             const miner = await this.getModifiedAccount(minerAddress, previousState, mapIndex, changes)
-            miner.account.balance = fees.add(hyconfromString("240"))
+            miner.account.balance = miner.account.balance.add(fees)
             this.putChange(miner, mapIndex, changes)
 
             const currentStateRoot = await this.putAccount(batch, mapAccount, changes, previousState)

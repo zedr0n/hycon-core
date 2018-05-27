@@ -25,16 +25,14 @@ export class BlockHeader extends BaseBlockHeader {
             throw new Error("Header missing difficulty")
         }
         if (header.miner === undefined) {
-            this.miner = new Address(new Uint8Array(20))
-        } else {
-            this.miner = new Address(header.miner)
+            throw new Error("Header is missing miner")
         }
 
         for (const prev of header.previousHash) {
             this.previousHash.push(new Hash(prev))
         }
-
         this.nonce = header.nonce instanceof Long ? header.nonce : Long.fromNumber(header.nonce, true)
+        this.miner = new Address(header.miner)
     }
 
     public preHash(): Uint8Array {

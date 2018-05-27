@@ -37,7 +37,6 @@ export class Block implements proto.IBlock {
     public set(block: proto.IBlock): void {
         if (block.txs === undefined) { throw (new Error("Block Txs are missing")) }
         if (block.header === undefined) { throw (new Error("Block Header is missing in Block")) }
-        // if (block.miner === undefined) { throw (new Error("Miner is missing")) }
 
         this.txs = []
         for (const tx of block.txs) {
