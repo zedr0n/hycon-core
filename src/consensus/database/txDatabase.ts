@@ -1,23 +1,37 @@
 import levelup = require("levelup")
 import { getLogger } from "log4js"
 import rocksdb = require("rocksdb")
+import * as sqlite3 from "sqlite3"
 import { Address } from "../../common/address"
 import { SignedTx } from "../../common/txSigned"
 import { Hash } from "../../util/hash"
 import { AnySignedTx, IConsensus } from "../iconsensus"
 import { BlockStatus } from "../sync"
 import { TxList } from "./txList"
+const sqlite = sqlite3.verbose()
 const logger = getLogger("TxDB")
 
 export class TxDatabase {
 
     private database: levelup.LevelUp
+    private db: sqlite3.Database
     private consensus: IConsensus
     constructor(path: string) {
         const rocks: any = rocksdb(path)
         this.database = levelup(rocks)
+        this.db = new sqlite.Database(path + `sql`)
     }
     public async init(consensus: IConsensus, tipHeight: number) {
+        this.db.serialize( () => {
+            this.db.run(`CREATE TABLE IF NOT EXISTS txdb(txhash TEXT PRIMARY KEY,
+                                                                txto TEXT,
+                                                                txfrom TEXT,
+                                                                amount TEXT,
+                                                                fee TEXT,
+                                                                blockhash TEXT,
+                                                                status number,
+                                                                timestamp number)`)
+        })
         this.consensus = consensus
         const lastHash = await this.getLastBlock()
         let lastHeight = 0
@@ -42,7 +56,7 @@ export class TxDatabase {
         }
     }
 
-    public async putTxs(blockHash: Hash, txs: AnySignedTx[]): Promise<void> {
+    public async putTxs(blockHash: Hash, txs: AnySignedTx[]): Promise<void > {
         const batch: levelup.Batch[] = []
         const mapLastTx: Map<string, Hash> = new Map<string, Hash>()
         for (const tx of txs) {
