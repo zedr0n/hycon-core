@@ -165,20 +165,26 @@ export class Consensus extends EventEmitter implements IConsensus {
                     await this.db.putDBBlock(hash, dbBlock)
                 }
 
-                if (this.headerTip === undefined || this.headerTip.height < dbBlock.height) {
+                if (this.headerTip === undefined || dbBlock.totalWork.greaterThan(this.headerTip.totalWork)) {
                     this.headerTip = dbBlock
                     await this.db.setHeaderTip(hash)
                 }
 
                 // TODO: Check timestamp, wait until timestamp has passed
-                if (block !== undefined && (this.blockTip === undefined || this.blockTip.height < dbBlock.height)) {
+                if (block !== undefined && (this.blockTip === undefined || dbBlock.totalWork.greaterThan(this.blockTip.totalWork))) {
+                    logger.info(`Reorganizing, block ${hash.toString()}(${dbBlock.height}) has more totalwork `
+                        + `(${dbBlock.totalWork.getMantissa()}e${dbBlock.totalWork.getExponent()}) than current tip ${new Hash(this.blockTip.header).toString()}`
+                        + `(${this.blockTip.height}) ${this.blockTip.totalWork.getMantissa()}e${this.blockTip.totalWork.getExponent()}`)
                     await this.reorganize(hash, block, dbBlock.height)
                     this.blockTip = dbBlock
                     await this.db.setBlockTip(hash)
                     this.createCandidateBlock(this.blockTip, hash)
                 }
 
-                logger.info(`Put ${block ? "Block" : "Header"}(${dbBlock.height}) ${hash}, BTip(${this.blockTip.height}) HTip(${this.headerTip.height})`)
+                logger.info(`Put ${block ? "Block" : "Header"}`
+                    + ` ${hash}(${dbBlock.height}, ${dbBlock.totalWork.getMantissa()}e${dbBlock.totalWork.getExponent()}),`
+                    + ` BTip(${this.blockTip.height}, ${this.blockTip.totalWork.getMantissa()}e${this.blockTip.totalWork.getExponent()}),`
+                    + ` HTip(${this.headerTip.height}, ${this.headerTip.totalWork.getMantissa()}e${this.headerTip.totalWork.getExponent()})`)
             }
             return { oldStatus, status }
         })
