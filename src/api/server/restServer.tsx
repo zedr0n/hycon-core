@@ -563,8 +563,8 @@ export class RestServer implements IRest {
         try {
             await Wallet.walletInit()
             const wallet = await Wallet.loadKeys(tx.name, tx.password)
-            const isExsited = this.txPool.isExsited(wallet.pubKey.address())
-            if (!isExsited) {
+            const isExist = this.txPool.isExist(wallet.pubKey.address())
+            if (!isExist) {
                 const address = new Address(tx.address)
                 const account = await this.consensus.getAccount(wallet.pubKey.address())
                 logger.warn(`Account Balance: ${account.balance}`)

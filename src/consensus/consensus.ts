@@ -341,7 +341,7 @@ export class Consensus extends EventEmitter implements IConsensus {
             await this.db.setBlockStatus(hash, BlockStatus.MainChain)
             await this.db.setHashAtHeight(pushHeight, hash)
             pushHeight += 1
-            this.txPool.updateTxs(block.txs, 0)
+            this.txPool.removeTxs(block.txs, 0)
             if (this.txdb) { await this.txdb.putTxs(hash, block.header.timeStamp, block.txs) }
             this.emit("block", block)
         }

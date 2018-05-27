@@ -36,7 +36,7 @@ async function test() {
         console.log(txPoolA.txs)
         const tx: any = randomTxs(1, 1)[0]
         console.log(`Removing... {fee: ${tx.fee}, g: ${tx.g}}`)
-        txPool.updateTxs(randomTxs(1, 1), 0)
+        txPool.removeTxs(randomTxs(1, 1), 0)
         console.log(txPoolA.txs)
         console.log(count)
     }

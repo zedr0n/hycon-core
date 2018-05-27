@@ -16,6 +16,7 @@ interface ITxCallback {
 export class TxPool implements ITxPool {
     private txs: SignedTx[]
     private txMap: Map<string, SignedTx>
+
     private callbacks: ITxCallback[]
     private minFee: number
 
@@ -26,7 +27,7 @@ export class TxPool implements ITxPool {
         this.txMap = new Map<string, SignedTx>()
     }
 
-    public putTxs(newTxsOriginal: SignedTx[]): number {
+    public async putTxs(newTxsOriginal: SignedTx[]): Promise<number> {
         const newTxs: SignedTx[] = []
 
         // drop it, if we already has it
@@ -61,7 +62,7 @@ export class TxPool implements ITxPool {
         return count
     }
 
-    public updateTxs(old: SignedTx[], maxReturn?: number): SignedTx[] {
+    public removeTxs(old: SignedTx[], maxReturn?: number): SignedTx[] {
         this.remove(old.slice(0, old.length))
         return this.txs.slice(0, maxReturn)
     }
@@ -87,15 +88,11 @@ export class TxPool implements ITxPool {
         return this.txs
     }
 
-    public isExsited(address: Address): boolean {
-        let isExsited = false
-        for (const tx of this.txs) {
-            if (tx.from.equals(address)) {
-                isExsited = true
-                break
-            }
-        }
-        return isExsited
+    public isExist(address: Address): boolean {
+        let isExist = false
+        const txs = this.txMap.get(address.toString())
+        if (txs !== undefined) { isExist = true }
+        return isExist
     }
 
     public getTxsOfAddress(address: Address): SignedTx[] {
