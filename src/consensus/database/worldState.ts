@@ -132,6 +132,7 @@ export class WorldState {
         const validTxs: SignedTx[] = []
         const invalidTxs: SignedTx[] = []
         return await this.accountLock.critical<{ stateTransition: IStateTransition, validTxs: SignedTx[], invalidTxs: SignedTx[] }>(async () => {
+            logger.error(`Start: ${previousState.toString()}`)
             for (const tx of txs) {
                 if (tx.from.equals(tx.to)) {
                     // TODO: Remove this if function and test
@@ -143,6 +144,7 @@ export class WorldState {
                 const fromIndex = mapIndex.get(tx.from.toString())
                 if (fromIndex === undefined) {
                     fromAccount = await this.getAccount(previousState, tx.from)
+                    logger.error(`Before ${tx.from.toString()} (${fromAccount.nonce}): ${fromAccount.balance}`)
                 } else {
                     fromAccount = changes[fromIndex].account
                 }
@@ -156,11 +158,13 @@ export class WorldState {
                 const toIndex = mapIndex.get(tx.to.toString())
                 if (toIndex === undefined) {
                     toAccount = await this.getAccount(previousState, tx.to)
+                    logger.error(`Before ${tx.from.toString()} (${fromAccount.nonce}): ${fromAccount.balance}`)
                 } else {
                     toAccount = changes[toIndex].account
                 }
                 if (toAccount === undefined) {
                     toAccount = new Account({ balance: 0, nonce: 0 })
+                    logger.error(`Before ${tx.from.toString()} (${fromAccount.nonce}): ${fromAccount.balance}`)
                 }
 
                 if (tx.nonce !== (fromAccount.nonce + 1)) {
@@ -177,12 +181,11 @@ export class WorldState {
                 }
 
                 validTxs.push(tx)
-                logger.error(`Before tx from : ${hycontoString(fromAccount.balance)}(n:${fromAccount.nonce}) -> to : ${hycontoString(toAccount.balance)}(n:${toAccount.nonce}) / (amount: ${hycontoString(tx.amount)} / fee:${hycontoString(tx.fee)})`)
                 fees = fees.add(tx.fee)
                 fromAccount.balance = fromAccount.balance.sub(total)
                 toAccount.balance = toAccount.balance.add(tx.amount)
                 fromAccount.nonce++
-                logger.error(`After tx from : ${hycontoString(fromAccount.balance)}(n:${fromAccount.nonce}) -> to : ${hycontoString(toAccount.balance)}(n:${toAccount.nonce}) / (amount: ${hycontoString(tx.amount)} / fee:${hycontoString(tx.fee)})`)
+                logger.error(`${tx.from.toString()} (${tx.amount.toString()} + ${tx.fee.toString()} = ${total.toSigned()}) -> ${tx.to.toString()} (+${tx.amount.toString()})`)
                 if (fromIndex === undefined) {
                     mapIndex.set(tx.from.toString(), changes.push({ address: tx.from, account: fromAccount }) - 1)
                 } else {
@@ -193,7 +196,6 @@ export class WorldState {
                 } else {
                     changes[toIndex].account = toAccount
                 }
-
             }
 
             // TODO: Handle coin burn
@@ -206,9 +208,9 @@ export class WorldState {
                     minerAccount = changes[minerIndex].account
                 }
                 if (minerAccount === undefined) { minerAccount = new Account({ balance: 0, nonce: 0 }) }
-                fees = fees.add(hyconfromString("240"))
+                const reward = fees.add(hyconfromString("240"))
                 minerAccount.balance = minerAccount.balance.add(fees)
-
+                logger.error(`Fees (${fees.toString()}) + Reward (${hyconfromString("240").toString()}) = ${reward.toString()} -> ${minerAddress.toString()} (${reward.toString()})`)
                 if (minerIndex === undefined) {
                     mapIndex.set(minerAddress.toString(), changes.push({ address: minerAddress, account: minerAccount }) - 1)
                 } else {
@@ -216,6 +218,11 @@ export class WorldState {
                 }
             }
             const currentStateRoot = await this.putAccount(batch, mapAccount, changes, previousState)
+
+            for (const change of changes) {
+                logger.error(`After ${change.address.toString()} (${change.account.nonce}): ${change.account.balance}`)
+            }
+
             return { stateTransition: { currentStateRoot, batch, mapAccount }, validTxs, invalidTxs }
         })
     }
