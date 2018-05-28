@@ -38,6 +38,7 @@ export const routes: RouteConfig[] = [
 
 // tslint:disable:no-shadowed-variable
 export class App extends React.Component<{ rest: IRest }, any> {
+    public errMsg1: string = "숫자 및 영문 대소문자로 구성된 올바른 Hash 값을 입력해주세요"
     public rest: IRest
     public blockView: ({ match }: RouteComponentProps<{ hash: string }>) => JSX.Element
     public home: ({ match }: RouteComponentProps<{}>) => JSX.Element
@@ -62,10 +63,11 @@ export class App extends React.Component<{ rest: IRest }, any> {
         super(props)
         this.state = {
             block: "block",
+            blockHash: undefined,
+            blockViewRedirect: false,
             isParity: false,
             loading: false,
             name: "BlockExplorer",
-            searchVal: "",
             tx: "Tx 1",
         }
         this.rest = props.rest
@@ -109,7 +111,23 @@ export class App extends React.Component<{ rest: IRest }, any> {
             <WalletDetail name={match.params.name} rest={this.rest} />
         )
     }
+    public handleBlockHash(data: any) {
+        this.setState({ blockHash: data.target.value })
+    }
+    public searchBlock(event: any) {
+        if (this.state.blockHash === undefined) {
+            event.preventDefault()
+        } else if (!/^[a-zA-Z0-9]+$/.test(this.state.blockHash)) {
+            event.preventDefault()
+            if (alert(this.errMsg1)) { window.location.reload() }
+        } else {
+            this.setState({ blockViewRedirect: true })
+        }
+    }
     public render() {
+        if (this.state.blockViewRedirect) {
+            return <Redirect to={`/block/${this.state.blockHash}`} />
+        }
         return (
             <div className="mdl-layout mdl-js-layout">
                 <header className="mdl-layout__header" >
@@ -117,7 +135,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
                         <span className="mdl-layout-title">Hycon Blockexplorer</span>
                         <div className="mdl-layout-spacer" />
                         <nav className="mdl-navigation mdl-layout--large-screen-only">
-                            <form action={`/block/${this.state.searchVal}`}>
+                            <form>
                                 <div className="mdl-textfield mdl-js-textfield mdl-textfield--expandable">
                                     <label
                                         className="mdl-button mdl-js-button mdl-button--icon"
@@ -127,11 +145,9 @@ export class App extends React.Component<{ rest: IRest }, any> {
                                     </label>
                                     <div className="mdl-textfield__expandable-holder">
                                         <input
-                                            className="mdl-textfield__input searchBox"
-                                            type="text"
-                                            id="search"
-                                            placeholder="Block Hash"
-                                            onChange={(event) => this.updateSearchVal(event)}
+                                            className="mdl-textfield__input searchBox" type="text" id="search" placeholder="Block Hash"
+                                            onChange={(data) => this.handleBlockHash(data)}
+                                            onKeyPress={(event) => { if (event.key === "Enter") { this.searchBlock(event) } }}
                                         />
                                     </div>
                                 </div>
@@ -169,8 +185,5 @@ export class App extends React.Component<{ rest: IRest }, any> {
                 </main>
             </div>
         )
-    }
-    public updateSearchVal(event: any) {
-        this.setState({ searchVal: event.target.value })
     }
 }
