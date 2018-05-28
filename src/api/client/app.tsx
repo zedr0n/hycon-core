@@ -38,7 +38,7 @@ export const routes: RouteConfig[] = [
 
 // tslint:disable:no-shadowed-variable
 export class App extends React.Component<{ rest: IRest }, any> {
-    public errMsg1: string = "숫자 및 영문 대소문자로 구성된 올바른 Hash 값을 입력해주세요"
+    public errMsg1: string = "Please enter a valid Hash value consisting of numbers and English"
     public rest: IRest
     public blockView: ({ match }: RouteComponentProps<{ hash: string }>) => JSX.Element
     public home: ({ match }: RouteComponentProps<{}>) => JSX.Element
