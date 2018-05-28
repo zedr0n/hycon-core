@@ -24,8 +24,8 @@ import { TestWalletMnemonics } from "./util/genWallet"
 import { Hash } from "./util/hash"
 import { Wallet } from "./wallet/wallet"
 import { WalletManager } from "./wallet/walletManager"
-// tslint:disable-next-line:no-var-requires
-const randomInt = require("random-int")
+
+function randomInt(min, max) { return min + Math.floor((max - min) * Math.random()) }
 // tslint:disable-next-line:no-var-requires
 const assert = require("assert")
 
@@ -97,11 +97,10 @@ export class TestServer {
             if (fromAddr.equals(toAddr)) {
                 continue
             }
-            let nonce = undefined
+            let nonce
             if (this.nonceTable.has(fromAddrString)) {
                 nonce = this.nonceTable.get(fromAddrString) + 1
-            }
-            else {
+            } else {
                 nonce = await this.server.consensus.getNonce(fromAddr) + 1
             }
 
