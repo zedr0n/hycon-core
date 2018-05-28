@@ -97,7 +97,17 @@ export class WorldState {
         }
     }
     public async validateTx(stateRoot: Hash, tx: SignedTx): Promise<TxValidity> {
-        throw new Error("Method not implemented.")
+        const fromAccount = await this.getAccount(stateRoot, tx.from)
+        let validity
+        if (fromAccount.nonce + 1 === tx.nonce) {
+            validity = TxValidity.Valid
+        } else if (fromAccount.nonce + 1 < tx.nonce) {
+            validity = TxValidity.Waiting
+        } else {
+            validity = TxValidity.Invalid
+        }
+        logger.error(`In validate Tx : ${tx.from} / ${tx.nonce} / Validity : ${validity}`)
+        return validity
     }
 
     public async first(genesis: GenesisBlock): Promise<IStateTransition> {

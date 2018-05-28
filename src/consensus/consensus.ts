@@ -177,8 +177,10 @@ export class Consensus extends EventEmitter implements IConsensus {
     public getBlocksTip(): { hash: Hash; height: number } {
         return { hash: new Hash(this.blockTip.header), height: this.blockTip.height }
     }
-    public txValidity(tx: SignedTx): Promise<TxValidity> {
-        return this.worldState.validateTx(this.blockTip.header.stateRoot, tx)
+    public async txValidity(tx: SignedTx): Promise<TxValidity> {
+        let validity = await this.worldState.validateTx(this.blockTip.header.stateRoot, tx)
+        if (!tx.verify()) { validity = TxValidity.Invalid }
+        return validity
     }
     public async getTx(hash: Hash): Promise<{ tx: DBTx, confirmation: number } | undefined> {
         if (this.txdb === undefined) {

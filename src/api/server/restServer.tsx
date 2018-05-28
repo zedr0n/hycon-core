@@ -480,16 +480,19 @@ export class RestServer implements IRest {
                 })
             }
             const webTxs: ITxProp[] = []
-            for (const tx of pendings) {
-                webTxs.push({
-                    hash: new Hash(tx).toString(),
-                    amount: hycontoString(tx.amount),
-                    fee: hycontoString(tx.fee),
-                    from: tx.from.toString(),
-                    to: tx.to.toString(),
-                    signature: tx.signature.toString("hex"),
-                    estimated: hycontoString(tx.amount.add(tx.fee)),
-                })
+            if (pendings !== undefined) {
+                logger.debug(`getTxsOfAddress result  = ${pendings.length}`)
+                for (const tx of pendings) {
+                    webTxs.push({
+                        hash: new Hash(tx).toString(),
+                        amount: hycontoString(tx.amount),
+                        fee: hycontoString(tx.fee),
+                        from: tx.from.toString(),
+                        to: tx.to.toString(),
+                        signature: tx.signature.toString("hex"),
+                        estimated: hycontoString(tx.amount.add(tx.fee)),
+                    })
+                }
             }
             for (const result of results) {
                 let webTx: ITxProp
@@ -564,24 +567,24 @@ export class RestServer implements IRest {
             await Wallet.walletInit()
             const wallet = await Wallet.loadKeys(tx.name, tx.password)
             const isExist = this.txPool.isExist(wallet.pubKey.address())
-            if (!isExist) {
-                const address = new Address(tx.address)
-                const account = await this.consensus.getAccount(wallet.pubKey.address())
-                logger.warn(`Account Balance: ${account.balance}`)
-                logger.warn(`TX Amount: ${tx.amount}`)
-                logger.warn(`TX Miner Fee: ${tx.minerFee}`)
-                const amt = hyconfromString(tx.amount.toString()).add(hyconfromString(tx.minerFee.toString()))
-                logger.warn(`TX Total: ${hycontoString(amt)}`)
-                if (amt.greaterThan(account.balance)) {
-                    throw new Error("insufficient wallet balance to send transaction")
-                }
-                const signedTx = wallet.send(address, hyconfromString(tx.amount.toString()), account.nonce + 1, hyconfromString(tx.minerFee.toString()))
-                if (queueTx) { queueTx(signedTx) } else { return Promise.reject(false) }
-                return Promise.resolve(true)
-            } else {
-                logger.warn(`Already exsited from Address in txPool (Related with nonce)`)
-                return Promise.resolve(false)
+            const address = new Address(tx.address)
+            const account = await this.consensus.getAccount(wallet.pubKey.address())
+            let accountBalance = account.balance
+            let accountNonce = account.nonce + 1
+            if (isExist.totalAmount !== undefined) { accountBalance = accountBalance.sub(isExist.totalAmount) }
+            if (isExist.lastNonce !== undefined) { accountNonce = isExist.lastNonce + 1 }
+            logger.warn(`Account Balance: ${account.balance} / Pending Amount : ${isExist.totalAmount} /  Available : ${account.balance.sub(isExist.totalAmount)}`)
+            logger.warn(`TX Amount: ${tx.amount}`)
+            logger.warn(`TX Miner Fee: ${tx.minerFee}`)
+            const amt = hyconfromString(tx.amount.toString()).add(hyconfromString(tx.minerFee.toString()))
+            logger.warn(`TX Total: ${hycontoString(amt)}`)
+            if (amt.greaterThan(accountBalance)) {
+                throw new Error("insufficient wallet balance to send transaction")
             }
+            const signedTx = wallet.send(address, hyconfromString(tx.amount.toString()), accountNonce, hyconfromString(tx.minerFee.toString()))
+            console.log(`Success send Tx : `, signedTx)
+            if (queueTx) { queueTx(signedTx) } else { return Promise.reject(false) }
+            return Promise.resolve(true)
         } catch (e) {
             logger.warn(e)
             return Promise.resolve(false)

@@ -1,5 +1,7 @@
 import { getLogger } from "log4js"
+import Long = require("long")
 import { hyconfromString } from "../api/client/stringUtil"
+import { TxValidity } from "../consensus/database/worldState"
 import { NewTx } from "../serialization/proto"
 import { Server } from "../server"
 import { Hash } from "../util/hash"
@@ -14,57 +16,82 @@ interface ITxCallback {
     n: number
 }
 export class TxPool implements ITxPool {
-    private txs: SignedTx[]
-    private txMap: Map<string, SignedTx>
+    private server: Server
+
+    private addresses: Array<{ address: string, fee: Long }>
+    private txsMap: Map<string, SignedTx[]>
 
     private callbacks: ITxCallback[]
     private minFee: number
 
-    constructor(minFee?: number) {
-        this.txs = []
+    constructor(server: Server, minFee?: number) {
+        this.server = server
+        this.addresses = []
         this.callbacks = []
         this.minFee = minFee === undefined ? 0 : minFee
-        this.txMap = new Map<string, SignedTx>()
+        this.txsMap = new Map<string, SignedTx[]>()
     }
 
     public async putTxs(newTxsOriginal: SignedTx[]): Promise<number> {
-        const newTxs: SignedTx[] = []
-
+        let newTxsCount: number = 0
+        let lowestIndex
         // drop it, if we already has it
         for (const oneTx of newTxsOriginal) {
-            const key = new Hash(oneTx).toString()
-            if (this.txMap.has(key)) {
+            let isExist = false
+            const isValid = await this.server.consensus.txValidity(oneTx)
+            if (isValid === TxValidity.Invalid) {
+                logger.error(`Invalid Tx : ${new Hash(oneTx).toString()}`)
                 continue
+            }
+            const fromString = oneTx.from.toString()
+            let txs = this.txsMap.get(fromString)
+            if (txs !== undefined) {
+                for (let i = 0; i < txs.length; i++) {
+                    const tx = txs[i]
+                    if (oneTx.nonce === tx.nonce) {
+                        if (!tx.equals(oneTx)) {
+                            if (oneTx.fee.greaterThan(tx.fee)) {
+                                if (await this.server.consensus.txValidity(tx) === TxValidity.Valid) {
+                                    this.removeFromAddresses(tx.from)
+                                }
+                                txs.splice(i, 1, oneTx)
+                                newTxsCount++
+                            }
+                        } else {
+                            isExist = true
+                            continue
+                        }
+                        break
+                    }
+                    if (oneTx.nonce < tx.nonce) {
+                        txs.splice(i, 0, oneTx)
+                        newTxsCount++
+                        break
+                    }
+                    if (i === txs.length - 1) {
+                        txs.push(oneTx)
+                        newTxsCount++
+                        break
+                    }
+                }
             } else {
-                newTxs.push(oneTx)
+                txs = [oneTx]
+                this.txsMap.set(fromString, txs)
+                newTxsCount++
+            }
+            if (!isExist && isValid === TxValidity.Valid && txs[0].equals(oneTx)) {
+                const index = this.setAddresses(fromString, oneTx)
+                lowestIndex !== undefined ? (index > lowestIndex ? lowestIndex = index : lowestIndex++) : lowestIndex = index
             }
         }
-        // nothing to do
-        if (newTxs.length <= 0) {
-            return 0
-        }
-
-        // insert
-        const { count, lowestIndex } = this.insert(newTxs)
-        for (const oneTx of newTxs) {
-            const key = new Hash(oneTx).toString()
-            this.txMap.set(key, oneTx)
-        }
-
-        // check same size
-        if (this.txMap.size !== this.txs.length) {
-            logger.fatal("TX Pool error, resetting TX Pool")
-            this.txs = Array.from(this.txMap.values())
-        }
-
         // notify
         this.callback(lowestIndex)
-        return count
+        return newTxsCount
     }
 
-    public removeTxs(old: SignedTx[], maxReturn?: number): SignedTx[] {
-        this.remove(old.slice(0, old.length))
-        return this.txs.slice(0, maxReturn)
+    public async removeTxs(old: SignedTx[], maxReturn?: number): Promise<SignedTx[]> {
+        await this.remove(old.slice(0, old.length))
+        return this.getTxs().slice(0, maxReturn)
     }
 
     public onTopTxChanges(n: number, callback: (txs: SignedTx[]) => void): void {
@@ -72,7 +99,7 @@ export class TxPool implements ITxPool {
     }
 
     public getPending(index: number, count: number): { txs: SignedTx[], length: number, totalAmount: Long, totalFee: Long } {
-        const txs = this.txs.slice()
+        const txs = this.getTxs().slice()
         let totalAmount = hyconfromString("0")
         let totalFee = hyconfromString("0")
         for (const tx of txs) {
@@ -85,124 +112,99 @@ export class TxPool implements ITxPool {
     }
 
     public getTxs(): SignedTx[] {
-        return this.txs
+        const getTxsResult = []
+        const addresses = this.addresses.slice()
+        const txsMap = this.txsMap
+        const mapIndex: Map<string, number> = new Map<string, number>()
+        for (const address of addresses) {
+            let index = mapIndex.get(address.address)
+            if (index === undefined) { index = 0 } else { index++ }
+            const txs = txsMap.get(address.address)
+            if (txs === undefined || txs.length === 0 || index >= txs.length) { throw new Error(`TX Pool error while getTxs, resetting TX Pool`) }
+            mapIndex.set(address.address, index)
+            getTxsResult.push(txs[index])
+            index += 1
+            if (index < txs.length) { this.setAddresses(address.address, txs[index], addresses) }
+        }
+        return getTxsResult
     }
 
-    public isExist(address: Address): boolean {
+    public isExist(address: Address): { isExist: boolean, totalAmount?: Long, lastNonce?: number } {
         let isExist = false
-        const txs = this.txMap.get(address.toString())
-        if (txs !== undefined) { isExist = true }
-        return isExist
+        let lastNonce: number | undefined
+        let totalAmount = Long.fromString("0", true)
+        const txs = this.txsMap.get(address.toString())
+        if (txs !== undefined && txs.length > 0) {
+            isExist = true
+            for (const tx of txs) {
+                totalAmount = totalAmount.add(tx.amount).add(tx.fee)
+            }
+            lastNonce = txs[txs.length - 1].nonce
+        }
+        return { isExist, totalAmount, lastNonce }
     }
 
-    public getTxsOfAddress(address: Address): SignedTx[] {
-        const pendings: SignedTx[] = []
-        for (const tx of this.txs) {
-            if (tx.from.equals(address) || tx.to.equals(address)) {
-                pendings.push(tx)
+    public getTxsOfAddress(address: Address): SignedTx[] | undefined {
+        return this.txsMap.get(address.toString())
+    }
+
+    private setAddresses(address: string, tx: SignedTx, addressArray?: Array<{ address: string, fee: Long }>): number {
+        let addresses
+        addressArray ? addresses = addressArray : addresses = this.addresses
+        const addressFee = { address, fee: tx.fee }
+        let isInsert = false
+        let index
+        for (let i = 0; i < addresses.length; i++) {
+            if (tx.fee.greaterThan(addresses[i].fee)) {
+                addresses.splice(i, 0, addressFee)
+                index = i
+                isInsert = true
+                break
             }
         }
-        return pendings
+        if (!isInsert) {
+            addresses.push(addressFee)
+            index = addresses.length - 1
+        }
+        return index
     }
 
-    private insert(newTxs: SignedTx[]): { count: number, lowestIndex?: number } {
-        newTxs.sort((a, b) => b.fee.compare(a.fee))
-        let lowestIndex
-        let count = 0
-        let i = 0
-        let j = 0
-        let k = 0
-        while (i < newTxs.length) {
-            if (newTxs[i].fee.lessThan(this.minFee)) {
-                return { count, lowestIndex }
-            }
-
-            if (j + k >= this.txs.length || newTxs[i].fee.greaterThan(this.txs[j + k].fee)) {
-                this.txs.splice(j + k, 0, newTxs[i])
-                if (count === 0) {
-                    lowestIndex = j + k
+    private async remove(txsOriginal: SignedTx[]) {
+        for (const txOriginal of txsOriginal) {
+            const fromAddress = txOriginal.from.toString()
+            const txsOfAddress = this.txsMap.get(fromAddress)
+            if (txsOfAddress !== undefined) {
+                if (txsOfAddress[0].nonce < txOriginal.nonce) { throw new Error(`Previous transaction is exist in txPool yet.`) }
+                if (txsOfAddress[0].nonce === txOriginal.nonce) {
+                    this.removeFromAddresses(txsOfAddress[0].from)
+                    txsOfAddress.splice(0, 1)
                 }
-                count++
-                k = 0
-                i++
-            } else if (newTxs[i].fee.lessThan(this.txs[j].fee)) {
-                j++
-            } else if (newTxs[i].fee.equals(this.txs[j + k].fee)) {
-                if (this.txs[j + k].equals(newTxs[i])) {
-                    i++
-                    k = 0
+                if (txsOfAddress.length === 0) {
+                    this.txsMap.delete(fromAddress)
                 } else {
-                    k++
-                }
-            } else {
-                logger.error(`TxPool insert error, it seems the data is not sorted correctly, skipping Tx and attempting to continue.`)
-                i++
-            }
-        }
-        return { count, lowestIndex }
-    }
-
-    private remove(txsOriginal: SignedTx[]) {
-        const txs: SignedTx[] = []
-
-        // proceed only if we has it!
-        for (const oneTx of txsOriginal) {
-            const key = new Hash(oneTx).toString()
-            if (this.txMap.has(key)) {
-                txs.push(oneTx)
-            }
-        }
-
-        // nothing to process
-        if (txs.length <= 0) {
-            return
-        }
-
-        txs.sort((a, b) => b.fee.compare(a.fee))
-        let i = 0
-        let j = 0
-        let k = 0
-        while (i < txs.length && j < this.txs.length) {
-            if (txs[i].fee.lessThan(this.txs[j].fee)) {
-                j++
-            } else if (j + k >= this.txs.length || txs[i].fee.greaterThan(this.txs[j + k].fee)) {
-                i++
-                k = 0
-            } else {
-                if (txs[i].fee.equals(this.txs[j + k].fee)) {
-                    if (this.txs[j + k].equals(txs[i])) {
-                        this.txs.splice(j + k, 1)
-                    } else {
-                        k++
+                    if (txsOfAddress[0].nonce === txOriginal.nonce + 1) {
+                        this.setAddresses(fromAddress, txsOfAddress[0])
                     }
-                } else {
-                    logger.error(`TxPool remove error, it seems the data is not sorted correctly, skipping Tx and attempting to continue.`)
                 }
             }
         }
+    }
 
-        // remove from map
-        for (const oneTx of txs) {
-            const key = new Hash(oneTx).toString()
-            const deleteResult = this.txMap.delete(key)
-            if (!deleteResult) {
-                logger.fatal("TX Pool error In Deleting, resetting TX Pool")
+    private removeFromAddresses(address: Address) {
+        const stringAddress = address.toString()
+        for (let i = 0; i < this.addresses.length; i++) {
+            if (this.addresses[i].address === stringAddress) {
+                this.addresses.splice(i, 1)
+                break
             }
         }
-
-        // the size should be always the same
-        if (this.txMap.size !== this.txs.length) {
-            logger.fatal("TX Pool error In Removing, resetting TX Pool")
-            this.txs = Array.from(this.txMap.values())
-        }
-
     }
 
     private callback(lowestIndex: number): void {
         const n = lowestIndex + 1
         for (const callback of this.callbacks) {
             if (callback.n >= n) {
-                setImmediate(callback.callback, this.txs.slice(0, 4096))
+                setImmediate(callback.callback, this.getTxs().slice(0, 4096))
             }
         }
     }
