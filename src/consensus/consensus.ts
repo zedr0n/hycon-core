@@ -54,7 +54,7 @@ export class Consensus extends EventEmitter implements IConsensus {
             this.headerTip = await this.db.getHeaderTip()
 
             if (this.txdb !== undefined) {
-                await this.txdb.init(this, this.blockTip === undefined ? undefined :  this.blockTip.height)
+                await this.txdb.init(this, this.blockTip === undefined ? undefined : this.blockTip.height)
             }
 
             if (this.blockTip === undefined) {
@@ -114,20 +114,20 @@ export class Consensus extends EventEmitter implements IConsensus {
         }
         return this.worldState.getAccount(this.blockTip.header.stateRoot, address)
     }
-    public getLastTxs(address: Address, count?: number) {
+    public getLastTxs(address: Address, count?: number): Promise<Tx[]> {
         if (this.txdb === undefined) {
             throw new Error(`The database to get txs does not exist.`)
         }
-        const result: Array<{tx: Tx}> = []
+        const result: Tx[] = []
         const idx: number = 0
         return this.txdb.getLastTxs(address, result, idx, count)
     }
 
-    public async getNextTxs(address: Address, txHash: Hash, count?: number): Promise<Array<{ tx: Tx }>> {
+    public async getNextTxs(address: Address, txHash: Hash, count?: number): Promise<Tx[]> {
         try {
             if (this.txdb) {
-                const result: Array<{tx: Tx}> = []
-                const idx: number = 0
+                const result: Tx[] = []
+                const idx: number = 1
                 return await this.txdb.getNextTxs(address, txHash, result, idx, count)
             } else {
                 return Promise.reject(`The database to get txs does not exist.`)
@@ -152,7 +152,7 @@ export class Consensus extends EventEmitter implements IConsensus {
     public txValidity(tx: SignedTx): Promise<TxValidity> {
         return this.worldState.validateTx(this.blockTip.header.stateRoot, tx)
     }
-    public getTx(hash: Hash) {
+    public async getTx(hash: Hash): Promise<{ tx: Tx, confirmation: number } | undefined> {
         if (this.txdb === undefined) {
             throw new Error(`The database to get txs does not exist.`)
         }

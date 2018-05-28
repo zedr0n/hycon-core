@@ -114,13 +114,13 @@ export class RestServer implements IRest {
                 let webTx: ITxProp
                 // if (result.txList.tx instanceof SignedTx && result.txList.tx.nonce >= nonce) {
                 webTx = {
-                    hash: result.tx.txhash,
-                    amount: result.tx.amount,
-                    fee: result.tx.fee,
-                    from: result.tx.from,
-                    to: result.tx.to,
-                    estimated: hycontoString(hyconfromString(result.tx.amount).add(hyconfromString(result.tx.fee))),
-                    receiveTime: result.tx.timestamp,
+                    hash: result.txhash,
+                    amount: result.amount,
+                    fee: result.fee,
+                    from: result.from,
+                    to: result.to,
+                    estimated: hycontoString(hyconfromString(result.amount).add(hyconfromString(result.fee))),
+                    receiveTime: result.timestamp,
                 }
                 webTxs.push(webTx)
             }
@@ -254,13 +254,13 @@ export class RestServer implements IRest {
             for (const result of results) {
                 let webTx: ITxProp
                 webTx = {
-                    hash: result.tx.txhash,
-                    amount: result.tx.amount,
-                    fee: result.tx.fee,
-                    from: result.tx.from,
-                    to: result.tx.to,
-                    estimated: hycontoString(hyconfromString(result.tx.amount).add(hyconfromString(result.tx.fee))),
-                    receiveTime: result.tx.timestamp,
+                    hash: result.txhash,
+                    amount: result.amount,
+                    fee: result.fee,
+                    from: result.from,
+                    to: result.to,
+                    estimated: hycontoString(hyconfromString(result.amount).add(hyconfromString(result.fee))),
+                    receiveTime: result.timestamp,
                 }
                 webTxs.push(webTx)
             }
@@ -418,7 +418,7 @@ export class RestServer implements IRest {
     }
     public async getTx(hash: string): Promise<ITxProp | IResponseError> {
         try {
-            const getTxResult = await this.consensus.getTx(new Hash(Hash.decode(hash)))
+            const getTxResult = await this.consensus.getTx(Hash.decode(hash))
             const hyconBlockTx = getTxResult.tx
             if (hyconBlockTx === undefined) {
                 return Promise.resolve({
@@ -428,30 +428,16 @@ export class RestServer implements IRest {
                     message: "the transaction cannot be found",
                 })
             }
-            let tx: ITxProp
-            if (hyconBlockTx.tx instanceof SignedTx) {
-                tx = {
-                    hash,
-                    amount: hycontoString(hyconBlockTx.tx.amount),
-                    fee: hycontoString(hyconBlockTx.tx.fee),
-                    from: hyconBlockTx.tx.from.toString(),
-                    to: hyconBlockTx.tx.to.toString(),
-                    blockHash: hyconBlockTx.blockHash.toString(),
-                    receiveTime: getTxResult.timestamp,
-                    estimated: hycontoString(hyconBlockTx.tx.amount.add(hyconBlockTx.tx.fee)),
-                    confirmation: getTxResult.confirmation,
-                }
-            } else {
-                tx = {
-                    hash,
-                    amount: hycontoString(hyconBlockTx.tx.amount),
-                    fee: "0.0",
-                    to: hyconBlockTx.tx.to.toString(),
-                    blockHash: hyconBlockTx.blockHash.toString(),
-                    receiveTime: getTxResult.timestamp,
-                    estimated: hycontoString(hyconBlockTx.tx.amount),
-                    confirmation: getTxResult.confirmation,
-                }
+            const tx: ITxProp = {
+                hash: hyconBlockTx.txhash,
+                amount: hyconBlockTx.amount,
+                fee: hyconBlockTx.fee,
+                from: hyconBlockTx.from,
+                to: hyconBlockTx.to,
+                blockHash: hyconBlockTx.blockhash,
+                receiveTime: hyconBlockTx.timestamp,
+                estimated: hycontoString(hyconfromString(hyconBlockTx.amount).add(hyconfromString(hyconBlockTx.fee))),
+                confirmation: getTxResult.confirmation,
             }
             return tx
         } catch (e) {
@@ -472,8 +458,6 @@ export class RestServer implements IRest {
             const account = await this.consensus.getAccount(addrOfWallet)
             const results = await this.consensus.getLastTxs(addrOfWallet, n)
             const pendings = this.txPool.getTxsOfAddress(addrOfWallet)
-            logger.debug(`getTxsOfAddress result  = ${pendings.length}`)
-            logger.debug(`getLastTxs result = ${results.length}`)
             const webTxs: ITxProp[] = []
             for (const tx of pendings) {
                 webTxs.push({
@@ -489,13 +473,13 @@ export class RestServer implements IRest {
             for (const result of results) {
                 let webTx: ITxProp
                 webTx = {
-                    hash: result.tx.txhash,
-                    amount: result.tx.amount,
-                    fee: result.tx.fee,
-                    from: result.tx.from,
-                    to: result.tx.to,
-                    estimated: hycontoString(hyconfromString(result.tx.amount).add(hyconfromString(result.tx.fee))),
-                    receiveTime: result.tx.timestamp,
+                    hash: result.txhash,
+                    amount: result.amount,
+                    fee: result.fee,
+                    from: result.from,
+                    to: result.to,
+                    estimated: hycontoString(hyconfromString(result.amount).add(hyconfromString(result.fee))),
+                    receiveTime: result.timestamp,
                 }
                 webTxs.push(webTx)
             }
@@ -668,13 +652,13 @@ export class RestServer implements IRest {
         for (const result of results) {
             let webTx: ITxProp
             webTx = {
-                hash: result.tx.txhash,
-                amount: result.tx.amount,
-                fee: result.tx.fee,
-                from: result.tx.from,
-                to: result.tx.to,
-                estimated: hycontoString(hyconfromString(result.tx.amount).add(hyconfromString(result.tx.fee))),
-                receiveTime: result.tx.timestamp,
+                hash: result.txhash,
+                amount: result.amount,
+                fee: result.fee,
+                from: result.from,
+                to: result.to,
+                estimated: hycontoString(hyconfromString(result.amount).add(hyconfromString(result.fee))),
+                receiveTime: result.timestamp,
             }
             webTxs.push(webTx)
         }

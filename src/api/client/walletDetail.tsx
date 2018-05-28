@@ -210,7 +210,7 @@ export class WalletDetail extends React.Component<any, any> {
         )
     }
     private fetchNextTxs() {
-        this.state.rest.getNextTxs(this.state.wallet.address, this.state.txs[this.state.txs.length - 1].hash).then((result: ITxProp[]) => {
+        this.state.rest.getNextTxs(this.state.wallet.address, this.state.txs[0].hash).then((result: ITxProp[]) => {
             if (result.length === 0) { this.setState({ hasMore: false }) }
             this.setState({
                 txs: update(this.state.txs, { $push: result }),

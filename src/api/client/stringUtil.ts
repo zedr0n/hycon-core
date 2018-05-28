@@ -23,7 +23,7 @@ export function hycontoString(val: Long): string {
 }
 
 export function hyconfromString(val: string): Long {
-    if (val === "") { return Long.fromNumber(0) }
+    if (val === "" || val === undefined || val === null) { return Long.fromNumber(0) }
     if (val[val.length - 1] === ".") { val += "0" }
     const arr = val.toString().split(".")
     let hycon = Long.fromString(arr[0], true).multiply(Math.pow(10, 9))
