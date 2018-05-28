@@ -65,15 +65,21 @@ export class RabbitNetwork implements INetwork {
         logger.info(`TcpNetwork Port=${port} Session Guid=${this.guid}`)
     }
 
+    public async peerDBCheck(peer: RabbitPeer, peerStatus: proto.IStatus): Promise<void> {
+       if (peerStatus && peerStatus.publicPort > 0) {
+           logger.info(`Write PublicIP=${peerStatus.publicPort}  ${peer.socketBuffer.getInfo()}`)
+           // it's not my self
+           const socket = peer.getSocket()
+           const ipeer = { host: RabbitNetwork.ipNormalise(socket.remoteAddress), port: peerStatus.publicPort }
+           await this.peerDB.seen(ipeer)
+           const key = PeerDb.ipeer2key(ipeer)
+           this.endPoints.set(key, ipeer)
+       }
+   }
     public async guidCheck(peer: RabbitPeer, peerStatus: proto.IStatus): Promise<void> {
-        if (peerStatus && peerStatus.guid !== this.guid && peerStatus.publicPort > 0) {
-            // it's not my self
-            const socket = peer.getSocket()
-            const ipeer = { host: RabbitNetwork.ipNormalise(socket.remoteAddress), port: peerStatus.publicPort }
-            await this.peerDB.seen(ipeer)
-            const key = PeerDb.ipeer2key(ipeer)
-            this.endPoints.set(key, ipeer)
+        if (peerStatus && peerStatus.guid !== this.guid) {
             // ok
+            this.peerDBCheck(peer, peerStatus)
         } else {
             // the self connection
             logger.debug(`GuidCheck Self-Connection Disconnect ${peer.socketBuffer.getInfo()}`)
@@ -259,7 +265,8 @@ export class RabbitNetwork implements INetwork {
                             }
                         }
                         resolve(peer)
-                        logger.debug(`Peer ${key} ${socket.remoteAddress}:${socket.remotePort} Status=${JSON.stringify(await peer.status())}`)
+                        // don't call status here, it's expensive function
+                        logger.debug(`Peer ${key} ${socket.remoteAddress}:${socket.remotePort}`)
                     } else {
                         await this.peerDB.fail(ipeer, RabbitNetwork.failLimit)
                         reject("Peer is using a different network")
