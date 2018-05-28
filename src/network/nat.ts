@@ -62,7 +62,7 @@ export class NatUpnp {
     constructor(port: number, net: INetwork) {
         this.publicIp = ""
         this.privatePort = port
-        this.publicPort = NaN
+        this.publicPort = -1 // to send via protobuf
         this.network = net
     }
 

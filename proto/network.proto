@@ -52,6 +52,7 @@ message Status {
     string networkid = 2;
     int32 port=5;
     string guid=6;
+    int32 publicPort=7;
 }
 
 message StatusReturn {

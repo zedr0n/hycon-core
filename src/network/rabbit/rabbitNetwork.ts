@@ -35,6 +35,7 @@ export class RabbitNetwork implements INetwork {
     public networkid: string = "hycon"
     public readonly version: number = 3
     public port: number
+    public publicPort: number
     public guid: string // unique id to prevent self connecting
     private txPool: ITxPool
     private consensus: IConsensus
@@ -53,6 +54,7 @@ export class RabbitNetwork implements INetwork {
         this.txPool = txPool
         this.consensus = consensus
         this.port = port
+        this.publicPort = -1
         this.networkid = networkid
         this.targetConnectedPeers = 5
         this.peers = new Map<number, RabbitPeer>()
@@ -64,10 +66,10 @@ export class RabbitNetwork implements INetwork {
     }
 
     public async guidCheck(peer: RabbitPeer, peerStatus: proto.IStatus): Promise<void> {
-        if (peerStatus && peerStatus.guid !== this.guid) {
+        if (peerStatus && peerStatus.guid !== this.guid && peerStatus.publicPort > 0) {
             // it's not my self
             const socket = peer.getSocket()
-            const ipeer = { host: RabbitNetwork.ipNormalise(socket.remoteAddress), port: peerStatus.port }
+            const ipeer = { host: RabbitNetwork.ipNormalise(socket.remoteAddress), port: peerStatus.publicPort }
             await this.peerDB.seen(ipeer)
             const key = PeerDb.ipeer2key(ipeer)
             this.endPoints.set(key, ipeer)
@@ -162,7 +164,7 @@ export class RabbitNetwork implements INetwork {
             this.natUpnp = new NatUpnp(this.port, this)
             await this.natUpnp.run()
             if (!isNaN(this.natUpnp.publicPort)) {
-                this.port = this.natUpnp.publicPort
+                this.publicPort = this.natUpnp.publicPort
             }
         }
 

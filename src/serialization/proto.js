@@ -1080,6 +1080,7 @@ $root.Status = (function() {
      * @property {string|null} [networkid] Status networkid
      * @property {number|null} [port] Status port
      * @property {string|null} [guid] Status guid
+     * @property {number|null} [publicPort] Status publicPort
      */
 
     /**
@@ -1130,6 +1131,14 @@ $root.Status = (function() {
     Status.prototype.guid = "";
 
     /**
+     * Status publicPort.
+     * @member {number} publicPort
+     * @memberof Status
+     * @instance
+     */
+    Status.prototype.publicPort = 0;
+
+    /**
      * Creates a new Status instance using the specified properties.
      * @function create
      * @memberof Status
@@ -1161,6 +1170,8 @@ $root.Status = (function() {
             writer.uint32(/* id 5, wireType 0 =*/40).int32(message.port);
         if (message.guid != null && message.hasOwnProperty("guid"))
             writer.uint32(/* id 6, wireType 2 =*/50).string(message.guid);
+        if (message.publicPort != null && message.hasOwnProperty("publicPort"))
+            writer.uint32(/* id 7, wireType 0 =*/56).int32(message.publicPort);
         return writer;
     };
 
@@ -1206,6 +1217,9 @@ $root.Status = (function() {
                 break;
             case 6:
                 message.guid = reader.string();
+                break;
+            case 7:
+                message.publicPort = reader.int32();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -1254,6 +1268,9 @@ $root.Status = (function() {
         if (message.guid != null && message.hasOwnProperty("guid"))
             if (!$util.isString(message.guid))
                 return "guid: string expected";
+        if (message.publicPort != null && message.hasOwnProperty("publicPort"))
+            if (!$util.isInteger(message.publicPort))
+                return "publicPort: integer expected";
         return null;
     };
 
@@ -1284,6 +1301,8 @@ $root.Status = (function() {
             message.port = object.port | 0;
         if (object.guid != null)
             message.guid = String(object.guid);
+        if (object.publicPort != null)
+            message.publicPort = object.publicPort | 0;
         return message;
     };
 
@@ -1309,6 +1328,7 @@ $root.Status = (function() {
             object.networkid = "";
             object.port = 0;
             object.guid = "";
+            object.publicPort = 0;
         }
         if (message.version != null && message.hasOwnProperty("version"))
             if (typeof message.version === "number")
@@ -1321,6 +1341,8 @@ $root.Status = (function() {
             object.port = message.port;
         if (message.guid != null && message.hasOwnProperty("guid"))
             object.guid = message.guid;
+        if (message.publicPort != null && message.hasOwnProperty("publicPort"))
+            object.publicPort = message.publicPort;
         return object;
     };
 
