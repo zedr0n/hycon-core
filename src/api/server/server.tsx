@@ -38,7 +38,8 @@ export class HttpServer {
             }
         })
         this.app.use((req: express.Request, res: express.Response, next: express.NextFunction) => this.reactRoute(req, res, next))
-        this.app.use(express.static("src/api/clientDist"))
+        // this.app.use(express.static("src/api/clientDist"))
+        this.app.use(express.static("data/clientDist"))
         this.app.use(express.static("node_modules"))
         this.routeRest()
         this.rest = new RestServer(hyconServer.consensus, hyconServer.network, hyconServer.txQueue)
