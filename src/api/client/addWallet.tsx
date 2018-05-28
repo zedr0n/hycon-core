@@ -160,8 +160,11 @@ export class AddWallet extends React.Component<any, any> {
                                         {this.state.languages.map((lang: string) => {
                                             return (
                                                 <div key={lang}>
-                                                    <input type="radio" name="language" value={lang}
-                                                        onChange={(option) => { this.handleOptionChange(option) }} />
+                                                    <input type="radio" name="language"
+                                                        value={lang}
+                                                        onChange={(option) => { this.handleOptionChange(option) }}
+                                                        onKeyPress={(event) => { if (event.key === "Enter") { this.languageSelected() } }}
+                                                    />
                                                     <label>{lang}</label>
                                                 </div>
                                             )
@@ -172,10 +175,12 @@ export class AddWallet extends React.Component<any, any> {
 
                             <tr>
                                 <td colSpan={2} className="addAccountBtnTd">
-                                    <button onClick={() => { this.cancelWallet() }} className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent addAccountBtn" >
-                                        CANCEL</button>
-                                    <button onClick={() => { this.languageSelected() }} className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored addAccountBtn" >
-                                        NEXT</button>
+                                    <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent addAccountBtn"
+                                        onClick={() => { this.cancelWallet() }}
+                                    >CANCEL</button>
+                                    <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored addAccountBtn"
+                                        onClick={() => { this.languageSelected() }}
+                                    >NEXT</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -186,16 +191,17 @@ export class AddWallet extends React.Component<any, any> {
                     <table>
                         <tbody>
                             <tr>
-                                <td>Name</td>
+                                <td>Wallet Name</td>
                                 <td>
                                     <form action="#" id="nameForm" ref="nameForm">
                                         <div className="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                            <input
-                                                className="mdl-textfield__input"
-                                                type="text"
-                                                id="walletName"
-                                                onChange={(data) => {
-                                                    this.handleName(data)
+                                            <input className="mdl-textfield__input" type="text" id="walletName"
+                                                onChange={(data) => { this.handleName(data) }}
+                                                onKeyPress={(event) => {
+                                                    if (event.key === "Enter") {
+                                                        event.preventDefault()
+                                                        this.receiveMnemonic()
+                                                    }
                                                 }}
                                             />
                                         </div>
@@ -207,12 +213,13 @@ export class AddWallet extends React.Component<any, any> {
                                 <td>
                                     <form action="#">
                                         <div className="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                            <input
-                                                className="mdl-textfield__input"
-                                                type="password"
-                                                id="walletPwd"
-                                                onChange={(data) => {
-                                                    this.handlePassword(data)
+                                            <input className="mdl-textfield__input" type="password" id="walletPwd" autoComplete="off"
+                                                onChange={(data) => { this.handlePassword(data) }}
+                                                onKeyPress={(event) => {
+                                                    if (event.key === "Enter") {
+                                                        event.preventDefault()
+                                                        this.receiveMnemonic()
+                                                    }
                                                 }}
                                             />
                                         </div>
@@ -224,12 +231,13 @@ export class AddWallet extends React.Component<any, any> {
                                 <td>
                                     <form action="#">
                                         <div className="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                            <input
-                                                className="mdl-textfield__input"
-                                                type="password"
-                                                id="walletConfirmPwd"
-                                                onChange={(data) => {
-                                                    this.handleConfirmPassword(data)
+                                            <input className="mdl-textfield__input" type="password" id="walletConfirmPwd" autoComplete="off"
+                                                onChange={(data) => { this.handleConfirmPassword(data) }}
+                                                onKeyPress={(event) => {
+                                                    if (event.key === "Enter") {
+                                                        event.preventDefault()
+                                                        this.receiveMnemonic()
+                                                    }
                                                 }}
                                             />
                                         </div>
@@ -241,12 +249,13 @@ export class AddWallet extends React.Component<any, any> {
                                 <td>
                                     <form action="#">
                                         <div className="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                            <input
-                                                className="mdl-textfield__input"
-                                                type="text"
-                                                id="walletPwdHint"
-                                                onChange={(data) => {
-                                                    this.handleHint(data)
+                                            <input className="mdl-textfield__input" type="text" id="walletPwdHint"
+                                                onChange={(data) => { this.handleHint(data) }}
+                                                onKeyPress={(event) => {
+                                                    if (event.key === "Enter") {
+                                                        event.preventDefault()
+                                                        this.receiveMnemonic()
+                                                    }
                                                 }}
                                             />
                                         </div>
@@ -255,22 +264,12 @@ export class AddWallet extends React.Component<any, any> {
                             </tr>
                             <tr>
                                 <td colSpan={2} className="addAccountBtnTd">
-                                    <button
-                                        onClick={() => {
-                                            this.cancelWallet()
-                                        }}
-                                        className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent addAccountBtn"
-                                    >
-                                        CANCEL
-                  </button>
-                                    <button
-                                        onClick={() => {
-                                            this.receiveMnemonic()
-                                        }}
-                                        className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored addAccountBtn"
-                                    >
-                                        NEXT
-                  </button>
+                                    <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent addAccountBtn"
+                                        onClick={() => { this.cancelWallet() }}
+                                    >CANCEL</button>
+                                    <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored addAccountBtn"
+                                        onClick={() => { this.receiveMnemonic() }}
+                                    >NEXT</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -291,32 +290,28 @@ export class AddWallet extends React.Component<any, any> {
                                 <td>
                                     <form action="#">
                                         <div className="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                            <input className="mdl-textfield__input mnemonicInput" type="text"
-                                                id="confirmMnemonic1"
+                                            <input className="mdl-textfield__input mnemonicInput" type="text" id="confirmMnemonic1"
                                                 onChange={(data) => { this.handleConfirmMnemonic(data) }}
-                                                onPaste={(e) => { e.preventDefault() }} />
+                                                onPaste={(e) => { e.preventDefault() }}
+                                                onKeyPress={(event) => {
+                                                    if (event.key === "Enter") {
+                                                        event.preventDefault()
+                                                        this.receiveMnemonic()
+                                                    }
+                                                }}
+                                            />
                                         </div>
                                     </form>
                                 </td>
                             </tr>
                             <tr>
                                 <td colSpan={2} className="addAccountBtnTd">
-                                    <button
-                                        onClick={() => {
-                                            this.cancelWallet()
-                                        }}
-                                        className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent addAccountBtn"
-                                    >
-                                        CANCEL
-                  </button>
-                                    <button
-                                        onClick={() => {
-                                            this.checkConfirmMnemonic()
-                                        }}
-                                        className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored addAccountBtn"
-                                    >
-                                        NEXT
-                  </button>
+                                    <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent addAccountBtn"
+                                        onClick={() => { this.cancelWallet() }}
+                                    >CANCEL</button>
+                                    <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored addAccountBtn"
+                                        onClick={() => { this.checkConfirmMnemonic() }}
+                                    >NEXT</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -334,15 +329,14 @@ export class AddWallet extends React.Component<any, any> {
                                 <td>
                                     <form action="#">
                                         <div className="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                            <input
-                                                className="mdl-textfield__input mnemonicInput"
-                                                type="text"
-                                                id="confirmMnemonic2"
-                                                onChange={(data) => {
-                                                    this.handleTypeMnemonic(data)
-                                                }}
-                                                onPaste={(e) => {
-                                                    e.preventDefault()
+                                            <input className="mdl-textfield__input mnemonicInput" type="text" id="confirmMnemonic2"
+                                                onChange={(data) => { this.handleTypeMnemonic(data) }}
+                                                onPaste={(e) => { e.preventDefault() }}
+                                                onKeyPress={(event) => {
+                                                    if (event.key === "Enter") {
+                                                        event.preventDefault()
+                                                        this.receiveMnemonic()
+                                                    }
                                                 }}
                                             />
                                         </div>
@@ -351,22 +345,12 @@ export class AddWallet extends React.Component<any, any> {
                             </tr>
                             <tr>
                                 <td colSpan={2} className="addAccountBtnTd">
-                                    <button
-                                        onClick={() => {
-                                            this.cancelWallet()
-                                        }}
-                                        className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent addAccountBtn"
-                                    >
-                                        CANCEL
-                  </button>
-                                    <button
-                                        onClick={() => {
-                                            this.createWallet()
-                                        }}
-                                        className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored addAccountBtn"
-                                    >
-                                        NEXT
-                  </button>
+                                    <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent addAccountBtn"
+                                        onClick={() => { this.cancelWallet() }}
+                                    >CANCEL</button>
+                                    <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored addAccountBtn"
+                                        onClick={() => { this.createWallet() }}
+                                    >CREATE</button>
                                 </td>
                             </tr>
                         </tbody>

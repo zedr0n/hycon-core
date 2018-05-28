@@ -11479,6 +11479,7 @@ _:-ms-input-placeholder, :root .mdl-slider.mdl-slider.is-upgraded {
 }
 .contentTitle {
   margin-top: 1em;
+  margin-bottom: 1em;
   font-size: 2em;
   font-weight: bold;
   color: #6e6e6e;
