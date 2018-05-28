@@ -135,23 +135,23 @@ export class App extends React.Component<{ rest: IRest }, any> {
                         <span className="mdl-layout-title">Hycon Blockexplorer</span>
                         <div className="mdl-layout-spacer" />
                         <nav className="mdl-navigation mdl-layout--large-screen-only">
-                            <form>
-                                <div className="mdl-textfield mdl-js-textfield mdl-textfield--expandable">
-                                    <label
-                                        className="mdl-button mdl-js-button mdl-button--icon"
-                                        htmlFor="search"
-                                    >
-                                        <i className="material-icons">search</i>
-                                    </label>
+                            {/* <form> */}
+                            <div className="mdl-textfield mdl-js-textfield mdl-textfield--expandable">
+                                <label
+                                    className="mdl-button mdl-js-button mdl-button--icon"
+                                >
+                                    <i className="material-icons">search</i>
+                                </label>
+                                <form>
                                     <div className="mdl-textfield__expandable-holder">
                                         <input
-                                            className="mdl-textfield__input searchBox" type="text" id="search" placeholder="Block Hash"
+                                            className="mdl-textfield__input searchBox" type="text" placeholder="Block Hash"
                                             onChange={(data) => this.handleBlockHash(data)}
                                             onKeyPress={(event) => { if (event.key === "Enter") { this.searchBlock(event) } }}
                                         />
                                     </div>
-                                </div>
-                            </form>
+                                </form>
+                            </div>
                             <Link className="mdl-navigation__link navMargin" to="/">Home</Link>
                             {/* <Link className="mdl-navigation__link" to="/block">Block</Link> */}
                             <Link className="mdl-navigation__link" to="/txPool">Tx</Link>
