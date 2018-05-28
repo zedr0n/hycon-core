@@ -14,6 +14,7 @@ import { Hash } from "../util/hash"
 import { Account } from "./database/account"
 import { Database } from "./database/database"
 import { DBBlock } from "./database/dbblock"
+import { Tx } from "./database/tx"
 import { TxDatabase } from "./database/txDatabase"
 import { TxList } from "./database/txList"
 import { TxValidity, WorldState } from "./database/worldState"
@@ -51,13 +52,15 @@ export class Consensus extends EventEmitter implements IConsensus {
             await this.db.init()
             this.blockTip = await this.db.getBlockTip()
             this.headerTip = await this.db.getHeaderTip()
+
+            if (this.txdb !== undefined) {
+                await this.txdb.init(this, this.blockTip === undefined ? undefined :  this.blockTip.height)
+            }
+
             if (this.blockTip === undefined) {
                 const genesis = await this.initGenesisBlock()
             }
 
-            if (this.txdb !== undefined) {
-                await this.txdb.init(this, this.blockTip.height)
-            }
             this.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock()) // TODO: move/remove?
             this.createCandidateBlock()
             logger.info(`Initialization of consensus is over.`)
@@ -115,13 +118,17 @@ export class Consensus extends EventEmitter implements IConsensus {
         if (this.txdb === undefined) {
             throw new Error(`The database to get txs does not exist.`)
         }
-        return this.txdb.getLastTxs(address, count)
+        const result: Array<{tx: Tx}> = []
+        const idx: number = 0
+        return this.txdb.getLastTxs(address, result, idx, count)
     }
 
-    public async getNextTxs(address: Address, txHash: Hash, count?: number): Promise<Array<{ txList: TxList, timestamp: number }>> {
+    public async getNextTxs(address: Address, txHash: Hash, count?: number): Promise<Array<{ tx: Tx }>> {
         try {
             if (this.txdb) {
-                return await this.txdb.getNextTxs(address, txHash, count)
+                const result: Array<{tx: Tx}> = []
+                const idx: number = 0
+                return await this.txdb.getNextTxs(address, txHash, result, idx, count)
             } else {
                 return Promise.reject(`The database to get txs does not exist.`)
             }
@@ -306,7 +313,7 @@ export class Consensus extends EventEmitter implements IConsensus {
             await this.db.setHashAtHeight(pushHeight, hash)
             pushHeight += 1
             this.txPool.updateTxs(block.txs, 0)
-            if (this.txdb) { await this.txdb.putTxs(hash, block.txs) }
+            if (this.txdb) { await this.txdb.putTxs(hash, block.header.timeStamp, block.txs) }
             this.emit("block", block)
         }
 
@@ -359,7 +366,7 @@ export class Consensus extends EventEmitter implements IConsensus {
             await this.db.setHeaderTip(genesisHash)
             await this.db.setBlockTip(genesisHash)
             if (this.txdb) {
-                await this.txdb.putTxs(genesisHash, genesis.txs)
+                await this.txdb.putTxs(genesisHash, genesis.header.timeStamp, genesis.txs)
             }
             return genesis
         } catch (e) {
