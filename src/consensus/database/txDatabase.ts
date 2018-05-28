@@ -191,7 +191,7 @@ export class TxDatabase {
             $count: count - result.length,
             $limit: idx * count,
         }
-        this.db.all(`SELECT txhash, txto, txfrom, amount, fee, blockhash, timestamp FROM txdb WHERE txto = $address OR txfrom = $address ORDER BY timestamp DESC LIMIT $limit, $count`, params, (err, rows) => {
+        const db = await this.db.all(`SELECT txhash, txto, txfrom, amount, fee, blockhash, timestamp FROM txdb WHERE txto = $address OR txfrom = $address ORDER BY timestamp DESC LIMIT $limit, $count`, params, async (err, rows) => {
             for (const row of rows) {
                 this.consensus.getBlockStatus(row.blockhash).then((status: BlockStatus) => {
                     if (status === BlockStatus.MainChain) {
@@ -200,10 +200,14 @@ export class TxDatabase {
                 })
                 if (result.length === count) { break }
             }
+            if (rows.length < count) {
+                return
+            }
+            if (result.length < count) {
+                result = await this.getLastTxs(address, result, ++idx, count)
+            }
         })
-        if (result.length < count) {
-            result = await this.getLastTxs(address, result, ++idx, count)
-        }
+
         // let txList = await this.get(address)
         // while (txList) {
         //     if (await this.consensus.getBlockStatus(txList.blockHash) === BlockStatus.MainChain) {
@@ -257,7 +261,7 @@ export class TxDatabase {
             $limit: idx * count,
             $txhash: txHash.toString(),
         }
-        this.db.all(`SELECT txhash, txto, txfrom, amount, fee, blockhash, timestamp FROM txdb WHERE (timestamp < (SELECT timestamp FROM txdb WHERE txhash = $txhash)) AND (txto = $address OR txfrom = $address) ORDER BY timestamp DESC LIMIT $limit, $count`, params, (err, rows) => {
+        this.db.all(`SELECT txhash, txto, txfrom, amount, fee, blockhash, timestamp FROM txdb WHERE (timestamp < (SELECT timestamp FROM txdb WHERE txhash = $txhash)) AND (txto = $address OR txfrom = $address) ORDER BY timestamp DESC LIMIT $limit, $count`, params, async (err, rows) => {
             for (const row of rows) {
                 this.consensus.getBlockStatus(row.blockhash).then((status: BlockStatus) => {
                     if (status === BlockStatus.MainChain) {
@@ -266,11 +270,13 @@ export class TxDatabase {
                 })
                 if (result.length === count) { break }
             }
+            if ( rows.length < count ) {
+                return
+            }
+            if (result.length < count) {
+                result = await this.getNextTxs(address, txHash, result, ++idx, count)
+            }
         })
-
-        if (result.length < count) {
-            result = await this.getLastTxs(address, result, ++idx, count)
-        }
 
         return result
     }
