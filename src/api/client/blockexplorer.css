@@ -357,7 +357,6 @@ table {
 } */
 
 .led-green {
-  margin: 0 auto;
   width: 10px;
   height: 10px;
   background-color: #ABFF00;
@@ -371,7 +370,6 @@ table {
 }
 
 .led-red {
-  margin: 0 auto;
   width: 10px;
   height: 10px;
   background-color: #F00;

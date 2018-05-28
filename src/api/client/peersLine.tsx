@@ -24,11 +24,15 @@ export class PeersLine extends React.Component<any, any> {
                 </td>
                 {this.state.peer.active ? (
                     <td className="mdl-data-table__cell--non-numeric">
-                        <div className="led-green"> </div>
+                        <span>
+                            <div className="led-green"> </div>
+                        </span>
                     </td>
                 ) : (
                         <td className="mdl-data-table__cell--non-numeric">
-                            <div className="led-red">  </div>
+                            <span>
+                                <div className="led-red"> </div>
+                            </span>
                         </td>
                     )
                 }
@@ -43,15 +47,6 @@ export class PeersLine extends React.Component<any, any> {
                 </td>
                 <td className="mdl-data-table__cell--non-numeric">
                     <span>{this.state.peer.currentQueue}</span>
-                </td>
-                <td className="mdl-data-table__cell--non-numeric">
-                    <span>{this.state.peer.location}</span>
-                </td>
-                <td className="mdl-data-table__cell--non-numeric">
-                    <span>{this.state.peer.latitude}</span>
-                </td>
-                <td className="mdl-data-table__cell--non-numeric">
-                    <span>{this.state.peer.longitude}</span>
                 </td>
             </tr>
         )

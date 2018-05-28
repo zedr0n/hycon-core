@@ -621,13 +621,14 @@ export class RestServer implements IRest {
     public async getPeerList(): Promise<IPeer[]> {
         const peerList: IPeer[] = []
         const peers: proto.IPeer[] = await this.network.getPeerDb()
+        // tslint:disable-next-line:prefer-const
         let result: any
         for (const peer of peers) {
-            try {
-                result = await ipLocation(peer.host)
-            } catch (e) {
-                logger.info(`Peer Geoinfo error: ${e}`)
-            }
+            // try {
+            //     result = await ipLocation(peer.host)
+            // } catch (e) {
+            //     logger.info(`Peer Geoinfo error: ${e}`)
+            // }
             const temp: IPeer = {
                 host: peer.host,
                 port: peer.port,

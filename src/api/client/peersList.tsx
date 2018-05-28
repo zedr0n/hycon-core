@@ -14,7 +14,7 @@ export class PeersList extends React.Component<any, any> {
     }
     public render() {
         let count = 0
-        if (this.state.peers === undefined) {
+        if (this.props.peer === undefined) {
             return (
                 <div />
             )
@@ -45,19 +45,10 @@ export class PeersList extends React.Component<any, any> {
                                 <th className="mdl-data-table__cell--non-numeric">
                                     <span>currentQueue</span>
                                 </th>
-                                <th className="mdl-data-table__cell--non-numeric">
-                                    <span>Location</span>
-                                </th>
-                                <th className="mdl-data-table__cell--non-numeric">
-                                    <span>Latitude</span>
-                                </th>
-                                <th className="mdl-data-table__cell--non-numeric">
-                                    <span>Longitude</span>
-                                </th>
                             </tr>
                         </thead>
                         <tbody>
-                            {this.state.peers.map((peer: IPeer) => {
+                            {this.props.peer.map((peer: IPeer) => {
                                 return (
                                     <PeersLine key={count++} peer={peer} rest={this.state.rest} />
                                 )

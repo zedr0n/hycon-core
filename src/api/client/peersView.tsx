@@ -12,10 +12,10 @@ interface IPeersProps {
     peer: IPeer
 }
 
-// tslint:disable-next-line:no-var-requires
-const googleMapsClient = require("@google/maps").createClient({
-    key: "AIzaSyAp-2W8_T6dZjq71yOhxW1kRkbY6E1iyuk",
-})
+// // tslint:disable-next-line:no-var-requires
+// const googleMapsClient = require("@google/maps").createClient({
+//     key: "AIzaSyAp-2W8_T6dZjq71yOhxW1kRkbY6E1iyuk",
+// })
 
 export class PeersView extends React.Component<any, any> {
     public mounted: boolean = false
@@ -62,7 +62,7 @@ export class PeersView extends React.Component<any, any> {
                     <PeersList rest={this.state.rest} peer={this.state.peerCon} />
                 </div>
 
-                <div style={{ width: "90%", height: "400px", margin: "auto" }}>
+                {/* <div style={{ width: "90%", height: "400px", margin: "auto" }}>
                     <GoogleMap
                         bootstrapURLKeys={{
                             key: "AIzaSyAp-2W8_T6dZjq71yOhxW1kRkbY6E1iyuk",
@@ -82,7 +82,7 @@ export class PeersView extends React.Component<any, any> {
                             )
                         })}
                     </GoogleMap>
-                </div>
+                </div> */}
             </div>
         )
     }
