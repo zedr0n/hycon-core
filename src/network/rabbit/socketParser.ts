@@ -70,9 +70,10 @@ export class SocketParser {
     }
 
     public destroy(e?: Error): void {
-        logger.info(`Disconnecting from ${this.socket.remoteAddress}:${this.socket.remotePort} due to protocol error: ${e}, ${e ? e.stack : ""}`)
+
         this.sendLock.rejectAll()
         if (this.socket) {
+            logger.info(`Disconnecting from ${this.socket.remoteAddress}:${this.socket.remotePort} due to protocol error: ${e}, ${e ? e.stack : ""}`)
             logger.debug(`Disconnect ${this.getInfo()}`)
             this.socket.unref()
             this.socket.destroy()
@@ -135,6 +136,7 @@ export class SocketParser {
             if (newData[newDataIndex] !== headerPrefix[this.parseIndex]) {
                 logger.warn(`Packet parsing error ${this.socket.remoteAddress}:${this.socket.remotePort}`)
                 this.destroy(new Error("Header prefix mismatch"))
+                throw new Error("Header prefix mismatch")
             }
             this.parseIndex++
             newDataIndex++
