@@ -108,4 +108,5 @@ export interface IRest {
     getPendingTxs(index: number): Promise<{ txs: ITxProp[], length: number, totalCount: number, totalAmount: string, totalFee: string }>
     getHint(name: string): Promise<string>
     getNextTxs(address: string, txHash: string): Promise<ITxProp[]>
+    checkDupleName(name: string): Promise<boolean>
 }

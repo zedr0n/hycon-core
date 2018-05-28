@@ -6,10 +6,13 @@ import { encodingMnemonic } from "./stringUtil"
 
 export class AddWallet extends React.Component<any, any> {
     public mounted: boolean = false
-    public errMsg1: string = "필수값을 입력하세요"
-    public errMsg2: string = "비밀번호가 일치하지 않습니다"
-    public errMsg3: string = "단어를 확인해주세요"
-    public errMsg4: string = "유효하지 않은 파일명입니다"
+    public errMsg1: string = "Please enter required value"
+    public errMsg2: string = "Not matched password"
+    public errMsg3: string = "Check your mnemonic words"
+    public errMsg4: string = "Invalid file name"
+    public errMsg5: string = "Please enter your mnemonic"
+    public errMsg6: string = "Duplicate wallet name"
+    public errMsg7: string = "Please select Language"
     constructor(props: any) {
         super(props)
         this.state = {
@@ -44,11 +47,7 @@ export class AddWallet extends React.Component<any, any> {
     }
 
     public receiveMnemonic() {
-        if (
-            this.state.name === undefined ||
-            this.state.password === undefined ||
-            this.state.hint === undefined
-        ) {
+        if (this.state.name === undefined || this.state.password === undefined || this.state.hint === undefined) {
             alert(this.errMsg1)
         } else if (!/^[a-zA-Z0-9\uAC00-\uD7A3]+$/.test(this.state.name)) {
             alert(this.errMsg4)
@@ -56,69 +55,87 @@ export class AddWallet extends React.Component<any, any> {
             if (this.state.password !== this.state.confirmPassword) {
                 alert(this.errMsg2)
             } else {
-                this.setState({ isMnemonicView: true })
+                this.state.rest.checkDupleName(this.state.name).then((result: boolean) => {
+                    if (result) {
+                        alert(this.errMsg6)
+                    } else {
+                        this.setState({ isMnemonicView: true })
+                    }
+                })
             }
         }
     }
     public checkConfirmMnemonic() {
-        let mnemonicString = ""
-        let coinfirmMnemonicString = ""
-        if (this.state.mnemonic.charCodeAt(0) >= 0xAC00 && this.state.mnemonic.charCodeAt(0) <= 0xD7A3) {
-            mnemonicString = encodingMnemonic(this.state.mnemonic)
+        if (this.state.confirmMnemonic === "" || this.state.confirmMnemonic === undefined) {
+            alert(this.errMsg5)
         } else {
-            mnemonicString = this.state.mnemonic
-        }
-        if (this.state.confirmMnemonic.charCodeAt(0) >= 0xAC00 && this.state.confirmMnemonic.charCodeAt(0) <= 0xD7A3) {
-            coinfirmMnemonicString = encodingMnemonic(this.state.confirmMnemonic)
-        } else {
-            coinfirmMnemonicString = this.state.confirmMnemonic
-        }
-        if (this.state.mnemonic === coinfirmMnemonicString) {
-            this.setState({ isMnemonicView: false, isMnemonicTypeView: true })
-        } else if (this.state.confirmMnemonic === "pass") {
-            this.setState({ isMnemonicView: false, isMnemonicTypeView: true })
-        } else {
-            alert(this.errMsg3)
+            let mnemonicString = ""
+            let coinfirmMnemonicString = ""
+            if (this.state.mnemonic.charCodeAt(0) >= 0xAC00 && this.state.mnemonic.charCodeAt(0) <= 0xD7A3) {
+                mnemonicString = encodingMnemonic(this.state.mnemonic)
+            } else {
+                mnemonicString = this.state.mnemonic
+            }
+            if (this.state.confirmMnemonic.charCodeAt(0) >= 0xAC00 && this.state.confirmMnemonic.charCodeAt(0) <= 0xD7A3) {
+                coinfirmMnemonicString = encodingMnemonic(this.state.confirmMnemonic)
+            } else {
+                coinfirmMnemonicString = this.state.confirmMnemonic
+            }
+            if (this.state.mnemonic === coinfirmMnemonicString) {
+                this.setState({ isMnemonicView: false, isMnemonicTypeView: true })
+            } else if (this.state.confirmMnemonic === "pass") {
+                this.setState({ isMnemonicView: false, isMnemonicTypeView: true })
+            } else {
+                alert(this.errMsg3)
+            }
         }
     }
     public createWallet() {
-        let mnemonicString = this.state.mnemonic
-        if (mnemonicString.charCodeAt(0) >= 0xAC00 && mnemonicString.charCodeAt(0) <= 0xD7A3) {
-            mnemonicString = encodingMnemonic(mnemonicString)
-        }
-        let typedMnemonicString = this.state.typedMnemonic
-        if (typedMnemonicString.charCodeAt(0) >= 0xAC00 && typedMnemonicString.charCodeAt(0) <= 0xD7A3) {
-            typedMnemonicString = encodingMnemonic(typedMnemonicString)
-        }
-        if (mnemonicString === typedMnemonicString || typedMnemonicString === "pass") {
-            this.state.rest.generateWallet({
-                hint: this.state.hint,
-                language: this.state.language,
-                mnemonic: this.state.mnemonic,
-                name: this.state.name,
-                password: this.state.password,
-            }).then((data: string) => {
-                this.setState({ walletViewRedirect: true, address: data })
-            })
+        if (this.state.typedMnemonic === "" || this.state.typedMnemonic === undefined) {
+            alert(this.errMsg5)
         } else {
-            alert(this.errMsg3)
+            let mnemonicString = this.state.mnemonic
+            if (mnemonicString.charCodeAt(0) >= 0xAC00 && mnemonicString.charCodeAt(0) <= 0xD7A3) {
+                mnemonicString = encodingMnemonic(mnemonicString)
+            }
+            let typedMnemonicString = this.state.typedMnemonic
+            if (typedMnemonicString.charCodeAt(0) >= 0xAC00 && typedMnemonicString.charCodeAt(0) <= 0xD7A3) {
+                typedMnemonicString = encodingMnemonic(typedMnemonicString)
+            }
+            if (mnemonicString === typedMnemonicString || typedMnemonicString === "pass") {
+                this.state.rest.generateWallet({
+                    hint: this.state.hint,
+                    language: this.state.language,
+                    mnemonic: this.state.mnemonic,
+                    name: this.state.name,
+                    password: this.state.password,
+                }).then((data: string) => {
+                    this.setState({ walletViewRedirect: true, address: data })
+                })
+            } else {
+                alert(this.errMsg3)
+            }
         }
     }
     public cancelWallet() {
         this.setState({ redirect: true })
     }
     public languageSelected() {
-        this.state.rest.setLoading(true)
-        let opt = this.state.selectedOption
-        if (opt === "Chinese - Traditional") {
-            opt = "chinese_traditional"
-        } else if (opt === "Chinese - Simplified") {
-            opt = "chinese_simplified"
+        if (this.state.selectedOption === "" || this.state.selectedOption === undefined) {
+            alert(this.errMsg7)
+        } else {
+            this.state.rest.setLoading(true)
+            let opt = this.state.selectedOption
+            if (opt === "Chinese - Traditional") {
+                opt = "chinese_traditional"
+            } else if (opt === "Chinese - Simplified") {
+                opt = "chinese_simplified"
+            }
+            this.state.rest.getMnemonic(opt).then((data: string) => {
+                this.state.rest.setLoading(false)
+                this.setState({ isLanguageView: false, mnemonic: data, language: opt })
+            })
         }
-        this.state.rest.getMnemonic(opt).then((data: string) => {
-            this.state.rest.setLoading(false)
-            this.setState({ isLanguageView: false, mnemonic: data, language: opt })
-        })
     }
     public handleOptionChange(option: any) {
         this.setState({ selectedOption: option.target.value })

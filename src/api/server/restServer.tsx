@@ -688,4 +688,8 @@ export class RestServer implements IRest {
         }
         return txList
     }
+
+    public async checkDupleName(name: string): Promise<boolean> {
+        return await Wallet.checkDupleName(name)
+    }
 }

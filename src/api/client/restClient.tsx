@@ -273,4 +273,14 @@ export class RestClient implements IRest {
         )
     }
 
+    public checkDupleName(name: string): Promise<boolean> {
+        return Promise.resolve(
+            fetch(`/api/${this.apiVersion}/dupleName/${name}`)
+                .then((response) => response.json())
+                .catch((err: Error) => {
+                    console.log(err)
+                }),
+        )
+    }
+
 }

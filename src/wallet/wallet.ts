@@ -285,6 +285,10 @@ export class Wallet {
         }
     }
 
+    public static async checkDupleName(name: string): Promise<boolean> {
+        return await fs.pathExists(`./wallet/rootKey/${name}`)
+    }
+
     public readonly privKey: PrivateKey
     public readonly pubKey: PublicKey
 
@@ -295,7 +299,7 @@ export class Wallet {
 
     public async save(name: string, password: string, hint?: string): Promise<undefined> {
         try {
-            const walletExist = await fs.existsSync(`./wallet/rootKey/${name}`)
+            const walletExist = await Wallet.checkDupleName(name)
             if (!walletExist) {
                 const encryptedPrivateKey = Wallet.encryptAES(password, this.privKey.privKey.toString("hex"))
                 let encPrivWithHint
@@ -327,7 +331,6 @@ export class Wallet {
             logger.error(`Fail to save wallet ${e}`)
             throw e
         }
-
     }
 
     public send(to: Address, amount: Long, nonce: number, fee?: Long): SignedTx {

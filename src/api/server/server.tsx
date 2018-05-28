@@ -222,6 +222,10 @@ export class HttpServer {
             res.json(await this.rest.getNextTxs(req.params.address, req.params.txHash))
         })
 
+        router.get("/dupleName/:name", async (req: express.Request, res: express.Response) => {
+            res.json(await this.rest.checkDupleName(req.params.name))
+        })
+
         this.app.use(`/api/${apiVersion}`, router)
     }
 
