@@ -73,7 +73,7 @@ export class SocketParser {
 
         this.sendLock.rejectAll()
         if (this.socket) {
-            logger.info(`Disconnecting from ${this.socket.remoteAddress}:${this.socket.remotePort} due to protocol error: ${e}, ${e ? e.stack : ""}`)
+            logger.debug(`Disconnecting from ${this.socket.remoteAddress}:${this.socket.remotePort} due to protocol error: ${e}, ${e ? e.stack : ""}`)
             logger.debug(`Disconnect ${this.getInfo()}`)
             this.socket.unref()
             this.socket.destroy()
@@ -100,7 +100,7 @@ export class SocketParser {
             this.parse(src)
         } catch (e) {
             if (this.socket) {
-                logger.fatal(`Disconnecting from ${this.socket.remoteAddress}:${this.socket.remotePort} due to internal parser error: ${e}`)
+                logger.debug(`Disconnecting from ${this.socket.remoteAddress}:${this.socket.remotePort} due to internal parser error: ${e}`)
             }
             this.destroy(e)
         }
@@ -123,7 +123,7 @@ export class SocketParser {
                     newDataIndex = this.parseBody(newData, newDataIndex)
                     break
                 default:
-                    logger.fatal(`Disconnecting due to invalid parseState '${this.parseState}'`)
+                    logger.debug(`Disconnecting due to invalid parseState '${this.parseState}'`)
                     const e = new Error(`Invalid parseState '${this.parseState}'`)
                     this.destroy(e)
                     throw e
@@ -134,7 +134,7 @@ export class SocketParser {
     private parseHeaderPrefix(newData: Buffer, newDataIndex: number): number {
         while (newDataIndex < newData.length && this.parseIndex < headerPrefix.length) {
             if (newData[newDataIndex] !== headerPrefix[this.parseIndex]) {
-                logger.warn(`Packet parsing error ${this.socket.remoteAddress}:${this.socket.remotePort}`)
+                logger.debug(`Packet parsing error ${this.socket.remoteAddress}:${this.socket.remotePort}`)
                 this.destroy(new Error("Header prefix mismatch"))
                 throw new Error("Header prefix mismatch")
             }
@@ -210,7 +210,7 @@ export class SocketParser {
             }
             this.parseReset()
         } else {
-            logger.info(`Copied ${bytesCopied} bytes into bodybuffer ${this.parseIndex}/${this.bodyBuffer.length}`)
+            logger.debug(`Copied ${bytesCopied} bytes into bodybuffer ${this.parseIndex}/${this.bodyBuffer.length}`)
         }
         return newDataIndex
     }
