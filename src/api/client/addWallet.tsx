@@ -296,7 +296,7 @@ export class AddWallet extends React.Component<any, any> {
                                                 onKeyPress={(event) => {
                                                     if (event.key === "Enter") {
                                                         event.preventDefault()
-                                                        this.receiveMnemonic()
+                                                        this.checkConfirmMnemonic()
                                                     }
                                                 }}
                                             />
@@ -335,7 +335,7 @@ export class AddWallet extends React.Component<any, any> {
                                                 onKeyPress={(event) => {
                                                     if (event.key === "Enter") {
                                                         event.preventDefault()
-                                                        this.receiveMnemonic()
+                                                        this.createWallet()
                                                     }
                                                 }}
                                             />
