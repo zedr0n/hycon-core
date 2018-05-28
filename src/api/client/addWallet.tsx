@@ -9,10 +9,11 @@ export class AddWallet extends React.Component<any, any> {
     public errMsg1: string = "Please enter required value"
     public errMsg2: string = "Not matched password"
     public errMsg3: string = "Check your mnemonic words"
-    public errMsg4: string = "Invalid file name"
+    public errMsg4: string = "Invalid wallet name: the wallet name must be in English, Korean and numbers only"
     public errMsg5: string = "Please enter your mnemonic"
     public errMsg6: string = "Duplicate wallet name"
     public errMsg7: string = "Please select Language"
+    public pattern1 = /^[a-zA-Z0-9\uAC00-\uD7A3]+$/
     constructor(props: any) {
         super(props)
         this.state = {
@@ -49,7 +50,7 @@ export class AddWallet extends React.Component<any, any> {
     public receiveMnemonic() {
         if (this.state.name === undefined || this.state.password === undefined || this.state.hint === undefined) {
             alert(this.errMsg1)
-        } else if (!/^[a-zA-Z0-9\uAC00-\uD7A3]+$/.test(this.state.name)) {
+        } else if (this.state.name.search(/\s/) !== -1 || !this.pattern1.test(this.state.name)) {
             alert(this.errMsg4)
         } else {
             if (this.state.password !== this.state.confirmPassword) {

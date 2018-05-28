@@ -156,7 +156,7 @@ export class RestClient implements IRest {
         )
     }
     public getMnemonic(lang: string): Promise<string> {
-        console.log(lang.toLowerCase())
+        // console.log(lang.toLowerCase())
         return Promise.resolve(
             fetch(`/api/${this.apiVersion}/getMnemonic/${lang.toLowerCase()}`)
                 .then((response) => response.json())
