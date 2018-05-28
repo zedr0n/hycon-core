@@ -250,6 +250,7 @@ export class RestServer implements IRest {
                 })
             }
             const webTxs: ITxProp[] = []
+            let pendingAmount = hyconfromString("0")
             for (const tx of pendings) {
                 webTxs.push({
                     hash: new Hash(tx).toString(),
@@ -260,6 +261,7 @@ export class RestServer implements IRest {
                     signature: tx.signature.toString("hex"),
                     estimated: hycontoString(tx.amount.add(tx.fee)),
                 })
+                pendingAmount = pendingAmount.add(tx.amount).add(tx.fee)
             }
             for (const result of results) {
                 let webTx: ITxProp
@@ -279,6 +281,7 @@ export class RestServer implements IRest {
                 balance: account ? hycontoString(account.balance) : "0.0",
                 txs: webTxs,
                 minedBlocks,
+                pendingAmount: hycontoString(pendingAmount),
             })
 
         } catch (e) {
@@ -480,6 +483,7 @@ export class RestServer implements IRest {
                 })
             }
             const webTxs: ITxProp[] = []
+            let pendingAmount = hyconfromString("0")
             if (pendings !== undefined) {
                 logger.debug(`getTxsOfAddress result  = ${pendings.length}`)
                 for (const tx of pendings) {
@@ -492,6 +496,7 @@ export class RestServer implements IRest {
                         signature: tx.signature.toString("hex"),
                         estimated: hycontoString(tx.amount.add(tx.fee)),
                     })
+                    pendingAmount = pendingAmount.add(tx.amount).add(tx.fee)
                 }
             }
             for (const result of results) {
@@ -513,6 +518,7 @@ export class RestServer implements IRest {
                 balance: account ? hycontoString(account.balance) : "0",
                 txs: webTxs,
                 minedBlocks,
+                pendingAmount: hycontoString(pendingAmount),
             }
             return Promise.resolve(hyconWallet)
         } catch (e) {
@@ -582,7 +588,6 @@ export class RestServer implements IRest {
                 throw new Error("insufficient wallet balance to send transaction")
             }
             const signedTx = wallet.send(address, hyconfromString(tx.amount.toString()), accountNonce, hyconfromString(tx.minerFee.toString()))
-            console.log(`Success send Tx : `, signedTx)
             if (queueTx) { queueTx(signedTx) } else { return Promise.reject(false) }
             return Promise.resolve(true)
         } catch (e) {

@@ -146,7 +146,7 @@ export class WalletDetail extends React.Component<any, any> {
                                                 <span className="mdl-chip mdl-chip--contact balanceInfo">
                                                     <span className="mdl-chip__contact mdl-color--teal mdl-color-text--white">H</span>
                                                     <span className="mdl-chip__text">
-                                                        {this.state.wallet.balance}
+                                                        {this.state.wallet.balance}(pending:{this.state.wallet.pendingAmount})
                                                     </span>
                                                 </span>
                                             </td>

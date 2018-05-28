@@ -44,6 +44,7 @@ export interface IWalletAddress {
     balance: string
     txs: ITxProp[]
     minedBlocks?: IMinedInfo[]
+    pendingAmount?: string
 }
 export interface IPeer {
     host: string
@@ -74,6 +75,7 @@ export interface IHyconWallet {
     balance?: string
     txs?: ITxProp[]
     language?: string
+    pendingAmount?: string
     minedBlocks?: IMinedInfo[]
 }
 

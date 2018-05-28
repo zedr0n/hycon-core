@@ -74,11 +74,11 @@ export class Transaction extends React.Component<any, any> {
             } catch (error) {
 
             }
-            if (hyconfromString(target.value).add(hyconfromString(this.state.minerFee)).greaterThan(hyconfromString(this.state.piggyBank))) {
+            if (hyconfromString(target.value).add(hyconfromString(this.state.minerFee)).greaterThan(hyconfromString(this.state.piggyBank).sub(hyconfromString(this.state.wallet.pendingAmount)))) {
                 alert(`You can't spend the money you don't have`)
             } else {
                 this.setState({ [name]: value })
-                this.currentMinerFee = hycontoString(hyconfromString(this.state.piggyBank).subtract(hyconfromString(target.value)))
+                this.currentMinerFee = hycontoString(hyconfromString(this.state.piggyBank).sub(hyconfromString(target.value).sub(this.state.wallet.pendingAmount)))
             }
         } else if (name === "address") {
             if (value === this.state.wallet.address) {
@@ -115,8 +115,6 @@ export class Transaction extends React.Component<any, any> {
                     this.state.rest.sendTx({ name: this.state.name, password: this.state.password, address: this.state.address, amount: this.state.amount.toString(), minerFee: this.state.minerFee.toString() })
                         .then((result: boolean) => {
                             if (result === true) {
-                                const newBank =
-                                    hyconfromString(this.state.piggyBank).subtract(hyconfromString((this.state.amount)).subtract(hyconfromString(this.state.minerFee)))
                                 alert("A transaction of " + this.state.amount +
                                     "HYCON has been submitted to " + this.state.address +
                                     " with " + this.state.minerFee + "HYCON as miner fees.",
@@ -156,7 +154,7 @@ export class Transaction extends React.Component<any, any> {
             <div>
                 <h1 className="contentTransactionTitle">Transaction Process</h1>
                 <h2 className="contentSubTitle">{this.state.name} Balance : {this.state.piggyBank} Hycon</h2>
-
+                <h3 className="contentSubTitle">Pending amount : {this.state.wallet.pendingAmount} Hycon</h3>
                 <form className="form" >
                     <label className="">From Address : {this.state.wallet.address}
                     </label>
