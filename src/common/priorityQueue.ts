@@ -26,7 +26,7 @@ export class PriorityQueue<T> {
         if (this.queue.length > this.maxLength) {
             return { index: this.queue.length, overflow: this.queue.pop() }
         }
-        return { index: this.queue.length }
+        return { index: this.queue.length, item: value }
     }
 
     public pop() {

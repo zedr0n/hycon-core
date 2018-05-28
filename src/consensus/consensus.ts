@@ -6,6 +6,7 @@ import { AsyncLock } from "../common/asyncLock"
 import { AnyBlock, Block } from "../common/block"
 import { GenesisBlock } from "../common/blockGenesis"
 import { AnyBlockHeader, BlockHeader } from "../common/blockHeader"
+import { DelayQueue } from "../common/delayQueue"
 import { ITxPool } from "../common/itxPool"
 import { SignedTx } from "../common/txSigned"
 import { Hash } from "../util/hash"
@@ -30,12 +31,15 @@ export class Consensus extends EventEmitter implements IConsensus {
     private headerTip: DBBlock
     private lock: AsyncLock
 
+    private futureBlockQueue: DelayQueue
+
     constructor(txPool: ITxPool, dbPath: string, wsPath: string, filePath: string, txPath?: string) {
         super()
         this.txPool = txPool
         this.db = new Database(dbPath, filePath)
         if (txPath) { this.txdb = new TxDatabase(txPath) }
         this.worldState = new WorldState(wsPath, txPool)
+        this.futureBlockQueue = new DelayQueue(10)
     }
 
     public async init(): Promise<void> {
@@ -155,6 +159,9 @@ export class Consensus extends EventEmitter implements IConsensus {
         return (block !== undefined) ? block.height : undefined
     }
     private async put(header: BlockHeader, block?: Block): Promise<IStatusChange> {
+        if (header.timeStamp > Date.now()) {
+            await this.futureBlockQueue.waitUntil(header.timeStamp)
+        }
         return this.lock.critical(async () => {
             const hash = new Hash(header)
             const { oldStatus, status, dbBlock, dbBlockHasChanged } = await this.process(hash, header, block)
@@ -173,7 +180,6 @@ export class Consensus extends EventEmitter implements IConsensus {
                     await this.db.setHeaderTip(hash)
                 }
 
-                // TODO: Check timestamp, wait until timestamp has passed
                 if (block !== undefined && (this.blockTip === undefined || dbBlock.totalWork.greaterThan(this.blockTip.totalWork))) {
                     await this.reorganize(hash, block, dbBlock)
                     await this.db.setBlockTip(hash)
