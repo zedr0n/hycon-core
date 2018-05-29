@@ -1,6 +1,7 @@
 import { getLogger } from "log4js"
 import { Socket } from "net"
 import { AsyncLock } from "../../common/asyncLock"
+import { globalOptions } from "../../main"
 import { Hash } from "../../util/hash"
 
 const logger = getLogger("SocketBuffer")
@@ -12,7 +13,7 @@ enum ParseState {
     Body,
 }
 
-const headerPrefix = Buffer.from([0x47, 0x4c, 0x53, 0x01])
+const headerPrefix = Hash.hash(globalOptions.networkid).slice(0, 4)
 const headerRouteLength = 4
 const headerPostfixLength = 4
 const scrapBufferLength = Math.max(headerPrefix.length, headerRouteLength, headerPostfixLength)
@@ -31,7 +32,7 @@ export class SocketParser {
     constructor(socket: Socket, onPacket: (route: number, buffer: Buffer) => void, bufferSize: number = 1024) {
         this.socket = socket
         this.packetCallback = onPacket
-        // These buffers will be held for the duration of the connection, and does not need to be intialized
+        // These buffers will be held for the duration of the connection, and do not need to be intialized
         this.scrapBuffer = Buffer.allocUnsafeSlow(scrapBufferLength)
         this.writeBuffer = Buffer.allocUnsafeSlow(writeBufferLength)
         this.sendLock = new AsyncLock(false, 30000)
@@ -56,7 +57,7 @@ export class SocketParser {
         await this.sendLock.getLock()
         this.writeBuffer.writeUInt32LE(route, 0)
         this.writeBuffer.writeUInt32LE(buffer.length, 4)
-        kernel = kernel && this.socket.write(headerPrefix)
+        kernel = kernel && this.socket.write(headerPrefix as Buffer)
         kernel = kernel && this.socket.write(this.writeBuffer)
         kernel = kernel && this.socket.write(buffer as Buffer)
         if (kernel) {
