@@ -7,6 +7,7 @@ import { resolve } from "url"
 import { hycontoString } from "../../api/client/stringUtil"
 import { Address } from "../../common/address"
 import { Block } from "../../common/block"
+import { GenesisBlock } from "../../common/blockGenesis"
 import { SignedTx } from "../../common/txSigned"
 import { Hash } from "../../util/hash"
 import { AnySignedTx, IConsensus } from "../iconsensus"
@@ -31,6 +32,7 @@ export class TxDatabase {
             this.db.run(`CREATE TABLE IF NOT EXISTS txdb(idx INTEGER PRIMARY KEY AUTOINCREMENT,
                                                         txhash TEXT,
                                                         blockhash TEXT,
+                                                        miner TEXT,
                                                         txto TEXT,
                                                         txfrom TEXT,
                                                         amount TEXT,
@@ -55,7 +57,11 @@ export class TxDatabase {
                 const blocks = await this.consensus.getBlocksRange(lastHeight)
                 for (const block of blocks) {
                     const blockHash = new Hash(block.header)
-                    await this.putTxs(blockHash, block.header.timeStamp, block.txs)
+                    if (block instanceof Block) {
+                        await this.putTxs(blockHash, block.header.timeStamp, block.txs, block.header.miner.toString())
+                    } else {
+                        await this.putTxs(blockHash, block.header.timeStamp, block.txs, undefined)
+                    }
                 }
             }
         }
@@ -81,9 +87,9 @@ export class TxDatabase {
         }
     }
 
-    public async putTxs(blockHash: Hash, timestamp: number, txs: AnySignedTx[]): Promise<void> {
+    public async putTxs(blockHash: Hash, timestamp: number, txs: AnySignedTx[], miner: string): Promise<void> {
         const stmtUpdate = this.db.prepare(`UPDATE txdb SET blockhash=$blockhash WHERE txhash=$txhash AND blockhash=$preblockhash`)
-        const stmtInsert = this.db.prepare(`INSERT INTO txdb (txhash, blockhash, txto, txfrom, amount, fee, timestamp) VALUES ($txhash, $blockhash, $txto, $txfrom, $amount, $fee, $timestamp)`)
+        const stmtInsert = this.db.prepare(`INSERT INTO txdb (txhash, blockhash, miner, txto, txfrom, amount, fee, timestamp) VALUES ($txhash, $blockhash, $miner, $txto, $txfrom, $amount, $fee, $timestamp)`)
         for (const tx of txs) {
             const txHash = new Hash(tx)
             const preBlockHash = await this.getBlockHash(txHash.toString())
@@ -92,6 +98,7 @@ export class TxDatabase {
                 if (!Hash.decode(preBlockHash).equals(blockHash)) {
                     const params = {
                         $blockhash: blockHash,
+                        $miner: miner,
                         $preblockhash: preBlockHash,
                         $txhash: txHash.toString(),
                     }
@@ -109,6 +116,7 @@ export class TxDatabase {
                         $amount: hycontoString(tx.amount),
                         $blockhash: blockHash.toString(),
                         $fee: hycontoString(tx.fee),
+                        $miner: miner,
                         $timestamp: timestamp,
                         $txfrom: tx.from.toString(),
                         $txhash: txHash.toString(),
@@ -201,6 +209,14 @@ export class TxDatabase {
             })
         })
     }
+
+    // public getMinedBlock(minerAddr: string): Promise<{tx: Tx[] | undefined}> {
+    //     const params = { $miner: minerAddr }
+    //     // return new Promise<{tx: Block[]}>((resolved, rejected) => {
+
+    //     // })
+    //     return new Promise<{undefined}>()
+    // }
 
     private async getBlockHash(txhash: string): Promise<string> {
         try {

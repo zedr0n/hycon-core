@@ -6,6 +6,8 @@ import * as CopyToClipboard from "react-copy-to-clipboard"
 import * as ReactPaginate from "react-paginate"
 import { Redirect } from "react-router"
 import { Link } from "react-router-dom"
+import { Tab, TabList, TabPanel, Tabs } from "react-tabs"
+import { MinedBlockList } from "./minedBlockList"
 import { IHyconWallet, IRest, ITxProp } from "./rest"
 import { TxLine } from "./txLine"
 interface IWalletDetailProps {
@@ -159,21 +161,34 @@ export class WalletDetail extends React.Component<any, any> {
                         </tr>
                     </tbody>
                 </table>
-                {this.state.txs.map((tx: ITxProp) => {
-                    return (
-                        <div key={accountIndex++}>
-                            <TxLine tx={tx} rest={this.state.rest} />
-                            {tx.from === this.state.address ?
-                                (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent txAmtBtn">-{tx.estimated} HYCON</button>)
-                                :
-                                (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored txAmtBtn">{tx.amount} HYCON</button>)}
-                        </div>
-                    )
-                })}
-                {this.state.hasMore && this.state.txs.length > 0 ?
-                    (<div><button className="btn btn-block btn-info" onClick={() => this.fetchNextTxs()}>Load more</button></div>)
-                    :
-                    (<div></div>)}
+                <Tabs>
+                    <TabList>
+                        <Tab>Transaction</Tab>
+                        <Tab>Mine Reward</Tab>
+                    </TabList>
+                    <TabPanel>
+                        {this.state.txs.map((tx: ITxProp) => {
+                            return (
+                                <div key={accountIndex++}>
+                                    <TxLine tx={tx} rest={this.state.rest} />
+                                    {tx.from === this.state.address ?
+                                        (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent txAmtBtn">-{tx.estimated} HYCON</button>)
+                                        :
+                                        (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored txAmtBtn">{tx.amount} HYCON</button>)}
+                                </div>
+                            )
+                        })}
+                        {this.state.hasMore && this.state.txs.length > 0 ?
+                            (<div><button className="btn btn-block btn-info" onClick={() => this.fetchNextTxs()}>Load more</button></div>)
+                            :
+                            (<div></div>)}
+                    </TabPanel>
+                    <TabPanel>
+                        <MinedBlockList
+                            rest={this.state.rest}
+                        />
+                    </TabPanel>
+                </Tabs>
                 <Dialog className="dialog" open={this.state.visible}>
                     <h4 className="contentTitle">Select account to use.</h4>
                     <div className="mdl-dialog__content accountDialogContent">

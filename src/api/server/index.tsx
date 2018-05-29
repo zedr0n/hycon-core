@@ -29,6 +29,7 @@ export function indexRender(
                 <script src="/react-router/umd/react-router.js"></script>
                 <script src="/react-router-config/umd/react-router-config.js"></script>
                 <script src="/react-router-dom/umd/react-router-dom.js"></script>
+                <script src="/react-tabs/style/react-tabs.css"></script>
                 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
                 <link rel="stylesheet" href="/styles.css" type="text/css">
             </head>
