@@ -281,8 +281,8 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     private async respondStatus(reply: boolean, request: proto.IStatus): Promise<IResponse> {
-        const receviedStatus = new proto.Status(request)        
-        await this.network.guidCheck(this, receviedStatus)        
+        const receviedStatus = new proto.Status(request)
+        await this.network.guidCheck(this, receviedStatus)
         const message: proto.INetwork = {
             statusReturn: {
                 status: {

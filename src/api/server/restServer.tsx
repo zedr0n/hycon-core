@@ -634,12 +634,10 @@ export class RestServer implements IRest {
             let seen = "0"
             let attempt = "0"
             if (lastSeen !== 0) {
-                logger.info(`max debug: ${peer.lastSeen}`)
                 const tp = new Date(lastSeen)
                 seen = tp.toLocaleString()
             }
             if (lastAttempt !== 0) {
-                logger.info(`max debug: ${peer.lastAttempt}`)
                 const tp = new Date(lastAttempt)
                 attempt = tp.toLocaleString()
             }
