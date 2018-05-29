@@ -16,7 +16,11 @@ import {
     CHINESE_SIMPLIFIED_WORDLIST,
     CHINESE_TRADITIONAL_WORDLIST,
     ENGLISH_WORDLIST,
+    FRENCH_WORDLIST,
+    ITALIAN_WORDLIST,
+    JAPANESE_WORDLIST,
     KOREAN_WORDLIST,
+    SPANISH_WORDLIST,
 } from "./mnemonic"
 
 const logger = getLogger("Wallet")
@@ -129,6 +133,9 @@ export class Wallet {
             case "english":
                 returnWordList = ENGLISH_WORDLIST
                 break
+            case "korean":
+                returnWordList = KOREAN_WORDLIST
+                break
             case "chinese_simplified":
                 returnWordList = CHINESE_SIMPLIFIED_WORDLIST
                 break
@@ -137,8 +144,17 @@ export class Wallet {
                 break
             case "chinese":
                 throw new Error("Did you mean chinese_simplified or chinese_traditional?")
-            case "korean":
-                returnWordList = KOREAN_WORDLIST
+            case "japanese":
+                returnWordList = JAPANESE_WORDLIST
+                break
+            case "french":
+                returnWordList = FRENCH_WORDLIST
+                break
+            case "spanish":
+                returnWordList = SPANISH_WORDLIST
+                break
+            case "italian":
+                returnWordList = ITALIAN_WORDLIST
                 break
             default:
                 returnWordList = ENGLISH_WORDLIST

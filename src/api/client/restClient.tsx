@@ -194,6 +194,7 @@ export class RestClient implements IRest {
     }
 
     public recoverWallet(Hwallet: IHyconWallet): Promise<string | boolean> {
+        Hwallet.language = Hwallet.language.toLowerCase()
         const headers = new Headers()
         headers.append("Accept", "application/json")
         headers.append("Content-Type", "application/json")

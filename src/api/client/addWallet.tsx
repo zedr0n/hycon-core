@@ -7,9 +7,9 @@ import { encodingMnemonic } from "./stringUtil"
 export class AddWallet extends React.Component<any, any> {
     public mounted: boolean = false
     public errMsg1: string = "Please enter required value"
-    public errMsg2: string = "Not matched password"
-    public errMsg3: string = "Check your mnemonic words"
-    public errMsg4: string = "Invalid wallet name: the wallet name must be in English, Korean and numbers only"
+    public errMsg2: string = "Invalid wallet name: the wallet name must be in English, Korean and numbers only"
+    public errMsg3: string = "Not matched password"
+    public errMsg4: string = "Check your mnemonic words"
     public errMsg5: string = "Please enter your mnemonic"
     public errMsg6: string = "Duplicate wallet name"
     public errMsg7: string = "Please select Language"
@@ -21,7 +21,7 @@ export class AddWallet extends React.Component<any, any> {
             isMnemonicTypeView: false,
             isMnemonicView: false,
             language: "",
-            languages: ["English", "Chinese - Simplified", "Chinese - Traditional", "Korean"],
+            languages: ["English", "Korean", "Chinese - Simplified", "Chinese - Traditional", "Japanese", "French", "Spanish", "Italian"],
             mnemonic: "",
             redirect: false,
             rest: props.rest,
@@ -51,10 +51,10 @@ export class AddWallet extends React.Component<any, any> {
         if (this.state.name === undefined || this.state.password === undefined || this.state.hint === undefined) {
             alert(this.errMsg1)
         } else if (this.state.name.search(/\s/) !== -1 || !this.pattern1.test(this.state.name)) {
-            alert(this.errMsg4)
+            alert(this.errMsg2)
         } else {
             if (this.state.password !== this.state.confirmPassword) {
-                alert(this.errMsg2)
+                alert(this.errMsg3)
             } else {
                 this.state.rest.checkDupleName(this.state.name).then((result: boolean) => {
                     if (result) {
@@ -70,24 +70,14 @@ export class AddWallet extends React.Component<any, any> {
         if (this.state.confirmMnemonic === "" || this.state.confirmMnemonic === undefined) {
             alert(this.errMsg5)
         } else {
-            let mnemonicString = ""
-            let coinfirmMnemonicString = ""
-            if (this.state.mnemonic.charCodeAt(0) >= 0xAC00 && this.state.mnemonic.charCodeAt(0) <= 0xD7A3) {
-                mnemonicString = encodingMnemonic(this.state.mnemonic)
-            } else {
-                mnemonicString = this.state.mnemonic
-            }
-            if (this.state.confirmMnemonic.charCodeAt(0) >= 0xAC00 && this.state.confirmMnemonic.charCodeAt(0) <= 0xD7A3) {
-                coinfirmMnemonicString = encodingMnemonic(this.state.confirmMnemonic)
-            } else {
-                coinfirmMnemonicString = this.state.confirmMnemonic
-            }
-            if (this.state.mnemonic === coinfirmMnemonicString) {
+            const mnemonicString = encodingMnemonic(this.state.mnemonic)
+            const confirmMnemonicString = encodingMnemonic(this.state.confirmMnemonic)
+            if (this.state.mnemonic === confirmMnemonicString) {
                 this.setState({ isMnemonicView: false, isMnemonicTypeView: true })
             } else if (this.state.confirmMnemonic === "pass") {
                 this.setState({ isMnemonicView: false, isMnemonicTypeView: true })
             } else {
-                alert(this.errMsg3)
+                alert(this.errMsg4)
             }
         }
     }
@@ -95,14 +85,8 @@ export class AddWallet extends React.Component<any, any> {
         if (this.state.typedMnemonic === "" || this.state.typedMnemonic === undefined) {
             alert(this.errMsg5)
         } else {
-            let mnemonicString = this.state.mnemonic
-            if (mnemonicString.charCodeAt(0) >= 0xAC00 && mnemonicString.charCodeAt(0) <= 0xD7A3) {
-                mnemonicString = encodingMnemonic(mnemonicString)
-            }
-            let typedMnemonicString = this.state.typedMnemonic
-            if (typedMnemonicString.charCodeAt(0) >= 0xAC00 && typedMnemonicString.charCodeAt(0) <= 0xD7A3) {
-                typedMnemonicString = encodingMnemonic(typedMnemonicString)
-            }
+            const mnemonicString = encodingMnemonic(this.state.mnemonic)
+            const typedMnemonicString = encodingMnemonic(this.state.typedMnemonic)
             if (mnemonicString === typedMnemonicString || typedMnemonicString === "pass") {
                 this.state.rest.generateWallet({
                     hint: this.state.hint,
@@ -114,7 +98,7 @@ export class AddWallet extends React.Component<any, any> {
                     this.setState({ walletViewRedirect: true, address: data })
                 })
             } else {
-                alert(this.errMsg3)
+                alert(this.errMsg4)
             }
         }
     }
@@ -191,9 +175,9 @@ export class AddWallet extends React.Component<any, any> {
                     <table>
                         <tbody>
                             <tr>
-                                <td>Wallet Name</td>
+                                <td className="subTitle_width20">Wallet Name</td>
                                 <td>
-                                    <form action="#" id="nameForm" ref="nameForm">
+                                    <form action="#">
                                         <div className="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                                             <input className="mdl-textfield__input" type="text" id="walletName"
                                                 onChange={(data) => { this.handleName(data) }}
@@ -209,7 +193,7 @@ export class AddWallet extends React.Component<any, any> {
                                 </td>
                             </tr>
                             <tr>
-                                <td>Password</td>
+                                <td className="subTitle_width20">Password</td>
                                 <td>
                                     <form action="#">
                                         <div className="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
@@ -227,7 +211,7 @@ export class AddWallet extends React.Component<any, any> {
                                 </td>
                             </tr>
                             <tr>
-                                <td>Confirm Password</td>
+                                <td className="subTitle_width20">Confirm Password</td>
                                 <td>
                                     <form action="#">
                                         <div className="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
@@ -245,7 +229,7 @@ export class AddWallet extends React.Component<any, any> {
                                 </td>
                             </tr>
                             <tr>
-                                <td>Password Hint</td>
+                                <td className="subTitle_width20">Password Hint</td>
                                 <td>
                                     <form action="#">
                                         <div className="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
