@@ -12,6 +12,7 @@ import { MinerServer } from "./miner/minerServer"
 import { INetwork } from "./network/inetwork"
 import { RabbitNetwork } from "./network/rabbit/rabbitNetwork" // for speed
 import { RestManager } from "./rest/restManager"
+import conf = require("./settings")
 import { Wallet } from "./wallet/wallet"
 import { WalletManager } from "./wallet/walletManager"
 
@@ -32,6 +33,7 @@ const optionDefinitions = [
     { name: "wallet", alias: "W", type: Boolean },
     { name: "writing", alias: "w", type: Boolean },
     { name: "nonLocal", alias: "l", type: Boolean },
+    { name: "genesis", alias: "G", type: String },
 ]
 const logger = getLogger("Server")
 
@@ -89,6 +91,11 @@ export class Server {
         if (Server.globalOptions.nonLocal === undefined) {
             Server.globalOptions.nonLocal = false
         }
+
+        if (Server.globalOptions.genesis !== undefined) {
+            conf.dataGenesis = Server.globalOptions.genesis
+        }
+        logger.info(`GenesisBlock=${conf.dataGenesis}`)
 
         const postfix = Server.globalOptions.postfix
         this.txPool = new TxPool()
