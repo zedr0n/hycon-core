@@ -3,7 +3,7 @@ import { Address } from "../../common/address"
 import { Hash } from "../../util/hash"
 import { AnySignedTx, IConsensus } from "../iconsensus"
 import { DBTx } from "./dbtx"
-export interface ItxDatabase extends EventEmitter {
+export interface ITxDatabase {
     init(consensus: IConsensus, tipHeight?: number): Promise<void>
     getLastBlock(idx: number): Promise<Hash | undefined>
     putTxs(blockHash: Hash, timestamp: number, txs: AnySignedTx[]): Promise<void>

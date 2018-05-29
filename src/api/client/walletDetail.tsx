@@ -7,13 +7,14 @@ import * as ReactPaginate from "react-paginate"
 import { Redirect } from "react-router"
 import { Link } from "react-router-dom"
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs"
-import { MinedBlockList } from "./minedBlockList"
-import { IHyconWallet, IRest, ITxProp } from "./rest"
+import { MinedBlockLine } from "./minedBlockLine"
+import { IHyconWallet, IMinedInfo, IRest, ITxProp } from "./rest"
 import { TxLine } from "./txLine"
 interface IWalletDetailProps {
     rest: IRest
     name: string
     wallet: IHyconWallet
+    minedBlocks: IMinedInfo[]
     accounts: IHyconWallet[]
 }
 export class WalletDetail extends React.Component<any, any> {
@@ -24,7 +25,19 @@ export class WalletDetail extends React.Component<any, any> {
     public mounted: boolean = false
     constructor(props: any) {
         super(props)
-        this.state = { name: props.name, rest: props.rest, visible: false, accounts: [], address: "", txs: [], hasMore: true, index: 1 }
+        this.state = {
+            accounts: [],
+            address: "",
+            hasMore: true,
+            hasMoreMinedInfo: true,
+            index: 1,
+            minedBlocks: [],
+            minerIndex: 1,
+            name: props.name,
+            rest: props.rest,
+            txs: [],
+            visible: false,
+        }
     }
     public componentWillUnmount() {
         this.mounted = false
@@ -36,7 +49,7 @@ export class WalletDetail extends React.Component<any, any> {
         this.props.rest.getWalletDetail(this.state.name).then((data: IHyconWallet) => {
             this.state.rest.setLoading(false)
             if (this.mounted) {
-                this.setState({ wallet: data, address: data.address, txs: data.txs })
+                this.setState({ wallet: data, address: data.address, txs: data.txs, minedBlocks: data.minedBlocks })
             }
         }).catch((e: Error) => {
             alert(e)
@@ -91,6 +104,7 @@ export class WalletDetail extends React.Component<any, any> {
     }
     public render() {
         let accountIndex = 0
+        let minedIndex = 0
         if (this.state.wallet === undefined) {
             return < div ></div >
         }
@@ -184,12 +198,28 @@ export class WalletDetail extends React.Component<any, any> {
                             (<div></div>)}
                     </TabPanel>
                     <TabPanel>
-                        <MinedBlockList
-                            rest={this.state.rest}
-                        />
+                        <table className="mdl-data-table mdl-js-data-table mdl-shadow--2dp table_margined">
+                            <thead>
+                                <tr>
+                                    <th className="mdl-data-table__cell--non-numeric">Block Hash</th>
+                                    <th className="mdl-data-table__cell--non-numeric">Miner Address</th>
+                                    <th className="mdl-data-table__cell--non-numeric">FeeReward</th>
+                                    <th className="mdl-data-table__cell--non-numeric">TimeStamp</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {this.state.minedBlocks.map((minedInfo: IMinedInfo) => {
+                                    return <MinedBlockLine key={minedIndex++} minedInfo={minedInfo} />
+                                })}
+                            </tbody>
+                        </table>
+                        {this.state.hasMoreMinedInfo && this.state.minedBlocks.length > 0 ?
+                            (<div><button className="btn btn-block btn-info" onClick={() => this.fetchNextMinedInfo()}>Load more</button></div>)
+                            :
+                            (<div></div>)}
                     </TabPanel>
                 </Tabs>
-                <Dialog className="dialog" open={this.state.visible}>
+                {/* <Dialog className="dialog" open={this.state.visible}>
                     <h4 className="contentTitle">Select account to use.</h4>
                     <div className="mdl-dialog__content accountDialogContent">
                         <p>List of currently available accounts. To add a new account, please click the 'New Account' button below.</p>
@@ -220,7 +250,7 @@ export class WalletDetail extends React.Component<any, any> {
                             <Link to="/wallet/addWallet">
                                 New Account</Link></button>
                     </div>
-                </Dialog>
+                </Dialog> */}
             </div>
         )
     }
@@ -230,6 +260,16 @@ export class WalletDetail extends React.Component<any, any> {
             this.setState({
                 index: this.state.index + 1,
                 txs: update(this.state.txs, { $push: result }),
+            })
+        })
+    }
+
+    private fetchNextMinedInfo() {
+        this.state.rest.getMinedBlocks(this.state.wallet.address, this.state.minedBlocks[0].blockhash, this.state.minerIndex).then((result: IMinedInfo[]) => {
+            if (result.length === 0) { this.setState({ hasMoreMinedInfo: false }) }
+            this.setState({
+                minedBlocks: update(this.state.minedBlocks, { $push: result }),
+                minerIndex: this.state.minerIndex + 1,
             })
         })
     }

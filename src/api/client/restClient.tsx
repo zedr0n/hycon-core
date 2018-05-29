@@ -3,6 +3,7 @@ import {
     IBlock,
     IHyconWallet,
     ILocationDetails,
+    IMinedInfo,
     IPeer,
     IResponseError,
     IRest,
@@ -277,6 +278,16 @@ export class RestClient implements IRest {
     public checkDupleName(name: string): Promise<boolean> {
         return Promise.resolve(
             fetch(`/api/${this.apiVersion}/dupleName/${name}`)
+                .then((response) => response.json())
+                .catch((err: Error) => {
+                    console.log(err)
+                }),
+        )
+    }
+
+    public getMinedBlocks(address: string, blockHash: string, index: number): Promise<IMinedInfo[]> {
+        return Promise.resolve(
+            fetch(`/api/${this.apiVersion}/getMinedInfo/${address}/${blockHash}/${index}`)
                 .then((response) => response.json())
                 .catch((err: Error) => {
                     console.log(err)

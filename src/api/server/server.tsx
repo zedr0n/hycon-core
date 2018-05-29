@@ -232,6 +232,10 @@ export class HttpServer {
             res.json(await this.rest.checkDupleName(req.params.name))
         })
 
+        router.get("/getMinedInfo/:address/:blockHash/:index", async (req: express.Request, res: express.Response) => {
+            res.json(await this.rest.getMinedBlocks(req.params.address, req.params.blockHash, req.params.index))
+        })
+
         this.app.use(`/api/${apiVersion}`, router)
     }
 

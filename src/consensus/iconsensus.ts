@@ -9,6 +9,7 @@ import { SignedTx } from "../common/txSigned"
 import { Account } from "../consensus/database/account"
 import { BlockStatus } from "../consensus/sync"
 import { Hash } from "../util/hash"
+import { DBMined } from "./database/DBMined"
 import { DBTx } from "./database/dbtx"
 import { TxValidity } from "./database/worldState"
 
@@ -28,6 +29,7 @@ export interface IConsensus extends EventEmitter {
     getAccount(address: Address): Promise<Account>
     getLastTxs(address: Address, count?: number): Promise<DBTx[]>
     getNextTxs(address: Address, txHash: Hash, index: number, count?: number): Promise<DBTx[]>
+    getMinedBlocks(address: Address, count?: number, index?: number, blockHash?: Hash): Promise<DBMined[]>
     getBlockStatus(hash: Hash): Promise<BlockStatus>
     getHeaderTip(): { hash: Hash, height: number }
     getBlocksTip(): { hash: Hash, height: number }

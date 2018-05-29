@@ -26,7 +26,7 @@
     "testNetwork1": "./node_modules/.bin/ts-node src/main.ts --port=8149 --str_port=9082 --cpuMiners=3 --api --api_port=2443 --networkid=cat",
     "testNetwork2": "./node_modules/.bin/ts-node src/main.ts --port=8152 --str_port=9082 --writing",
     "testNetwork3": "./node_modules/.bin/ts-node src/main.ts --port=8153  --str_port=9083 --writing",
-    "clear": "rm -rf blockdb* worldstate* rawblock* txDB* peerdb*",
+    "clear": "rm -rf blockdb* worldstate* rawblock* txDB* peerdb* minedDB*",
     "wallet": "./node_modules/.bin/ts-node src/util/genWallet.ts",
     "visTest": "./node_modules/.bin/ts-node src/util/visTest.ts",
     "package": "tsc && pkg package.json",

@@ -14,9 +14,11 @@ import { Hash } from "../util/hash"
 import { Account } from "./database/account"
 import { Database } from "./database/database"
 import { DBBlock } from "./database/dbblock"
+import { DBMined } from "./database/DBMined"
 import { DBTx } from "./database/dbtx"
 import { ITxDatabase } from "./database/itxDatabase"
-import { TxDatabase } from "./database/TxDatabase"
+import { MinedDatabase } from "./database/minedDatabase"
+import { TxDatabase } from "./database/txDatabase"
 import { TxValidity, WorldState } from "./database/worldState"
 import { IConsensus, IStatusChange } from "./iconsensus"
 import { BlockStatus } from "./sync"
@@ -25,6 +27,7 @@ const logger = getLogger("Consensus")
 
 export class Consensus extends EventEmitter implements IConsensus {
     private txdb?: ITxDatabase
+    private minedDatabase: MinedDatabase
     private txPool: ITxPool
     private worldState: WorldState
     private db: Database
@@ -34,11 +37,12 @@ export class Consensus extends EventEmitter implements IConsensus {
 
     private futureBlockQueue: DelayQueue
 
-    constructor(txPool: ITxPool, dbPath: string, wsPath: string, filePath: string, txPath?: string) {
+    constructor(txPool: ITxPool, dbPath: string, wsPath: string, filePath: string, txPath?: string, minedDBPath?: string) {
         super()
         this.txPool = txPool
         this.db = new Database(dbPath, filePath)
         if (txPath) { this.txdb = new TxDatabase(txPath) }
+        if (minedDBPath) { this.minedDatabase = new MinedDatabase(minedDBPath) }
         this.worldState = new WorldState(wsPath, txPool)
         this.futureBlockQueue = new DelayQueue(10)
     }
@@ -55,6 +59,9 @@ export class Consensus extends EventEmitter implements IConsensus {
 
             if (this.txdb !== undefined) {
                 await this.txdb.init(this, this.blockTip === undefined ? undefined : this.blockTip.height)
+            }
+            if (this.minedDatabase !== undefined) {
+                await this.minedDatabase.init(this, this.blockTip === undefined ? undefined : this.blockTip.height)
             }
 
             if (this.blockTip === undefined) {
@@ -90,6 +97,9 @@ export class Consensus extends EventEmitter implements IConsensus {
     }
     public async getBlocksRange(fromHeight: number, count?: number): Promise<AnyBlock[]> {
         try {
+            if (count === undefined) {
+                this.blockTip.height >= fromHeight ? count = this.blockTip.height - fromHeight + 1 : count = 0
+            }
             const dbblocks = await this.db.getDBBlocksRange(fromHeight, count)
             const blockPromises = dbblocks.map((dbblock) => this.db.dbBlockToBlock(dbblock))
             return Promise.all(blockPromises)
@@ -101,6 +111,9 @@ export class Consensus extends EventEmitter implements IConsensus {
     }
     public async getHeadersRange(fromHeight: number, count?: number): Promise<AnyBlockHeader[]> {
         try {
+            if (count === undefined) {
+                this.headerTip.height >= fromHeight ? count = this.headerTip.height - fromHeight + 1 : count = 0
+            }
             const dbblocks = await this.db.getDBBlocksRange(fromHeight, count)
             return dbblocks.map((dbblock) => dbblock.header)
         } catch (e) {
@@ -135,6 +148,22 @@ export class Consensus extends EventEmitter implements IConsensus {
             logger.error(`Fail to getNextTxs : ${e}`)
             return e
         }
+    }
+
+    public async getMinedBlocks(address: Address, count?: number, index?: number, blockHash?: Hash): Promise<DBMined[]> {
+        try {
+            if (index === undefined) { index = 0 }
+            if (count === undefined) { count = 10 }
+            if (this.minedDatabase) {
+                return this.minedDatabase.getMinedBlocks(address, count, index, blockHash)
+            } else {
+                return Promise.reject(`There is  no minedDatabase`)
+            }
+        } catch (e) {
+            logger.error(`Fail to getMinedBlocks in consensus: ${e}`)
+            return e
+        }
+
     }
     public getBlockStatus(hash?: Hash): Promise<BlockStatus> {
         if (hash === undefined) {
@@ -249,6 +278,7 @@ export class Consensus extends EventEmitter implements IConsensus {
             if (result.newStatus === BlockStatus.Rejected) {
                 return { oldStatus, status }
             }
+            if (this.minedDatabase) { await this.minedDatabase.putMinedBlock(hash, block.header.timeStamp, block.txs, block.header.miner) }
             dbBlockHasChanged = dbBlockHasChanged || result.dbBlockHasChanged
             status = result.newStatus
         }

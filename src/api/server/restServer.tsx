@@ -11,7 +11,7 @@ import { INetwork } from "../../network/inetwork"
 import * as proto from "../../serialization/proto"
 import { Hash } from "../../util/hash"
 import { Wallet } from "../../wallet/wallet"
-import { IBlock, IHyconWallet, IPeer, IResponseError, IRest, ITxProp, IUser, IWalletAddress } from "../client/rest"
+import { IBlock, IHyconWallet, IMinedInfo, IPeer, IResponseError, IRest, ITxProp, IUser, IWalletAddress } from "../client/rest"
 import { hyconfromString, hycontoString, zeroPad } from "../client/stringUtil"
 const logger = getLogger("RestServer")
 
@@ -120,7 +120,7 @@ export class RestServer implements IRest {
                     from: result.from,
                     to: result.to,
                     estimated: hycontoString(hyconfromString(result.amount).add(hyconfromString(result.fee))),
-                    receiveTime: result.timestamp,
+                    receiveTime: result.blocktime,
                 }
                 webTxs.push(webTx)
             }
@@ -239,6 +239,16 @@ export class RestServer implements IRest {
             const account = await this.consensus.getAccount(addressOfWallet)
             const pendings = this.txPool.getTxsOfAddress(addressOfWallet)
             const results = await this.consensus.getLastTxs(addressOfWallet, n)
+            const minedinfo = await this.consensus.getMinedBlocks(addressOfWallet)
+            const minedBlocks: IMinedInfo[] = []
+            for (const mined of minedinfo) {
+                minedBlocks.push({
+                    blockhash: mined.blockhash,
+                    timestamp: mined.blocktime,
+                    miner: mined.miner,
+                    feeReward: mined.feeReward,
+                })
+            }
             const webTxs: ITxProp[] = []
             for (const tx of pendings) {
                 webTxs.push({
@@ -260,7 +270,7 @@ export class RestServer implements IRest {
                     from: result.from,
                     to: result.to,
                     estimated: hycontoString(hyconfromString(result.amount).add(hyconfromString(result.fee))),
-                    receiveTime: result.timestamp,
+                    receiveTime: result.blocktime,
                 }
                 webTxs.push(webTx)
             }
@@ -268,6 +278,7 @@ export class RestServer implements IRest {
                 hash: address,
                 balance: account ? hycontoString(account.balance) : "0.0",
                 txs: webTxs,
+                minedBlocks,
             })
 
         } catch (e) {
@@ -435,7 +446,7 @@ export class RestServer implements IRest {
                 from: hyconBlockTx.from,
                 to: hyconBlockTx.to,
                 blockHash: hyconBlockTx.blockhash,
-                receiveTime: hyconBlockTx.timestamp,
+                receiveTime: hyconBlockTx.blocktime,
                 estimated: hycontoString(hyconfromString(hyconBlockTx.amount).add(hyconfromString(hyconBlockTx.fee))),
                 confirmation: getTxResult.confirmation,
             }
@@ -457,7 +468,17 @@ export class RestServer implements IRest {
             const n = 10
             const account = await this.consensus.getAccount(addrOfWallet)
             const results = await this.consensus.getLastTxs(addrOfWallet, n)
+            const minedinfo = await this.consensus.getMinedBlocks(addrOfWallet)
             const pendings = this.txPool.getTxsOfAddress(addrOfWallet)
+            const minedBlocks: IMinedInfo[] = []
+            for (const mined of minedinfo) {
+                minedBlocks.push({
+                    blockhash: mined.blockhash,
+                    timestamp: mined.blocktime,
+                    miner: mined.miner,
+                    feeReward: mined.feeReward,
+                })
+            }
             const webTxs: ITxProp[] = []
             for (const tx of pendings) {
                 webTxs.push({
@@ -479,7 +500,7 @@ export class RestServer implements IRest {
                     from: result.from,
                     to: result.to,
                     estimated: hycontoString(hyconfromString(result.amount).add(hyconfromString(result.fee))),
-                    receiveTime: result.timestamp,
+                    receiveTime: result.blocktime,
                 }
                 webTxs.push(webTx)
             }
@@ -488,6 +509,7 @@ export class RestServer implements IRest {
                 address: addrOfWallet.toString(),
                 balance: account ? hycontoString(account.balance) : "0",
                 txs: webTxs,
+                minedBlocks,
             }
             return Promise.resolve(hyconWallet)
         } catch (e) {
@@ -658,7 +680,7 @@ export class RestServer implements IRest {
                 from: result.from,
                 to: result.to,
                 estimated: hycontoString(hyconfromString(result.amount).add(hyconfromString(result.fee))),
-                receiveTime: result.timestamp,
+                receiveTime: result.blocktime,
             }
             webTxs.push(webTx)
         }
@@ -667,5 +689,20 @@ export class RestServer implements IRest {
 
     public async checkDupleName(name: string): Promise<boolean> {
         return await Wallet.checkDupleName(name)
+    }
+
+    public async getMinedBlocks(address: string, blockHash: string, index: number): Promise<IMinedInfo[]> {
+        const cntPerPage: number = 10
+        const minedInfo = await this.consensus.getMinedBlocks(new Address(address), cntPerPage, index, Hash.decode(blockHash))
+        const minedBloks: IMinedInfo[] = []
+        for (const mined of minedInfo) {
+            minedBloks.push({
+                blockhash: mined.blockhash,
+                timestamp: mined.blocktime,
+                miner: mined.miner,
+                feeReward: mined.feeReward,
+            })
+        }
+        return minedBloks
     }
 }

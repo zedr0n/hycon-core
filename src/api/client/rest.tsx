@@ -43,6 +43,7 @@ export interface IWalletAddress {
     hash: string
     balance: string
     txs: ITxProp[]
+    minedBlocks?: IMinedInfo[]
 }
 export interface IPeer {
     host: string
@@ -73,6 +74,14 @@ export interface IHyconWallet {
     balance?: string
     txs?: ITxProp[]
     language?: string
+    minedBlocks?: IMinedInfo[]
+}
+
+export interface IMinedInfo {
+    blockhash: string
+    timestamp: number
+    miner: string
+    feeReward: string
 }
 export interface IRest {
     loadingListener(callback: (loading: boolean) => void): void
@@ -109,4 +118,5 @@ export interface IRest {
     getHint(name: string): Promise<string>
     getNextTxs(address: string, txHash: string, index: number): Promise<ITxProp[]>
     checkDupleName(name: string): Promise<boolean>
+    getMinedBlocks(address: string, blockHash: string, index: number): Promise<IMinedInfo[]>
 }
