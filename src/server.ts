@@ -31,7 +31,7 @@ const optionDefinitions = [
     { name: "visualize", alias: "V", type: Boolean },
     { name: "wallet", alias: "W", type: Boolean },
     { name: "writing", alias: "w", type: Boolean },
-    { name: "localOnly", alias: "l", type: Boolean, defaultOption: true },
+    { name: "nonLocal", alias: "l", type: Boolean },
 ]
 const logger = getLogger("Server")
 
@@ -86,6 +86,10 @@ export class Server {
             Server.globalOptions.cpuMiners = 0
         }
 
+        if (Server.globalOptions.nonLocal === undefined) {
+            Server.globalOptions.nonLocal = false
+        }
+
         const postfix = Server.globalOptions.postfix
         this.txPool = new TxPool()
         this.consensus = new Consensus(this.txPool, "blockdb" + postfix, "worldstate" + postfix, "rawblock" + postfix, "txDB" + postfix)
@@ -104,7 +108,7 @@ export class Server {
         if (Server.globalOptions.api) {
             logger.info("Test API")
             logger.info(`API Port ${Server.globalOptions.api_port}`)
-            this.httpServer = new HttpServer(this.rest, Server.globalOptions.api_port, { localOnly: Server.globalOptions.localOnly })
+            this.httpServer = new HttpServer(this.rest, Server.globalOptions.api_port, { nonLocal: Server.globalOptions.nonLocal })
         }
         await this.network.start()
         await Wallet.walletInit()

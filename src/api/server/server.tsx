@@ -28,10 +28,11 @@ export class HttpServer {
         this.app = express()
         this.config()
         this.app.all("/*", (req: express.Request, res: express.Response, next: express.NextFunction) => {
-            if (options.localOnly) {
-                res.header("Access-Control-Allow-Origin", "localhost")
-            } else {
+            if (options.nonLocal) {
                 res.header("Access-Control-Allow-Origin", "*")
+
+            } else {
+                res.header("Access-Control-Allow-Origin", "localhost")
             }
             res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE")
             res.header("Access-Control-Allow-Headers", "Content-type, Accept, X-Access-Token, X-Key")
