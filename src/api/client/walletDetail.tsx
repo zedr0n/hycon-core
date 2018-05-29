@@ -24,7 +24,7 @@ export class WalletDetail extends React.Component<any, any> {
     public mounted: boolean = false
     constructor(props: any) {
         super(props)
-        this.state = { name: props.name, rest: props.rest, visible: false, accounts: [], address: "", txs: [], hasMore: true }
+        this.state = { name: props.name, rest: props.rest, visible: false, accounts: [], address: "", txs: [], hasMore: true, index: 1 }
     }
     public componentWillUnmount() {
         this.mounted = false
@@ -225,9 +225,10 @@ export class WalletDetail extends React.Component<any, any> {
         )
     }
     private fetchNextTxs() {
-        this.state.rest.getNextTxs(this.state.wallet.address, this.state.txs[0].hash).then((result: ITxProp[]) => {
+        this.state.rest.getNextTxs(this.state.wallet.address, this.state.txs[0].hash, this.state.index).then((result: ITxProp[]) => {
             if (result.length === 0) { this.setState({ hasMore: false }) }
             this.setState({
+                index: this.state.index + 1,
                 txs: update(this.state.txs, { $push: result }),
             })
         })

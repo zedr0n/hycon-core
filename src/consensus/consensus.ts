@@ -123,12 +123,11 @@ export class Consensus extends EventEmitter implements IConsensus {
         return this.txdb.getLastTxs(address, result, idx, count)
     }
 
-    public async getNextTxs(address: Address, txHash: Hash, count?: number): Promise<DBTx[]> {
+    public async getNextTxs(address: Address, txHash: Hash, index: number, count?: number): Promise<DBTx[]> {
         try {
             if (this.txdb) {
                 const result: DBTx[] = []
-                const idx: number = 1
-                return await this.txdb.getNextTxs(address, txHash, result, idx, count)
+                return await this.txdb.getNextTxs(address, txHash, result, index, count)
             } else {
                 return Promise.reject(`The database to get txs does not exist.`)
             }

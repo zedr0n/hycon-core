@@ -645,9 +645,9 @@ export class RestServer implements IRest {
         return Wallet.getHint(name)
     }
 
-    public async getNextTxs(address: string, txHash: string): Promise<ITxProp[]> {
+    public async getNextTxs(address: string, txHash: string, index: number): Promise<ITxProp[]> {
         const cntPerPage: number = 10
-        const results = await this.consensus.getNextTxs(new Address(address), Hash.decode(txHash), cntPerPage)
+        const results = await this.consensus.getNextTxs(new Address(address), Hash.decode(txHash), index, cntPerPage)
         const webTxs: ITxProp[] = []
         for (const result of results) {
             let webTx: ITxProp

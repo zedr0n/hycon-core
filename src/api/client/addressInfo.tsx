@@ -13,13 +13,14 @@ interface IAddressView {
     hash: string
     txs: ITxProp[],
     hasMore: boolean,
+    index: number,
     address?: IWalletAddress
 }
 export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
     public mounted: boolean = false
     constructor(props: IAddressProps) {
         super(props)
-        this.state = { hash: props.hash, rest: props.rest, txs: [], hasMore: true }
+        this.state = { hash: props.hash, rest: props.rest, txs: [], hasMore: true, index: 1 }
     }
     public componentWillUnmount() {
         this.mounted = false
@@ -99,9 +100,10 @@ export class AddressInfo extends React.Component<IAddressProps, IAddressView> {
         )
     }
     private fetchNextTxs() {
-        this.state.rest.getNextTxs(this.state.hash, this.state.txs[this.state.txs.length - 1].hash).then((result: ITxProp[]) => {
+        this.state.rest.getNextTxs(this.state.hash, this.state.txs[0].hash, this.state.index).then((result: ITxProp[]) => {
             if (result.length === 0) { this.setState({ hasMore: false }) }
             this.setState({
+                index: this.state.index + 1,
                 txs: update(this.state.txs, { $push: result }),
             })
         })

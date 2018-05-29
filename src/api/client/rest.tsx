@@ -107,6 +107,6 @@ export interface IRest {
     getPeerConnected(): Promise<IPeer[]>
     getPendingTxs(index: number): Promise<{ txs: ITxProp[], length: number, totalCount: number, totalAmount: string, totalFee: string }>
     getHint(name: string): Promise<string>
-    getNextTxs(address: string, txHash: string): Promise<ITxProp[]>
+    getNextTxs(address: string, txHash: string, index: number): Promise<ITxProp[]>
     checkDupleName(name: string): Promise<boolean>
 }
