@@ -7,7 +7,7 @@ export class PriorityQueue<T> {
         this.maxLength = maxLength
     }
 
-    public insert(value: T, comparator: (a: T, b: T) => number) {
+    public insert(value: T, comparator: (a: T, b: T) => number): { index: number, overflow?: T, item?: T } {
         // tslint:disable-next-line:prefer-for-of
         for (let i = 0; i < this.queue.length; i++) {
             const item = this.peek(i)
