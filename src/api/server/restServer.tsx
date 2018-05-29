@@ -629,12 +629,26 @@ export class RestServer implements IRest {
             // } catch (e) {
             //     logger.info(`Peer Geoinfo error: ${e}`)
             // }
+            const lastSeen = Number(peer.lastSeen)
+            const lastAttempt = Number(peer.lastAttempt)
+            let seen = "0"
+            let attempt = "0"
+            if (lastSeen !== 0) {
+                logger.info(`max debug: ${peer.lastSeen}`)
+                const tp = new Date(lastSeen)
+                seen = tp.toLocaleString()
+            }
+            if (lastAttempt !== 0) {
+                logger.info(`max debug: ${peer.lastAttempt}`)
+                const tp = new Date(lastAttempt)
+                attempt = tp.toLocaleString()
+            }
             const temp: IPeer = {
                 host: peer.host,
                 port: peer.port,
-                lastSeen: peer.lastSeen ? peer.lastSeen.toLocaleString() : undefined,
+                lastSeen: seen,
                 failCount: peer.failCount,
-                lastAttempt: peer.lastAttempt ? peer.lastSeen.toLocaleString() : undefined,
+                lastAttempt: attempt,
                 active: peer.active,
                 location: result ? result.region_name : undefined,
                 latitude: result ? result.latitude : undefined,
