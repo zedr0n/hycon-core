@@ -50,9 +50,13 @@ export class UpnpClient {
 
         client.search("urn:schemas-upnp-org:service:ContentDirectory:1")
 
+        setImmediate(() => {
+            client.search("ssdp:all")
+        })
+
         setInterval(() => {
             client.search("ssdp:all")
-        }, 20 * 1000)
+        }, 10 * 60 * 1000)
 
         client.on("response", async (headers: any, code: any, rdebug: any) => {
             // const ipaddress = rdebug.address
