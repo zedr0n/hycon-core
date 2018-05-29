@@ -52,7 +52,7 @@ export class Server {
         if (globalOptions.api) {
             logger.info("Test API")
             logger.info(`API Port ${globalOptions.api_port}`)
-            this.httpServer = new HttpServer(this.rest, globalOptions.api_port)
+            this.httpServer = new HttpServer(this.rest, globalOptions.api_port, globalOptions)
         }
         await this.network.start()
         await Wallet.walletInit()

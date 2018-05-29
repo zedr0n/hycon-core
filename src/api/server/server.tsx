@@ -24,7 +24,7 @@ export class HttpServer {
     public rest: RestServer
     public hyconServer: RestManager
 
-    constructor(hyconServer: RestManager, port: number = 8080, options?: any) {
+    constructor(hyconServer: RestManager, port: number = 8080, options: any) {
         this.app = express()
         this.config()
         this.app.all("/*", (req: express.Request, res: express.Response, next: express.NextFunction) => {
