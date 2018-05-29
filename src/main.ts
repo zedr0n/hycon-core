@@ -26,7 +26,10 @@ const optionDefinitions = [
     { name: "cpuMiners", alias: "m", type: Number },
     { name: "disable_upnp", alias: "x", type: Boolean },
     { name: "disable_nat", alias: "N", type: Boolean },
+    { name: "genesis", alias: "G", type: String },
+    { name: "minerAddress", alias: "M", type: String },
     { name: "networkid", alias: "n", type: String },
+    { name: "nonLocal", alias: "l", type: Boolean },
     { name: "peer", type: String, multiple: true, defaultOption: true },
     { name: "plot", alias: "g", type: Boolean },
     { name: "port", alias: "p", type: Number },
@@ -36,40 +39,40 @@ const optionDefinitions = [
     { name: "visualize", alias: "V", type: Boolean },
     { name: "wallet", alias: "W", type: Boolean },
     { name: "writing", alias: "w", type: Boolean },
-    { name: "nonLocal", alias: "l", type: Boolean },
-    { name: "genesis", alias: "G", type: String },
 ]
 export const globalOptions = commandLineArgs(optionDefinitions)
 
 import conf = require("./settings")
-if (globalOptions.port === 0) {
-    globalOptions.port = 20000 + Math.floor(40000 * Math.random())
-}
 
-if (globalOptions.str_port === 0) {
-    globalOptions.str_port = 20000 + Math.floor(40000 * Math.random())
-}
-
-if (globalOptions.api_port !== "") {
-    logger.info(`API Port=${globalOptions.api_port}`)
-}
-if (globalOptions.postfix === undefined) {
-    globalOptions.postfix = ""
-}
-if (globalOptions.networkid === undefined) {
-    globalOptions.networkid = "hycon"
-}
-if (globalOptions.verbose) {
-    logger.level = "debug"
-}
 if (globalOptions.cpuMiners === undefined) {
     globalOptions.cpuMiners = 0
 }
 if (globalOptions.genesis !== undefined) {
     conf.dataGenesis = globalOptions.genesis
 }
+if (globalOptions.api_port !== "") {
+    logger.info(`API Port=${globalOptions.api_port}`)
+}
+if (globalOptions.minerAddress === undefined) {
+    globalOptions.minerAddress = conf.minerAddress
+}
+if (globalOptions.networkid === undefined) {
+    globalOptions.networkid = "hycon"
+}
 if (globalOptions.nonLocal === undefined) {
     globalOptions.nonLocal = false
+}
+if (globalOptions.port === 0) {
+    globalOptions.port = 20000 + Math.floor(40000 * Math.random())
+}
+if (globalOptions.postfix === undefined) {
+    globalOptions.postfix = ""
+}
+if (globalOptions.str_port === 0) {
+    globalOptions.str_port = 20000 + Math.floor(40000 * Math.random())
+}
+if (globalOptions.verbose) {
+    logger.level = "debug"
 }
 logger.info(`GenesisBlock=${conf.dataGenesis}`)
 

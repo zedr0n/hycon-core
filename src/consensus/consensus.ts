@@ -9,6 +9,7 @@ import { AnyBlockHeader, BlockHeader } from "../common/blockHeader"
 import { DelayQueue } from "../common/delayQueue"
 import { ITxPool } from "../common/itxPool"
 import { SignedTx } from "../common/txSigned"
+import { globalOptions } from "../main"
 import { Hash } from "../util/hash"
 import { Account } from "./database/account"
 import { Database } from "./database/database"
@@ -20,7 +21,6 @@ import { IConsensus, IStatusChange } from "./iconsensus"
 import { BlockStatus } from "./sync"
 import { Verify } from "./verify"
 const logger = getLogger("Consensus")
-const conf = JSON.parse(fs.readFileSync("./data/config.json", "utf-8"))
 
 export class Consensus extends EventEmitter implements IConsensus {
     private txdb?: TxDatabase
@@ -316,10 +316,11 @@ export class Consensus extends EventEmitter implements IConsensus {
     private async createCandidateBlock(previousDBBlock: DBBlock = this.blockTip, previousHash: Hash = new Hash(previousDBBlock.header)) {
         try {
             const timeStamp = Date.now()
-            if (conf.minerAddress === undefined || conf.minerAddress === "") {
+            if (globalOptions.minerAddress === undefined || globalOptions.minerAddress === "") {
+                logger.info("Can't mine without miner address")
                 return
             }
-            const miner: Address = new Address(conf.minerAddress)
+            const miner: Address = new Address(globalOptions.minerAddress)
             const { stateTransition: { currentStateRoot }, validTxs, invalidTxs } = await this.worldState.next(previousDBBlock.header.stateRoot, miner)
             const newBlock = new Block({
                 header: new BlockHeader({
