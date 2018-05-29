@@ -32,7 +32,6 @@ fi
 mkdir $output_dir
 cd $output_dir
 cp -rf ../data . 
-cp -rf ../wallet . 
 if [ -e "../hycon.exe" ]
 then
     cp -f ../hycon.exe .       
