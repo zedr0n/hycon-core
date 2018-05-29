@@ -3,6 +3,7 @@ import { cloneElement } from "react"
 import { AnyBlockHeader, BlockHeader } from "../common/blockHeader"
 import { GenesisBlockHeader } from "../common/genesisHeader"
 import { BlockStatus } from "../consensus/sync"
+import { globalOptions } from "../main"
 import { Server } from "../server"
 import { Hash } from "./hash"
 
@@ -15,7 +16,7 @@ export class Graph {
     public outFile: string
 
     constructor() {
-        if (Server.globalOptions.visualize) {
+        if (globalOptions.visualize) {
             this.gviz = require("graphviz").graphviz.digraph("hycon")
         }
         this.gmap = {

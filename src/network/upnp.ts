@@ -1,5 +1,6 @@
 import * as ip from "ip"
 import { getLogger } from "log4js"
+import { globalOptions } from "../main"
 import { Server } from "../server"
 import { INetwork } from "./inetwork"
 const logger = getLogger("Upnp")
@@ -14,8 +15,8 @@ export class UpnpServer {
     constructor(port: number) {
         UpnpServer.port = port
 
-        if (Server.globalOptions.networkid) {
-            UpnpServer.networkid = Server.globalOptions.networkid
+        if (globalOptions.networkid) {
+            UpnpServer.networkid = globalOptions.networkid
         }
 
         this.run()

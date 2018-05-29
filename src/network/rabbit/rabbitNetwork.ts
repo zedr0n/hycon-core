@@ -5,6 +5,7 @@ import { createServer, Socket } from "net"
 import * as netmask from "netmask"
 import { ITxPool } from "../../common/itxPool"
 import { IConsensus } from "../../consensus/iconsensus"
+import { globalOptions } from "../../main"
 import * as proto from "../../serialization/proto"
 import { Server } from "../../server"
 import { Hash } from "../../util/hash"
@@ -155,11 +156,11 @@ export class RabbitNetwork implements INetwork {
         let useUpnp = true
         let useNat = true
 
-        if (Server.globalOptions.disable_upnp) {
+        if (globalOptions.disable_upnp) {
             useUpnp = false
         }
 
-        if (Server.globalOptions.disable_nat) {
+        if (globalOptions.disable_nat) {
             useNat = false
         }
 

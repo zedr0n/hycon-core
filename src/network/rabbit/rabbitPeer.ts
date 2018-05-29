@@ -8,6 +8,7 @@ import { ITxPool } from "../../common/itxPool"
 import { SignedTx } from "../../common/txSigned"
 import { IConsensus, IStatusChange } from "../../consensus/iconsensus"
 import { BlockStatus } from "../../consensus/sync"
+import { globalOptions } from "../../main"
 import * as proto from "../../serialization/proto"
 import { Server } from "../../server"
 import { Hash } from "../../util/hash"
@@ -43,7 +44,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public async detectStatus(): Promise<proto.IStatus> {
         const status = await this.status()
         const remoteNetworkId = status.networkid
-        const myNetworkId = Server.globalOptions.networkid
+        const myNetworkId = globalOptions.networkid
         if (myNetworkId === remoteNetworkId) {
             logger.info(`Successfully Checked NetworkID LocalNetworkID=${myNetworkId} RemoteNetworkID=${remoteNetworkId}`)
         } else {
