@@ -55,5 +55,5 @@ cp -rf ../node_modules/react* ./node_modules/
 
 cd ..
 zip -r $file_name $output_dir
-cp $file_name ../$file_name
+md5 -q $file_name > $file_name.md5
 
