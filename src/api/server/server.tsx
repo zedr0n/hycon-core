@@ -24,11 +24,15 @@ export class HttpServer {
     public rest: RestServer
     public hyconServer: RestManager
 
-    constructor(hyconServer: RestManager, port: number = 8080) {
+    constructor(hyconServer: RestManager, port: number = 8080, options?: any) {
         this.app = express()
         this.config()
         this.app.all("/*", (req: express.Request, res: express.Response, next: express.NextFunction) => {
-            res.header("Access-Control-Allow-Origin", "*")
+            if (options.localOnly) {
+                res.header("Access-Control-Allow-Origin", "localhost")
+            } else {
+                res.header("Access-Control-Allow-Origin", "*")
+            }
             res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE")
             res.header("Access-Control-Allow-Headers", "Content-type, Accept, X-Access-Token, X-Key")
             if (req.method === "OPTIONS") {

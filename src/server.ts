@@ -31,6 +31,7 @@ const optionDefinitions = [
     { name: "visualize", alias: "V", type: Boolean },
     { name: "wallet", alias: "W", type: Boolean },
     { name: "writing", alias: "w", type: Boolean },
+    { name: "localOnly", alias: "l", type: Boolean, defaultOption: true },
 ]
 const logger = getLogger("Server")
 
@@ -103,7 +104,7 @@ export class Server {
         if (Server.globalOptions.api) {
             logger.info("Test API")
             logger.info(`API Port ${Server.globalOptions.api_port}`)
-            this.httpServer = new HttpServer(this.rest, Server.globalOptions.api_port)
+            this.httpServer = new HttpServer(this.rest, Server.globalOptions.api_port, { localOnly: Server.globalOptions.localOnly })
         }
         await this.network.start()
         await Wallet.walletInit()
