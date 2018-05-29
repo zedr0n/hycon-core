@@ -22,4 +22,5 @@ export interface IPeer {
     getHeadersByRange(fromHeight: number, count: number): Promise<AnyBlockHeader[]>
     getTip(): Promise<{ hash: Hash, height: number }>
     getPeers(count: number): Promise<proto.IPeer[]>
+    getInfo(): string // for debugging
 }
