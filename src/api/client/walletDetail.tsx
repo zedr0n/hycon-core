@@ -15,6 +15,10 @@ interface IWalletDetailProps {
     accounts: IHyconWallet[]
 }
 export class WalletDetail extends React.Component<any, any> {
+    public msg1: string = "Are you sure delete your wallet?"
+    public msg2: string = "Successfully deleted. You can recover deleted wallet anytime using mnemonic words."
+    public msg3: string = "Fail to delete wallet"
+    public msg4: string = "Fail to change account"
     public mounted: boolean = false
     constructor(props: any) {
         super(props)
@@ -40,14 +44,16 @@ export class WalletDetail extends React.Component<any, any> {
         this.setState({ represent: option.target.value })
     }
     public deleteWallet() {
-        this.state.rest.deleteWallet(this.state.name).then((isDeleted: boolean) => {
-            if (isDeleted === true) {
-                alert("Successfully deleted.")
-                this.setState({ redirect: true })
-            } else {
-                alert("Fail to delete wallet.")
-            }
-        })
+        if (confirm(this.msg1)) {
+            this.state.rest.deleteWallet(this.state.name).then((isDeleted: boolean) => {
+                if (isDeleted === true) {
+                    alert(this.msg2)
+                    this.setState({ redirect: true })
+                } else {
+                    alert(this.msg3)
+                }
+            })
+        }
     }
     public accountSelected() {
         this.state.rest.setLoading(true)
@@ -61,7 +67,7 @@ export class WalletDetail extends React.Component<any, any> {
                     }
                 })
             } else {
-                alert("Fail to change account.")
+                alert(this.msg4)
                 this.setState({ visible: false })
                 this.state.rest.setLoading(false)
             }
