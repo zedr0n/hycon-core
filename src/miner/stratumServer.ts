@@ -52,26 +52,34 @@ export class StratumServer {
         for (let index = 0; index < this.socketsId.length; index++) {
             const socket = this.mapSocket.get(this.socketsId[index])
             if (socket !== undefined) {
-                socket.notify([
-                    index + minerOffset,      // job_prefix
-                    Buffer.from(prehash as Buffer).toString("hex"),
-                    difficulty.getMinerTarget(),
-                    jobId,
-                    "0", // empty
-                    "0", // empty
-                    "0", // empty
-                    "0", // empty
-                    true, // empty
-                ]).then(
-                    () => {
-                        logger.debug(`Put work - ${index} miner success `)
-                    },
-                    () => {
-                        logger.debug(`Put work - ${index} miner fail `)
-                    },
-                )
+                this.notifyJob(socket, index, minerOffset, prehash, difficulty, jobId)
             }
         }
+    }
+
+    private notifyJob(socket: any, index: number, minerOffset: number, prehash: Uint8Array, difficulty: Difficulty, jobId: number) {
+        if (socket === undefined) {
+            return
+        }
+
+        socket.notify([
+            index + minerOffset,      // job_prefix
+            Buffer.from(prehash as Buffer).toString("hex"),
+            difficulty.getMinerTarget(),
+            jobId,
+            "0", // empty
+            "0", // empty
+            "0", // empty
+            "0", // empty
+            true, // empty
+        ]).then(
+            () => {
+                logger.debug(`Put job_id ${jobId} - ${socket.id} miner success `)
+            },
+            () => {
+                logger.debug(`Put work - ${socket.id} miner fail `)
+            },
+        )
     }
 
     private initialize() {
@@ -95,6 +103,12 @@ export class StratumServer {
                     logger.info(`Authorizing worker id : ${req.params[0]} /  pw : ${req.params[1]}`)
                     deferred.resolve([true])
                     deferred.promise.then(() => { })
+                    const candidate = this.mapCandidateBlock.get(this.jobId)
+                    if (candidate !== undefined) {
+                        const randPrefix = Math.floor(Math.random() * (0xFFFF - 10)) + 10
+                        this.notifyJob(socket, randPrefix - 10, 10, candidate.prehash, candidate.difficulty, candidate.jobId)
+                    }
+
                     break
                 case "submit":
                     logger.debug(`Submit job id : ${req.params.job_id} / nonce : ${req.params.nonce} / result : ${req.params.result}`)
@@ -160,9 +174,10 @@ export class StratumServer {
 
     private newJob(block: ICandidateBlock) {
         this.jobId++
-        if (this.jobId > 0xFFFFFFFF) { this.jobId = 0 }
+        if (this.jobId > 0x7FFFFFFF) { this.jobId = 0 }
         this.mapCandidateBlock.delete(this.jobId - this.maxMapCount)
         this.mapCandidateBlock.set(this.jobId, block)
+        block.jobId = this.jobId
         return this.jobId
     }
 
