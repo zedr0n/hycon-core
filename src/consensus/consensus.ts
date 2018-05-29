@@ -288,6 +288,7 @@ export class Consensus extends EventEmitter implements IConsensus {
                 throw new Error("Error trying to reorganize past the genesis block")
             }
             await this.db.setBlockStatus(popHash, BlockStatus.Block)
+            this.emit("txs", popBlock.txs)
             this.txPool.putTxs(popBlock.txs)
             popHash = popBlock.header.previousHash[0]
             popHeight -= 1

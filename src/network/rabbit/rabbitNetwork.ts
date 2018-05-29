@@ -66,6 +66,7 @@ export class RabbitNetwork implements INetwork {
         this.pendingConnections = new Map<number, proto.IPeer>()
         this.peerDB = new PeerDb(peerDbPath)
         this.guid = new Hash(randomBytes(32)).toString()
+        this.consensus.on("txs", (txs) => {this.broadcastTxs(txs)})
         logger.info(`TcpNetwork Port=${port} Session Guid=${this.guid}`)
     }
 
