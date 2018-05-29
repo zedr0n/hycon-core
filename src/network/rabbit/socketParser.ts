@@ -57,9 +57,10 @@ export class SocketParser {
         await this.sendLock.getLock()
         this.writeBuffer.writeUInt32LE(route, 0)
         this.writeBuffer.writeUInt32LE(buffer.length, 4)
-        kernel = kernel && this.socket.write(headerPrefix as Buffer)
+        // using array buffer directly doesn't work
+        kernel = kernel && this.socket.write(Buffer.from(headerPrefix))
         kernel = kernel && this.socket.write(this.writeBuffer)
-        kernel = kernel && this.socket.write(buffer as Buffer)
+        kernel = kernel && this.socket.write(Buffer.from(buffer))
         if (kernel) {
             this.sendLock.releaseLock()
         } else {
