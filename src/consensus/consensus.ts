@@ -315,6 +315,9 @@ export class Consensus extends EventEmitter implements IConsensus {
     private async createCandidateBlock(previousDBBlock: DBBlock = this.blockTip, previousHash: Hash = new Hash(previousDBBlock.header)) {
         try {
             const timeStamp = Date.now()
+            if (conf.minerAddress && conf.minerAddress.length !== 32) {
+                throw new Error("Invalid Miner  Address, Please Check the Address")
+            }
             const miner: Address = new Address(conf.minerAddress)
             const { stateTransition: { currentStateRoot }, validTxs, invalidTxs } = await this.worldState.next(previousDBBlock.header.stateRoot, miner)
             const newBlock = new Block({
