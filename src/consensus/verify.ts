@@ -20,8 +20,9 @@ export class Verify {
             newStatus: BlockStatus;
             dbBlock?: DBBlock;
         }> {
-        if (Date.now() - header.timeStamp < 0) {
-            return { newStatus: BlockStatus.Rejected }
+        if (Date.now() < header.timeStamp) {
+            // This should be prevented by the future block delayQueue
+            return { newStatus: BlockStatus.Nothing }
         }
         const { nextDifficulty, workDelta, timeEMA } = DifficultyAdjuster.adjustDifficulty(previousDBBlock, header.timeStamp)
 
