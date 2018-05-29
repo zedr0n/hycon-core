@@ -7,10 +7,9 @@ import { GenesisBlockHeader } from "../common/genesisHeader"
 import { GenesisSignedTx } from "../common/txGenesisSigned"
 import { SignedTx } from "../common/txSigned"
 import { Account } from "../consensus/database/account"
-import { TxList } from "../consensus/database/txList"
 import { BlockStatus } from "../consensus/sync"
 import { Hash } from "../util/hash"
-import { Tx } from "./database/tx"
+import { DBTx } from "./database/dbtx"
 import { TxValidity } from "./database/worldState"
 
 export interface IStatusChange { oldStatus?: BlockStatus, status?: BlockStatus }
@@ -27,12 +26,12 @@ export interface IConsensus extends EventEmitter {
     getBlocksRange(fromHeight: number, count?: number): Promise<AnyBlock[]>
     getHeadersRange(fromHeight: number, count?: number): Promise<AnyBlockHeader[]>
     getAccount(address: Address): Promise<Account>
-    getLastTxs(address: Address, count?: number): Promise<Tx[]>
-    getNextTxs(address: Address, txHash: Hash, count?: number): Promise<Tx[]>
+    getLastTxs(address: Address, count?: number): Promise<DBTx[]>
+    getNextTxs(address: Address, txHash: Hash, count?: number): Promise<DBTx[]>
     getBlockStatus(hash: Hash): Promise<BlockStatus>
     getHeaderTip(): { hash: Hash, height: number }
     getBlocksTip(): { hash: Hash, height: number }
-    getTx(hash: Hash): Promise<{ tx: Tx, confirmation: number } | undefined>
+    getTx(hash: Hash): Promise<{ tx: DBTx, confirmation: number } | undefined>
     txValidity(tx: SignedTx): Promise<TxValidity>
     getHash(height: number): Promise<Hash>
     getBlockHeight(hash: Hash): Promise<number | undefined>

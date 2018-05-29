@@ -27,8 +27,6 @@ export class Server {
     public readonly wallet: WalletManager
     public readonly txPool: ITxPool
     public readonly rest: RestManager
-    public db: Database
-    public accountDB: WorldState
     public httpServer: HttpServer
     public sync: Sync
     private triggerMining: () => void

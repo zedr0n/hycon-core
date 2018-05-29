@@ -1,4 +1,4 @@
-export class Tx {
+export class DBTx {
     public txhash: string
     public blockhash: string
     public to: string

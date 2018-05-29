@@ -14,9 +14,9 @@ import { Hash } from "../util/hash"
 import { Account } from "./database/account"
 import { Database } from "./database/database"
 import { DBBlock } from "./database/dbblock"
-import { Tx } from "./database/tx"
-import { TxDatabase } from "./database/txDatabase"
-import { TxList } from "./database/txList"
+import { DBTx } from "./database/dbtx"
+import { ITxDatabase } from "./database/itxDatabase"
+import { TxDatabase } from "./database/TxDatabase"
 import { TxValidity, WorldState } from "./database/worldState"
 import { IConsensus, IStatusChange } from "./iconsensus"
 import { BlockStatus } from "./sync"
@@ -24,7 +24,7 @@ import { Verify } from "./verify"
 const logger = getLogger("Consensus")
 
 export class Consensus extends EventEmitter implements IConsensus {
-    private txdb?: TxDatabase
+    private txdb?: ITxDatabase
     private txPool: ITxPool
     private worldState: WorldState
     private db: Database
@@ -114,19 +114,19 @@ export class Consensus extends EventEmitter implements IConsensus {
         }
         return this.worldState.getAccount(this.blockTip.header.stateRoot, address)
     }
-    public getLastTxs(address: Address, count?: number): Promise<Tx[]> {
+    public getLastTxs(address: Address, count?: number): Promise<DBTx[]> {
         if (this.txdb === undefined) {
             throw new Error(`The database to get txs does not exist.`)
         }
-        const result: Tx[] = []
+        const result: DBTx[] = []
         const idx: number = 0
         return this.txdb.getLastTxs(address, result, idx, count)
     }
 
-    public async getNextTxs(address: Address, txHash: Hash, count?: number): Promise<Tx[]> {
+    public async getNextTxs(address: Address, txHash: Hash, count?: number): Promise<DBTx[]> {
         try {
             if (this.txdb) {
-                const result: Tx[] = []
+                const result: DBTx[] = []
                 const idx: number = 1
                 return await this.txdb.getNextTxs(address, txHash, result, idx, count)
             } else {
@@ -152,7 +152,7 @@ export class Consensus extends EventEmitter implements IConsensus {
     public txValidity(tx: SignedTx): Promise<TxValidity> {
         return this.worldState.validateTx(this.blockTip.header.stateRoot, tx)
     }
-    public async getTx(hash: Hash): Promise<{ tx: Tx, confirmation: number } | undefined> {
+    public async getTx(hash: Hash): Promise<{ tx: DBTx, confirmation: number } | undefined> {
         if (this.txdb === undefined) {
             throw new Error(`The database to get txs does not exist.`)
         }

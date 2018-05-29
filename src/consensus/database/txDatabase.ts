@@ -11,7 +11,7 @@ import { SignedTx } from "../../common/txSigned"
 import { Hash } from "../../util/hash"
 import { AnySignedTx, IConsensus } from "../iconsensus"
 import { BlockStatus } from "../sync"
-import { Tx } from "./tx"
+import { DBTx } from "./dbtx"
 const sqlite = sqlite3.verbose()
 const logger = getLogger("TxDB")
 
@@ -131,18 +131,18 @@ export class TxDatabase {
         stmtInsert.finalize()
     }
 
-    public async getLastTxs(address: Address, result: Tx[] = [], idx: number = 0, count?: number): Promise<Tx[]> {
+    public async getLastTxs(address: Address, result: DBTx[] = [], idx: number = 0, count?: number): Promise<DBTx[]> {
         const params = {
             $address: address.toString(),
             $count: count - result.length,
             $startIndex: idx * count,
         }
-        return new Promise<Tx[]>(async (resolved, rejected) => {
+        return new Promise<DBTx[]>(async (resolved, rejected) => {
             this.db.all(`SELECT txhash, txto, txfrom, amount, fee, blockhash, timestamp FROM txdb WHERE txto = $address OR txfrom = $address ORDER BY timestamp DESC LIMIT $startIndex, $count`, params, async (err, rows) => {
                 for (const row of rows) {
                     const status = await this.consensus.getBlockStatus(row.blockhash)
                     if (status === BlockStatus.MainChain) {
-                        result.push(new Tx(row.txhash, row.blockhash, row.txto, row.txfrom, row.amount, row.fee, row.timestamp))
+                        result.push(new DBTx(row.txhash, row.blockhash, row.txto, row.txfrom, row.amount, row.fee, row.timestamp))
                     }
                     if (result.length === count) { break }
                 }
@@ -157,19 +157,19 @@ export class TxDatabase {
         })
     }
 
-    public async getNextTxs(address: Address, txHash: Hash, result: Tx[] = [], idx: number = 1, count?: number): Promise<Tx[]> {
+    public async getNextTxs(address: Address, txHash: Hash, result: DBTx[] = [], idx: number = 1, count?: number): Promise<DBTx[]> {
         const params = {
             $address: address.toString(),
             $count: count - result.length,
             $startIndex: idx * count,
             $txhash: txHash.toString(),
         }
-        return new Promise<Tx[]>(async (resolved, rejected) => {
+        return new Promise<DBTx[]>(async (resolved, rejected) => {
             this.db.all(`SELECT txhash, txto, txfrom, amount, fee, blockhash, timestamp FROM txdb WHERE (timestamp <= (SELECT timestamp FROM txdb WHERE txhash = $txhash)) AND (txto = $address OR txfrom = $address) ORDER BY timestamp DESC LIMIT $startIndex, $count`, params, async (err, rows) => {
                 for (const row of rows) {
                     const status = await this.consensus.getBlockStatus(row.blockhash)
                     if (status === BlockStatus.MainChain) {
-                        result.push(new Tx(row.txhash, row.blockhash, row.txto, row.txfrom, row.amount, row.fee, row.timestamp))
+                        result.push(new DBTx(row.txhash, row.blockhash, row.txto, row.txfrom, row.amount, row.fee, row.timestamp))
                     }
 
                     if (result.length === count) { break }
@@ -186,13 +186,13 @@ export class TxDatabase {
 
     }
 
-    public async getTx(key: Hash): Promise<{ tx: Tx, confirmation: number } | undefined> {
+    public async getTx(key: Hash): Promise<{ tx: DBTx, confirmation: number } | undefined> {
         const params = { $txhash: key.toString() }
-        let tx: Tx
-        return new Promise<{ tx: Tx, confirmation: number } | undefined>(async (resolved, rejected) => {
+        let tx: DBTx
+        return new Promise<{ tx: DBTx, confirmation: number } | undefined>(async (resolved, rejected) => {
             this.db.each(`SELECT txhash, txto, txfrom, amount, fee, blockhash, timestamp FROM txdb WHERE txhash = $txhash`, params, async (err, row) => {
                 if (row === undefined) { return resolved(undefined) }
-                tx = new Tx(row.txhash, row.blockhash, row.txto, row.txfrom, row.amount, row.fee, row.timestamp)
+                tx = new DBTx(row.txhash, row.blockhash, row.txto, row.txfrom, row.amount, row.fee, row.timestamp)
                 // const block = await this.consensus.getHeaderByHash(tx.blockHash)
                 const height = await this.consensus.getBlockHeight(Hash.decode(tx.blockhash))
                 const tip = this.consensus.getBlocksTip()
