@@ -123,7 +123,7 @@ export class WorldState {
     }
 
     public async next(previousState: Hash, minerAddress: Address, txs?: SignedTx[]): Promise<{ stateTransition: IStateTransition, validTxs: SignedTx[], invalidTxs: SignedTx[] }> {
-        txs === undefined ? txs = this.txPool.getTxs() : txs = txs
+        txs === undefined ? txs = this.txPool.getTxs().slice(0, 4096) : txs = txs
         const batch: DBState[] = []
         const changes: IChange[] = []
         const mapAccount: Map<string, DBState> = new Map<string, DBState>()
