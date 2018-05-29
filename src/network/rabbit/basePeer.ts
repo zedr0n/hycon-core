@@ -31,6 +31,10 @@ export abstract class BasePeer {
         this.rejectAllReplies("Disconnect")
     }
 
+    public getInfo(): string {
+        return (this.socketBuffer === null) ? "" : this.socketBuffer.getInfo()
+    }
+
     protected rejectAllReplies(reason?: string) {
         for (const [id, { reject }] of this.replyMap) {
             reject(reason)
