@@ -26,6 +26,8 @@ export class RabbitNetwork implements INetwork {
     ]
     public static failLimit: number
 
+    public static socketTimeout: number
+
     public static ipNormalise(ipv6: string): string {
         const ipTemp: string[] = ipv6.split(":")
         if (ipTemp.length === 4) {
@@ -51,6 +53,7 @@ export class RabbitNetwork implements INetwork {
 
     constructor(txPool: ITxPool, consensus: IConsensus, port: number = 8148, peerDbPath: string = "peerdb", networkid: string = "hycon") {
         RabbitNetwork.failLimit = 10
+        RabbitNetwork.socketTimeout = 5000
         this.txPool = txPool
         this.consensus = consensus
         this.port = port
@@ -66,16 +69,16 @@ export class RabbitNetwork implements INetwork {
     }
 
     public async peerDBCheck(peer: RabbitPeer, peerStatus: proto.IStatus): Promise<void> {
-       if (peerStatus && peerStatus.publicPort > 0) {
-           logger.info(`Write PublicIP=${peerStatus.publicPort}  ${peer.socketBuffer.getInfo()}`)
-           // it's not my self
-           const socket = peer.getSocket()
-           const ipeer = { host: RabbitNetwork.ipNormalise(socket.remoteAddress), port: peerStatus.publicPort }
-           await this.peerDB.seen(ipeer)
-           const key = PeerDb.ipeer2key(ipeer)
-           this.endPoints.set(key, ipeer)
-       }
-   }
+        if (peerStatus && peerStatus.publicPort > 0) {
+            logger.info(`Write PublicIP=${peerStatus.publicPort}  ${peer.socketBuffer.getInfo()}`)
+            // it's not my self
+            const socket = peer.getSocket()
+            const ipeer = { host: RabbitNetwork.ipNormalise(socket.remoteAddress), port: peerStatus.publicPort }
+            await this.peerDB.seen(ipeer)
+            const key = PeerDb.ipeer2key(ipeer)
+            this.endPoints.set(key, ipeer)
+        }
+    }
     public async guidCheck(peer: RabbitPeer, peerStatus: proto.IStatus): Promise<void> {
         if (peerStatus && peerStatus.guid !== this.guid) {
             // ok
@@ -219,6 +222,15 @@ export class RabbitNetwork implements INetwork {
         return iPeer
     }
 
+    public async failedConnecting(key: number, ipeer: proto.IPeer) {
+        try {
+            this.pendingConnections.delete(key)
+            await this.peerDB.fail(ipeer, RabbitNetwork.failLimit)
+        } catch (e) {
+            logger.debug(e)
+        }
+    }
+
     public async connect(host: string, port: number, save: boolean = true): Promise<RabbitPeer> {
         return new Promise<RabbitPeer>(async (resolve, reject) => {
             const ipeer = { host, port }
@@ -235,14 +247,14 @@ export class RabbitNetwork implements INetwork {
             this.pendingConnections.set(key, ipeer)
             logger.debug(`Attempting to connect to ${host}:${port}...`)
             const socket = new Socket()
+            socket.setTimeout(RabbitNetwork.socketTimeout)
             socket.once("error", async () => {
-                try {
-                    this.pendingConnections.delete(key)
-                    await this.peerDB.fail(ipeer, RabbitNetwork.failLimit)
-                    reject(`Failed to connect to ${key}: ${host}:${port}`)
-                } catch (e) {
-                    logger.debug(e)
-                }
+                this.failedConnecting(key, ipeer)
+                reject(`Failed to connect to ${key}: ${host}:${port}`)
+            })
+            socket.once("timeout", async () => {
+                this.failedConnecting(key, ipeer)
+                reject(`Timeout to connect to ${key}: ${host}:${port}`)
             })
             socket.connect({ host, port }, async () => {
                 try {
