@@ -251,17 +251,19 @@ export class RestServer implements IRest {
             }
             const webTxs: ITxProp[] = []
             let pendingAmount = hyconfromString("0")
-            for (const tx of pendings) {
-                webTxs.push({
-                    hash: new Hash(tx).toString(),
-                    amount: hycontoString(tx.amount),
-                    fee: hycontoString(tx.fee),
-                    from: tx.from.toString(),
-                    to: tx.to.toString(),
-                    signature: tx.signature.toString("hex"),
-                    estimated: hycontoString(tx.amount.add(tx.fee)),
-                })
-                pendingAmount = pendingAmount.add(tx.amount).add(tx.fee)
+            if (pendings !== undefined) {
+                for (const tx of pendings) {
+                    webTxs.push({
+                        hash: new Hash(tx).toString(),
+                        amount: hycontoString(tx.amount),
+                        fee: hycontoString(tx.fee),
+                        from: tx.from.toString(),
+                        to: tx.to.toString(),
+                        signature: tx.signature.toString("hex"),
+                        estimated: hycontoString(tx.amount.add(tx.fee)),
+                    })
+                    pendingAmount = pendingAmount.add(tx.amount).add(tx.fee)
+                }
             }
             for (const result of results) {
                 let webTx: ITxProp
