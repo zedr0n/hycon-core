@@ -1,3 +1,4 @@
-build_time=$(date +"%Y%m%d_%H%M")
-./package_at.sh $build_time $1
+time=$(date +"%Y%m%d_%H%M")
+foldername="HYCON_0.0.1_"$time
+./package_at.sh $foldername $1
 
