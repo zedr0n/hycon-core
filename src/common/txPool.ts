@@ -89,8 +89,8 @@ export class TxPool implements ITxPool {
         return newTxsCount
     }
 
-    public async removeTxs(old: SignedTx[], maxReturn?: number): Promise<SignedTx[]> {
-        await this.remove(old.slice(0, old.length))
+    public removeTxs(old: SignedTx[], maxReturn?: number): SignedTx[] {
+        this.remove(old.slice(0, old.length))
         return this.getTxs().slice(0, maxReturn)
     }
 
