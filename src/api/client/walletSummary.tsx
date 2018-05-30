@@ -1,5 +1,5 @@
 import Avatar from "material-ui/Avatar"
-import { List, ListItem } from "material-ui/List"
+import { ListItem } from "material-ui/List"
 import * as React from "react"
 import { Link } from "react-router-dom"
 import { IHyconWallet, IRest } from "./rest"
@@ -20,18 +20,14 @@ export class WalletSummary extends React.Component<any, any> {
         }
         return (
             <div>
-                <List>
-                    <Link to={`/wallet/${this.state.wallet.name}`}>
-                        <ListItem
-                            leftAvatar={<Avatar icon={<i className="material-icons walletIcon_white">
-                                account_balance_wallet
-                    </i>} />}
-                            primaryText={this.state.wallet.name}
-                            secondaryText={this.state.wallet.address}
-                            tertiaryText={this.state.wallet.balance}
-                        />
-                    </Link>
-                </List>
+                <Link to={`/wallet/${this.state.wallet.name}`}>
+                    <ListItem style={{ width: "23em" }}
+                        leftAvatar={<Avatar icon={<i className="material-icons walletIcon_white">
+                            account_balance_wallet</i>} />}
+                        primaryText={this.state.wallet.name}
+                        secondaryText={this.state.wallet.address}
+                    />
+                </Link>
             </div >
         )
     }

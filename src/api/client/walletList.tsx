@@ -1,3 +1,4 @@
+import { List } from "material-ui/List"
 import * as React from "react"
 import { Link } from "react-router-dom"
 import { IHyconWallet, IRest } from "./rest"
@@ -33,7 +34,7 @@ export class WalletList extends React.Component<any, any> {
         return (
             <div>
                 <div className="contentTitle noMarginTitle">Wallet List</div>
-                <div>
+                <List>
                     {this.state.wallets.map((wallet: IHyconWallet) => {
                         return (
                             <WalletSummary
@@ -43,7 +44,7 @@ export class WalletList extends React.Component<any, any> {
                             />
                         )
                     })}
-                </div>
+                </List>
             </div>
         )
     }

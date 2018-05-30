@@ -380,3 +380,7 @@ table {
 .textRed{
   color: red;
 }
+.walletName{
+  vertical-align: super;
+  padding-left: 10px;
+}

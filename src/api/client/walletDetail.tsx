@@ -1,4 +1,5 @@
 import { Dialog } from "material-ui"
+import Avatar from "material-ui/Avatar"
 import { Tab, Tabs } from "material-ui/Tabs"
 import * as QRCode from "qrcode.react"
 import * as React from "react"
@@ -134,25 +135,34 @@ export class WalletDetail extends React.Component<any, any> {
                     <tbody>
                         <tr>
                             <td>
-                                <i className="material-icons walletIcon_grey">account_balance_wallet</i>
                                 <table className="walletTable_NameAddr">
                                     <tbody>
                                         <tr>
-                                            <td className="walletNameTd">{this.state.name}
-                                                <button onClick={() => { this.searchAllAccounts() }} className="mdl-button">
-                                                    <i className="material-icons">find_replace</i></button>
+                                            <td className="walletNameTd">
+                                                <span>
+                                                    <Avatar style={{ width: "35px", height: "35px" }} icon={<i className="material-icons walletIcon_white">account_balance_wallet</i>} />
+                                                </span>
+                                                <span className="walletName">{this.state.name}</span>
+
+                                                {/* <button onClick={() => { this.searchAllAccounts() }} className="mdl-button">
+                                                    <i className="material-icons">find_replace</i></button> */}
                                             </td>
-                                            <td>
-                                                <span className="mdl-chip mdl-chip--contact balanceInfo">
-                                                    <span className="mdl-chip__contact mdl-color--teal mdl-color-text--white">H</span>
-                                                    <span className="mdl-chip__text">
-                                                        {this.state.wallet.balance} (pending:{this.state.wallet.pendingAmount})
-                                                    </span>
+                                        </tr>
+                                        <tr>
+                                            <td><br />
+                                                <span>
+                                                    <i className="material-icons">account_balance</i>
+                                                </span>
+                                                <span style={{ fontSize: "17px" }} className="walletName">
+                                                    {this.state.wallet.balance} HYCON
+                                                </span><br />
+                                                <span style={{ marginLeft: "25px", fontSize: "14px" }} className="walletName">
+                                                    pending: {this.state.wallet.pendingAmount} HYCON
                                                 </span>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td colSpan={2}>
+                                            <td colSpan={2}><br />
                                                 <button className="mdl-button flaotLeft copyBtn">
                                                     <CopyToClipboard text={this.state.wallet.address} onCopy={() => this.setState({ copied: true })} >
                                                         <span>
@@ -248,7 +258,7 @@ export class WalletDetail extends React.Component<any, any> {
                                 New Account</Link></button>
                     </div>
                 </Dialog> */}
-            </div>
+            </div >
         )
     }
     private fetchNextTxs() {
