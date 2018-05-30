@@ -11,7 +11,6 @@ import { SignedTx } from "../src/common/txSigned"
 import { Database } from "../src/consensus/database/database"
 import { DBBlock } from "../src/consensus/database/dbblock"
 import { DBState } from "../src/consensus/database/dbState"
-import { TxList } from "../src/consensus/database/txList"
 import { UpnpClient } from "../src/network/upnp"
 import { UpnpServer } from "../src/network/upnp"
 import * as proto from "../src/serialization/proto"
@@ -68,17 +67,10 @@ describe("Server", () => {
     afterEach(() => {
         jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout
     })
-    afterAll(() => {
-        delete server.db
-    })
     it("Should create a server to listen for sockets", () => {
         expect(net.createServer).toHaveBeenCalled()
     })
     it("Should start the server listening", () => {
         expect(netServer.listen).toHaveBeenCalled()
-    })
-    it("Should initialise the database", () => {
-        expect(server.db).toBeDefined()
-        expect(server.db).toBeDefined()
     })
 })

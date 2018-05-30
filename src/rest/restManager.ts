@@ -23,8 +23,6 @@ export class RestManager {
         this.txQueue = server.txPool
         this.consensus = server.consensus
         this.network = server.network
-        this.db = server.db
-        this.accountDB = server.accountDB
     }
 
     public broadcastTxs(txList: SignedTx[]) {
