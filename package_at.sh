@@ -43,6 +43,12 @@ then
     cp -f ../launch.sh.command .
     cp -f ../node_modules/node-cryptonight/build/Release/cryptonight.node .
     cp -f ../node_modules/rocksdb/build/Release/leveldown.node .
+    if [ $platform = "macos" ]
+    then
+        cp -f ../node_modules/sqlite3/lib/binding/node-v59-darwin-x64/node_sqlite3.node .
+    elif [ $platform = "linux" ]
+        cp -f ../node_modules/sqlite3/lib/binding/node-v59-linux-x64/node_sqlite3.node .
+    fi
 else
     echo "================== Error: Executable not found ==============="
     exit 1
