@@ -659,7 +659,7 @@ export class RestServer implements IRest {
 
     public getPeerConnected(): Promise<IPeer[]> {
         const peerList: IPeer[] = []
-        const peers: proto.IPeer[] = this.network.getEndPoints()
+        const peers: proto.IPeer[] = this.network.getConnection()
         for (const peer of peers) {
             const temp: IPeer = {
                 host: peer.host,

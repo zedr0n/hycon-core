@@ -94,6 +94,14 @@ export class SocketParser {
         return `Local=${this.socket.localAddress}:${this.socket.localPort}  Remote=${this.socket.remoteAddress}:${this.socket.remotePort} CurrentQueue=${this.sendLock.queueLength()}`
     }
 
+    public getIp() {
+        return this.socket.remoteAddress
+    }
+
+    public getPort() {
+        return this.socket.remotePort
+    }
+
     public getQueueLength() {
         return this.sendLock.queueLength()
     }

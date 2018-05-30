@@ -66,7 +66,7 @@ export class RabbitNetwork implements INetwork {
         this.pendingConnections = new Map<number, proto.IPeer>()
         this.peerDB = new PeerDb(peerDbPath)
         this.guid = new Hash(randomBytes(32)).toString()
-        this.consensus.on("txs", (txs) => {this.broadcastTxs(txs)})
+        this.consensus.on("txs", (txs) => { this.broadcastTxs(txs) })
         logger.info(`TcpNetwork Port=${port} Session Guid=${this.guid}`)
     }
 
@@ -96,7 +96,7 @@ export class RabbitNetwork implements INetwork {
         const peerList: proto.IPeer[] = []
         let isActive: boolean = false
         for (const key of this.peerDB.keys) {
-            if (this.endPoints.has(key)) {
+            if (this.peers.has(key)) {
                 isActive = true
             }
             const value = await this.peerDB.get(key)
@@ -107,20 +107,19 @@ export class RabbitNetwork implements INetwork {
         return peerList
     }
 
-    public getEndPoints(): proto.IPeer[] {
-        const keys = Array.from(this.endPoints.keys())
-        const endPoints = []
-        let currentQueue: number
-        for (const key of keys) {
-            if (this.peers.has(key)) {
-                currentQueue = this.peers.get(key).socketBuffer.getQueueLength()
+    public getConnection(): proto.IPeer[] {
+        const values = Array.from(this.peers.values())
+        const connection: proto.IPeer[] = []
+        for (const value of values) {
+            const tp = {
+                active: true,
+                currentQueue: value.socketBuffer.getQueueLength(),
+                host: value.socketBuffer.getIp(),
+                port: value.socketBuffer.getPort(),
             }
-            const value = this.endPoints.get(key)
-            value.currentQueue = currentQueue
-            value.active = true
-            endPoints.push(value)
+            connection.push(tp)
         }
-        return endPoints
+        return connection
     }
 
     public broadcastTxs(txs: proto.ITx[]): void {
