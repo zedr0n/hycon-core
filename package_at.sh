@@ -47,7 +47,11 @@ then
     then
         cp -f ../node_modules/sqlite3/lib/binding/node-v59-darwin-x64/node_sqlite3.node .
     elif [ $platform = "linux" ]
+    then
         cp -f ../node_modules/sqlite3/lib/binding/node-v59-linux-x64/node_sqlite3.node .
+    else
+        echo "================== Error: platform not recognised ==============="
+        exit 1
     fi
 else
     echo "================== Error: Executable not found ==============="
