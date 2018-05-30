@@ -9,7 +9,7 @@ import { SignedTx } from "../../common/txSigned"
 import { Hash } from "../../util/hash"
 import { AnySignedTx, IConsensus } from "../IConsensus"
 import { BlockStatus } from "../sync"
-import { DBMined } from "./DBMined"
+import { DBMined } from "./dbMined"
 const sqlite = sqlite3.verbose()
 const logger = getLogger("MinedDB")
 
