@@ -320,6 +320,7 @@ export class Consensus extends EventEmitter implements IConsensus {
                 + `previous tip ${popHash.toString()}(${popHeight}, ${this.blockTip.totalWork.getMantissa()}e${this.blockTip.totalWork.getExponent()}`)
         }
 
+        const tmpTxs: SignedTx[] =  []
         while (popHeight >= popStopHeight) {
             const popBlock = await this.db.getBlock(popHash)
             if (!(popBlock instanceof Block)) {
@@ -327,7 +328,10 @@ export class Consensus extends EventEmitter implements IConsensus {
             }
             await this.db.setBlockStatus(popHash, BlockStatus.Block)
             this.emit("txs", popBlock.txs)
-            this.txPool.putTxs(popBlock.txs)
+           // this.txPool.putTxs(popBlock.txs)
+            for (const one of tmpTxs) {
+                tmpTxs.push(one)
+            }
             popHash = popBlock.header.previousHash[0]
             popHeight -= 1
         }
@@ -349,6 +353,7 @@ export class Consensus extends EventEmitter implements IConsensus {
         }
 
         this.blockTip = newDBBlock
+        this.txPool.putTxs(tmpTxs)
     }
 
     private async createCandidateBlock(previousDBBlock: DBBlock = this.blockTip, previousHash: Hash = new Hash(previousDBBlock.header)) {
