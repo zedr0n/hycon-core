@@ -31,7 +31,7 @@ export class PeersView extends React.Component<any, any> {
     public componentWillUnMount() {
         this.mounted = false
     }
-    public componentWillMount() {
+    public componentDidMount() {
         this.mounted = true
         this.state.rest.setLoading(true)
         this.state.rest.getPeerList().then((data: IPeer[]) => {
