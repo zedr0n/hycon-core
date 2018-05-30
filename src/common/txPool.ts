@@ -169,7 +169,7 @@ export class TxPool implements ITxPool {
         return index
     }
 
-    private async remove(txsOriginal: SignedTx[]) {
+    private remove(txsOriginal: SignedTx[]) {
         for (const txOriginal of txsOriginal) {
             const fromAddress = txOriginal.from.toString()
             const txsOfAddress = this.txsMap.get(fromAddress)

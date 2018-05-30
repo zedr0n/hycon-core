@@ -320,7 +320,7 @@ export class Consensus extends EventEmitter implements IConsensus {
                 + `previous tip ${popHash.toString()}(${popHeight}, ${this.blockTip.totalWork.getMantissa()}e${this.blockTip.totalWork.getExponent()}`)
         }
 
-        const tmpTxs: SignedTx[] =  []
+        const popTxs: SignedTx[] =  []
         while (popHeight >= popStopHeight) {
             const popBlock = await this.db.getBlock(popHash)
             if (!(popBlock instanceof Block)) {
@@ -329,8 +329,8 @@ export class Consensus extends EventEmitter implements IConsensus {
             await this.db.setBlockStatus(popHash, BlockStatus.Block)
             this.emit("txs", popBlock.txs)
            // this.txPool.putTxs(popBlock.txs)
-            for (const one of tmpTxs) {
-                tmpTxs.push(one)
+            for (const one of popBlock.txs) {
+                popTxs.push(one)
             }
             popHash = popBlock.header.previousHash[0]
             popHeight -= 1
@@ -341,19 +341,24 @@ export class Consensus extends EventEmitter implements IConsensus {
         }
 
         let pushHeight = popStopHeight
+        const removeTxs: SignedTx[] = []
         while (newBlockHashes.length > 0) {
             hash = newBlockHashes.pop()
             block = newBlocks.pop()
             await this.db.setBlockStatus(hash, BlockStatus.MainChain)
             await this.db.setHashAtHeight(pushHeight, hash)
+            for (const tx of block.txs) {
+                removeTxs.push(tx)
+            }
             pushHeight += 1
-            this.txPool.removeTxs(block.txs, 0)
+            // this.txPool.removeTxs(block.txs, 0)
             if (this.txdb) { await this.txdb.putTxs(hash, block.header.timeStamp, block.txs) }
             this.emit("block", block)
         }
 
         this.blockTip = newDBBlock
-        this.txPool.putTxs(tmpTxs)
+        await this.txPool.putTxs(popTxs)
+        this.txPool.removeTxs(removeTxs)
     }
 
     private async createCandidateBlock(previousDBBlock: DBBlock = this.blockTip, previousHash: Hash = new Hash(previousDBBlock.header)) {

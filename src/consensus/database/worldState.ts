@@ -105,7 +105,6 @@ export class WorldState {
             validity = TxValidity.Waiting
         } else {
             validity = TxValidity.Invalid
-            logger.error(`Invalid Tx : ${tx.from} / ${tx.nonce} / Validity : ${validity}`)
         }
         return validity
     }
