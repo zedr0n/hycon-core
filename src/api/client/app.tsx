@@ -15,6 +15,7 @@ import { TxPoolList } from "./txPoolList"
 import { TxView } from "./txView"
 
 import { AddWallet } from "./addWallet"
+import { NotFound } from "./notFound"
 import { RecoverWallet } from "./recoverWallet"
 import { WalletDetail } from "./walletDetail"
 import { WalletList } from "./walletList"
@@ -58,6 +59,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
     public addWallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
     public recoverWallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
     public walletDetail: ({ match }: RouteComponentProps<{ name: string }>) => JSX.Element
+    public notFound: ({ match }: RouteComponentProps<{}>) => JSX.Element
 
     constructor(props: any) {
         super(props)
@@ -109,6 +111,9 @@ export class App extends React.Component<{ rest: IRest }, any> {
         )
         this.walletDetail = ({ match }: RouteComponentProps<{ name: string }>) => (
             <WalletDetail name={match.params.name} rest={this.rest} />
+        )
+        this.notFound = ({ match }: RouteComponentProps<{}>) => (
+            <NotFound />
         )
     }
     public handleBlockHash(data: any) {
@@ -180,6 +185,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
                             <Route exact path="/wallet/recoverWallet" component={this.recoverWallet} />
                             <Route exact path="/wallet/detail/:name" component={this.walletDetail} />
                             <Route exact path="/peersView" component={this.peersView} />
+                            <Route exact path="*" component={this.notFound} />
                         </Switch>
                     </div>
                 </main>

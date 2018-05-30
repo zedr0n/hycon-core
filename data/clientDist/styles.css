@@ -11490,6 +11490,13 @@ _:-ms-input-placeholder, :root .mdl-slider.mdl-slider.is-upgraded {
   color: white;
   font-weight: 500;
 }
+.errTitle {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  font-size: 2em;
+  font-weight: bold;
+  color: #c5521d;
+}
 .main {
   padding: 2em;
 }
