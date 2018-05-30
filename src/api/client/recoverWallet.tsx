@@ -6,11 +6,11 @@ import { encodingMnemonic } from "./stringUtil"
 export class RecoverWallet extends React.Component<any, any> {
     public mounted: boolean = false
     public errMsg1: string = "Please enter required value"
-    public errMsg2: string = "Invalid wallet name: the wallet name must be between 2 to 20 characters with no spaces. Use only English, Korean or number."
+    public errMsg2: string = "Invalid wallet name: the wallet name must be between 2 to 20 characters with no spaces. Use only English or number."
     public errMsg3: string = "Not matched password"
     public errMsg4: string = "Check your mnemonic words"
     public errMsg5: string = "Fail to recover wallet"
-    public pattern1 = /^[a-zA-Z0-9\uAC00-\uD7A3]{2,20}$/
+    public pattern1 = /^[a-zA-Z0-9]{2,20}$/
     constructor(props: any) {
         super(props)
         this.state = {
