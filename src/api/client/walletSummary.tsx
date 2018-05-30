@@ -1,3 +1,5 @@
+import Avatar from "material-ui/Avatar"
+import { List, ListItem } from "material-ui/List"
 import * as React from "react"
 import { Link } from "react-router-dom"
 import { IHyconWallet, IRest } from "./rest"
@@ -17,37 +19,20 @@ export class WalletSummary extends React.Component<any, any> {
             return < div ></div >
         }
         return (
-            <div className="demo-card-wide mdl-card mdl-shadow--2dp cardMarginTop">
-                <Link to={`/wallet/${this.state.wallet.name}`}>
-                    <div className="mdl-card__title walletTitleDiv">
-                        <i className="material-icons walletIcon_white">
-                            account_balance_wallet
-            </i>
-                        <table className="walletSummaryTable">
-                            <tbody>
-                                <tr>
-                                    <td className="contentTitle inCardTitle">
-                                        {this.state.wallet.name}
-                                    </td>
-                                    <td rowSpan={2}>
-                                        <span className="mdl-chip mdl-chip--contact balanceInfo">
-                                            <span className="mdl-chip__contact mdl-color--teal mdl-color-text--white">
-                                                H
-                      </span>
-                                            <span className="mdl-chip__text">
-                                                {this.state.wallet.balance}
-                                            </span>
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td className="addressFont">{this.state.wallet.address}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </Link>
-            </div>
+            <div>
+                <List>
+                    <Link to={`/wallet/${this.state.wallet.name}`}>
+                        <ListItem
+                            leftAvatar={<Avatar icon={<i className="material-icons walletIcon_white">
+                                account_balance_wallet
+                    </i>} />}
+                            primaryText={this.state.wallet.name}
+                            secondaryText={this.state.wallet.address}
+                            tertiaryText={this.state.wallet.balance}
+                        />
+                    </Link>
+                </List>
+            </div >
         )
     }
 }
