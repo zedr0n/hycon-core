@@ -176,7 +176,7 @@ export class Transaction extends React.Component<any, any> {
                     <br />
                     <label className="txLabel">Wallet Password<br />
                         <div>
-                            <input name="password" className="txSendInput txSendInputPwd" type="password" onChange={(data) => { this.handlePassword(data) }} />
+                            <input name="password" className="txSendInput txSendInputPwd" type="password" autoComplete="off" onChange={(data) => { this.handlePassword(data) }} />
                             {this.state.isHint ? (this.state.hint) : (<button className="btn btn-block btn-info blue hintBtn" onClick={(e) => this.showHint(e)}>Hint</button>)}
                         </div>
                     </label>

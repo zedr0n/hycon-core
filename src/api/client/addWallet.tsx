@@ -274,7 +274,7 @@ export class AddWallet extends React.Component<any, any> {
                                 <td>
                                     <form action="#">
                                         <div className="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                            <input className="mdl-textfield__input mnemonicInput" type="text" id="confirmMnemonic1"
+                                            <input className="mdl-textfield__input mnemonicInput" type="text" id="confirmMnemonic1" autoComplete="off"
                                                 onChange={(data) => { this.handleConfirmMnemonic(data) }}
                                                 onPaste={(e) => { e.preventDefault() }}
                                                 onKeyPress={(event) => {
@@ -313,7 +313,7 @@ export class AddWallet extends React.Component<any, any> {
                                 <td>
                                     <form action="#">
                                         <div className="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                            <input className="mdl-textfield__input mnemonicInput" type="text" id="confirmMnemonic2"
+                                            <input className="mdl-textfield__input mnemonicInput" type="text" id="confirmMnemonic2" autoComplete="off"
                                                 onChange={(data) => { this.handleTypeMnemonic(data) }}
                                                 onPaste={(e) => { e.preventDefault() }}
                                                 onKeyPress={(event) => {

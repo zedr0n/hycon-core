@@ -200,7 +200,7 @@ export class RecoverWallet extends React.Component<any, any> {
                             <td>
                                 <form action="#">
                                     <div className="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                        <input className="mdl-textfield__input mnemonicInput" type="text" id="confirmMnemonic"
+                                        <input className="mdl-textfield__input mnemonicInput" type="text" id="confirmMnemonic" autoComplete="off"
                                             onChange={(data) => { this.handleTypeMnemonic(data) }}
                                             onKeyPress={(event) => {
                                                 if (event.key === "Enter") {
