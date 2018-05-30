@@ -14,6 +14,7 @@ peerdb*
 PeerList.db
 rawblock*
 txDB*
+minedDB*
 wallet*
 worldstate*
 *.png
