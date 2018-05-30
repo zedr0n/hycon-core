@@ -1,4 +1,5 @@
 import { Dialog } from "material-ui"
+import { Tab, Tabs } from "material-ui/Tabs"
 import * as QRCode from "qrcode.react"
 import * as React from "react"
 import update = require("react-addons-update")
@@ -6,7 +7,6 @@ import * as CopyToClipboard from "react-copy-to-clipboard"
 import * as ReactPaginate from "react-paginate"
 import { Redirect } from "react-router"
 import { Link } from "react-router-dom"
-import { Tab, TabList, TabPanel, Tabs } from "react-tabs"
 import { MinedBlockLine } from "./minedBlockLine"
 import { IHyconWallet, IMinedInfo, IRest, ITxProp } from "./rest"
 import { TxLine } from "./txLine"
@@ -175,12 +175,8 @@ export class WalletDetail extends React.Component<any, any> {
                         </tr>
                     </tbody>
                 </table>
-                <Tabs>
-                    <TabList>
-                        <Tab>Transaction</Tab>
-                        <Tab>Mine Reward</Tab>
-                    </TabList>
-                    <TabPanel>
+                <Tabs style={{ paddingTop: "2px" }} inkBarStyle={{ backgroundColor: "#000" }}>
+                    <Tab label="Transaction" style={{ backgroundColor: "#FFF", color: "#000" }}>
                         {this.state.txs.map((tx: ITxProp) => {
                             return (
                                 <div key={accountIndex++}>
@@ -196,8 +192,8 @@ export class WalletDetail extends React.Component<any, any> {
                             (<div><button className="btn btn-block btn-info" onClick={() => this.fetchNextTxs()}>Load more</button></div>)
                             :
                             (<div></div>)}
-                    </TabPanel>
-                    <TabPanel>
+                    </Tab>
+                    <Tab label="Mine Reward" style={{ backgroundColor: "#FFF", color: "#000" }}>
                         <table className="mdl-data-table mdl-js-data-table mdl-shadow--2dp table_margined">
                             <thead>
                                 <tr>
@@ -213,11 +209,12 @@ export class WalletDetail extends React.Component<any, any> {
                                 })}
                             </tbody>
                         </table>
+                        <br />
                         {this.state.hasMoreMinedInfo && this.state.minedBlocks.length > 0 ?
                             (<div><button className="btn btn-block btn-info" onClick={() => this.fetchNextMinedInfo()}>Load more</button></div>)
                             :
                             (<div></div>)}
-                    </TabPanel>
+                    </Tab>
                 </Tabs>
                 {/* <Dialog className="dialog" open={this.state.visible}>
                     <h4 className="contentTitle">Select account to use.</h4>
