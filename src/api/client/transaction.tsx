@@ -61,7 +61,7 @@ export class Transaction extends React.Component<any, any> {
 
     public handleInputChange(event: any) {
         const target = event.target
-        const value = target.value
+        let value = target.value
         const name = target.name
 
         if (name === "amount") {
@@ -76,10 +76,11 @@ export class Transaction extends React.Component<any, any> {
             }
             if (hyconfromString(target.value).add(hyconfromString(this.state.minerFee)).greaterThan(hyconfromString(this.state.piggyBank).sub(hyconfromString(this.state.wallet.pendingAmount)))) {
                 alert(`You can't spend the money you don't have`)
-            } else {
-                this.setState({ [name]: value })
-                this.currentMinerFee = hycontoString(hyconfromString(this.state.piggyBank).sub(hyconfromString(target.value).sub(this.state.wallet.pendingAmount)))
+                value = 0
             }
+            this.setState({ [name]: value })
+            this.currentMinerFee = hycontoString(hyconfromString(this.state.piggyBank).sub(hyconfromString(target.value).sub(this.state.wallet.pendingAmount)))
+
         } else if (name === "address") {
             if (value === this.state.wallet.address) {
                 alert(`You can not send HYCON to yourself.`)
@@ -96,11 +97,12 @@ export class Transaction extends React.Component<any, any> {
                 if (temp.match("(^[0-9]*)([.]{0,1}[0-9]{0,9}$)") == null) {
                     alert("Please enter a number with up to 9 decimal places")
                 } else if (hyconfromString(value).greaterThan(hyconfromString(this.currentMinerFee))) {
-                    alert("You can't spend the money you don't have")
-                    this.setState({ minerFee: 0 })
-                } else {
-                    this.setState({ minerFee: target.value })
+                    alert(`You can't spend the money you don't have : ${this.currentMinerFee}`)
+                    if (hyconfromString("1").greaterThan(hyconfromString(this.currentMinerFee))) {
+                        value = this.currentMinerFee
+                    } else { value = 1 }
                 }
+                this.setState({ minerFee: value })
             }
         }
     }
