@@ -72,7 +72,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
         }
         this.rest = props.rest
         this.rest.loadingListener((loading: boolean) => {
-            this.setState({ loading })
+            this.state = ({ loading })
         })
         this.blockView = ({ match }: RouteComponentProps<{ hash: string }>) => (
             <BlockView hash={match.params.hash} rest={this.rest} />
