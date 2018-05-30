@@ -46,7 +46,6 @@ export class Consensus extends EventEmitter implements IConsensus {
         this.worldState = new WorldState(wsPath, txPool)
         this.futureBlockQueue = new DelayQueue(10)
     }
-
     public async init(): Promise<void> {
         if (this.lock !== undefined) {
             throw new Error("Multiple calls to init")
@@ -69,7 +68,6 @@ export class Consensus extends EventEmitter implements IConsensus {
             }
 
             this.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock()) // TODO: move/remove?
-            this.createCandidateBlock()
             logger.info(`Initialization of consensus is over.`)
         } catch (e) {
             logger.error(`Initialization failure in consensus: ${e}`)
@@ -77,6 +75,9 @@ export class Consensus extends EventEmitter implements IConsensus {
         } finally {
             this.lock.releaseLock()
         }
+    }
+    public triggerMining() {
+        this.createCandidateBlock()
     }
 
     public putBlock(block: Block): Promise<IStatusChange> {
@@ -320,7 +321,7 @@ export class Consensus extends EventEmitter implements IConsensus {
                 + `previous tip ${popHash.toString()}(${popHeight}, ${this.blockTip.totalWork.getMantissa()}e${this.blockTip.totalWork.getExponent()}`)
         }
 
-        const popTxs: SignedTx[] =  []
+        const popTxs: SignedTx[] = []
         while (popHeight >= popStopHeight) {
             const popBlock = await this.db.getBlock(popHash)
             if (!(popBlock instanceof Block)) {
@@ -328,7 +329,7 @@ export class Consensus extends EventEmitter implements IConsensus {
             }
             await this.db.setBlockStatus(popHash, BlockStatus.Block)
             this.emit("txs", popBlock.txs)
-           // this.txPool.putTxs(popBlock.txs)
+            // this.txPool.putTxs(popBlock.txs)
             for (const one of popBlock.txs) {
                 popTxs.push(one)
             }

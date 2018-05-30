@@ -37,4 +37,5 @@ export interface IConsensus extends EventEmitter {
     txValidity(tx: SignedTx): Promise<TxValidity>
     getHash(height: number): Promise<Hash>
     getBlockHeight(hash: Hash): Promise<number | undefined>
+    triggerMining(): void
 }

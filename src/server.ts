@@ -29,7 +29,6 @@ export class Server {
     public readonly rest: RestManager
     public httpServer: HttpServer
     public sync: Sync
-    private triggerMining: () => void
     constructor() {
 
         const postfix = globalOptions.postfix
@@ -39,9 +38,6 @@ export class Server {
         this.miner = new MinerServer(this.consensus, this.network, globalOptions.cpuMiners, globalOptions.str_port)
         this.wallet = new WalletManager(this)
         this.rest = new RestManager(this)
-    }
-    public setTriggerMining(f: () => void) {
-        this.triggerMining = f
     }
     public async run() {
         await this.consensus.init()
@@ -72,10 +68,10 @@ export class Server {
         logger.debug(`begin sync`)
         const sync = new Sync(this)
         await sync.sync()
-        // if (!Server.triedSync) {
-        //     Server.triedSync = true
-        //     this.triggerMining()
-        // }
+        if (!Server.triedSync) {
+            Server.triedSync = true
+            setImmediate(() => { this.consensus.triggerMining() })
+        }
         setTimeout(async () => {
             await this.runSync()
         }, 5000)
