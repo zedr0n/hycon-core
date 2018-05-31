@@ -86,7 +86,7 @@ import { Server } from "./server"
 import { WalletManager } from "./wallet/walletManager"
 
 async function startHycon() {
-    if (conf.minerAddress === undefined || conf.minerAddress === "") {
+    if (globalOptions.minerAddress === undefined || globalOptions.minerAddress === "") {
         let walletAddress = await  WalletManager.getDefaultWallet()
         if (walletAddress === "") {
             walletAddress = await WalletManager.initialize()
