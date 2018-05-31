@@ -3,7 +3,15 @@ import {Wallet} from "./wallet"
 // tslint:disable-next-line:no-var-requires
 const input = require("input")
 export class WalletManager {
-    public static async initialize() {
+
+    public static async getDefaultWallet(): Promise<string> {
+        try {
+            const address = await Wallet.getAddress("defaultMiner")
+            return address
+        } catch (error) {
+            return ""
+        }    }
+    public static async initialize(): Promise < string > {
         try {
             Wallet.walletInit()
             let password = ""
@@ -20,9 +28,12 @@ export class WalletManager {
                 }
             }
             const newWallet = Wallet.randomWallet()
-            await newWallet.save("miner", password, "")
+            await newWallet.save("defaultMiner", password, "")
+            const address = newWallet.pubKey.address().toString()
+            // tslint:disable-next-line:no-console
+            console.log(`Default Miner Wallet ${address}`)
+            return address
         } catch (error) {
         }
-        startHycon()
     }
 }

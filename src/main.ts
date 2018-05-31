@@ -1,3 +1,4 @@
+import * as fs from "fs-extra"
 import { configure, getLogger } from "log4js"
 configure({
     appenders: {
@@ -82,5 +83,19 @@ logger.info(`Port=${globalOptions.port}`)
 logger.info(`Stratum Port=${globalOptions.str_port}`)
 
 import { Server } from "./server"
-const hycon = new Server()
-hycon.run()
+import { WalletManager } from "./wallet/walletManager"
+
+async function startHycon() {
+    if (conf.minerAddress === undefined || conf.minerAddress === "") {
+        let walletAddress = await  WalletManager.getDefaultWallet()
+        if (walletAddress === "") {
+            walletAddress = await WalletManager.initialize()
+        }
+        conf.minerAddress = walletAddress
+        fs.writeFileSync("./data/config.json", JSON.stringify(conf))
+    }
+    const hycon = new Server()
+    hycon.run()
+}
+
+startHycon()
