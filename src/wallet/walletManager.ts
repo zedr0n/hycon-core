@@ -1,6 +1,6 @@
-import {Wallet} from "./wallet"
+import { Wallet } from "./wallet"
 // tslint:disable-next-line:no-var-requires
-const readline = require("readline")
+const input = require("input")
 export class WalletManager {
 
     public static async getDefaultWallet(): Promise<string> {
@@ -9,33 +9,16 @@ export class WalletManager {
             return address
         } catch (error) {
             return ""
-        }    }
-    public static async initialize(): Promise < string > {
+        }
+    }
+    public static async initialize(): Promise<string> {
         try {
             Wallet.walletInit()
             let password = ""
-            const rl = readline.createInterface({
-                input: process.stdin,
-                output: process.stdout,
-            })
             while (true) {
                 const pwd = Math.floor(Math.random() * 0xFFFFFF)
-                let pw1 = ""
-                let pw2 = ""
-                await new Promise( (resolve) => {
-                    rl.question("Please type your miner password?", (answer: string) => {
-                        pw1 = answer
-                        resolve()
-                    })
-                })
-
-                await new Promise((resolve) => {
-                    rl.question("Please type your miner password again?", (answer: string) => {
-                        pw2 = answer
-                        resolve()
-                    })
-                })
-
+                const pw1 = await input.text("Please type your miner password?", { default: pwd })
+                const pw2 = await input.text("Please type your miner password again?", { default: pwd })
                 if (pw1 === pw2) {
                     password = pw1
                     break
