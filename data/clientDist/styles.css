@@ -11856,7 +11856,10 @@ table {
 .textRed{
   color: red;
 }
-.marker {
+.walletName{
+  vertical-align: super;
+  padding-left: 10px;
+}.marker {
   /* position: 'absolute';
     width: 40px ;
     height: 40px ;

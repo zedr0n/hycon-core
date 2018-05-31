@@ -42,6 +42,7 @@ export interface IBlock {
 export interface IWalletAddress {
     hash: string
     balance: string
+    nonce: number
     txs: ITxProp[]
     minedBlocks?: IMinedInfo[]
     pendingAmount?: string

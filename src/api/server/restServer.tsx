@@ -281,6 +281,7 @@ export class RestServer implements IRest {
             return Promise.resolve<IWalletAddress>({
                 hash: address,
                 balance: account ? hycontoString(account.balance) : "0.0",
+                nonce: account.nonce,
                 txs: webTxs,
                 minedBlocks,
                 pendingAmount: hycontoString(pendingAmount),
