@@ -34,7 +34,6 @@ export class TxPool implements ITxPool {
 
     public async putTxs(newTxsOriginal: SignedTx[]): Promise<number> {
         let newTxsCount: number = 0
-        let lowestIndex
         // drop it, if we already has it
         for (const oneTx of newTxsOriginal) {
             let isExist = false
@@ -80,12 +79,9 @@ export class TxPool implements ITxPool {
                 newTxsCount++
             }
             if (!isExist && isValid === TxValidity.Valid && txs[0].equals(oneTx)) {
-                const index = this.setAddresses(fromString, oneTx)
-                lowestIndex !== undefined ? (index > lowestIndex ? lowestIndex = index : lowestIndex++) : lowestIndex = index
+                this.setAddresses(fromString, oneTx)
             }
         }
-        // notify
-        this.callback(lowestIndex)
         return newTxsCount
     }
 
@@ -93,11 +89,6 @@ export class TxPool implements ITxPool {
         this.remove(old.slice(0, old.length))
         return this.getTxs().slice(0, maxReturn)
     }
-
-    public onTopTxChanges(n: number, callback: (txs: SignedTx[]) => void): void {
-        this.callbacks.push({ callback, n })
-    }
-
     public getPending(index: number, count: number): { txs: SignedTx[], length: number, totalAmount: Long, totalFee: Long } {
         const txs = this.getTxs().slice()
         let totalAmount = hyconfromString("0")
@@ -148,25 +139,21 @@ export class TxPool implements ITxPool {
         return this.txsMap.get(address.toString())
     }
 
-    private setAddresses(address: string, tx: SignedTx, addressArray?: Array<{ address: string, fee: Long }>): number {
+    private setAddresses(address: string, tx: SignedTx, addressArray?: Array<{ address: string, fee: Long }>): void {
         let addresses
         addressArray ? addresses = addressArray : addresses = this.addresses
         const addressFee = { address, fee: tx.fee }
         let isInsert = false
-        let index
         for (let i = 0; i < addresses.length; i++) {
             if (tx.fee.greaterThan(addresses[i].fee)) {
                 addresses.splice(i, 0, addressFee)
-                index = i
                 isInsert = true
                 break
             }
         }
         if (!isInsert) {
             addresses.push(addressFee)
-            index = addresses.length - 1
         }
-        return index
     }
 
     private remove(txsOriginal: SignedTx[]) {
@@ -196,15 +183,6 @@ export class TxPool implements ITxPool {
             if (this.addresses[i].address === stringAddress) {
                 this.addresses.splice(i, 1)
                 break
-            }
-        }
-    }
-
-    private callback(lowestIndex: number): void {
-        const n = lowestIndex + 1
-        for (const callback of this.callbacks) {
-            if (callback.n >= n) {
-                setImmediate(callback.callback, this.getTxs().slice(0, 4096))
             }
         }
     }
