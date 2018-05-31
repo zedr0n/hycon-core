@@ -47,7 +47,6 @@ export class TxPool implements ITxPool {
         let newTxsCount: number = 0
         // drop it, if we already has it
         for (const { tx, valid } of filteredTxs) {
-            logger.error(`Receive tx : ${new Hash(tx)} / from: ${tx.from} / to : ${tx.to} / amount : ${tx.from} / fee : ${tx.fee}`)
             let isExist = false
             const fromString = tx.from.toString()
             let txs = this.txsMap.get(fromString)
@@ -65,7 +64,6 @@ export class TxPool implements ITxPool {
                             }
                         } else {
                             isExist = true
-                            logger.error(`Duplicate tx`)
                             continue
                         }
                         break
@@ -173,19 +171,21 @@ export class TxPool implements ITxPool {
         for (const txOriginal of txsOriginal) {
             const fromAddress = txOriginal.from.toString()
             const txsOfAddress = this.txsMap.get(fromAddress)
-            if (txsOfAddress !== undefined) {
-                if (txsOfAddress[0].nonce < txOriginal.nonce) { throw new Error(`Previous transaction is exist in txPool yet.`) }
-                if (txsOfAddress[0].nonce === txOriginal.nonce) {
-                    this.removeFromAddresses(txsOfAddress[0].from)
-                    txsOfAddress.splice(0, 1)
-                }
-                if (txsOfAddress.length === 0) {
-                    this.txsMap.delete(fromAddress)
-                } else {
-                    if (txsOfAddress[0].nonce === txOriginal.nonce + 1) {
-                        this.setAddresses(fromAddress, txsOfAddress[0])
-                    }
-                }
+            if (txsOfAddress === undefined) {
+                continue
+            }
+
+            while (txsOfAddress.length > 0 && txsOfAddress[0].nonce <= txOriginal.nonce) {
+                this.removeFromAddresses(txsOfAddress[0].from)
+                txsOfAddress.splice(0, 1)
+            }
+            if (txsOfAddress.length === 0) {
+                this.txsMap.delete(fromAddress)
+                continue
+            }
+
+            if (txsOfAddress[0].nonce === txOriginal.nonce + 1) {
+                this.setAddresses(fromAddress, txsOfAddress[0])
             }
         }
     }
