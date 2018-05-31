@@ -10,16 +10,6 @@ import { Link } from "react-router-dom"
 import { IBlock, IHyconWallet, IRest } from "./rest"
 import { hyconfromString, hycontoString } from "./stringUtil"
 
-const styles = (theme: any) => ({
-    container: {
-        display: "flex",
-        flexWrap: "wrap",
-    },
-    input: {
-        margin: theme.spacing.unit,
-    },
-})
-
 export class Transaction extends React.Component<any, any> {
     public currentMinerFee = "0"
     public currentReturnedFee = 0
@@ -46,6 +36,7 @@ export class Transaction extends React.Component<any, any> {
 
         this.handleInputChange = this.handleInputChange.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
+        this.handleCancel = this.handleCancel.bind(this)
 
     }
 
@@ -164,53 +155,39 @@ export class Transaction extends React.Component<any, any> {
         return +test.toFixed(digits)
     }
     public render() {
-        const { classes } = this.props
         if (this.state.redirect) {
             return <Redirect to={`/wallet/detail/${this.state.name}`} />
         }
-        if (this.state.wallet === undefined) {
-            return < div ></div >
-        }
+        if (this.state.wallet === undefined) { return < div ></div > }
         return (
             <div>
-                <Dialog
-                    open={true}
-                    aria-labelledby="alert-dialog-title"
-                    aria-describedby="alert-dialog-description"
-                >
-                    <h3>Send Transaction</h3>
-                    {/* <h2 className="contentSubTitle">{this.state.name} Balance : {this.state.piggyBank} Hycon</h2>
-                    <h3 className="contentSubTitle">Pending amount : {this.state.wallet.pendingAmount} Hycon</h3> */}
-
-                    <TextField floatingLabelText="From Address" type="text" disabled={true} value={this.state.wallet.address} />
-                    <TextField name="address" style={{ marginLeft: "10px" }} floatingLabelText="To Address" type="text" value={this.state.address} onChange={this.handleInputChange} />
-                    <br />
-                    <TextField floatingLabelText="Balance" type="text" disabled={true} value={this.state.piggyBank} />
-                    <TextField floatingLabelText="Pending Amount" style={{ marginLeft: "10px" }} type="text" disabled={true} value={this.state.wallet.pendingAmount} />
-                    <TextField name="amount" floatingLabelText="Amount" type="text" value={this.state.amount} max={this.state.piggyBank} onChange={this.handleInputChange} />
-                    <br />
-                    <TextField name="minerFee" floatingLabelText="Miner Fee" type="text" value={this.state.minerFee} onChange={this.handleInputChange} />
-                    <br />
-                    <TextField name="password" floatingLabelText="Wallet Password" type="password" autoComplete="off" onChange={(data) => { this.handlePassword(data) }} />
-
-                    {this.state.isHint ? (this.state.hint) : (<button className="btn btn-block btn-info blue hintBtn" onClick={(e) => this.showHint(e)}>Hint</button>)}
-                    <br />
-
-                    <br />
-                    {this.state.isLoading ? (
-                        <CircularProgress size={50} thickness={2} />
-                    ) : (
-                            <button className="btn btn-block btn-info green" onClick={this.handleSubmit}>Submit</button>
-                        )}
-                    <Button variant="raised" onClick={this.handleSubmit} style={{ backgroundColor: "#50aaff", color: "white" }}>
-                        Send
-                    <Icon>send</Icon>
-                    </Button>
-                    <Button variant="raised" onClick={this.handleCancel} style={{ backgroundColor: "rgb(225, 0, 80)", color: "white" }}>
-                        Cancel
-                    <Icon>cancel</Icon>
-                    </Button>
-
+                <Dialog open={true} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" >
+                    <div style={{ textAlign: "center" }}>
+                        <h3 style={{ color: "grey" }}><Icon style={{ transform: "rotate(-25deg)", marginRight: "10px", color: "grey" }}>send</Icon>Send Transaction</h3><br />
+                        <TextField style={{ width: "330px" }} floatingLabelText="From Address" type="text" disabled={true} value={this.state.wallet.address} />
+                        <TextField name="address" floatingLabelFixed={true} style={{ marginLeft: "30px", width: "330px" }} floatingLabelText="To Address" type="text" value={this.state.address} onChange={this.handleInputChange} />
+                        <br />
+                        <TextField style={{ width: "330px" }} floatingLabelText="Balance" type="text" disabled={true} value={this.state.piggyBank} />
+                        <TextField floatingLabelText="Pending Amount" style={{ marginLeft: "30px", width: "330px" }} type="text" disabled={true} value={this.state.wallet.pendingAmount} />
+                        <br />
+                        <TextField style={{ width: "330px" }} name="amount" floatingLabelFixed={true} floatingLabelText="Amount" type="text" value={this.state.amount} max={this.state.piggyBank} onChange={this.handleInputChange} />
+                        <TextField name="minerFee" floatingLabelFixed={true} style={{ marginLeft: "30px", width: "330px" }} floatingLabelText="Miner Fee" type="text" value={this.state.minerFee} onChange={this.handleInputChange} />
+                        <br />
+                        <TextField name="password" floatingLabelFixed={true} style={{ marginRight: "20px", width: "330px" }} floatingLabelText="Wallet Password" type="password" autoComplete="off" onChange={(data) => { this.handlePassword(data) }} />
+                        {this.state.isHint ? (<span style={{ fontSize: "12px" }}>(Password Hint: {this.state.hint})</span>) : (<Button onClick={(e) => this.showHint(e)}>Hint</Button>)}
+                        <br /><br />
+                        <Button variant="raised" onClick={this.handleSubmit} style={{ backgroundColor: "#50aaff", color: "white", float: "right", marginLeft: "10px" }}>
+                            <span style={{ marginRight: "15px" }}>Send</span><Icon>send</Icon>
+                        </Button>
+                        <Button variant="raised" onClick={this.handleCancel} style={{ backgroundColor: "rgb(225, 0, 80)", color: "white", float: "right" }}>
+                            <span style={{ marginRight: "5px" }}>Cancel</span><Icon>cancel</Icon>
+                        </Button>
+                    </div>
+                </Dialog>
+                <Dialog open={this.state.isLoading} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" >
+                    <div style={{ textAlign: "center" }}>
+                        <CircularProgress style={{ marginRight: "5px" }} size={50} thickness={2} /> LOADING
+                    </div>
                 </Dialog>
             </div >
         )
