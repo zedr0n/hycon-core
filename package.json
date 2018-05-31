@@ -98,7 +98,7 @@
     "ip": "^1.1.5",
     "ip-location": "^1.0.1",
     "levelup": "^2.0.2",
-    "log4js": "^2.7.0",
+    "log4js": "git+https://github.com/Team-Hycon/log4js-node.git",
     "log4js-protractor-appender": "^1.1.2",
     "merkle-lib": "^2.0.10",
     "nat-upnp": "^1.1.1",
