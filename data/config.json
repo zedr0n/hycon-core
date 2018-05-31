@@ -1,5 +1,4 @@
 {
-    "minerAddress": "",
     "dagFile": "./data/dag_hycon.png",
     "dataAccount": "./data/accounts",
     "dataBlockFilePrefix": "./data/raw/blk",
@@ -7,5 +6,6 @@
     "dataMeta": "./data/meta",
     "dataRaw": "./data/raw",
     "dataRoot": "./data",
-    "dataWallet": "./wallet"
+    "dataWallet": "./wallet",
+    "minerAddress": ""
 }
