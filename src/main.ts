@@ -91,7 +91,7 @@ async function startHycon() {
         if (walletAddress === "") {
             walletAddress = await WalletManager.initialize()
         }
-        conf.minerAddress = walletAddress
+        globalOptions.minerAddress = conf.minerAddress = walletAddress
         fs.writeFileSync("./data/config.json", JSON.stringify(conf))
     }
     const hycon = new Server()
