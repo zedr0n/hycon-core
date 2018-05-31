@@ -7,7 +7,7 @@ import { Block } from "../../common/block"
 import { BlockHeader } from "../../common/blockHeader"
 import { SignedTx } from "../../common/txSigned"
 import { Hash } from "../../util/hash"
-import { AnySignedTx, IConsensus } from "../IConsensus"
+import { AnySignedTx, IConsensus } from "../iconsensus"
 import { BlockStatus } from "../sync"
 import { DBMined } from "./dbMined"
 const sqlite = sqlite3.verbose()

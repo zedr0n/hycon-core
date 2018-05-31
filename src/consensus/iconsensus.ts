@@ -9,7 +9,7 @@ import { SignedTx } from "../common/txSigned"
 import { Account } from "../consensus/database/account"
 import { BlockStatus } from "../consensus/sync"
 import { Hash } from "../util/hash"
-import { DBMined } from "./database/DBMined"
+import { DBMined } from "./database/dbMined"
 import { DBTx } from "./database/dbtx"
 import { TxValidity } from "./database/worldState"
 
