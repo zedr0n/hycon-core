@@ -29,7 +29,6 @@ export class MinedDatabase {
                                                         miner TEXT,
                                                         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)`)
         })
-
         if (tipHeight !== undefined) {
             let status: BlockStatus
             let lastHeight = 0
@@ -60,22 +59,24 @@ export class MinedDatabase {
     }
 
     public async getLastBlock(): Promise<Hash | undefined> {
-        let hashData: string = ""
-        return new Promise<Hash>(async (resolved, rejected) => {
-            this.db.each(`SELECT blockhash FROM mineddb ORDER BY timestamp DESC LIMIT 1`, (err, row) => {
-                if (row === undefined) {
-                    return resolved(undefined)
-                }
-                hashData = row.blockhash
-                return resolved(Hash.decode(hashData))
+        try {
+            let hashData: string = ""
+            return new Promise<Hash | undefined>(async (resolved, rejected) => {
+                this.db.all(`SELECT * FROM mineddb ORDER BY timestamp DESC LIMIT 1`, (err, rows) => {
+                    if (rows[0] === undefined) { return resolved(undefined) }
+                    hashData = rows[0].blockhash
+                    return resolved(Hash.decode(hashData))
+                })
             })
-        })
+        } catch (e) {
+            logger.error(`Fail to getlastBlock : ${e}`)
+            throw e
+        }
     }
 
     public async putMinedBlock(blockHash: Hash, timestamp: number, txs: AnySignedTx[], miner: Address): Promise<void> {
         const isExist = await this.get(blockHash)
         if (!isExist) {
-
             const stmtInsert = this.db.prepare(`INSERT INTO mineddb (blockhash, feeReward, blocktime, miner) VALUES ($blockhash, $feeReward, $blocktime, $miner)`)
             let feeReward = hyconfromString("240")
             for (const tx of txs) { tx instanceof SignedTx ? feeReward = feeReward.add(tx.fee) : feeReward = feeReward }
