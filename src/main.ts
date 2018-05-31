@@ -46,7 +46,7 @@ export const globalOptions = commandLineArgs(optionDefinitions)
 import conf = require("./settings")
 
 if (globalOptions.cpuMiners === undefined) {
-    globalOptions.cpuMiners = 0
+    globalOptions.cpuMiners = 1
 }
 if (globalOptions.genesis !== undefined) {
     conf.dataGenesis = globalOptions.genesis
