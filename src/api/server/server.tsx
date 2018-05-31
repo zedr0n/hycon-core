@@ -36,6 +36,7 @@ export class HttpServer {
             }
             res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE")
             res.header("Access-Control-Allow-Headers", "Content-type, Accept, X-Access-Token, X-Key")
+            res.header("X-FRAME-OPTIONS", "DENY")
             if (req.method === "OPTIONS") {
                 res.status(200).end()
             } else {
