@@ -32,7 +32,7 @@
     "package": "tsc && pkg package.json",
     "block:build": "cd ./src/api/client && webpack",
     "startWriting": "./node_modules/.bin/ts-node src/main.ts --port=8148 --str_port=9081 --cpuMiners=3 --api --api_port=2442 --networkid=zelda --writing",
-    "debugWriti'ng": "./node_modules/.bin/ts-node --inspect=9231 --inspect-brk src/main.ts  --port=8148 --str_port=9081 --cpuMiners=3 --api --api_port=2442 --networkid=zelda --writing"
+    "debugWriting": "./node_modules/.bin/ts-node --inspect=9231 --inspect-brk src/main.ts  --port=8148 --str_port=9081 --cpuMiners=3 --api --api_port=2442 --networkid=zelda --writing"
   },
   "author": "",
   "license": "ISC",

@@ -147,7 +147,7 @@ export class Transaction extends React.Component<any, any> {
 
     public render() {
         if (this.state.redirect) {
-            return <Redirect to={`/wallet/${this.state.name}`} />
+            return <Redirect to={`/wallet/detail/${this.state.name}`} />
         }
         if (this.state.wallet === undefined) {
             return < div ></div >

@@ -130,7 +130,7 @@ export class AddWallet extends React.Component<any, any> {
             return <Redirect to="/wallet" />
         }
         if (this.state.walletViewRedirect) {
-            return <Redirect to={`/wallet/${this.state.name}`} />
+            return <Redirect to={`/wallet/detail/${this.state.name}`} />
         }
         return (
             <div>

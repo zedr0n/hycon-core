@@ -177,7 +177,7 @@ export class RestClient implements IRest {
     }
     public getWalletDetail(name: string): Promise<IHyconWallet> {
         return Promise.resolve(
-            fetch(`/api/${this.apiVersion}/wallet/${name}`)
+            fetch(`/api/${this.apiVersion}/wallet/detail/${name}`)
                 .then((response) => response.json())
                 .catch((err: Error) => {
                     console.log(err)

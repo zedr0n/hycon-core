@@ -28,12 +28,12 @@ export const routes: RouteConfig[] = [
     { exact: true, path: "/txPool" },
     { exact: true, path: "/address/:hash" },
     { exact: true, path: "/wallet" },
+    { exact: true, path: "/wallet/addWallet" },
+    { exact: true, path: "/wallet/recoverWallet" },
+    { exact: true, path: "/wallet/detail/:name" },
     { exact: true, path: "/transaction/:name" },
     { exact: true, path: "/peersView" },
     // { exact: true, path: "/peer/:hash" },
-    { exact: true, path: "/wallet/addWallet" },
-    { exact: true, path: "/wallet/recoverWallet" },
-    { exact: true, path: "/wallet/:name" },
 ]
 
 // tslint:disable:no-shadowed-variable
@@ -178,7 +178,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
                             <Route exact path="/wallet/addWallet" component={this.addWallet} />
                             <Route exact path="/wallet" component={this.wallet} />
                             <Route exact path="/wallet/recoverWallet" component={this.recoverWallet} />
-                            <Route exact path="/wallet/:name" component={this.walletDetail} />
+                            <Route exact path="/wallet/detail/:name" component={this.walletDetail} />
                             <Route exact path="/peersView" component={this.peersView} />
                         </Switch>
                     </div>

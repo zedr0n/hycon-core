@@ -20,7 +20,7 @@ export class WalletSummary extends React.Component<any, any> {
         }
         return (
             <div>
-                <Link to={`/wallet/${this.state.wallet.name}`}>
+                <Link to={`/wallet/detail/${this.state.wallet.name}`}>
                     <ListItem style={{ width: "23em" }}
                         leftAvatar={<Avatar icon={<i className="material-icons walletIcon_white">
                             account_balance_wallet</i>} />}

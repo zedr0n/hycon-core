@@ -178,7 +178,7 @@ export class HttpServer {
         router.get("/tx/:hash", async (req: express.Request, res: express.Response) => {
             res.json(await this.rest.getTx(req.params.hash))
         })
-        router.get("/wallet/:name", async (req: express.Request, res: express.Response) => {
+        router.get("/wallet/detail/:name", async (req: express.Request, res: express.Response) => {
             res.json(await this.rest.getWalletDetail(req.params.name))
         })
         router.get("/wallet", async (req: express.Request, res: express.Response) => {
