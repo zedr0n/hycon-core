@@ -309,7 +309,7 @@ export class RestServer implements IRest {
         }
     }
 
-    public async getBlock(hash: string): Promise<IBlock> {
+    public async getBlock(hash: string): Promise<IBlock | IResponseError> {
         try {
             // const dbBlock = await this.db.getDBBlock(Hash.decode(hash))
             const hyconBlock = await this.consensus.getBlockByHash(Hash.decode(hash))
@@ -366,7 +366,12 @@ export class RestServer implements IRest {
 
             return Promise.resolve(webBlock)
         } catch (e) {
-            return Promise.reject("Error while getting block information from server : " + e)
+            return Promise.resolve({
+                status: 404,
+                timestamp: Date.now(),
+                error: "NOT_FOUND",
+                message: "the block cannot be found",
+            })
         }
     }
     public async getBlockList(index: number): Promise<{ blocks: IBlock[], length: number }> {
@@ -466,7 +471,7 @@ export class RestServer implements IRest {
             })
         }
     }
-    public async getWalletDetail(name: string): Promise<IHyconWallet> {
+    public async getWalletDetail(name: string): Promise<IHyconWallet | IResponseError> {
         const mapHashTx: Map<Hash, SignedTx> = new Map<Hash, SignedTx>()
         try {
             await Wallet.walletInit()
@@ -525,7 +530,12 @@ export class RestServer implements IRest {
             }
             return Promise.resolve(hyconWallet)
         } catch (e) {
-            return Promise.reject("Error while getWalletDetail in restServer : " + e)
+            return Promise.resolve({
+                status: 404,
+                timestamp: Date.now(),
+                error: "NOT_FOUND",
+                message: "the wallet cannot be found",
+            })
         }
     }
 

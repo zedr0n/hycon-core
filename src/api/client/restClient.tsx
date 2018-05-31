@@ -138,7 +138,7 @@ export class RestClient implements IRest {
                 }),
         )
     }
-    public getBlock(hash: string): Promise<IBlock> {
+    public getBlock(hash: string): Promise<IBlock | IResponseError> {
         return Promise.resolve(
             fetch(`/api/${this.apiVersion}/block/${hash}`)
                 .then((response) => response.json())
@@ -175,7 +175,7 @@ export class RestClient implements IRest {
                 }),
         )
     }
-    public getWalletDetail(name: string): Promise<IHyconWallet> {
+    public getWalletDetail(name: string): Promise<IHyconWallet | IResponseError> {
         return Promise.resolve(
             fetch(`/api/${this.apiVersion}/wallet/detail/${name}`)
                 .then((response) => response.json())

@@ -15,12 +15,13 @@ import { TxPoolList } from "./txPoolList"
 import { TxView } from "./txView"
 
 import { AddWallet } from "./addWallet"
-import { NotFound } from "./notFound"
 import { RecoverWallet } from "./recoverWallet"
 import { WalletDetail } from "./walletDetail"
 import { WalletList } from "./walletList"
 import { WalletSummary } from "./walletSummary"
 import { WalletView } from "./walletView"
+
+import { NotFound } from "./notFound"
 
 export const routes: RouteConfig[] = [
     { exact: true, path: "/" },
@@ -59,17 +60,17 @@ export class App extends React.Component<{ rest: IRest }, any> {
     public addWallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
     public recoverWallet: ({ match }: RouteComponentProps<{}>) => JSX.Element
     public walletDetail: ({ match }: RouteComponentProps<{ name: string }>) => JSX.Element
-    public notFound: ({ match }: RouteComponentProps<{}>) => JSX.Element
+    public notFound: boolean
 
     constructor(props: any) {
         super(props)
         this.state = {
             block: "block",
             blockHash: undefined,
-            blockViewRedirect: false,
             isParity: false,
             loading: false,
             name: "BlockExplorer",
+            redirect: false,
             tx: "Tx 1",
         }
         this.rest = props.rest
@@ -77,7 +78,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
             this.state = ({ loading })
         })
         this.blockView = ({ match }: RouteComponentProps<{ hash: string }>) => (
-            <BlockView hash={match.params.hash} rest={this.rest} />
+            <BlockView hash={match.params.hash} rest={this.rest} notFound={this.notFound} />
         )
         this.home = ({ match }: RouteComponentProps<{}>) => (
             <Home rest={props.rest} />
@@ -110,10 +111,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
             <RecoverWallet rest={props.rest} />
         )
         this.walletDetail = ({ match }: RouteComponentProps<{ name: string }>) => (
-            <WalletDetail name={match.params.name} rest={this.rest} />
-        )
-        this.notFound = ({ match }: RouteComponentProps<{}>) => (
-            <NotFound />
+            <WalletDetail name={match.params.name} rest={this.rest} notFound={this.notFound} />
         )
     }
     public handleBlockHash(data: any) {
@@ -126,11 +124,11 @@ export class App extends React.Component<{ rest: IRest }, any> {
             event.preventDefault()
             if (alert(this.errMsg1)) { window.location.reload() }
         } else {
-            this.setState({ blockViewRedirect: true })
+            this.setState({ redirect: true })
         }
     }
     public render() {
-        if (this.state.blockViewRedirect) {
+        if (this.state.redirect) {
             return <Redirect to={`/block/${this.state.blockHash}`} />
         }
         return (
@@ -140,11 +138,8 @@ export class App extends React.Component<{ rest: IRest }, any> {
                         <span className="mdl-layout-title">Hycon Blockexplorer</span>
                         <div className="mdl-layout-spacer" />
                         <nav className="mdl-navigation mdl-layout--large-screen-only">
-                            {/* <form> */}
                             <div className="mdl-textfield mdl-js-textfield mdl-textfield--expandable">
-                                <label
-                                    className="mdl-button mdl-js-button mdl-button--icon"
-                                >
+                                <label className="mdl-button mdl-js-button mdl-button--icon">
                                     <i className="material-icons">search</i>
                                 </label>
                                 <form>
@@ -164,11 +159,7 @@ export class App extends React.Component<{ rest: IRest }, any> {
                             <Link className="mdl-navigation__link" to="/peersView">Peers List</Link>
                         </nav>
                     </div>
-                    <div
-                        className={`mdl-progress mdl-js-progress mdl-progress__indeterminate progressBar ${
-                            this.state.loading ? "" : "hide"
-                            }`}
-                    />
+                    <div className={`mdl-progress mdl-js-progress mdl-progress__indeterminate progressBar ${this.state.loading ? "" : "hide"}`} />
                 </header>
                 <main className="mdl-layout__content main">
                     <div className="page-content">
@@ -185,7 +176,6 @@ export class App extends React.Component<{ rest: IRest }, any> {
                             <Route exact path="/wallet/recoverWallet" component={this.recoverWallet} />
                             <Route exact path="/wallet/detail/:name" component={this.walletDetail} />
                             <Route exact path="/peersView" component={this.peersView} />
-                            <Route exact path="*" component={this.notFound} />
                         </Switch>
                     </div>
                 </main>

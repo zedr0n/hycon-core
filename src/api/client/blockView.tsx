@@ -1,11 +1,13 @@
 import Long = require("long")
 import * as React from "react"
-import { IBlock, IRest } from "./rest"
+import { NotFound } from "./notFound"
+import { IBlock, IResponseError, IRest } from "./rest"
 import { hyconfromString, hycontoString } from "./stringUtil"
 import { TxList } from "./txList"
 interface IBlockProps {
     rest: IRest
     hash: string
+    notFound: boolean
 }
 
 interface IBlockViewState {
@@ -15,12 +17,17 @@ interface IBlockViewState {
     amount?: string
     fees?: string
     volume?: string
+    notFound: boolean
 }
 export class BlockView extends React.Component<IBlockProps, IBlockViewState> {
     public mounted: boolean = false
     constructor(props: IBlockProps) {
         super(props)
-        this.state = { hash: props.hash, rest: props.rest }
+        this.state = {
+            hash: props.hash,
+            notFound: false,
+            rest: props.rest,
+        }
     }
     public componentWillUnmount() {
         this.mounted = false
@@ -28,30 +35,40 @@ export class BlockView extends React.Component<IBlockProps, IBlockViewState> {
     public componentDidMount() {
         this.mounted = true
         this.state.rest.setLoading(true)
-        this.state.rest.getBlock(this.state.hash).then((data: IBlock) => {
-            let amount = Long.fromInt(0)
-            let fees = Long.fromInt(0)
-            for (const tx of data.txs) {
-                amount = amount.add(hyconfromString(tx.amount))
-                if (tx.fee !== undefined) {
-                    fees = fees.add(hyconfromString(tx.fee))
-                }
-            }
-            const volume = amount.add(fees)
+        this.state.rest.getBlock(this.state.hash).then((data: IBlock & IResponseError) => {
             this.state.rest.setLoading(false)
-            if (this.mounted) {
-                this.setState({
-                    amount: hycontoString(amount),
-                    block: data,
-                    fees: hycontoString(fees),
-                    volume: hycontoString(volume),
-                })
+            if (data.txs) {
+                let amount = Long.fromInt(0)
+                let fees = Long.fromInt(0)
+                for (const tx of data.txs) {
+                    amount = amount.add(hyconfromString(tx.amount))
+                    if (tx.fee !== undefined) {
+                        fees = fees.add(hyconfromString(tx.fee))
+                    }
+                }
+                const volume = amount.add(fees)
+                this.state.rest.setLoading(false)
+                if (this.mounted) {
+                    this.setState({
+                        amount: hycontoString(amount),
+                        block: data,
+                        fees: hycontoString(fees),
+                        volume: hycontoString(volume),
+                    })
+                }
+            } else {
+                this.setState({ notFound: true })
             }
+        }).catch((e: Error) => {
+            alert(e)
         })
     }
     public render() {
-        if (this.state.block === undefined) {
-            return < div ></div >
+        if (this.state.notFound) {
+            return <NotFound />
+        }
+        if (!this.state.notFound && this.state.block === undefined) {
+            return <div></div>
         }
         const date = new Date(this.state.block.timeStamp)
         return (
@@ -60,12 +77,7 @@ export class BlockView extends React.Component<IBlockProps, IBlockViewState> {
                 <table className="table_margined blockTable">
                     <thead>
                         <tr>
-                            <th
-                                colSpan={2}
-                                className="tableBorder_Header tableHeader_floatLeft"
-                            >
-                                Summary
-                            </th>
+                            <th colSpan={2} className="tableBorder_Header tableHeader_floatLeft">Summary</th>
                         </tr>
                     </thead>
                     <tbody>

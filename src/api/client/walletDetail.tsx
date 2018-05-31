@@ -9,7 +9,8 @@ import * as ReactPaginate from "react-paginate"
 import { Redirect } from "react-router"
 import { Link } from "react-router-dom"
 import { MinedBlockLine } from "./minedBlockLine"
-import { IHyconWallet, IMinedInfo, IRest, ITxProp } from "./rest"
+import { NotFound } from "./notFound"
+import { IHyconWallet, IMinedInfo, IResponseError, IRest, ITxProp } from "./rest"
 import { TxLine } from "./txLine"
 interface IWalletDetailProps {
     rest: IRest
@@ -17,6 +18,7 @@ interface IWalletDetailProps {
     wallet: IHyconWallet
     minedBlocks: IMinedInfo[]
     accounts: IHyconWallet[]
+    notFound: boolean
 }
 export class WalletDetail extends React.Component<any, any> {
     public msg1: string = "Are you sure delete your wallet?"
@@ -35,6 +37,7 @@ export class WalletDetail extends React.Component<any, any> {
             minedBlocks: [],
             minerIndex: 1,
             name: props.name,
+            notFound: false,
             rest: props.rest,
             txs: [],
             visible: false,
@@ -47,10 +50,12 @@ export class WalletDetail extends React.Component<any, any> {
     public componentDidMount() {
         this.mounted = true
         this.props.rest.setLoading(true)
-        this.props.rest.getWalletDetail(this.state.name).then((data: IHyconWallet) => {
+        this.props.rest.getWalletDetail(this.state.name).then((data: IHyconWallet & IResponseError) => {
             this.state.rest.setLoading(false)
-            if (this.mounted) {
+            if (this.mounted && data.address) {
                 this.setState({ wallet: data, address: data.address, txs: data.txs, minedBlocks: data.minedBlocks })
+            } else {
+                this.setState({ notFound: true })
             }
         }).catch((e: Error) => {
             alert(e)
@@ -106,8 +111,11 @@ export class WalletDetail extends React.Component<any, any> {
     public render() {
         let accountIndex = 0
         let minedIndex = 0
-        if (this.state.wallet === undefined) {
-            return < div ></div >
+        if (this.state.notFound) {
+            return <NotFound />
+        }
+        if (!this.state.notFound && this.state.wallet === undefined) {
+            return <div></div>
         }
         if (this.state.redirect) {
             return <Redirect to="/wallet" />

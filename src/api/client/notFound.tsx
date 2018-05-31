@@ -16,7 +16,7 @@ export class NotFound extends React.Component<any, any> {
                 <div>Sorry, the page you tried connot be found</div>
                 <br></br>
                 <Link to="/"><button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
-                >GO TO HOME</button></Link>
+                >BACK TO HOME</button></Link>
             </div>
         )
     }

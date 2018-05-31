@@ -104,13 +104,13 @@ export interface IRest {
     generateWallet(Hwallet: IHyconWallet): Promise<string>
     getAddressInfo(address: string): Promise<IWalletAddress>
     getAllAccounts(name: string): Promise<{ represent: number, accounts: Array<{ address: string, balance: string }> } | boolean>
-    getBlock(hash: string): Promise<IBlock>
+    getBlock(hash: string): Promise<IBlock | IResponseError>
     getBlockList(index: number): Promise<{ blocks: IBlock[], length: number }>
     getMnemonic(lang: string): Promise<string>
     // [ipeer.ts not implemented] getPeerDetails(hash: string): Promise<IPeer>
     // [ipeer.ts not implemented] getPeersList(hash: string): Promise<IPeer[]>
     getTx(hash: string): Promise<ITxProp | IResponseError>
-    getWalletDetail(name: string): Promise<IHyconWallet>
+    getWalletDetail(name: string): Promise<IHyconWallet | IResponseError>
     getWalletList(): Promise<IHyconWallet[]>
     recoverWallet(Hwallet: IHyconWallet): Promise<string | boolean>
     // [Depreciated: Use above] recoverWalletForce(Hwallet: IHyconWallet): Promise<string | boolean>
