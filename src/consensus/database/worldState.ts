@@ -244,7 +244,6 @@ export class WorldState {
                 // TODO: Remove this if function and test
                 return TxValidity.Invalid
             }
-
             const from = await this.getModifiedAccount(tx.from, previousState, mapIndex, changes)
             if (tx.nonce < (from.account.nonce + 1)) {
                 logger.info(`Tx ${new Hash(tx)} Rejected: TxNonce=${tx.nonce} ${tx.from} Nonce=${from.account.nonce}`)
@@ -290,6 +289,7 @@ export class WorldState {
         if (account !== undefined) {
             return { account, address }
         }
+        logger.warn(`Account(${address}) is undefined in previous state (${state})`)
         return { account: new Account({ balance: 0, nonce: 0 }), address }
     }
 

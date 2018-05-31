@@ -81,6 +81,7 @@ export class Verify {
 
         const { offset, fileNumber, length } = await database.writeBlock(block)
         await worldState.putPending(stateTransition.batch, stateTransition.mapAccount)
+        await worldState.print(stateTransition.currentStateRoot)
 
         dbBlock.offset = offset
         dbBlock.fileNumber = fileNumber
