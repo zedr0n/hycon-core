@@ -1,8 +1,10 @@
 import Button from "@material-ui/core/Button"
+import CardContent from "@material-ui/core/CardContent"
+import Grid from "@material-ui/core/Grid"
 import Icon from "@material-ui/core/Icon"
 import GoogleMapReact from "google-map-react"
 import Long = require("long")
-import { CircularProgress, TextField } from "material-ui"
+import { Card, CircularProgress, TextField } from "material-ui"
 import Dialog from "material-ui/Dialog"
 import * as React from "react"
 import { Redirect } from "react-router"
@@ -160,30 +162,34 @@ export class Transaction extends React.Component<any, any> {
         }
         if (this.state.wallet === undefined) { return < div ></div > }
         return (
-            <div>
-                <Dialog open={true} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" >
-                    <div style={{ textAlign: "center" }}>
-                        <h3 style={{ color: "grey" }}><Icon style={{ transform: "rotate(-25deg)", marginRight: "10px", color: "grey" }}>send</Icon>Send Transaction</h3><br />
-                        <TextField style={{ width: "330px" }} floatingLabelText="From Address" type="text" disabled={true} value={this.state.wallet.address} />
-                        <TextField name="address" floatingLabelFixed={true} style={{ marginLeft: "30px", width: "330px" }} floatingLabelText="To Address" type="text" value={this.state.address} onChange={this.handleInputChange} />
-                        <br />
-                        <TextField style={{ width: "330px" }} floatingLabelText="Balance" type="text" disabled={true} value={this.state.piggyBank} />
-                        <TextField floatingLabelText="Pending Amount" style={{ marginLeft: "30px", width: "330px" }} type="text" disabled={true} value={this.state.wallet.pendingAmount} />
-                        <br />
-                        <TextField style={{ width: "330px" }} name="amount" floatingLabelFixed={true} floatingLabelText="Amount" type="text" value={this.state.amount} max={this.state.piggyBank} onChange={this.handleInputChange} />
-                        <TextField name="minerFee" floatingLabelFixed={true} style={{ marginLeft: "30px", width: "330px" }} floatingLabelText="Miner Fee" type="text" value={this.state.minerFee} onChange={this.handleInputChange} />
-                        <br />
-                        <TextField name="password" floatingLabelFixed={true} style={{ marginRight: "20px", width: "330px" }} floatingLabelText="Wallet Password" type="password" autoComplete="off" onChange={(data) => { this.handlePassword(data) }} />
-                        {this.state.isHint ? (<span style={{ fontSize: "12px" }}>(Password Hint: {this.state.hint})</span>) : (<Button onClick={(e) => this.showHint(e)}>Hint</Button>)}
-                        <br /><br />
-                        <Button variant="raised" onClick={this.handleSubmit} style={{ backgroundColor: "#50aaff", color: "white", float: "right", marginLeft: "10px" }}>
-                            <span style={{ marginRight: "15px" }}>Send</span><Icon>send</Icon>
-                        </Button>
-                        <Button variant="raised" onClick={this.handleCancel} style={{ backgroundColor: "rgb(225, 0, 80)", color: "white", float: "right" }}>
-                            <span style={{ marginRight: "5px" }}>Cancel</span><Icon>cancel</Icon>
-                        </Button>
-                    </div>
-                </Dialog>
+            <div style={{ width: "60%", margin: "auto" }}>
+                <Card>
+                    <CardContent>
+                        <div style={{ textAlign: "center" }}>
+                            <h3 style={{ color: "grey" }}><Icon style={{ transform: "rotate(-25deg)", marginRight: "10px", color: "grey" }}>send</Icon>Send Transaction</h3><br />
+                            <TextField style={{ width: "330px" }} floatingLabelText="From Address" type="text" disabled={true} value={this.state.wallet.address} />
+                            <TextField name="address" floatingLabelFixed={true} style={{ marginLeft: "30px", width: "330px" }} floatingLabelText="To Address" type="text" value={this.state.address} onChange={this.handleInputChange} />
+                            <br />
+                            <TextField style={{ width: "330px" }} floatingLabelText="Balance" type="text" disabled={true} value={this.state.piggyBank} />
+                            <TextField floatingLabelText="Pending Amount" style={{ marginLeft: "30px", width: "330px" }} type="text" disabled={true} value={this.state.wallet.pendingAmount} />
+                            <br />
+                            <TextField style={{ width: "330px" }} name="amount" floatingLabelFixed={true} floatingLabelText="Amount" type="text" value={this.state.amount} max={this.state.piggyBank} onChange={this.handleInputChange} />
+                            <TextField name="minerFee" floatingLabelFixed={true} style={{ marginLeft: "30px", width: "330px" }} floatingLabelText="Miner Fee" type="text" value={this.state.minerFee} onChange={this.handleInputChange} />
+                            <br />
+                            <TextField name="password" floatingLabelFixed={true} style={{ marginRight: "20px", width: "330px" }} floatingLabelText="Wallet Password" type="password" autoComplete="off" onChange={(data) => { this.handlePassword(data) }} />
+                            {this.state.isHint ? (<span style={{ fontSize: "12px" }}>(Password Hint: {this.state.hint})</span>) : (<Button onClick={(e) => this.showHint(e)}>Hint</Button>)}
+                            <br /><br />
+                            <Grid container direction={"row"} justify={"flex-end"} alignItems={"flex-end"}>
+                                <Button variant="raised" onClick={this.handleSubmit} style={{ backgroundColor: "#50aaff", color: "white", float: "right", margin: "0 10px" }}>
+                                    <span style={{ marginRight: "10px" }}>Send</span><Icon>send</Icon>
+                                </Button>
+                                <Button variant="raised" onClick={this.handleCancel} style={{ backgroundColor: "rgb(225, 0, 80)", color: "white", float: "right" }}>
+                                    <span style={{ marginRight: "5px" }}>Cancel</span><Icon>cancel</Icon>
+                                </Button>
+                            </Grid>
+                        </div>
+                    </CardContent>
+                </Card >
                 <Dialog open={this.state.isLoading} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" >
                     <div style={{ textAlign: "center" }}>
                         <CircularProgress style={{ marginRight: "5px" }} size={50} thickness={2} /> LOADING
