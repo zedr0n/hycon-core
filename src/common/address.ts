@@ -6,6 +6,7 @@ import { Hash } from "../util/hash"
 const logger = getLogger("Address")
 
 function checkSum(arr: Uint8Array): string {
+    // Consensus Critical
     const hash = Hash.hash(arr)
     let str = Base58.encode(hash)
     str = str.slice(0, 4)
@@ -13,6 +14,7 @@ function checkSum(arr: Uint8Array): string {
 }
 
 function toUint8Array(address: (string | Uint8Array | Buffer)): Uint8Array {
+    // Consensus Critical
     if (typeof address === "string") {
         if (address.charAt(0) !== "H") {
             throw new Error(`Address is invalid. Expected address to start with 'H'`)
@@ -40,6 +42,7 @@ export class Address extends Uint8Array {
     }
 
     constructor(address: string | number | Uint8Array | Buffer) {
+        // Consensus Critical
         typeof address === "number" ? super(address) : super(toUint8Array(address))
         // Need to allow for super constructor for number due to extension of Uint8Array
     }
@@ -53,6 +56,7 @@ export class Address extends Uint8Array {
     }
 
     public equals(address: Address): boolean {
+        // Consensus Critical
         if (this.length !== address.length) { return false }
         for (let i = 0; i < address.length; i++) {
             if (this[i] !== address[i]) {

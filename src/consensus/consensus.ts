@@ -20,6 +20,7 @@ import { ITxDatabase } from "./database/itxDatabase"
 import { MinedDatabase } from "./database/minedDatabase"
 import { TxDatabase } from "./database/txDatabase"
 import { TxValidity, WorldState } from "./database/worldState"
+import { DifficultyAdjuster } from "./difficultyAdjuster"
 import { IConsensus, IStatusChange } from "./iconsensus"
 import { BlockStatus } from "./sync"
 import { Verify } from "./verify"
@@ -37,13 +38,13 @@ export class Consensus extends EventEmitter implements IConsensus {
 
     private futureBlockQueue: DelayQueue
 
-    constructor(txPool: ITxPool, dbPath: string, wsPath: string, filePath: string, txPath?: string, minedDBPath?: string) {
+    constructor(txPool: ITxPool, worldState: WorldState, dbPath: string, filePath: string, txPath?: string, minedDBPath?: string) {
         super()
+        this.worldState = worldState
         this.txPool = txPool
         this.db = new Database(dbPath, filePath)
         if (txPath) { this.txdb = new TxDatabase(txPath) }
         if (minedDBPath) { this.minedDatabase = new MinedDatabase(minedDBPath) }
-        this.worldState = new WorldState(wsPath, txPool)
         this.futureBlockQueue = new DelayQueue(10)
     }
     public async init(): Promise<void> {
@@ -67,7 +68,10 @@ export class Consensus extends EventEmitter implements IConsensus {
                 const genesis = await this.initGenesisBlock()
             }
 
-            this.txPool.onTopTxChanges(10, (txs: SignedTx[]) => this.createCandidateBlock()) // TODO: move/remove?
+            if (globalOptions.bootstrap !== undefined) {
+                this.emit("candidate", this.blockTip, new Hash(this.blockTip.header))
+            }
+
             logger.info(`Initialization of consensus is over.`)
         } catch (e) {
             logger.error(`Initialization failure in consensus: ${e}`)
@@ -75,9 +79,6 @@ export class Consensus extends EventEmitter implements IConsensus {
         } finally {
             this.lock.releaseLock()
         }
-    }
-    public triggerMining() {
-        this.createCandidateBlock()
     }
 
     public putBlock(block: Block): Promise<IStatusChange> {
@@ -213,21 +214,21 @@ export class Consensus extends EventEmitter implements IConsensus {
                     await this.db.putDBBlock(hash, dbBlock)
                 }
 
-                if (this.headerTip === undefined || dbBlock.totalWork.greaterThan(this.headerTip.totalWork)) {
+                if (this.headerTip === undefined || dbBlock.totalWork > this.headerTip.totalWork) {
                     this.headerTip = dbBlock
                     await this.db.setHeaderTip(hash)
                 }
 
-                if (block !== undefined && (this.blockTip === undefined || dbBlock.totalWork.greaterThan(this.blockTip.totalWork))) {
+                if (block !== undefined && (this.blockTip === undefined || dbBlock.totalWork > this.blockTip.totalWork)) {
                     await this.reorganize(hash, block, dbBlock)
                     await this.db.setBlockTip(hash)
-                    this.createCandidateBlock(this.blockTip, hash)
+                    this.emit("candidate", this.blockTip, hash)
                 }
 
                 logger.info(`Put ${block ? "Block" : "Header"}`
-                    + ` ${hash}(${dbBlock.height}, ${dbBlock.totalWork.getMantissa()}e${dbBlock.totalWork.getExponent()}),`
-                    + ` BTip(${this.blockTip.height}, ${this.blockTip.totalWork.getMantissa()}e${this.blockTip.totalWork.getExponent()}),`
-                    + ` HTip(${this.headerTip.height}, ${this.headerTip.totalWork.getMantissa()}e${this.headerTip.totalWork.getExponent()})`)
+                    + ` ${hash}(${dbBlock.height}, ${dbBlock.totalWork.toExponential()}),`
+                    + ` BTip(${this.blockTip.height}, ${this.blockTip.totalWork.toExponential()}),`
+                    + ` HTip(${this.headerTip.height}, ${this.headerTip.totalWork.toExponential()})`)
             }
             return { oldStatus, status }
         })
@@ -239,6 +240,7 @@ export class Consensus extends EventEmitter implements IConsensus {
             dbBlock?: DBBlock,
             dbBlockHasChanged?: boolean,
         }> {
+        // Consensus Critical
         const oldStatus = await this.db.getBlockStatus(hash)
         let status = oldStatus
         if (oldStatus === BlockStatus.Rejected) {
@@ -291,6 +293,7 @@ export class Consensus extends EventEmitter implements IConsensus {
     }
 
     private async reorganize(newBlockHash: Hash, newBlock: Block, newDBBlock: DBBlock) {
+        // Consensus Critical
         const newBlockHashes: Hash[] = []
         const newBlocks: Block[] = []
         let popStopHeight = newDBBlock.height
@@ -317,8 +320,8 @@ export class Consensus extends EventEmitter implements IConsensus {
         const popCount = popHeight - popStopHeight + 1
         if (popCount >= 1) {
             logger.info(`Reorganizing, removing ${popCount} blocks for ${newBlocks.length} new blocks on a longer chain, `
-                + `new tip ${newBlockHash.toString()}(${newDBBlock.height}, ${newDBBlock.totalWork.getMantissa()}e${newDBBlock.totalWork.getExponent()}), `
-                + `previous tip ${popHash.toString()}(${popHeight}, ${this.blockTip.totalWork.getMantissa()}e${this.blockTip.totalWork.getExponent()}`)
+                + `new tip ${newBlockHash.toString()}(${newDBBlock.height}, ${newDBBlock.totalWork.toExponential()}), `
+                + `previous tip ${popHash.toString()}(${popHeight}, ${this.blockTip.totalWork.toExponential()}`)
         }
 
         const popTxs: SignedTx[] = []
@@ -362,45 +365,17 @@ export class Consensus extends EventEmitter implements IConsensus {
         this.txPool.removeTxs(removeTxs)
     }
 
-    private async createCandidateBlock(previousDBBlock: DBBlock = this.blockTip, previousHash: Hash = new Hash(previousDBBlock.header)) {
-        try {
-            const timeStamp = Date.now()
-            if (globalOptions.minerAddress === undefined || globalOptions.minerAddress === "") {
-                logger.info("Can't mine without miner address")
-                return
-            }
-            const miner: Address = new Address(globalOptions.minerAddress)
-            const { stateTransition: { currentStateRoot }, validTxs, invalidTxs } = await this.worldState.next(previousDBBlock.header.stateRoot, miner)
-            const newBlock = new Block({
-                header: new BlockHeader({
-                    difficulty: previousDBBlock.nextDifficulty.encode(),
-                    merkleRoot: Block.calculateMerkleRoot(validTxs),
-                    miner,
-                    nonce: -1,
-                    previousHash: [previousHash],
-                    stateRoot: currentStateRoot,
-                    timeStamp,
-                }),
-                txs: validTxs,
-            })
-            this.emit("candidate", newBlock)
-        } catch (e) {
-            logger.error(`Fail to createCandidateBlock: ${e}`)
-            throw e
-        }
-    }
-
     private async initGenesisBlock(): Promise<GenesisBlock> {
         try {
             const genesis = GenesisBlock.loadFromFile()
             const transition = await this.worldState.first(genesis)
             await this.worldState.putPending(transition.batch, transition.mapAccount)
             genesis.header.stateRoot = transition.currentStateRoot // TODO: Investigate
-            genesis.header.difficulty = 0x08000001
+            genesis.header.difficulty = 1
             genesis.header.merkleRoot = new Hash("Centralization is the root of all evil.")
             const genesisHash = new Hash(genesis.header)
             const { fileNumber, length, filePosition, offset } = await this.db.writeBlock(genesis)
-            const dbBlock = new DBBlock({ fileNumber, header: genesis.header, height: 0, length, offset, timeEMA: 0, totalWork: 0, nextDifficulty: 0 })
+            const dbBlock = new DBBlock({ fileNumber, header: genesis.header, height: 0, length, offset, tEMA: DifficultyAdjuster.getTargetTime(), pEMA: Math.pow(2, -10), totalWork: 0, nextDifficulty: Math.pow(2, -10) })
             await this.db.putDBBlock(genesisHash, dbBlock)
             this.blockTip = this.headerTip = dbBlock
             await this.db.setBlockStatus(genesisHash, BlockStatus.MainChain)

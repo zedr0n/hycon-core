@@ -268,7 +268,7 @@ export class Sync {
                 height += blocks.length
             } while (blocks.length > 0)
         } catch (e) {
-            throw new Error(`Could not completely sync blocks: ${e}`)
+            throw new Error(`Could not completely sync blocks: ${e} -- ${this.peer.getInfo()}`)
         }
     }
 }

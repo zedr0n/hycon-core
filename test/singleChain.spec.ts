@@ -5,6 +5,7 @@ import { GenesisBlock } from "../src/common/blockGenesis"
 import { ITxPool } from "../src/common/itxPool"
 import { Consensus } from "../src/consensus/consensus"
 import { Database } from "../src/consensus/database/database"
+import { WorldState } from "../src/consensus/database/worldState"
 import { IConsensus } from "../src/consensus/iconsensus"
 import { MinerServer } from "../src/miner/minerServer"
 import { Server } from "../src/server"
@@ -12,6 +13,7 @@ import { Server } from "../src/server"
 xdescribe("SingleChain", () => {
     let serverSpy: jasmine.SpyObj<Server> = jasmine.createSpyObj("Server", ["run"])
     const txPool: jasmine.SpyObj<ITxPool> = jasmine.createSpyObj("TxPoolSpy", [])
+    const worldState: jasmine.SpyObj<WorldState> = jasmine.createSpyObj("WorldStateSpy", [])
     let consensus: Consensus
     let dbSpy: jasmine.SpyObj<Database> = jasmine.createSpyObj("Database", ["init"])
     let header = {}
@@ -35,7 +37,7 @@ xdescribe("SingleChain", () => {
         dbSpy.getHeaderTip.and.callFake(() => {
 
         })
-        consensus = new Consensus(txPool, "./garbage", "./garbage", "./garbage")
+        consensus = new Consensus(txPool, worldState, "./garbage", "./garbage")
         // Dirty trick to prevent an actual DB from forming
         // tslint:disable-next-line:no-string-literal
         consensus["db"] = dbSpy

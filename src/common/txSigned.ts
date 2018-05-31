@@ -101,6 +101,7 @@ export class SignedTx implements proto.ITx {
     }
 
     public verify(): boolean {
+        // Consensus Critical
         try {
             const pubkey = new PublicKey(this)
             return pubkey.verify(this)

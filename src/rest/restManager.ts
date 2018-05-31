@@ -15,8 +15,6 @@ export class RestManager {
     public consensus: IConsensus
 
     public network: INetwork
-    private db: Database
-    private accountDB: WorldState
     private server: Server
     constructor(server: Server) {
         this.server = server

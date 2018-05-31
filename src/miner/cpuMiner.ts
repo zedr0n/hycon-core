@@ -1,7 +1,7 @@
 import { getLogger } from "log4js"
 import Long = require("long")
 import { Block } from "../common/block"
-import { Difficulty } from "../consensus/difficulty"
+import { DifficultyAdjuster } from "../consensus/difficultyAdjuster"
 import { Hash } from "../util/hash"
 import { MinerServer } from "./minerServer"
 const logger = getLogger("CpuMiner")
@@ -13,7 +13,7 @@ interface IAsyncCpuMiner {
 }
 
 export class CpuMiner {
-    public static mine(preHash: Uint8Array, difficulty: Difficulty, prefix: number, startNonce: number = 0, maxNonce: number = 0xFFFFFFFF): IAsyncCpuMiner {
+    public static mine(preHash: Uint8Array, difficulty: number, prefix: number, startNonce: number = 0, maxNonce: number = 0xFFFFFFFF): IAsyncCpuMiner {
         let calculate = true
         const hashrate = 0
         let currentNonce = startNonce
@@ -24,11 +24,11 @@ export class CpuMiner {
                 const buffer = Buffer.allocUnsafe(72)
                 buffer.fill(preHash, 0, 64)
                 buffer.writeUInt32LE(prefix, 64)
-                const target = difficulty.getTarget()
+                const target = DifficultyAdjuster.getTarget(difficulty, 32)
 
                 while (currentNonce < maxNonce && calculate) {
                     buffer.writeUInt32LE(currentNonce, 68)
-                    if (difficulty.acceptable(await Hash.hashCryptonight(buffer), target)) {
+                    if (DifficultyAdjuster.acceptable(await Hash.hashCryptonight(buffer), target)) {
                         const low = buffer.readInt32LE(64)
                         const high = buffer.readInt32LE(68)
                         resolve(Long.fromBits(low, high, true))
@@ -88,7 +88,7 @@ export class CpuMiner {
         return Promise.all(promises)
     }
 
-    public putWork(block: Block, prehash: Uint8Array, difficulty: Difficulty) {
+    public putWork(block: Block, prehash: Uint8Array, difficulty: number) {
         this.stop()
         this.miners = []
         const hash = new Hash(block.header)

@@ -3069,8 +3069,11 @@ export interface IBlockDB {
     /** BlockDB length */
     length?: number;
 
-    /** BlockDB timeEMA */
-    timeEMA?: number;
+    /** BlockDB tEMA */
+    tEMA?: number;
+
+    /** BlockDB pEMA */
+    pEMA?: number;
 
     /** BlockDB nextDifficulty */
     nextDifficulty?: number;
@@ -3103,8 +3106,11 @@ export class BlockDB implements IBlockDB {
     /** BlockDB length. */
     public length: number;
 
-    /** BlockDB timeEMA. */
-    public timeEMA: number;
+    /** BlockDB tEMA. */
+    public tEMA: number;
+
+    /** BlockDB pEMA. */
+    public pEMA: number;
 
     /** BlockDB nextDifficulty. */
     public nextDifficulty: number;

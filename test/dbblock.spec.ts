@@ -8,7 +8,6 @@ import { BlockHeader } from "../src/common/blockHeader"
 import * as HeaderBlock from "../src/common/blockHeader"
 import { setGenesisBlockHeader } from "../src/common/genesisHeader"
 import { DBBlock } from "../src/consensus/database/dbblock"
-import { Difficulty } from "../src/consensus/difficulty"
 import * as proto from "../src/serialization/proto"
 import { BlockDB } from "../src/serialization/proto"
 import { Hash } from "../src/util/hash"
@@ -33,10 +32,10 @@ describe("DBBlock Test", () => {
             header: new BlockHeader(iBlockHeader),
             height: 0,
             length: 0,
-            nextDifficulty: new Difficulty(0x0000FF, 0x00).encode(),
+            nextDifficulty: 1,
             offset: 0,
-            timeEMA: 30,
-            totalWork: new Difficulty(0x0000FF, 0x00).encode(),
+            tEMA: 30,
+            totalWork: 0,
         }
         dbBlock = new DBBlock(iDBBlock)
     })
@@ -49,9 +48,9 @@ describe("DBBlock Test", () => {
         expect(block.offset).toEqual(0)
         expect(block.header).toBeDefined()
         expect(block.length).toEqual(0)
-        expect(block.timeEMA).toEqual(30)
-        expect(block.totalWork.encode()).toEqual(0x100000FF)
-        expect(block.nextDifficulty.encode()).toEqual(0x100000FF)
+        expect(block.tEMA).toEqual(30)
+        expect(block.totalWork).toEqual(0)
+        expect(block.nextDifficulty).toEqual(1)
     })
 
     it("set(block) : if set method set property", () => {
@@ -78,19 +77,19 @@ describe("DBBlock Test", () => {
             header: iBlockHeader,
             height: 7,
             length: 9,
-            nextDifficulty: new Difficulty(0x0000EE, 0x00).encode(),
+            nextDifficulty: 1,
             offset: 8,
-            timeEMA: 30,
-            totalWork: new Difficulty(0x0000FF, 0x00).encode(),
+            tEMA: 30,
+            totalWork: 0,
         })
 
         expect(dbBlock.height).toEqual(7)
         expect(dbBlock.fileNumber).toEqual(6)
         expect(dbBlock.offset).toEqual(8)
         expect(dbBlock.length).toEqual(9)
-        expect(dbBlock.timeEMA).toEqual(30)
-        expect(dbBlock.totalWork.encode()).toEqual(0xFF)
-        expect(dbBlock.nextDifficulty.encode()).toEqual(0xEE)
+        expect(dbBlock.tEMA).toEqual(30)
+        expect(dbBlock.totalWork).toEqual(0xFF)
+        expect(dbBlock.nextDifficulty).toEqual(0xEE)
         expect(setSpy).toHaveBeenCalled()
     })
 

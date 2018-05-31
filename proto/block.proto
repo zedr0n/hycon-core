@@ -14,7 +14,8 @@ message BlockDB {
     uint32 fileNumber = 3;
     uint32 offset = 4;
     uint32 length = 5;
-    double timeEMA = 6;
-    uint32 nextDifficulty = 7;
-    uint32 totalWork = 8;
+    double tEMA = 6;
+    double pEMA = 7;
+    double nextDifficulty = 8;
+    double totalWork = 9;
 }

@@ -9,15 +9,18 @@ message DBState {
 }
 
 message Account {
+    // Consensus Critical
     uint64 balance = 1;
     uint32 nonce = 2;
 }
 
 message StateNode {
+    // Consensus Critical
     repeated NodeRef nodeRefs = 1;
 }
 
 message NodeRef {
-    bytes address = 1; //Address
+    // Consensus Critical
+    bytes address = 1;
     bytes child = 2; //Hash
 }

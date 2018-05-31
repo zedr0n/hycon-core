@@ -14,6 +14,7 @@ import * as proto from "../serialization/proto"
 const cryptonight = require("node-cryptonight").asyncHash
 
 function toUint8Array(ob?: Tx | Block | GenesisBlockHeader | BlockHeader | string | SignedTx | GenesisTx | GenesisSignedTx | StateNode | Account | Uint8Array | Buffer): Uint8Array {
+    // Consensus Critical
     if (ob !== undefined) {
         if (typeof ob === "string") {
             return Hash.hash(ob)
@@ -45,11 +46,13 @@ export class Hash extends Uint8Array {
     }
 
     public static hash(ob: Uint8Array | string): Uint8Array {
+        // Consensus Critical
         typeof ob === "string" ? ob = Buffer.from(ob) : ob = ob
         return blake2b(32).update(ob).digest()
     }
 
     public static async hashCryptonight(ob: Uint8Array | string): Promise<Uint8Array> {
+        // Consensus Critical
         if (typeof ob === "string") {
             ob = Buffer.from(ob)
         }
@@ -65,6 +68,7 @@ export class Hash extends Uint8Array {
     }
 
     constructor(ob?: Tx | Block | GenesisBlockHeader | BlockHeader | string | SignedTx | GenesisTx | GenesisSignedTx | StateNode | Account | Uint8Array | Buffer) {
+        // Consensus Critical
         super(toUint8Array(ob))
     }
 
@@ -77,10 +81,12 @@ export class Hash extends Uint8Array {
     }
 
     public toBuffer(): Buffer {
+        // Consensus Critical
         return Buffer.from(this as Uint8Array as Buffer)
     }
 
     public equals(other: Hash): boolean {
+        // Consensus Critical
         if (this.length !== other.length) { return false }
         for (let i = 0; i < other.length; i++) {
             if (this[i] !== other[i]) {

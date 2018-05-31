@@ -4,12 +4,12 @@ import { AnyBlockHeader, BlockHeader } from "../common/blockHeader"
 import { PublicKey } from "../common/publicKey"
 import { GenesisSignedTx } from "../common/txGenesisSigned"
 import { SignedTx } from "../common/txSigned"
+import { globalOptions } from "../main"
 import { MinerServer } from "../miner/minerServer"
 import { Hash } from "../util/hash"
 import { Database } from "./database/database"
 import { DBBlock } from "./database/dbblock"
 import { IStateTransition, WorldState } from "./database/worldState"
-import { Difficulty } from "./difficulty"
 import { DifficultyAdjuster } from "./difficultyAdjuster"
 import { BlockStatus } from "./sync"
 
@@ -20,14 +20,15 @@ export class Verify {
             newStatus: BlockStatus;
             dbBlock?: DBBlock;
         }> {
-        if (Date.now() < header.timeStamp) {
-            // This should be prevented by the future block delayQueue
-            return { newStatus: BlockStatus.Nothing }
-        }
-        const { nextDifficulty, workDelta, timeEMA } = DifficultyAdjuster.adjustDifficulty(previousDBBlock, header.timeStamp)
+        // Consensus Critical
 
-        if (previousDBBlock.nextDifficulty.encode() !== header.difficulty) {
-            logger.warn(`Rejecting block(${hash.toString()}): Difficulty(${header.difficulty}) does not match calculated value(${previousDBBlock.nextDifficulty.encode()})`)
+        if (header.timeStamp < previousDBBlock.header.timeStamp + 50) {
+            return { newStatus: BlockStatus.Rejected }
+        }
+        const { nextDifficulty, tEMA, pEMA } = DifficultyAdjuster.adjustDifficulty(previousDBBlock, header.timeStamp)
+
+        if (previousDBBlock.nextDifficulty !== header.difficulty) {
+            logger.warn(`Rejecting block(${hash.toString()}): Difficulty(${header.difficulty}) does not match calculated value(${previousDBBlock.nextDifficulty})`)
             return { newStatus: BlockStatus.Rejected }
         }
 
@@ -39,8 +40,9 @@ export class Verify {
         }
 
         const height = previousDBBlock.height + 1
-        const totalWork = previousDBBlock.totalWork.add(workDelta)
-        const dbBlock = new DBBlock({ header, height, timeEMA, nextDifficulty: nextDifficulty.encode(), totalWork: totalWork.encode() })
+        const totalWork = previousDBBlock.totalWork + previousDBBlock.nextDifficulty
+        const dbBlock = new DBBlock({ header, height, tEMA, pEMA, nextDifficulty, totalWork })
+
         return { newStatus: BlockStatus.Header, dbBlock }
     }
 
@@ -50,6 +52,7 @@ export class Verify {
             dbBlock?: DBBlock;
             dbBlockHasChanged?: boolean;
         }> {
+        // Consensus Critical
         const merkleRoot = Block.calculateMerkleRoot(block.txs)
         if (!merkleRoot.equals(header.merkleRoot)) {
             logger.warn(`Rejecting block(${hash.toString()}): Merkle root(${header.merkleRoot.toString()}) does not match calculated value(${merkleRoot.toString()})`)

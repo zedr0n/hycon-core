@@ -4,6 +4,7 @@ message Txs {
 }
 
 message Tx {
+  // Consensus Critical
   bytes from = 1; //Address
   bytes to = 2; //Address
   uint64 amount = 3;

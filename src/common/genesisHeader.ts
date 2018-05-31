@@ -8,9 +8,11 @@ export class BaseBlockHeader implements proto.IBlockHeader {
     public difficulty: number
     public stateRoot: Hash
 
+    // Consensus Critical
     constructor() { }
 
     public set(header: proto.IBlockHeader): void {
+        // Consensus Critical
         if (header.merkleRoot === undefined) {
             throw new Error("Header missing merkle root")
         }
@@ -57,6 +59,7 @@ export function GenesisBlockHeader(): GenesisBlockHeader {
 }
 
 export function setGenesisBlockHeader(header: proto.IBlockHeader): GenesisBlockHeader {
+    // Consensus Critical
     const genesis = new BaseBlockHeader()
     genesis.set({
         difficulty: header.difficulty,

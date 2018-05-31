@@ -1,9 +1,8 @@
 import { AnyBlockHeader, BlockHeader } from "../../common/blockHeader"
 import { setGenesisBlockHeader } from "../../common/genesisHeader"
 import * as proto from "../../serialization/proto"
-import { Difficulty } from "../difficulty"
 
-export class DBBlock {
+export class DBBlock implements proto.IBlockDB {
     public static decode(data: Uint8Array): DBBlock {
         const blockDB = proto.BlockDB.decode(data)
         return new DBBlock(blockDB)
@@ -13,26 +12,32 @@ export class DBBlock {
     public fileNumber?: number
     public offset?: number
     public length?: number
-    public timeEMA: number
-    public nextDifficulty: Difficulty
-    public totalWork: Difficulty
+    public tEMA: number
+    public pEMA: number
+    public nextDifficulty: number
+    public totalWork: number
 
     constructor(dbBlock: proto.IBlockDB) {
+        // Consensus Critical
         this.set(dbBlock)
     }
 
     public set(block: proto.IBlockDB): void {
+        // Consensus Critical
         if (block.height === undefined) {
             throw new Error("DBBlock height is missing")
         }
         if (block.header === undefined) {
             throw new Error("DBBlock header is missing")
         }
-        if (block.timeEMA === undefined) {
-            throw new Error("DBBlock timeEMA is missing")
+        if (block.tEMA === undefined) {
+            throw new Error("DBBlock tEMA is missing")
+        }
+        if (block.pEMA === undefined) {
+            throw new Error("DBBlock pEMA is missing")
         }
         if (block.nextDifficulty === undefined) {
-            throw new Error("DBBlock workEMA is missing")
+            throw new Error("DBBlock nextDifficulty is missing")
         }
         if (block.totalWork === undefined) {
             throw new Error("DBBlock totalWork is missing")
@@ -47,14 +52,17 @@ export class DBBlock {
         if (block.length !== undefined) {
             this.length = block.length
         }
-        if (block.timeEMA !== undefined) {
-            this.timeEMA = block.timeEMA
+        if (block.tEMA !== undefined) {
+            this.tEMA = block.tEMA
+        }
+        if (block.pEMA !== undefined) {
+            this.pEMA = block.pEMA
         }
         if (block.nextDifficulty !== undefined) {
-            this.nextDifficulty = Difficulty.decode(block.nextDifficulty)
+            this.nextDifficulty = block.nextDifficulty
         }
         if (block.totalWork !== undefined) {
-            this.totalWork = Difficulty.decode(block.totalWork)
+            this.totalWork = block.totalWork
         }
 
         this.height = block.height
@@ -70,15 +78,6 @@ export class DBBlock {
     }
 
     public encode(): Uint8Array {
-        return proto.BlockDB.encode({
-            fileNumber: this.fileNumber,
-            header: this.header,
-            height: this.height,
-            length: this.length,
-            nextDifficulty: this.nextDifficulty.encode(),
-            offset: this.offset,
-            timeEMA: this.timeEMA,
-            totalWork: this.totalWork.encode(),
-        }).finish()
+        return proto.BlockDB.encode(this).finish()
     }
 }

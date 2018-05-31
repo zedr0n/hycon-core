@@ -13,11 +13,13 @@ export class BlockHeader extends BaseBlockHeader {
     public miner: Address
 
     constructor(header: proto.IBlockHeader) {
+        // Consensus Critical
         super()
         this.set(header)
     }
 
     public set(header: proto.IBlockHeader): void {
+        // Consensus Critical
         super.set(header)
         if (header.previousHash === undefined) { throw new Error("Header missing previous hash") }
         if (header.nonce === undefined) { throw new Error("Header missing nonce") }
@@ -36,11 +38,13 @@ export class BlockHeader extends BaseBlockHeader {
     }
 
     public preHash(): Uint8Array {
+        // Consensus Critical
         const hashExcludeNonce: Uint8Array = blake2b(64).update(this.prehashEncode()).digest()
         return hashExcludeNonce
     }
 
     private prehashEncode(): Uint8Array {
+        // Consensus Critical
         const header = Object.assign({}, this)
         delete header.nonce
         return proto.BlockHeader.encode(header).finish()

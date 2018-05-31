@@ -22,6 +22,7 @@ export class Block implements proto.IBlock {
         return new Block(block)
     }
     public static calculateMerkleRoot(txs: SignedTx[]): Hash {
+        // Consensus Critical
         const values: Uint8Array[] = txs.map((tx) => new Hash(tx))
         const tree = merkle(values, Hash.hash)
         return new Hash(tree[tree.length - 1])

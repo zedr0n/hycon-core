@@ -2,56 +2,70 @@ import { getLogger } from "log4js"
 import { AnyBlockHeader } from "../common/blockHeader"
 import { BaseBlockHeader } from "../common/genesisHeader"
 import { Hash } from "../util/hash"
-import { Difficulty } from "./../consensus/difficulty"
 import { DBBlock } from "./database/dbblock"
 
 const logger = getLogger("Difficulty")
 
 export class DifficultyAdjuster {
     public static adjustDifficulty(previousDBBlock: DBBlock, timeStamp: number, hash?: Hash) {
-        const timeDelta = timeStamp - previousDBBlock.header.timeStamp
-        if (timeDelta <= 0) {
-            throw new Error("Invalid block timestamp")
+        // Consensus Critical
+        const timeDelta = previousDBBlock.height > 0 ? timeStamp - previousDBBlock.header.timeStamp : DifficultyAdjuster.targetTime
+
+        const tEMA = DifficultyAdjuster.calcEMA(timeDelta, previousDBBlock.tEMA)
+        const pEMA = DifficultyAdjuster.calcEMA(previousDBBlock.nextDifficulty, previousDBBlock.pEMA)
+        const nextDifficulty = (tEMA * pEMA) / DifficultyAdjuster.targetTime
+
+        return { nextDifficulty, tEMA, pEMA }
+    }
+
+    public static calcEMA(newValue: number, previousEMA: number, alpha: number = DifficultyAdjuster.alpha) {
+        // Consensus Critical
+        const newEMA = alpha * newValue + (1 - alpha) * previousEMA
+        return newEMA
+    }
+
+    public static getTarget(p: number, length: number = 32) {
+        // Consensus Critical
+        if (p > 1) {
+            logger.warn(`Difficulty(${p.toExponential()}) is too low, anything is possible. (　＾∇＾)`)
+            p = 1
+        }
+        if (p < Math.pow(0x100, -length)) {
+            logger.warn(`Difficulty(${p.toExponential()}) is too high, give up now. (╯°□°）╯︵ ┻━┻`)
+            p = Math.pow(0x100, -length)
+        }
+        const target = Buffer.alloc(length)
+        let carry = 0
+        for (let i = length - 1; i >= 0; i--) {
+            carry = (0x100 * carry) + (p * 0xFF)
+            target[i] = Math.floor(carry)
+            carry -= target[i]
+        }
+        return target
+    }
+
+    public static acceptable(hash: Uint8Array | Hash, target: Uint8Array): boolean {
+        // Consensus Critical
+        if (!(hash instanceof Hash) && hash.length !== 32) {
+            throw new Error(`Expected 32 byte hash, got ${hash.length} bytes`)
         }
 
-        const workDelta = Difficulty.decode(previousDBBlock.header.difficulty)
-        const timeEMA = DifficultyAdjuster.calcTimeEMA(timeDelta, previousDBBlock.timeEMA)
-        const nextDifficulty = DifficultyAdjuster.calcNewDifficulty(timeEMA, workDelta)
-        return { nextDifficulty, workDelta, timeEMA }
-    }
-
-    public static calcNewDifficulty(timeEMA: number, workEMA: Difficulty, targetTime: number = DifficultyAdjuster.targetTime): Difficulty {
-        let timeRatio = targetTime / timeEMA
-        logger.debug(`workEMA m: ${workEMA.getMantissa().toString(16)} e: ${workEMA.getExponent()}, timeEMA: ${timeEMA}, targetTime: ${targetTime}, alpha: ${DifficultyAdjuster.alpha}, timeRatio: ${timeRatio}`)
-        timeRatio = timeRatio > 3 ? 3 : timeRatio
-        timeRatio = timeRatio < 0.25 ? 0.25 : timeRatio
-        const newDifficulty = workEMA.multiply(timeRatio)
-        logger.debug(`newDifficulty m: ${newDifficulty.getMantissa().toString(16)}, e: ${newDifficulty.getExponent()}`)
-        return newDifficulty
-    }
-
-    public static calcTimeEMA(newValue: number, prevEMA: number, alpha: number = DifficultyAdjuster.alpha) {
-        const newEMA = alpha * newValue + (1 - alpha) * prevEMA
-        return newEMA
-    }
-
-    public static calcWorkEMA(newValue: Difficulty, prevEMA: Difficulty, alpha: number = DifficultyAdjuster.alpha) {
-        const oldTerm = prevEMA.multiply(1 - alpha)
-        let newEMA = newValue.multiply(alpha)
-        newEMA = newEMA.add(oldTerm)
-        return newEMA
+        for (let i = 31; i >= 0; i--) {
+            if (hash[i] < target[i]) {
+                return true
+            }
+            if (hash[i] > target[i]) {
+                return false
+            }
+        }
+        return true
     }
 
     public static getTargetTime(): number {
+        // Consensus Critical
         return this.targetTime
     }
-    private static maxDifficulty = new Hash(new Uint8Array([
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-    ]))
-    private static alpha: number = 0.1
-    private static targetTime: number = 10000
+    private static alpha: number = 0.003
+    private static targetTime: number = 1000 / Math.LN2
 
 }

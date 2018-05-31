@@ -8,6 +8,7 @@ export class PublicKey {
     public readonly pubKey: Buffer
 
     constructor(pubKeySource: (SignedTx | GenesisSignedTx | Buffer)) {
+        // Consensus Critical
         if (pubKeySource instanceof Buffer) {
             this.pubKey = pubKeySource
         } else {
@@ -17,6 +18,7 @@ export class PublicKey {
     }
 
     public verify(tx: (SignedTx | GenesisSignedTx)): boolean {
+        // Consensus Critical
         let txAddress: Address
         if (tx instanceof SignedTx) {
             txAddress = tx.from
@@ -37,6 +39,7 @@ export class PublicKey {
     }
 
     public address(): Address {
+        // Consensus Critical
         const hash: Uint8Array = Hash.hash(this.pubKey)
         const add = new Uint8Array(20)
         for (let i = 12; i < 32; i++) {

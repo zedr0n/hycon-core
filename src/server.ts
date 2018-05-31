@@ -20,21 +20,24 @@ export class Server {
     public static subsid = 0
     public static triedSync: boolean = false
     public subscription: Map<number, any> | undefined
+
     public readonly consensus: IConsensus
     public readonly network: INetwork
     public readonly miner: MinerServer
 
     public readonly txPool: ITxPool
     public readonly rest: RestManager
+    public worldState: WorldState
     public httpServer: HttpServer
     public sync: Sync
     constructor() {
 
         const postfix = globalOptions.postfix
         this.txPool = new TxPool(this)
-        this.consensus = new Consensus(this.txPool, "blockdb" + postfix, "worldstate" + postfix, "rawblock" + postfix, "txDB" + postfix, "minedDB" + postfix)
+        this.worldState = new WorldState("worldstate" + postfix, this.txPool)
+        this.consensus = new Consensus(this.txPool, this.worldState, "blockdb" + postfix, "rawblock" + postfix, "txDB" + postfix, "minedDB" + postfix)
         this.network = new RabbitNetwork(this.txPool, this.consensus, globalOptions.port, "peerdb" + postfix, globalOptions.networkid)
-        this.miner = new MinerServer(this.consensus, this.network, globalOptions.cpuMiners, globalOptions.str_port)
+        this.miner = new MinerServer(this.worldState, this.consensus, this.network, globalOptions.cpuMiners, globalOptions.str_port)
         this.rest = new RestManager(this)
     }
     public async run() {
@@ -55,10 +58,6 @@ export class Server {
                 this.network.connect(ip, port).catch((e) => logger.error(`Failed to connect to client: ${e}`))
             }
         }
-        if (globalOptions.writing) {
-            logger.info("Test Writing")
-            throw new Error("Deprecated")
-        }
         await this.runSync()
     }
 
@@ -66,10 +65,6 @@ export class Server {
         logger.debug(`begin sync`)
         const sync = new Sync(this)
         await sync.sync()
-        if (!Server.triedSync) {
-            Server.triedSync = true
-            setImmediate(() => { this.consensus.triggerMining() })
-        }
         setTimeout(async () => {
             await this.runSync()
         }, 5000)

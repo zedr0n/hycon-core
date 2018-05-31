@@ -24,6 +24,7 @@ import commandLineArgs = require("command-line-args")
 const optionDefinitions = [
     { name: "api", alias: "a", type: Boolean },
     { name: "api_port", alias: "A", type: Number },
+    { name: "bootstrap", type: Boolean },
     { name: "cpuMiners", alias: "m", type: Number },
     { name: "disable_upnp", alias: "x", type: Boolean },
     { name: "disable_nat", alias: "N", type: Boolean },
@@ -32,7 +33,6 @@ const optionDefinitions = [
     { name: "networkid", alias: "n", type: String },
     { name: "nonLocal", alias: "l", type: Boolean },
     { name: "peer", type: String, multiple: true, defaultOption: true },
-    { name: "plot", alias: "g", type: Boolean },
     { name: "port", alias: "p", type: Number },
     { name: "postfix", alias: "P", type: String },
     { name: "str_port", alias: "s", type: Number },
@@ -87,7 +87,7 @@ import { WalletManager } from "./wallet/walletManager"
 
 async function startHycon() {
     if (globalOptions.minerAddress === undefined || globalOptions.minerAddress === "") {
-        let walletAddress = await  WalletManager.getDefaultWallet()
+        let walletAddress = await WalletManager.getDefaultWallet()
         if (walletAddress === "") {
             walletAddress = await WalletManager.initialize()
         }

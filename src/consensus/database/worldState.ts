@@ -33,6 +33,7 @@ export enum TxValidity {
 }
 
 function match(pre: Uint8Array, address: Address, offset: number): boolean {
+    // Consensus Critical
     if (pre.length > address.length - offset) { return false }
     for (let i = 0; i < pre.length; i++) {
         if (pre[i] !== address[offset + i]) { return false }
@@ -132,6 +133,7 @@ export class WorldState {
     }
 
     public async next(previousState: Hash, minerAddress: Address, txs?: SignedTx[]): Promise<{ stateTransition: IStateTransition, validTxs: SignedTx[], invalidTxs: SignedTx[] }> {
+        // Consensus Critical
         txs === undefined ? txs = this.txPool.getTxs().slice(0, 4096) : txs = txs
         const batch: DBState[] = []
         const changes: IChange[] = []
@@ -167,6 +169,7 @@ export class WorldState {
     }
 
     public async getAccount(stateRoot: Hash, address: Address): Promise<Account | undefined> {
+        // Consensus Critical
         let state = await this.get(stateRoot)
         let isMatched = false
         let offset = 0
@@ -189,6 +192,7 @@ export class WorldState {
     }
 
     public async putPending(pendings: DBState[], mapAccount: Map<string, DBState>): Promise<undefined> {
+        // Consensus Critical
         const mapDBChildren: Map<string, DBState> = new Map<string, DBState>()
         const dbChildren: DBState[] = []
 
@@ -234,6 +238,7 @@ export class WorldState {
     }
 
     private async processTx(tx: SignedTx, previousState: Hash, mapIndex: Map<string, number>, changes: IChange[]) {
+        // Consensus Critical
         if (tx.from.equals(tx.to)) {
             // TODO: Remove this if function and test
             return TxValidity.Invalid
@@ -272,6 +277,7 @@ export class WorldState {
     }
 
     private async getModifiedAccount(address: Address, state: Hash, mapIndex: Map<string, number>, changes: IChange[]) {
+        // Consensus Critical
         const index = mapIndex.get(address.toString())
         if (index !== undefined) {
             return { index, account: changes[index].account, address }
@@ -284,6 +290,7 @@ export class WorldState {
     }
 
     private async putChange(change: { index?: number, account: Account, address: Address }, mapIndex: Map<string, number>, changes: IChange[]) {
+        // Consensus Critical
         if (change.index === undefined) {
             mapIndex.set(change.address.toString(), changes.push(change) - 1)
         } else {
