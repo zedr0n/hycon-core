@@ -1,12 +1,25 @@
+import Button from "@material-ui/core/Button"
+import Icon from "@material-ui/core/Icon"
 import GoogleMapReact from "google-map-react"
 import Long = require("long")
-import { CircularProgress } from "material-ui"
+import { CircularProgress, TextField } from "material-ui"
 import Dialog from "material-ui/Dialog"
 import * as React from "react"
 import { Redirect } from "react-router"
 import { Link } from "react-router-dom"
 import { IBlock, IHyconWallet, IRest } from "./rest"
 import { hyconfromString, hycontoString } from "./stringUtil"
+
+const styles = (theme: any) => ({
+    container: {
+        display: "flex",
+        flexWrap: "wrap",
+    },
+    input: {
+        margin: theme.spacing.unit,
+    },
+})
+
 export class Transaction extends React.Component<any, any> {
     public currentMinerFee = "0"
     public currentReturnedFee = 0
@@ -92,18 +105,20 @@ export class Transaction extends React.Component<any, any> {
         } else if (name === "minerFee") {
             if (this.state.amount === 0 || this.state.address === "") {
                 alert(`Please should enter amount and address before enter miner fee.`)
+                value = ""
             } else {
                 const temp: string = value
                 if (temp.match("(^[0-9]*)([.]{0,1}[0-9]{0,9}$)") == null) {
                     alert("Please enter a number with up to 9 decimal places")
+                    value = ""
                 } else if (hyconfromString(value).greaterThan(hyconfromString(this.currentMinerFee))) {
                     alert(`You can't spend the money you don't have : ${this.currentMinerFee}`)
                     if (hyconfromString("1").greaterThan(hyconfromString(this.currentMinerFee))) {
                         value = this.currentMinerFee
                     } else { value = 1 }
                 }
-                this.setState({ minerFee: value })
             }
+            this.setState({ minerFee: value })
         }
     }
 
@@ -137,6 +152,10 @@ export class Transaction extends React.Component<any, any> {
         event.preventDefault()
     }
 
+    public handleCancel(event: any) {
+        this.setState({ redirect: true })
+    }
+
     public roundTo(n: number) {
         const digits = 9
         const multiplicator = Math.pow(10, digits)
@@ -144,8 +163,8 @@ export class Transaction extends React.Component<any, any> {
         const test = Math.round(n) / multiplicator
         return +test.toFixed(digits)
     }
-
     public render() {
+        const { classes } = this.props
         if (this.state.redirect) {
             return <Redirect to={`/wallet/detail/${this.state.name}`} />
         }
@@ -154,32 +173,27 @@ export class Transaction extends React.Component<any, any> {
         }
         return (
             <div>
-                <h1 className="contentTransactionTitle">Transaction Process</h1>
-                <h2 className="contentSubTitle">{this.state.name} Balance : {this.state.piggyBank} Hycon</h2>
-                <h3 className="contentSubTitle">Pending amount : {this.state.wallet.pendingAmount} Hycon</h3>
-                <form className="form" >
-                    <label className="">From Address : {this.state.wallet.address}
-                    </label>
+                <Dialog
+                    open={true}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <h3>Send Transaction</h3>
+                    {/* <h2 className="contentSubTitle">{this.state.name} Balance : {this.state.piggyBank} Hycon</h2>
+                    <h3 className="contentSubTitle">Pending amount : {this.state.wallet.pendingAmount} Hycon</h3> */}
+
+                    <TextField floatingLabelText="From Address" type="text" disabled={true} value={this.state.wallet.address} />
+                    <TextField name="address" style={{ marginLeft: "10px" }} floatingLabelText="To Address" type="text" value={this.state.address} onChange={this.handleInputChange} />
                     <br />
+                    <TextField floatingLabelText="Balance" type="text" disabled={true} value={this.state.piggyBank} />
+                    <TextField floatingLabelText="Pending Amount" style={{ marginLeft: "10px" }} type="text" disabled={true} value={this.state.wallet.pendingAmount} />
+                    <TextField name="amount" floatingLabelText="Amount" type="text" value={this.state.amount} max={this.state.piggyBank} onChange={this.handleInputChange} />
                     <br />
-                    <label className="txLabel">To Address<br />
-                        <input name="address" className="txSendInput" type="text" value={this.state.address} onChange={this.handleInputChange} />
-                    </label>
+                    <TextField name="minerFee" floatingLabelText="Miner Fee" type="text" value={this.state.minerFee} onChange={this.handleInputChange} />
                     <br />
-                    <label className="txLabel">Amount<br />
-                        <input name="amount" className="txSendInput" type="text" value={this.state.amount} max={this.state.piggyBank} onChange={this.handleInputChange} />
-                    </label>
-                    <br />
-                    <label className="txLabel">Miner fee<br />
-                        <input name="minerFee" className="txSendInput" type="text" value={this.state.minerFee} onChange={this.handleInputChange} />
-                    </label>
-                    <br />
-                    <label className="txLabel">Wallet Password<br />
-                        <div>
-                            <input name="password" className="txSendInput txSendInputPwd" type="password" autoComplete="off" onChange={(data) => { this.handlePassword(data) }} />
-                            {this.state.isHint ? (this.state.hint) : (<button className="btn btn-block btn-info blue hintBtn" onClick={(e) => this.showHint(e)}>Hint</button>)}
-                        </div>
-                    </label>
+                    <TextField name="password" floatingLabelText="Wallet Password" type="password" autoComplete="off" onChange={(data) => { this.handlePassword(data) }} />
+
+                    {this.state.isHint ? (this.state.hint) : (<button className="btn btn-block btn-info blue hintBtn" onClick={(e) => this.showHint(e)}>Hint</button>)}
                     <br />
 
                     <br />
@@ -188,7 +202,16 @@ export class Transaction extends React.Component<any, any> {
                     ) : (
                             <button className="btn btn-block btn-info green" onClick={this.handleSubmit}>Submit</button>
                         )}
-                </form>
+                    <Button variant="raised" onClick={this.handleSubmit} style={{ backgroundColor: "#50aaff", color: "white" }}>
+                        Send
+                    <Icon>send</Icon>
+                    </Button>
+                    <Button variant="raised" onClick={this.handleCancel} style={{ backgroundColor: "rgb(225, 0, 80)", color: "white" }}>
+                        Cancel
+                    <Icon>cancel</Icon>
+                    </Button>
+
+                </Dialog>
             </div >
         )
     }
@@ -198,4 +221,5 @@ export class Transaction extends React.Component<any, any> {
         })
         e.preventDefault()
     }
+
 }
