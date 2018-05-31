@@ -54,13 +54,13 @@ export class TxPool implements ITxPool {
             if (txs !== undefined) {
                 for (let i = 0; i < txs.length; i++) {
                     const txInMap = txs[i]
-                    if (txInMap.nonce === txInMap.nonce) {
-                        if (!txInMap.equals(txInMap)) {
-                            if (txInMap.fee.greaterThan(txInMap.fee)) {
+                    if (tx.nonce === txInMap.nonce) {
+                        if (!txInMap.equals(tx)) {
+                            if (tx.fee.greaterThan(txInMap.fee)) {
                                 if (valid === TxValidity.Valid) {
                                     this.removeFromAddresses(txInMap.from)
                                 }
-                                txs.splice(i, 1, txInMap)
+                                txs.splice(i, 1, tx)
                                 newTxsCount++
                             }
                         } else {
@@ -70,13 +70,13 @@ export class TxPool implements ITxPool {
                         }
                         break
                     }
-                    if (txInMap.nonce < txInMap.nonce) {
-                        txs.splice(i, 0, txInMap)
+                    if (tx.nonce < txInMap.nonce) {
+                        txs.splice(i, 0, tx)
                         newTxsCount++
                         break
                     }
                     if (i === txs.length - 1) {
-                        txs.push(txInMap)
+                        txs.push(tx)
                         newTxsCount++
                         break
                     }
