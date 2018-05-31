@@ -180,9 +180,11 @@ export class Consensus extends EventEmitter implements IConsensus {
         return { hash: new Hash(this.blockTip.header), height: this.blockTip.height }
     }
     public async txValidity(tx: SignedTx): Promise<TxValidity> {
-        let validity = await this.worldState.validateTx(this.blockTip.header.stateRoot, tx)
-        if (!tx.verify()) { validity = TxValidity.Invalid }
-        return validity
+        return this.lock.critical(async () => {
+            let validity = await this.worldState.validateTx(this.blockTip.header.stateRoot, tx)
+            if (!tx.verify()) { validity = TxValidity.Invalid }
+            return validity
+        })
     }
     public async getTx(hash: Hash): Promise<{ tx: DBTx, confirmation: number } | undefined> {
         if (this.txdb === undefined) {
@@ -332,7 +334,6 @@ export class Consensus extends EventEmitter implements IConsensus {
             }
             await this.db.setBlockStatus(popHash, BlockStatus.Block)
             this.emit("txs", popBlock.txs)
-            // this.txPool.putTxs(popBlock.txs)
             for (const one of popBlock.txs) {
                 popTxs.push(one)
             }
@@ -355,14 +356,13 @@ export class Consensus extends EventEmitter implements IConsensus {
                 removeTxs.push(tx)
             }
             pushHeight += 1
-            // this.txPool.removeTxs(block.txs, 0)
             if (this.txdb) { await this.txdb.putTxs(hash, block.header.timeStamp, block.txs) }
             this.emit("block", block)
         }
 
         this.blockTip = newDBBlock
-        await this.txPool.putTxs(popTxs)
-        this.txPool.removeTxs(removeTxs)
+        // This must not use await because of lock. So we used then.
+        this.txPool.putTxs(popTxs).then(() => this.txPool.removeTxs(removeTxs))
     }
 
     private async initGenesisBlock(): Promise<GenesisBlock> {

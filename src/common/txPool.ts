@@ -6,6 +6,7 @@ import { NewTx } from "../serialization/proto"
 import { Server } from "../server"
 import { Hash } from "../util/hash"
 import { Address } from "./address"
+import { AsyncLock } from "./asyncLock"
 import { ITxPool } from "./itxPool"
 import { SignedTx } from "./txSigned"
 // tslint:disable-next-line:no-var-requires
@@ -23,6 +24,7 @@ export class TxPool implements ITxPool {
 
     private callbacks: ITxCallback[]
     private minFee: number
+    private lock: AsyncLock
 
     constructor(server: Server, minFee?: number) {
         this.server = server
@@ -33,57 +35,65 @@ export class TxPool implements ITxPool {
     }
 
     public async putTxs(newTxsOriginal: SignedTx[]): Promise<number> {
-        let newTxsCount: number = 0
-        // drop it, if we already has it
-        for (const oneTx of newTxsOriginal) {
-            let isExist = false
-            const isValid = await this.server.consensus.txValidity(oneTx)
+        const filteredTxs: Array<{ tx: SignedTx, valid: TxValidity }> = []
+        for (const tx of newTxsOriginal) {
+            const isValid = await this.server.consensus.txValidity(tx)
             if (isValid === TxValidity.Invalid) {
-                logger.error(`Invalid Tx : ${new Hash(oneTx).toString()}`)
+                logger.debug(`Invalid Tx : ${new Hash(tx).toString()}`)
                 continue
             }
-            const fromString = oneTx.from.toString()
+            filteredTxs.push({ tx, valid: isValid })
+        }
+        let newTxsCount: number = 0
+        // drop it, if we already has it
+        for (const { tx, valid } of filteredTxs) {
+            logger.error(`Receive tx : ${new Hash(tx)} / from: ${tx.from} / to : ${tx.to} / amount : ${tx.from} / fee : ${tx.fee}`)
+            let isExist = false
+            const fromString = tx.from.toString()
             let txs = this.txsMap.get(fromString)
             if (txs !== undefined) {
                 for (let i = 0; i < txs.length; i++) {
-                    const tx = txs[i]
-                    if (oneTx.nonce === tx.nonce) {
-                        if (!tx.equals(oneTx)) {
-                            if (oneTx.fee.greaterThan(tx.fee)) {
-                                if (isValid === TxValidity.Valid) {
-                                    this.removeFromAddresses(tx.from)
+                    const txInMap = txs[i]
+                    if (txInMap.nonce === txInMap.nonce) {
+                        if (!txInMap.equals(txInMap)) {
+                            if (txInMap.fee.greaterThan(txInMap.fee)) {
+                                if (valid === TxValidity.Valid) {
+                                    this.removeFromAddresses(txInMap.from)
                                 }
-                                txs.splice(i, 1, oneTx)
+                                txs.splice(i, 1, txInMap)
                                 newTxsCount++
                             }
                         } else {
                             isExist = true
+                            logger.error(`Duplicate tx`)
                             continue
                         }
                         break
                     }
-                    if (oneTx.nonce < tx.nonce) {
-                        txs.splice(i, 0, oneTx)
+                    if (txInMap.nonce < txInMap.nonce) {
+                        txs.splice(i, 0, txInMap)
                         newTxsCount++
                         break
                     }
                     if (i === txs.length - 1) {
-                        txs.push(oneTx)
+                        txs.push(txInMap)
                         newTxsCount++
                         break
                     }
                 }
             } else {
-                txs = [oneTx]
+                txs = [tx]
                 this.txsMap.set(fromString, txs)
                 newTxsCount++
             }
-            if (!isExist && isValid === TxValidity.Valid && txs[0].equals(oneTx)) {
-                this.setAddresses(fromString, oneTx)
+            if (!isExist) {
+                if (valid === TxValidity.Valid && txs[0].equals(tx)) {
+                    this.setAddresses(fromString, tx)
+                }
+                // For callback index
+                const index = this.getTxs().indexOf(tx)
+                lowestIndex !== undefined ? (index < lowestIndex ? lowestIndex = index : lowestIndex = lowestIndex) : lowestIndex = index
             }
-            // For callback index
-            const index = this.getTxs().indexOf(oneTx)
-            lowestIndex !== undefined ? (index < lowestIndex ? lowestIndex = index : lowestIndex = lowestIndex) : lowestIndex = index
         }
         return newTxsCount
     }
