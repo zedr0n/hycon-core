@@ -157,7 +157,6 @@ export class WorldState {
                         break
                 }
             }
-
             const miner = await this.getModifiedAccount(minerAddress, previousState, mapIndex, changes)
             miner.account.balance = miner.account.balance.add(fees)
             this.putChange(miner, mapIndex, changes)
@@ -289,7 +288,6 @@ export class WorldState {
         if (account !== undefined) {
             return { account, address }
         }
-        logger.warn(`Account(${address}) is undefined in previous state (${state})`)
         return { account: new Account({ balance: 0, nonce: 0 }), address }
     }
 

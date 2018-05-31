@@ -50,7 +50,7 @@ export class TxPool implements ITxPool {
                     if (oneTx.nonce === tx.nonce) {
                         if (!tx.equals(oneTx)) {
                             if (oneTx.fee.greaterThan(tx.fee)) {
-                                if (await this.server.consensus.txValidity(tx) === TxValidity.Valid) {
+                                if (isValid === TxValidity.Valid) {
                                     this.removeFromAddresses(tx.from)
                                 }
                                 txs.splice(i, 1, oneTx)
@@ -81,6 +81,9 @@ export class TxPool implements ITxPool {
             if (!isExist && isValid === TxValidity.Valid && txs[0].equals(oneTx)) {
                 this.setAddresses(fromString, oneTx)
             }
+            // For callback index
+            const index = this.getTxs().indexOf(oneTx)
+            lowestIndex !== undefined ? (index < lowestIndex ? lowestIndex = index : lowestIndex = lowestIndex) : lowestIndex = index
         }
         return newTxsCount
     }
