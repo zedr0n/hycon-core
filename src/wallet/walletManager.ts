@@ -1,4 +1,3 @@
-import { startHycon } from "../main"
 import {Wallet} from "./wallet"
 // tslint:disable-next-line:no-var-requires
 const input = require("input")
