@@ -1,4 +1,3 @@
-import * as fs from "fs-extra"
 import { configure, getLogger } from "log4js"
 configure({
     appenders: {
@@ -29,6 +28,7 @@ const optionDefinitions = [
     { name: "disable_upnp", alias: "x", type: Boolean },
     { name: "disable_nat", alias: "N", type: Boolean },
     { name: "genesis", alias: "G", type: String },
+    { name: "lite", type: String },
     { name: "minerAddress", alias: "M", type: String },
     { name: "networkid", alias: "n", type: String },
     { name: "nonLocal", alias: "l", type: Boolean },
@@ -43,40 +43,48 @@ const optionDefinitions = [
 ]
 export const globalOptions = commandLineArgs(optionDefinitions)
 
+import * as fs from "fs-extra"
 import conf = require("./settings")
 
-if (globalOptions.cpuMiners === undefined) {
-    globalOptions.cpuMiners = 1
+async function defaultOption() {
+    if (globalOptions.cpuMiners === undefined) {
+        globalOptions.cpuMiners = 1
+    }
+    if (globalOptions.genesis !== undefined) {
+        conf.dataGenesis = globalOptions.genesis
+    }
+    if (globalOptions.api_port !== "") {
+        logger.info(`API Port=${globalOptions.api_port}`)
+    }
+    if (globalOptions.minerAddress === undefined || globalOptions.minerAddress === "") {
+        let walletAddress = await WalletManager.getDefaultWallet()
+        if (walletAddress === "") {
+            walletAddress = await WalletManager.initialize()
+        }
+        globalOptions.minerAddress = conf.minerAddress = walletAddress
+        await fs.writeFileSync("./data/config.json", JSON.stringify(conf))
+    }
+    if (globalOptions.networkid === undefined) {
+        globalOptions.networkid = "hycon"
+    }
+    if (globalOptions.nonLocal === undefined) {
+        globalOptions.nonLocal = false
+    }
+    if (globalOptions.port === 0) {
+        globalOptions.port = 20000 + Math.floor(40000 * Math.random())
+    }
+    if (globalOptions.postfix === undefined) {
+        globalOptions.postfix = ""
+    }
+    if (globalOptions.str_port === 0) {
+        globalOptions.str_port = 20000 + Math.floor(40000 * Math.random())
+    }
+    if (globalOptions.verbose) {
+        logger.level = "debug"
+    }
 }
-if (globalOptions.genesis !== undefined) {
-    conf.dataGenesis = globalOptions.genesis
-}
-if (globalOptions.api_port !== "") {
-    logger.info(`API Port=${globalOptions.api_port}`)
-}
-if (globalOptions.minerAddress === undefined) {
-    globalOptions.minerAddress = conf.minerAddress
-}
-if (globalOptions.networkid === undefined) {
-    globalOptions.networkid = "hycon"
-}
-if (globalOptions.nonLocal === undefined) {
-    globalOptions.nonLocal = false
-}
-if (globalOptions.port === 0) {
-    globalOptions.port = 20000 + Math.floor(40000 * Math.random())
-}
-if (globalOptions.postfix === undefined) {
-    globalOptions.postfix = ""
-}
-if (globalOptions.str_port === 0) {
-    globalOptions.str_port = 20000 + Math.floor(40000 * Math.random())
-}
-if (globalOptions.verbose) {
-    logger.level = "debug"
-}
-logger.info(`GenesisBlock=${conf.dataGenesis}`)
 
+logger.info(`GenesisBlock=${conf.dataGenesis}`)
 logger.info(`Options=${JSON.stringify(globalOptions)}`)
 logger.info(`Verbose=${globalOptions.verbose}`)
 logger.info(`Port=${globalOptions.port}`)
@@ -85,17 +93,9 @@ logger.info(`Stratum Port=${globalOptions.str_port}`)
 import { Server } from "./server"
 import { WalletManager } from "./wallet/walletManager"
 
-async function startHycon() {
-    if (globalOptions.minerAddress === undefined || globalOptions.minerAddress === "") {
-        let walletAddress = await WalletManager.getDefaultWallet()
-        if (walletAddress === "") {
-            walletAddress = await WalletManager.initialize()
-        }
-        globalOptions.minerAddress = conf.minerAddress = walletAddress
-        fs.writeFileSync("./data/config.json", JSON.stringify(conf))
-    }
+if (globalOptions.lite === undefined) {
     const hycon = new Server()
     hycon.run()
-}
+} else {
 
-startHycon()
+}

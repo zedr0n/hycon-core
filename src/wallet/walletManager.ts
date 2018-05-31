@@ -13,18 +13,17 @@ export class WalletManager {
     }
     public static async initialize(): Promise<string> {
         try {
-            Wallet.walletInit()
+            await Wallet.walletInit()
             let password = ""
             while (true) {
-                const pwd = Math.floor(Math.random() * 0xFFFFFF)
-                const pw1 = await input.text("Please type your miner password?", { default: pwd })
-                const pw2 = await input.text("Please type your miner password again?", { default: pwd })
+                const pw1 = await input.text("Please type your miner password?", { default: "" })
+                const pw2 = await input.text("Please type your miner password again?", { default: "" })
                 if (pw1 === pw2) {
                     password = pw1
                     break
                 } else {
                     // tslint:disable-next-line:no-console
-                    console.log("password not matched")
+                    console.log("passwords do not match")
                 }
             }
             const newWallet = Wallet.randomWallet()
