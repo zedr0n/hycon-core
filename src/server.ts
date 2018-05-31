@@ -13,7 +13,6 @@ import { INetwork } from "./network/inetwork"
 import { RabbitNetwork } from "./network/rabbit/rabbitNetwork" // for speed
 import { RestManager } from "./rest/restManager"
 import { Wallet } from "./wallet/wallet"
-import { WalletManager } from "./wallet/walletManager"
 
 const logger = getLogger("Server")
 
@@ -24,7 +23,7 @@ export class Server {
     public readonly consensus: IConsensus
     public readonly network: INetwork
     public readonly miner: MinerServer
-    public readonly wallet: WalletManager
+
     public readonly txPool: ITxPool
     public readonly rest: RestManager
     public httpServer: HttpServer
@@ -36,7 +35,6 @@ export class Server {
         this.consensus = new Consensus(this.txPool, "blockdb" + postfix, "worldstate" + postfix, "rawblock" + postfix, "txDB" + postfix, "minedDB" + postfix)
         this.network = new RabbitNetwork(this.txPool, this.consensus, globalOptions.port, "peerdb" + postfix, globalOptions.networkid)
         this.miner = new MinerServer(this.consensus, this.network, globalOptions.cpuMiners, globalOptions.str_port)
-        this.wallet = new WalletManager(this)
         this.rest = new RestManager(this)
     }
     public async run() {
