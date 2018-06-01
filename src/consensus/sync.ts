@@ -51,7 +51,7 @@ export class Sync {
             this.peer = this.network.getRandomPeer()
             if (!this.peer) {
                 logger.info(`No peer to sync with, Local=${localTip.height} `)
-                // we will replace with other alogrithm
+                
                 return
             }
 

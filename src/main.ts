@@ -1,7 +1,7 @@
 import { configure, getLogger } from "log4js"
 configure({
     appenders: {
-        // console: { type: "stdout" },
+        
         console: {
             type: "log4js-protractor-appender",
         },

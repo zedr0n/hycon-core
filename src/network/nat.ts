@@ -49,16 +49,7 @@ export class NatUpnp {
     private privatePort: number
     private network: INetwork
 
-    // constructor(port: number) {
-    //     this.publicIp = ""
-    //     this.privatePort = port
-    //     this.publicPort = NaN
-    //     setTimeout(() => {
-    //         this.run()
-    //     }, 5000)
-    // }
-
-    // test
+  
     constructor(port: number, net: INetwork) {
         this.publicIp = ""
         this.privatePort = port

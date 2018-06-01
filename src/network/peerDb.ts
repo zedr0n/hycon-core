@@ -29,9 +29,9 @@ export class PeerDb {
 
     constructor(peerDbPath: string = "peerdb") {
         // Locked until this.keys is initialized
-        const rocksDB: any = rocksdb(peerDbPath)// TODO: Fix levelup type declarartion
+        const rocksDB: any = rocksdb(peerDbPath)
         this.db = levelup(rocksDB)
-        const db: any = this.db // TODO: Fix levelup type declarartion
+        const db: any = this.db
         this.initKeys()
     }
 

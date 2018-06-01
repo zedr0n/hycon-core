@@ -8,7 +8,6 @@ import { GenesisSignedTx } from "./txGenesisSigned"
 
 const logger = getLogger("GenesisBlock")
 
-// TODO: Clean up this interface?
 export class GenesisBlock implements proto.IBlock {
     public static loadFromFile(path: string = conf.dataGenesis) {
         try {

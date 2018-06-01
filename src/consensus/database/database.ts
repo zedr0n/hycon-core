@@ -39,7 +39,7 @@ export class Database {
     private fileNumber: number
 
     constructor(dbPath: string, filePath: string) {
-        // TODO: Fix levelup defintions to use abstract leveldown in the constructor
+
         const rocks: any = rocksdb(dbPath)
         this.database = levelup(rocks)
         this.headerLock = new AsyncLock()
@@ -127,7 +127,7 @@ export class Database {
                 return undefined
             }
             if (e instanceof DecodeError) {
-                // TODO: Schedule rerequest or file lookup
+
                 logger.error(`Could not decode block ${hash}`)
             }
             throw e
@@ -155,7 +155,7 @@ export class Database {
             if (block) {
                 return block
             } else {
-                // TODO: Schedule Rebuild from file or rerequest from network
+
                 logger.debug(`Could not decode block ${hash}`)
                 const decodeError = new DecodeError()
                 decodeError.hash = hash
@@ -164,7 +164,7 @@ export class Database {
         } catch (e) {
             if (e.notFound) { return undefined }
             if (decodingDBEntry) {
-                // TODO: Schedule rerequest or file lookup
+
                 logger.error(`Could not decode block ${hash}`)
                 const decodeError = new DecodeError()
                 decodeError.hash = hash

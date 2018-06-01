@@ -11,7 +11,7 @@ import { Sync } from "./consensus/sync"
 import { globalOptions } from "./main"
 import { MinerServer } from "./miner/minerServer"
 import { INetwork } from "./network/inetwork"
-import { RabbitNetwork } from "./network/rabbit/rabbitNetwork" // for speed
+import { RabbitNetwork } from "./network/rabbit/rabbitNetwork" 
 import { RestManager } from "./rest/restManager"
 import { Wallet } from "./wallet/wallet"
 

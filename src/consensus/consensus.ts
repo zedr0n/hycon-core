@@ -370,8 +370,6 @@ export class Consensus extends EventEmitter implements IConsensus {
             const genesis = GenesisBlock.loadFromFile()
             const transition = await this.worldState.first(genesis)
             await this.worldState.putPending(transition.batch, transition.mapAccount)
-            // genesis.header.stateRoot = transition.currentStateRoot
-            // genesis.header.difficulty = 1
             genesis.header.merkleRoot = new Hash("Centralization is the root of tyranny.")
             const genesisHash = new Hash(genesis.header)
             const { fileNumber, length, filePosition, offset } = await this.db.writeBlock(genesis)

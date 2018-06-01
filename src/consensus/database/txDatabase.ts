@@ -192,7 +192,6 @@ export class TxDatabase implements ITxDatabase {
             this.db.each(`SELECT txhash, txto, txfrom, amount, fee, blockhash, blocktime FROM txdb WHERE txhash = $txhash`, params, async (err, row) => {
                 if (row === undefined) { return resolved(undefined) }
                 tx = new DBTx(row.txhash, row.blockhash, row.txto, row.txfrom, row.amount, row.fee, row.blocktime)
-                // const block = await this.consensus.getHeaderByHash(tx.blockHash)
                 const height = await this.consensus.getBlockHeight(Hash.decode(tx.blockhash))
                 const tip = this.consensus.getBlocksTip()
                 const confirmation = tip.height - height

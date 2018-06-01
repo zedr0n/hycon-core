@@ -333,8 +333,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 logger.error(`Failed to putTx: ${e}`)
             }
         }
-
-        // logger.debug(`PutTx`)
+        
         return { message: { putTxReturn: { success } }, relay: success }
     }
 

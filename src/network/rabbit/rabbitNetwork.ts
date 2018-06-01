@@ -278,7 +278,6 @@ export class RabbitNetwork implements INetwork {
                             }
                         }
                         resolve(peer)
-                        // don't call status here, it's expensive function
                         logger.debug(`Peer ${key} ${socket.remoteAddress}:${socket.remotePort}`)
                     } else {
                         await this.peerDB.fail(ipeer, RabbitNetwork.failLimit)
