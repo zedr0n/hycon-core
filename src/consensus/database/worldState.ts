@@ -265,7 +265,7 @@ export class WorldState {
             from.account.nonce++
 
             if (tx.to === undefined) {
-                logger.warn(`TX ${new Hash(tx).toString()} burned ${hycontoString(tx.amount)} HYC from ${tx.from.toString()}`)
+                logger.warn(`🔥 TX ${new Hash(tx).toString()} burned ${hycontoString(tx.amount)} HYC from ${tx.from.toString()} 🔥`)
             } else {
                 const to = await this.getModifiedAccount(tx.to, previousState, mapIndex, changes)
                 to.account.balance = to.account.balance.add(tx.amount)
