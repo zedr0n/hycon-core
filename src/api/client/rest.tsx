@@ -114,7 +114,7 @@ export interface IRest {
     getWalletList(): Promise<IHyconWallet[]>
     recoverWallet(Hwallet: IHyconWallet): Promise<string | boolean>
     // [Depreciated: Use above] recoverWalletForce(Hwallet: IHyconWallet): Promise<string | boolean>
-    sendTx(tx: { name: string, password: string, address: string, amount: number, minerFee: number }, queueTx?: Function): Promise<boolean>
+    sendTx(tx: { name: string, password: string, address: string, amount: number, minerFee: number }, queueTx?: Function): Promise<{ res: boolean, case?: number }>
     getPeerList(): Promise<IPeer[]>
     getPeerConnected(): Promise<IPeer[]>
     getPendingTxs(index: number): Promise<{ txs: ITxProp[], length: number, totalCount: number, totalAmount: string, totalFee: string }>

@@ -122,18 +122,24 @@ export class Transaction extends React.Component<any, any> {
                     alert(`Enter a valid miner fee`)
                 } else {
                     if (this.state.wallet.address === this.state.address) {
-                        alert(`You can not send HYCON to yourself.`)
+                        alert("You can not send HYCON to yourself.")
                     } else {
                         this.setState({ isLoading: true })
                         this.state.rest.sendTx({ name: this.state.name, password: this.state.password, address: this.state.address, amount: this.state.amount.toString(), minerFee: this.state.minerFee.toString() })
-                            .then((result: boolean) => {
-                                if (result === true) {
+                            .then((result: { res: boolean, case?: number }) => {
+                                if (result.res === true) {
                                     alert("A transaction of " + this.state.amount +
                                         "HYCON has been submitted to " + this.state.address +
                                         " with " + this.state.minerFee + "HYCON as miner fees.",
                                     )
                                     this.setState({ redirect: true })
-                                } else {
+                                } else if (result.case === 1) {
+                                    alert("Invalid password: You can see a hint about password pressing 'HINT'")
+                                    window.location.reload()
+                                } else if (result.case === 2) {
+                                    alert("Invalid address: Please check 'To Address' input")
+                                    window.location.reload()
+                                } else if (result.case === 3) {
                                     alert("Fail to transfer hycon")
                                     this.setState({ redirect: true })
                                 }

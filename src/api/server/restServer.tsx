@@ -579,13 +579,17 @@ export class RestServer implements IRest {
         }
     }
 
-    public async sendTx(tx: { name: string, password: string, address: string, amount: number, minerFee: number }, queueTx?: Function): Promise<boolean> {
+    public async sendTx(tx: { name: string, password: string, address: string, amount: number, minerFee: number }, queueTx?: Function): Promise<{ res: boolean, case?: number }> {
         tx.password === undefined ? tx.password = "" : tx.password = tx.password
+        let checkPass = false
+        let checkAddr = false
         try {
             await Wallet.walletInit()
             const wallet = await Wallet.loadKeys(tx.name, tx.password)
+            checkPass = true
             const isExist = this.txPool.isExist(wallet.pubKey.address())
             const address = new Address(tx.address)
+            checkAddr = true
             const account = await this.consensus.getAccount(wallet.pubKey.address())
             let accountBalance = account.balance
             let accountNonce = account.nonce + 1
@@ -601,10 +605,12 @@ export class RestServer implements IRest {
             }
             const signedTx = wallet.send(address, hyconfromString(tx.amount.toString()), accountNonce, hyconfromString(tx.minerFee.toString()))
             if (queueTx) { queueTx(signedTx) } else { return Promise.reject(false) }
-            return Promise.resolve(true)
+            return Promise.resolve({ res: true })
         } catch (e) {
             logger.warn(e)
-            return Promise.resolve(false)
+            if (!checkPass) { return Promise.resolve({ res: false, case: 1 }) }
+            if (!checkAddr) { return Promise.resolve({ res: false, case: 2 }) }
+            return Promise.resolve({ res: false, case: 3 })
         }
     }
 

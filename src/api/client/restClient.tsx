@@ -209,7 +209,7 @@ export class RestClient implements IRest {
                 console.log(err)
             }))
     }
-    public sendTx(tx: { name: string, password: string, address: string, amount: number, minerFee: number }, queueTx?: Function): Promise<boolean> {
+    public sendTx(tx: { name: string, password: string, address: string, amount: number, minerFee: number }, queueTx?: Function): Promise<{ res: boolean, case?: number }> {
         console.log(tx.name)
         const headers = new Headers()
         headers.append("Accept", "application/json")
