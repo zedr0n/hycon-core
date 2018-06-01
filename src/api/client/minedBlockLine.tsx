@@ -40,7 +40,7 @@ export class MinedBlockLine extends React.Component<IMinedBlockLineProps, IMined
                         {this.state.minedInfo.miner}
                     </a>
                 </td>
-                <td className="numericTd">
+                <td className="mdl-data-table__cell--numeric" style={{ paddingRight: "10%" }}>
                     {this.state.minedInfo.feeReward} HYCON
                 </td>
                 <td className="mdl-data-table__cell--non-numeric">

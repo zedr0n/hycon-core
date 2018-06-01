@@ -217,8 +217,8 @@ export class WalletDetail extends React.Component<any, any> {
                                 <tr>
                                     <th className="mdl-data-table__cell--non-numeric">Block Hash</th>
                                     <th className="mdl-data-table__cell--non-numeric">Miner Address</th>
-                                    <th className="mdl-data-table__cell--non-numeric">FeeReward</th>
-                                    <th className="mdl-data-table__cell--non-numeric">TimeStamp</th>
+                                    <th className="mdl-data-table__cell--numeric" style={{ paddingRight: "10%" }}>Fee Reward</th>
+                                    <th className="mdl-data-table__cell--non-numeric">Timestamp</th>
                                 </tr>
                             </thead>
                             <tbody>

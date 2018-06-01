@@ -98,11 +98,10 @@ export class BlockList extends React.Component<any, any> {
                             <tr>
                                 <th className="mdl-data-table__cell--non-numeric">Height</th>
                                 <th className="mdl-data-table__cell--non-numeric">Age</th>
-                                <th className="mdl-data-table__cell--non-numeric">Transactions</th>
-                                <th className="mdl-data-table__cell--non-numeric">Total Sent</th>
+                                <th className="mdl-data-table__cell--numeric" style={{ paddingRight: "10%" }}>Transactions</th>
+                                <th className="mdl-data-table__cell--numeric" style={{ paddingRight: "10%" }}>Total Sent</th>
                                 <th className="mdl-data-table__cell--non-numeric">Relayed By</th>
-                                <th className="mdl-data-table__cell--non-numeric">Size(kB)</th>
-                                {/* <th className="mdl-data-table__cell--non-numeric">Weight(kWU)</th> */}
+                                <th className="mdl-data-table__cell--numeric">Size(kB)</th>
                             </tr>
                         </thead>
                         <tbody>

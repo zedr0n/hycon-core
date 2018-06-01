@@ -83,8 +83,8 @@ export class BlockLine extends React.Component<any, any> {
                     {this.state.block.age.diffDate === 0 && this.state.block.age.diffHour === 0 && this.state.block.age.diffMin === 0 ?
                         this.state.block.age.diffSec + " seconds" : ""}
                 </td>
-                <td className="numericTd">{this.state.block.txs.length}</td>
-                <td className="numericTd">
+                <td className="mdl-data-table__cell--numeric" style={{ paddingRight: "10%" }}>{this.state.block.txs.length}</td>
+                <td className="mdl-data-table__cell--numeric" style={{ paddingRight: "10%" }}>
                     {this.formatNumber(this.state.block.txSummary)} HYCON
                 </td>
                 <td className="mdl-data-table__cell--non-numeric">
@@ -92,7 +92,7 @@ export class BlockLine extends React.Component<any, any> {
                         {this.state.block.miner}
                     </a>
                 </td>
-                <td className="numericTd">{(this.state.block.size / 1000).toPrecision(3)}</td>
+                <td className="mdl-data-table__cell--numeric">{(this.state.block.size / 1000).toPrecision(3)}</td>
                 {/* <td /> */}
             </tr>
         )
