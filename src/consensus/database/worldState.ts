@@ -239,41 +239,45 @@ export class WorldState {
 
     private async processTx(tx: SignedTx, previousState: Hash, mapIndex: Map<string, number>, changes: IChange[]) {
         // Consensus Critical
-        if (tx.from.equals(tx.to)) {
-            // TODO: Remove this if function and test
-            return TxValidity.Invalid
-        }
+        try {
+            if (tx.from.equals(tx.to)) {
+                // TODO: Remove this if function and test
+                return TxValidity.Invalid
+            }
 
-        const from = await this.getModifiedAccount(tx.from, previousState, mapIndex, changes)
-        if (tx.nonce < (from.account.nonce + 1)) {
-            logger.info(`Tx ${new Hash(tx)} Rejected: TxNonce=${tx.nonce} ${tx.from} Nonce=${from.account.nonce}`)
-            return TxValidity.Invalid
-        }
+            const from = await this.getModifiedAccount(tx.from, previousState, mapIndex, changes)
+            if (tx.nonce < (from.account.nonce + 1)) {
+                logger.info(`Tx ${new Hash(tx)} Rejected: TxNonce=${tx.nonce} ${tx.from} Nonce=${from.account.nonce}`)
+                return TxValidity.Invalid
+            }
 
-        if (tx.nonce > (from.account.nonce + 1)) {
-            return TxValidity.Waiting
-        }
+            if (tx.nonce > (from.account.nonce + 1)) {
+                return TxValidity.Waiting
+            }
 
-        const total = tx.amount.add(tx.fee)
-        if (from.account.balance.lessThan(total)) {
-            logger.info(`Tx ${new Hash(tx)} Rejected: The balance (${hycontoString(from.account.balance)}) is insufficient (${hycontoString(tx.amount)} + ${hycontoString(tx.fee)} = ${hycontoString(total)})`)
-            return TxValidity.Invalid
-        }
+            const total = tx.amount.add(tx.fee)
+            if (from.account.balance.lessThan(total)) {
+                logger.info(`Tx ${new Hash(tx)} Rejected: The balance (${hycontoString(from.account.balance)}) is insufficient (${hycontoString(tx.amount)} + ${hycontoString(tx.fee)} = ${hycontoString(total)})`)
+                return TxValidity.Invalid
+            }
 
-        from.account.balance = from.account.balance.sub(total)
-        from.account.nonce++
+            from.account.balance = from.account.balance.sub(total)
+            from.account.nonce++
 
-        this.putChange(from, mapIndex, changes)
-        if (tx.to === undefined) {
-            logger.warn(`TX ${new Hash(tx).toString()} burned ${hycontoString(tx.amount)} HYC from ${tx.from.toString()}`)
+            if (tx.to === undefined) {
+                logger.warn(`TX ${new Hash(tx).toString()} burned ${hycontoString(tx.amount)} HYC from ${tx.from.toString()}`)
+            } else {
+                const to = await this.getModifiedAccount(tx.to, previousState, mapIndex, changes)
+                to.account.balance = to.account.balance.add(tx.amount)
+                this.putChange(to, mapIndex, changes)
+            }
+            this.putChange(from, mapIndex, changes)
+
             return TxValidity.Valid
+        } catch (e) {
+            logger.error(`Failed to process TX: ${e}`)
+            return TxValidity.Invalid
         }
-
-        const to = await this.getModifiedAccount(tx.to, previousState, mapIndex, changes)
-        to.account.balance = to.account.balance.add(tx.amount)
-        this.putChange(to, mapIndex, changes)
-
-        return TxValidity.Valid
     }
 
     private async getModifiedAccount(address: Address, state: Hash, mapIndex: Map<string, number>, changes: IChange[]) {

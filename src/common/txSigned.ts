@@ -45,7 +45,6 @@ export class SignedTx implements proto.ITx {
 
     public set(stx: proto.ITx): void {
         if (stx.from === undefined) { throw (new Error("from address not defined in input")) }
-        if (stx.to === undefined) { throw (new Error("to address not defined in input")) }
         if (stx.amount === undefined) { throw (new Error("amount not defined in input")) }
         if (stx.fee === undefined) { throw (new Error("fee not defined in input")) }
         if (stx.nonce === undefined) { throw (new Error("nonce not defined in input")) }
@@ -53,7 +52,9 @@ export class SignedTx implements proto.ITx {
         if (stx.recovery === undefined) { throw (new Error("recovery not defined in input")) }
 
         this.from = new Address(stx.from)
-        this.to = new Address(stx.to)
+        if (stx.to !== undefined && stx.to.length > 0) {
+            this.to = new Address(stx.to)
+        }
         this.amount = stx.amount instanceof Long ? stx.amount : Long.fromNumber(stx.amount, true)
         if (this.amount.lessThan(0)) {
             throw new Error("Transaction amount can not be negative")
@@ -84,7 +85,10 @@ export class SignedTx implements proto.ITx {
         if (this.recovery !== tx.recovery) {
             return false
         }
-        if (!this.to.equals(tx.to)) {
+        if (this.to !== undefined && !this.to.equals(tx.to)) {
+            return false
+        }
+        if (this.to === undefined && tx.to !== undefined) {
             return false
         }
         if (!this.from.equals(tx.from)) {

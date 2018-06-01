@@ -57,7 +57,7 @@ export class Address extends Uint8Array {
 
     public equals(address: Address): boolean {
         // Consensus Critical
-        if (this.length !== address.length) { return false }
+        if (address === undefined || this.length !== address.length) { return false }
         for (let i = 0; i < address.length; i++) {
             if (this[i] !== address[i]) {
                 return false
