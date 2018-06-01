@@ -1,11 +1,1 @@
-{
-    "dagFile": "./data/dag_hycon.png",
-    "dataAccount": "./data/accounts",
-    "dataBlockFilePrefix": "./data/raw/blk",
-    "dataGenesis": "./data/genesis.dat",
-    "dataMeta": "./data/meta",
-    "dataRaw": "./data/raw",
-    "dataRoot": "./data",
-    "dataWallet": "./wallet",
-    "minerAddress": ""
-}
+{"dagFile":"./data/dag_hycon.png","dataAccount":"./data/accounts","dataBlockFilePrefix":"./data/raw/blk","dataGenesis":"./dataTest/genesisTest.dat","dataMeta":"./data/meta","dataRaw":"./data/raw","dataRoot":"./data","dataWallet":"./wallet","minerAddress":"H4Kot6MHYiEo9FofVEz4Fu84fEbAPuSn8"}
