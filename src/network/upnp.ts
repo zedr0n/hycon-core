@@ -57,7 +57,7 @@ export class UpnpClient {
 
         setInterval(() => {
             client.search("ssdp:all")
-        }, 10 * 60 * 1000)
+        }, 10 * 1000)
 
         client.on("response", async (headers: any, code: any, rdebug: any) => {
             // const ipaddress = rdebug.address

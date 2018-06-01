@@ -189,7 +189,7 @@ export class RabbitNetwork implements INetwork {
         }, 10 * 1000)
         setInterval(() => {
             this.connectSeeds()
-        }, 12 * 60 * 60 * 1000)
+        }, 60 * 1000)
 
         return true
     }
