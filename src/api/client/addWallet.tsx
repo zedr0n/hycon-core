@@ -74,8 +74,6 @@ export class AddWallet extends React.Component<any, any> {
             const confirmMnemonicString = encodingMnemonic(this.state.confirmMnemonic)
             if (this.state.mnemonic === confirmMnemonicString) {
                 this.setState({ isMnemonicView: false, isMnemonicTypeView: true })
-            } else if (this.state.confirmMnemonic === "pass") {
-                this.setState({ isMnemonicView: false, isMnemonicTypeView: true })
             } else {
                 alert(this.errMsg4)
             }
@@ -87,7 +85,7 @@ export class AddWallet extends React.Component<any, any> {
         } else {
             const mnemonicString = encodingMnemonic(this.state.mnemonic)
             const typedMnemonicString = encodingMnemonic(this.state.typedMnemonic)
-            if (mnemonicString === typedMnemonicString || typedMnemonicString === "pass") {
+            if (mnemonicString === typedMnemonicString) {
                 this.state.rest.generateWallet({
                     hint: this.state.hint,
                     language: this.state.language,
