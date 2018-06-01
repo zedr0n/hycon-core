@@ -2,6 +2,7 @@ import { getLogger } from "log4js"
 import Long = require("long")
 import { hyconfromString, hycontoString } from "../api/client/stringUtil"
 import { TxValidity } from "../consensus/database/worldState"
+import { BlockStatus } from "../consensus/sync"
 import { NewTx } from "../serialization/proto"
 import { Server } from "../server"
 import { Hash } from "../util/hash"
@@ -25,9 +26,13 @@ export class TxPool implements ITxPool {
     private callbacks: ITxCallback[]
     private minFee: Long
     private lock: AsyncLock
+    private maxAddresses: number
+    private maxTxsPerAddress: number
 
     constructor(server: Server, minFee?: Long) {
         this.server = server
+        this.maxTxsPerAddress = 10
+        this.maxAddresses = 10000
         this.addresses = []
         this.callbacks = []
         this.minFee = minFee === undefined ? hyconfromString("0.000000001") : minFee
@@ -48,53 +53,71 @@ export class TxPool implements ITxPool {
             }
             filteredTxs.push({ tx, valid: isValid })
         }
-        let newTxsCount: number = 0
-        // drop it, if we already has it
-        for (const { tx, valid } of filteredTxs) {
-            let isExist = false
-            const fromString = tx.from.toString()
-            let txs = this.txsMap.get(fromString)
-            if (txs !== undefined) {
-                for (let i = 0; i < txs.length; i++) {
-                    const txInMap = txs[i]
-                    if (tx.nonce === txInMap.nonce) {
-                        if (!txInMap.equals(tx)) {
-                            if (tx.fee.greaterThan(txInMap.fee)) {
-                                if (valid === TxValidity.Valid) {
-                                    this.removeFromAddresses(txInMap.from)
-                                }
-                                txs.splice(i, 1, tx)
-                                newTxsCount++
-                            }
-                        } else {
-                            isExist = true
-                            continue
-                        }
-                        break
-                    }
-                    if (tx.nonce < txInMap.nonce) {
-                        txs.splice(i, 0, tx)
-                        newTxsCount++
-                        break
-                    }
-                    if (i === txs.length - 1) {
-                        txs.push(tx)
-                        newTxsCount++
-                        break
-                    }
-                }
-            } else {
-                txs = [tx]
-                this.txsMap.set(fromString, txs)
-                newTxsCount++
+        const newTxsCount: number = 0
+
+        const validTxs: Array<{ validity: TxValidity, tx: SignedTx }> = []
+        for (const tx of newTxsOriginal) {
+            if (this.addresses.length + validTxs.length > this.maxAddresses) {
+                break
             }
-            if (!isExist) {
-                if (valid === TxValidity.Valid && txs[0].equals(tx)) {
-                    this.setAddresses(fromString, tx)
-                }
+            if (tx.fee.lessThan(this.minFee)) {
+                continue
+            }
+            const addressTxs = this.txsMap.get(tx.from.toString())
+            if (addressTxs !== undefined && addressTxs.length >= this.maxTxsPerAddress) {
+                continue
+            }
+            const validity = await this.server.consensus.txValidity(tx)
+            if (validity === TxValidity.Invalid) {
+                continue
+            }
+            validTxs.push({ tx, validity })
+        }
+
+        // drop it, if we already has it
+        for (const { tx, validity } of validTxs) {
+            if (this.insertIntoAddressMap(tx) && validity === TxValidity.Valid) {
+                this.setAddresses(tx.from.toString(), tx)
             }
         }
         return newTxsCount
+    }
+
+    public insertIntoAddressMap(tx: SignedTx) {
+        const fromString = tx.from.toString()
+        let txs = this.txsMap.get(fromString)
+        if (txs === undefined) {
+            txs = []
+            this.txsMap.set(fromString, txs)
+        }
+
+        if (txs.length >= this.maxTxsPerAddress) {
+            return false
+        }
+
+        for (let i = 0; i < txs.length; i++) {
+            const tx2 = txs[i]
+            if (tx.nonce > tx2.nonce) {
+                return false
+            }
+
+            if (tx.nonce < tx2.nonce) {
+                txs.splice(i, 0, tx)
+                return i === 0
+            }
+
+            if (tx.nonce === tx2.nonce) {
+                if (tx.fee.greaterThan(tx2.fee)) {
+                    txs.splice(i, 1, tx)
+                    return i === 0
+                }
+                return false
+            }
+
+        }
+
+        txs.push(tx)
+        return txs.length === 1
     }
 
     public removeTxs(old: SignedTx[], maxReturn?: number): SignedTx[] {
@@ -132,6 +155,10 @@ export class TxPool implements ITxPool {
         return getTxsResult
     }
 
+    public getTxsOfAddress(address: Address): SignedTx[] | undefined {
+        return this.txsMap.get(address.toString())
+    }
+
     public isExist(address: Address): { isExist: boolean, totalAmount?: Long, lastNonce?: number } {
         let isExist = false
         let lastNonce: number | undefined
@@ -145,10 +172,6 @@ export class TxPool implements ITxPool {
             lastNonce = txs[txs.length - 1].nonce
         }
         return { isExist, totalAmount, lastNonce }
-    }
-
-    public getTxsOfAddress(address: Address): SignedTx[] | undefined {
-        return this.txsMap.get(address.toString())
     }
 
     private setAddresses(address: string, tx: SignedTx, addressArray?: Array<{ address: string, fee: Long }>): void {
