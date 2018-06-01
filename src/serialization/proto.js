@@ -7426,7 +7426,7 @@ $root.Block = (function() {
             $root.BlockHeader.encode(message.header, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
         if (message.txs != null && message.txs.length)
             for (var i = 0; i < message.txs.length; ++i)
-                $root.Tx.encode(message.txs[i], writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+                $root.Tx.encode(message.txs[i], writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
         return writer;
     };
 
@@ -7464,7 +7464,7 @@ $root.Block = (function() {
             case 1:
                 message.header = $root.BlockHeader.decode(reader, reader.uint32());
                 break;
-            case 3:
+            case 2:
                 if (!(message.txs && message.txs.length))
                     message.txs = [];
                 message.txs.push($root.Tx.decode(reader, reader.uint32()));
@@ -7590,6 +7590,242 @@ $root.Block = (function() {
     };
 
     return Block;
+})();
+
+$root.GenesisBlock = (function() {
+
+    /**
+     * Properties of a GenesisBlock.
+     * @exports IGenesisBlock
+     * @interface IGenesisBlock
+     * @property {IGenesisBlockHeader|null} [header] GenesisBlock header
+     * @property {Array.<ITx>|null} [txs] GenesisBlock txs
+     */
+
+    /**
+     * Constructs a new GenesisBlock.
+     * @exports GenesisBlock
+     * @classdesc Represents a GenesisBlock.
+     * @implements IGenesisBlock
+     * @constructor
+     * @param {IGenesisBlock=} [properties] Properties to set
+     */
+    function GenesisBlock(properties) {
+        this.txs = [];
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * GenesisBlock header.
+     * @member {IGenesisBlockHeader|null|undefined} header
+     * @memberof GenesisBlock
+     * @instance
+     */
+    GenesisBlock.prototype.header = null;
+
+    /**
+     * GenesisBlock txs.
+     * @member {Array.<ITx>} txs
+     * @memberof GenesisBlock
+     * @instance
+     */
+    GenesisBlock.prototype.txs = $util.emptyArray;
+
+    /**
+     * Creates a new GenesisBlock instance using the specified properties.
+     * @function create
+     * @memberof GenesisBlock
+     * @static
+     * @param {IGenesisBlock=} [properties] Properties to set
+     * @returns {GenesisBlock} GenesisBlock instance
+     */
+    GenesisBlock.create = function create(properties) {
+        return new GenesisBlock(properties);
+    };
+
+    /**
+     * Encodes the specified GenesisBlock message. Does not implicitly {@link GenesisBlock.verify|verify} messages.
+     * @function encode
+     * @memberof GenesisBlock
+     * @static
+     * @param {IGenesisBlock} message GenesisBlock message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GenesisBlock.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.header != null && message.hasOwnProperty("header"))
+            $root.GenesisBlockHeader.encode(message.header, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+        if (message.txs != null && message.txs.length)
+            for (var i = 0; i < message.txs.length; ++i)
+                $root.Tx.encode(message.txs[i], writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified GenesisBlock message, length delimited. Does not implicitly {@link GenesisBlock.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof GenesisBlock
+     * @static
+     * @param {IGenesisBlock} message GenesisBlock message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GenesisBlock.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a GenesisBlock message from the specified reader or buffer.
+     * @function decode
+     * @memberof GenesisBlock
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {GenesisBlock} GenesisBlock
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GenesisBlock.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GenesisBlock();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.header = $root.GenesisBlockHeader.decode(reader, reader.uint32());
+                break;
+            case 3:
+                if (!(message.txs && message.txs.length))
+                    message.txs = [];
+                message.txs.push($root.Tx.decode(reader, reader.uint32()));
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a GenesisBlock message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof GenesisBlock
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {GenesisBlock} GenesisBlock
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GenesisBlock.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a GenesisBlock message.
+     * @function verify
+     * @memberof GenesisBlock
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    GenesisBlock.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.header != null && message.hasOwnProperty("header")) {
+            var error = $root.GenesisBlockHeader.verify(message.header);
+            if (error)
+                return "header." + error;
+        }
+        if (message.txs != null && message.hasOwnProperty("txs")) {
+            if (!Array.isArray(message.txs))
+                return "txs: array expected";
+            for (var i = 0; i < message.txs.length; ++i) {
+                var error = $root.Tx.verify(message.txs[i]);
+                if (error)
+                    return "txs." + error;
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Creates a GenesisBlock message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof GenesisBlock
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {GenesisBlock} GenesisBlock
+     */
+    GenesisBlock.fromObject = function fromObject(object) {
+        if (object instanceof $root.GenesisBlock)
+            return object;
+        var message = new $root.GenesisBlock();
+        if (object.header != null) {
+            if (typeof object.header !== "object")
+                throw TypeError(".GenesisBlock.header: object expected");
+            message.header = $root.GenesisBlockHeader.fromObject(object.header);
+        }
+        if (object.txs) {
+            if (!Array.isArray(object.txs))
+                throw TypeError(".GenesisBlock.txs: array expected");
+            message.txs = [];
+            for (var i = 0; i < object.txs.length; ++i) {
+                if (typeof object.txs[i] !== "object")
+                    throw TypeError(".GenesisBlock.txs: object expected");
+                message.txs[i] = $root.Tx.fromObject(object.txs[i]);
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a GenesisBlock message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof GenesisBlock
+     * @static
+     * @param {GenesisBlock} message GenesisBlock
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    GenesisBlock.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.arrays || options.defaults)
+            object.txs = [];
+        if (options.defaults)
+            object.header = null;
+        if (message.header != null && message.hasOwnProperty("header"))
+            object.header = $root.GenesisBlockHeader.toObject(message.header, options);
+        if (message.txs && message.txs.length) {
+            object.txs = [];
+            for (var j = 0; j < message.txs.length; ++j)
+                object.txs[j] = $root.Tx.toObject(message.txs[j], options);
+        }
+        return object;
+    };
+
+    /**
+     * Converts this GenesisBlock to JSON.
+     * @function toJSON
+     * @memberof GenesisBlock
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    GenesisBlock.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return GenesisBlock;
 })();
 
 $root.BlockDB = (function() {
@@ -8784,6 +9020,383 @@ $root.TxDB = (function() {
     };
 
     return TxDB;
+})();
+
+$root.GenesisBlockHeader = (function() {
+
+    /**
+     * Properties of a GenesisBlockHeader.
+     * @exports IGenesisBlockHeader
+     * @interface IGenesisBlockHeader
+     * @property {Array.<Uint8Array>|null} [previousHash] GenesisBlockHeader previousHash
+     * @property {Uint8Array|null} [merkleRoot] GenesisBlockHeader merkleRoot
+     * @property {Uint8Array|null} [stateRoot] GenesisBlockHeader stateRoot
+     * @property {number|null} [difficulty] GenesisBlockHeader difficulty
+     * @property {number|Long|null} [timeStamp] GenesisBlockHeader timeStamp
+     * @property {number|Long|null} [nonce] GenesisBlockHeader nonce
+     * @property {Uint8Array|null} [miner] GenesisBlockHeader miner
+     */
+
+    /**
+     * Constructs a new GenesisBlockHeader.
+     * @exports GenesisBlockHeader
+     * @classdesc Represents a GenesisBlockHeader.
+     * @implements IGenesisBlockHeader
+     * @constructor
+     * @param {IGenesisBlockHeader=} [properties] Properties to set
+     */
+    function GenesisBlockHeader(properties) {
+        this.previousHash = [];
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * GenesisBlockHeader previousHash.
+     * @member {Array.<Uint8Array>} previousHash
+     * @memberof GenesisBlockHeader
+     * @instance
+     */
+    GenesisBlockHeader.prototype.previousHash = $util.emptyArray;
+
+    /**
+     * GenesisBlockHeader merkleRoot.
+     * @member {Uint8Array} merkleRoot
+     * @memberof GenesisBlockHeader
+     * @instance
+     */
+    GenesisBlockHeader.prototype.merkleRoot = $util.newBuffer([]);
+
+    /**
+     * GenesisBlockHeader stateRoot.
+     * @member {Uint8Array} stateRoot
+     * @memberof GenesisBlockHeader
+     * @instance
+     */
+    GenesisBlockHeader.prototype.stateRoot = $util.newBuffer([]);
+
+    /**
+     * GenesisBlockHeader difficulty.
+     * @member {number} difficulty
+     * @memberof GenesisBlockHeader
+     * @instance
+     */
+    GenesisBlockHeader.prototype.difficulty = 0;
+
+    /**
+     * GenesisBlockHeader timeStamp.
+     * @member {number|Long} timeStamp
+     * @memberof GenesisBlockHeader
+     * @instance
+     */
+    GenesisBlockHeader.prototype.timeStamp = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
+
+    /**
+     * GenesisBlockHeader nonce.
+     * @member {number|Long} nonce
+     * @memberof GenesisBlockHeader
+     * @instance
+     */
+    GenesisBlockHeader.prototype.nonce = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
+
+    /**
+     * GenesisBlockHeader miner.
+     * @member {Uint8Array} miner
+     * @memberof GenesisBlockHeader
+     * @instance
+     */
+    GenesisBlockHeader.prototype.miner = $util.newBuffer([]);
+
+    /**
+     * Creates a new GenesisBlockHeader instance using the specified properties.
+     * @function create
+     * @memberof GenesisBlockHeader
+     * @static
+     * @param {IGenesisBlockHeader=} [properties] Properties to set
+     * @returns {GenesisBlockHeader} GenesisBlockHeader instance
+     */
+    GenesisBlockHeader.create = function create(properties) {
+        return new GenesisBlockHeader(properties);
+    };
+
+    /**
+     * Encodes the specified GenesisBlockHeader message. Does not implicitly {@link GenesisBlockHeader.verify|verify} messages.
+     * @function encode
+     * @memberof GenesisBlockHeader
+     * @static
+     * @param {IGenesisBlockHeader} message GenesisBlockHeader message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GenesisBlockHeader.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.previousHash != null && message.previousHash.length)
+            for (var i = 0; i < message.previousHash.length; ++i)
+                writer.uint32(/* id 1, wireType 2 =*/10).bytes(message.previousHash[i]);
+        if (message.merkleRoot != null && message.hasOwnProperty("merkleRoot"))
+            writer.uint32(/* id 2, wireType 2 =*/18).bytes(message.merkleRoot);
+        if (message.stateRoot != null && message.hasOwnProperty("stateRoot"))
+            writer.uint32(/* id 3, wireType 2 =*/26).bytes(message.stateRoot);
+        if (message.difficulty != null && message.hasOwnProperty("difficulty"))
+            writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.difficulty);
+        if (message.timeStamp != null && message.hasOwnProperty("timeStamp"))
+            writer.uint32(/* id 5, wireType 0 =*/40).uint64(message.timeStamp);
+        if (message.nonce != null && message.hasOwnProperty("nonce"))
+            writer.uint32(/* id 6, wireType 0 =*/48).uint64(message.nonce);
+        if (message.miner != null && message.hasOwnProperty("miner"))
+            writer.uint32(/* id 7, wireType 2 =*/58).bytes(message.miner);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified GenesisBlockHeader message, length delimited. Does not implicitly {@link GenesisBlockHeader.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof GenesisBlockHeader
+     * @static
+     * @param {IGenesisBlockHeader} message GenesisBlockHeader message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GenesisBlockHeader.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a GenesisBlockHeader message from the specified reader or buffer.
+     * @function decode
+     * @memberof GenesisBlockHeader
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {GenesisBlockHeader} GenesisBlockHeader
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GenesisBlockHeader.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GenesisBlockHeader();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                if (!(message.previousHash && message.previousHash.length))
+                    message.previousHash = [];
+                message.previousHash.push(reader.bytes());
+                break;
+            case 2:
+                message.merkleRoot = reader.bytes();
+                break;
+            case 3:
+                message.stateRoot = reader.bytes();
+                break;
+            case 4:
+                message.difficulty = reader.uint32();
+                break;
+            case 5:
+                message.timeStamp = reader.uint64();
+                break;
+            case 6:
+                message.nonce = reader.uint64();
+                break;
+            case 7:
+                message.miner = reader.bytes();
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a GenesisBlockHeader message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof GenesisBlockHeader
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {GenesisBlockHeader} GenesisBlockHeader
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GenesisBlockHeader.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a GenesisBlockHeader message.
+     * @function verify
+     * @memberof GenesisBlockHeader
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    GenesisBlockHeader.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.previousHash != null && message.hasOwnProperty("previousHash")) {
+            if (!Array.isArray(message.previousHash))
+                return "previousHash: array expected";
+            for (var i = 0; i < message.previousHash.length; ++i)
+                if (!(message.previousHash[i] && typeof message.previousHash[i].length === "number" || $util.isString(message.previousHash[i])))
+                    return "previousHash: buffer[] expected";
+        }
+        if (message.merkleRoot != null && message.hasOwnProperty("merkleRoot"))
+            if (!(message.merkleRoot && typeof message.merkleRoot.length === "number" || $util.isString(message.merkleRoot)))
+                return "merkleRoot: buffer expected";
+        if (message.stateRoot != null && message.hasOwnProperty("stateRoot"))
+            if (!(message.stateRoot && typeof message.stateRoot.length === "number" || $util.isString(message.stateRoot)))
+                return "stateRoot: buffer expected";
+        if (message.difficulty != null && message.hasOwnProperty("difficulty"))
+            if (!$util.isInteger(message.difficulty))
+                return "difficulty: integer expected";
+        if (message.timeStamp != null && message.hasOwnProperty("timeStamp"))
+            if (!$util.isInteger(message.timeStamp) && !(message.timeStamp && $util.isInteger(message.timeStamp.low) && $util.isInteger(message.timeStamp.high)))
+                return "timeStamp: integer|Long expected";
+        if (message.nonce != null && message.hasOwnProperty("nonce"))
+            if (!$util.isInteger(message.nonce) && !(message.nonce && $util.isInteger(message.nonce.low) && $util.isInteger(message.nonce.high)))
+                return "nonce: integer|Long expected";
+        if (message.miner != null && message.hasOwnProperty("miner"))
+            if (!(message.miner && typeof message.miner.length === "number" || $util.isString(message.miner)))
+                return "miner: buffer expected";
+        return null;
+    };
+
+    /**
+     * Creates a GenesisBlockHeader message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof GenesisBlockHeader
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {GenesisBlockHeader} GenesisBlockHeader
+     */
+    GenesisBlockHeader.fromObject = function fromObject(object) {
+        if (object instanceof $root.GenesisBlockHeader)
+            return object;
+        var message = new $root.GenesisBlockHeader();
+        if (object.previousHash) {
+            if (!Array.isArray(object.previousHash))
+                throw TypeError(".GenesisBlockHeader.previousHash: array expected");
+            message.previousHash = [];
+            for (var i = 0; i < object.previousHash.length; ++i)
+                if (typeof object.previousHash[i] === "string")
+                    $util.base64.decode(object.previousHash[i], message.previousHash[i] = $util.newBuffer($util.base64.length(object.previousHash[i])), 0);
+                else if (object.previousHash[i].length)
+                    message.previousHash[i] = object.previousHash[i];
+        }
+        if (object.merkleRoot != null)
+            if (typeof object.merkleRoot === "string")
+                $util.base64.decode(object.merkleRoot, message.merkleRoot = $util.newBuffer($util.base64.length(object.merkleRoot)), 0);
+            else if (object.merkleRoot.length)
+                message.merkleRoot = object.merkleRoot;
+        if (object.stateRoot != null)
+            if (typeof object.stateRoot === "string")
+                $util.base64.decode(object.stateRoot, message.stateRoot = $util.newBuffer($util.base64.length(object.stateRoot)), 0);
+            else if (object.stateRoot.length)
+                message.stateRoot = object.stateRoot;
+        if (object.difficulty != null)
+            message.difficulty = object.difficulty >>> 0;
+        if (object.timeStamp != null)
+            if ($util.Long)
+                (message.timeStamp = $util.Long.fromValue(object.timeStamp)).unsigned = true;
+            else if (typeof object.timeStamp === "string")
+                message.timeStamp = parseInt(object.timeStamp, 10);
+            else if (typeof object.timeStamp === "number")
+                message.timeStamp = object.timeStamp;
+            else if (typeof object.timeStamp === "object")
+                message.timeStamp = new $util.LongBits(object.timeStamp.low >>> 0, object.timeStamp.high >>> 0).toNumber(true);
+        if (object.nonce != null)
+            if ($util.Long)
+                (message.nonce = $util.Long.fromValue(object.nonce)).unsigned = true;
+            else if (typeof object.nonce === "string")
+                message.nonce = parseInt(object.nonce, 10);
+            else if (typeof object.nonce === "number")
+                message.nonce = object.nonce;
+            else if (typeof object.nonce === "object")
+                message.nonce = new $util.LongBits(object.nonce.low >>> 0, object.nonce.high >>> 0).toNumber(true);
+        if (object.miner != null)
+            if (typeof object.miner === "string")
+                $util.base64.decode(object.miner, message.miner = $util.newBuffer($util.base64.length(object.miner)), 0);
+            else if (object.miner.length)
+                message.miner = object.miner;
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a GenesisBlockHeader message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof GenesisBlockHeader
+     * @static
+     * @param {GenesisBlockHeader} message GenesisBlockHeader
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    GenesisBlockHeader.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.arrays || options.defaults)
+            object.previousHash = [];
+        if (options.defaults) {
+            object.merkleRoot = options.bytes === String ? "" : [];
+            object.stateRoot = options.bytes === String ? "" : [];
+            object.difficulty = 0;
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, true);
+                object.timeStamp = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.timeStamp = options.longs === String ? "0" : 0;
+            if ($util.Long) {
+                var long = new $util.Long(0, 0, true);
+                object.nonce = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+            } else
+                object.nonce = options.longs === String ? "0" : 0;
+            object.miner = options.bytes === String ? "" : [];
+        }
+        if (message.previousHash && message.previousHash.length) {
+            object.previousHash = [];
+            for (var j = 0; j < message.previousHash.length; ++j)
+                object.previousHash[j] = options.bytes === String ? $util.base64.encode(message.previousHash[j], 0, message.previousHash[j].length) : options.bytes === Array ? Array.prototype.slice.call(message.previousHash[j]) : message.previousHash[j];
+        }
+        if (message.merkleRoot != null && message.hasOwnProperty("merkleRoot"))
+            object.merkleRoot = options.bytes === String ? $util.base64.encode(message.merkleRoot, 0, message.merkleRoot.length) : options.bytes === Array ? Array.prototype.slice.call(message.merkleRoot) : message.merkleRoot;
+        if (message.stateRoot != null && message.hasOwnProperty("stateRoot"))
+            object.stateRoot = options.bytes === String ? $util.base64.encode(message.stateRoot, 0, message.stateRoot.length) : options.bytes === Array ? Array.prototype.slice.call(message.stateRoot) : message.stateRoot;
+        if (message.difficulty != null && message.hasOwnProperty("difficulty"))
+            object.difficulty = message.difficulty;
+        if (message.timeStamp != null && message.hasOwnProperty("timeStamp"))
+            if (typeof message.timeStamp === "number")
+                object.timeStamp = options.longs === String ? String(message.timeStamp) : message.timeStamp;
+            else
+                object.timeStamp = options.longs === String ? $util.Long.prototype.toString.call(message.timeStamp) : options.longs === Number ? new $util.LongBits(message.timeStamp.low >>> 0, message.timeStamp.high >>> 0).toNumber(true) : message.timeStamp;
+        if (message.nonce != null && message.hasOwnProperty("nonce"))
+            if (typeof message.nonce === "number")
+                object.nonce = options.longs === String ? String(message.nonce) : message.nonce;
+            else
+                object.nonce = options.longs === String ? $util.Long.prototype.toString.call(message.nonce) : options.longs === Number ? new $util.LongBits(message.nonce.low >>> 0, message.nonce.high >>> 0).toNumber(true) : message.nonce;
+        if (message.miner != null && message.hasOwnProperty("miner"))
+            object.miner = options.bytes === String ? $util.base64.encode(message.miner, 0, message.miner.length) : options.bytes === Array ? Array.prototype.slice.call(message.miner) : message.miner;
+        return object;
+    };
+
+    /**
+     * Converts this GenesisBlockHeader to JSON.
+     * @function toJSON
+     * @memberof GenesisBlockHeader
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    GenesisBlockHeader.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return GenesisBlockHeader;
 })();
 
 $root.BlockHeader = (function() {

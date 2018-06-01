@@ -7,7 +7,7 @@ import { DBBlock } from "./database/dbblock"
 const logger = getLogger("Difficulty")
 
 export class DifficultyAdjuster {
-    public static adjustDifficulty(previousDBBlock: DBBlock, timeStamp: number, hash?: Hash) {
+    public static adjustDifficulty(previousDBBlock: DBBlock, timeStamp: number) {
         // Consensus Critical
         const timeDelta = previousDBBlock.height > 0 ? timeStamp - previousDBBlock.header.timeStamp : DifficultyAdjuster.targetTime
 

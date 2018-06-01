@@ -5,6 +5,11 @@ import "difficulty.proto";
 
 message Block {
     BlockHeader header = 1;
+    repeated Tx txs = 2;
+}
+
+message GenesisBlock {
+    GenesisBlockHeader header = 1;
     repeated Tx txs = 3;
 }
 

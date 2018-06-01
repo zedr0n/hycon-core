@@ -58,7 +58,7 @@ export function GenesisBlockHeader(): GenesisBlockHeader {
     return genesis
 }
 
-export function setGenesisBlockHeader(header: proto.IBlockHeader): GenesisBlockHeader {
+export function setGenesisBlockHeader(header: proto.IGenesisBlockHeader): GenesisBlockHeader {
     // Consensus Critical
     const genesis = new BaseBlockHeader()
     genesis.set({

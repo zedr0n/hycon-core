@@ -112,7 +112,7 @@ export class TxDatabase implements ITxDatabase {
                         $fee: hycontoString(tx.fee),
                         $txfrom: tx.from.toString(),
                         $txhash: txHash.toString(),
-                        $txto: tx.to === undefined ? "burn" : tx.to.toString(),
+                        $txto: tx.to === undefined ? "🔥" : tx.to.toString(),
                     }
                 } else {
                     params = {
@@ -120,7 +120,7 @@ export class TxDatabase implements ITxDatabase {
                         $blockhash: blockHash.toString(),
                         $blocktime: timestamp,
                         $txhash: txHash.toString(),
-                        $txto: tx.to === undefined ? "burn" : tx.to.toString(),
+                        $txto: tx.to === undefined ? "🔥" : tx.to.toString(),
                     }
                 }
                 stmtInsert.run(params)

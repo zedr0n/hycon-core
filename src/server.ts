@@ -1,4 +1,5 @@
 import { getLogger } from "log4js"
+import { hyconfromString } from "./api/client/stringUtil"
 import { HttpServer } from "./api/server/server"
 import { ITxPool } from "./common/itxPool"
 import { TxPool } from "./common/txPool"
@@ -12,6 +13,7 @@ import { MinerServer } from "./miner/minerServer"
 import { INetwork } from "./network/inetwork"
 import { RabbitNetwork } from "./network/rabbit/rabbitNetwork" // for speed
 import { RestManager } from "./rest/restManager"
+import { Tx } from "./serialization/proto"
 import { Wallet } from "./wallet/wallet"
 
 const logger = getLogger("Server")
@@ -58,6 +60,10 @@ export class Server {
                 this.network.connect(ip, port).catch((e) => logger.error(`Failed to connect to client: ${e}`))
             }
         }
+        const wallet = await Wallet.loadKeys("test1", "")
+        const tx = wallet.send(undefined, hyconfromString("0.1"), 1, hyconfromString("1"))
+        // this.txPool.putTxs([tx])
+        this.network.broadcastTxs([tx])
         await this.runSync()
     }
 

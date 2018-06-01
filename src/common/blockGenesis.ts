@@ -19,17 +19,17 @@ export class GenesisBlock implements proto.IBlock {
         }
     }
     public static decode(data: Uint8Array): GenesisBlock {
-        const block = proto.Block.decode(data)
+        const block = proto.GenesisBlock.decode(data)
         return new GenesisBlock(block)
     }
     public header: GenesisBlockHeader
     public txs: GenesisSignedTx[]
 
-    constructor(block: proto.IBlock) {
+    constructor(block: proto.IGenesisBlock) {
         this.set(block)
     }
 
-    public set(block: proto.IBlock): void {
+    public set(block: proto.IGenesisBlock): void {
         if (block.txs === undefined) { throw (new Error("Block Txs are missing")) }
         if (block.header === undefined) { throw (new Error("Block Header is missing in GenesisBlock")) }
 

@@ -3051,6 +3051,102 @@ export class Block implements IBlock {
     public toJSON(): { [k: string]: any };
 }
 
+/** Properties of a GenesisBlock. */
+export interface IGenesisBlock {
+
+    /** GenesisBlock header */
+    header?: IGenesisBlockHeader;
+
+    /** GenesisBlock txs */
+    txs?: ITx[];
+}
+
+/** Represents a GenesisBlock. */
+export class GenesisBlock implements IGenesisBlock {
+
+    /**
+     * Constructs a new GenesisBlock.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IGenesisBlock);
+
+    /** GenesisBlock header. */
+    public header?: IGenesisBlockHeader;
+
+    /** GenesisBlock txs. */
+    public txs: ITx[];
+
+    /**
+     * Creates a new GenesisBlock instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns GenesisBlock instance
+     */
+    public static create(properties?: IGenesisBlock): GenesisBlock;
+
+    /**
+     * Encodes the specified GenesisBlock message. Does not implicitly {@link GenesisBlock.verify|verify} messages.
+     * @param message GenesisBlock message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: IGenesisBlock, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified GenesisBlock message, length delimited. Does not implicitly {@link GenesisBlock.verify|verify} messages.
+     * @param message GenesisBlock message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: IGenesisBlock, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a GenesisBlock message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns GenesisBlock
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): GenesisBlock;
+
+    /**
+     * Decodes a GenesisBlock message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns GenesisBlock
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): GenesisBlock;
+
+    /**
+     * Verifies a GenesisBlock message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a GenesisBlock message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns GenesisBlock
+     */
+    public static fromObject(object: { [k: string]: any }): GenesisBlock;
+
+    /**
+     * Creates a plain object from a GenesisBlock message. Also converts values to other types if specified.
+     * @param message GenesisBlock
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: GenesisBlock, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this GenesisBlock to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
 /** Properties of a BlockDB. */
 export interface IBlockDB {
 
@@ -3508,6 +3604,132 @@ export class TxDB implements ITxDB {
 
     /**
      * Converts this TxDB to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a GenesisBlockHeader. */
+export interface IGenesisBlockHeader {
+
+    /** GenesisBlockHeader previousHash */
+    previousHash?: Uint8Array[];
+
+    /** GenesisBlockHeader merkleRoot */
+    merkleRoot?: Uint8Array;
+
+    /** GenesisBlockHeader stateRoot */
+    stateRoot?: Uint8Array;
+
+    /** GenesisBlockHeader difficulty */
+    difficulty?: number;
+
+    /** GenesisBlockHeader timeStamp */
+    timeStamp?: number|Long;
+
+    /** GenesisBlockHeader nonce */
+    nonce?: number|Long;
+
+    /** GenesisBlockHeader miner */
+    miner?: Uint8Array;
+}
+
+/** Represents a GenesisBlockHeader. */
+export class GenesisBlockHeader implements IGenesisBlockHeader {
+
+    /**
+     * Constructs a new GenesisBlockHeader.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IGenesisBlockHeader);
+
+    /** GenesisBlockHeader previousHash. */
+    public previousHash: Uint8Array[];
+
+    /** GenesisBlockHeader merkleRoot. */
+    public merkleRoot: Uint8Array;
+
+    /** GenesisBlockHeader stateRoot. */
+    public stateRoot: Uint8Array;
+
+    /** GenesisBlockHeader difficulty. */
+    public difficulty: number;
+
+    /** GenesisBlockHeader timeStamp. */
+    public timeStamp: (number|Long);
+
+    /** GenesisBlockHeader nonce. */
+    public nonce: (number|Long);
+
+    /** GenesisBlockHeader miner. */
+    public miner: Uint8Array;
+
+    /**
+     * Creates a new GenesisBlockHeader instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns GenesisBlockHeader instance
+     */
+    public static create(properties?: IGenesisBlockHeader): GenesisBlockHeader;
+
+    /**
+     * Encodes the specified GenesisBlockHeader message. Does not implicitly {@link GenesisBlockHeader.verify|verify} messages.
+     * @param message GenesisBlockHeader message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: IGenesisBlockHeader, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified GenesisBlockHeader message, length delimited. Does not implicitly {@link GenesisBlockHeader.verify|verify} messages.
+     * @param message GenesisBlockHeader message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: IGenesisBlockHeader, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a GenesisBlockHeader message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns GenesisBlockHeader
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): GenesisBlockHeader;
+
+    /**
+     * Decodes a GenesisBlockHeader message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns GenesisBlockHeader
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): GenesisBlockHeader;
+
+    /**
+     * Verifies a GenesisBlockHeader message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a GenesisBlockHeader message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns GenesisBlockHeader
+     */
+    public static fromObject(object: { [k: string]: any }): GenesisBlockHeader;
+
+    /**
+     * Creates a plain object from a GenesisBlockHeader message. Also converts values to other types if specified.
+     * @param message GenesisBlockHeader
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: GenesisBlockHeader, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this GenesisBlockHeader to JSON.
      * @returns JSON object
      */
     public toJSON(): { [k: string]: any };
