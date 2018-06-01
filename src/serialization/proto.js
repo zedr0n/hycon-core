@@ -8786,274 +8786,6 @@ $root.TxDB = (function() {
     return TxDB;
 })();
 
-$root.TxList = (function() {
-
-    /**
-     * Properties of a TxList.
-     * @exports ITxList
-     * @interface ITxList
-     * @property {ITx|null} [tx] TxList tx
-     * @property {Uint8Array|null} [previousFrom] TxList previousFrom
-     * @property {Uint8Array|null} [previousTo] TxList previousTo
-     * @property {Uint8Array|null} [blockHash] TxList blockHash
-     */
-
-    /**
-     * Constructs a new TxList.
-     * @exports TxList
-     * @classdesc Represents a TxList.
-     * @implements ITxList
-     * @constructor
-     * @param {ITxList=} [properties] Properties to set
-     */
-    function TxList(properties) {
-        if (properties)
-            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                if (properties[keys[i]] != null)
-                    this[keys[i]] = properties[keys[i]];
-    }
-
-    /**
-     * TxList tx.
-     * @member {ITx|null|undefined} tx
-     * @memberof TxList
-     * @instance
-     */
-    TxList.prototype.tx = null;
-
-    /**
-     * TxList previousFrom.
-     * @member {Uint8Array} previousFrom
-     * @memberof TxList
-     * @instance
-     */
-    TxList.prototype.previousFrom = $util.newBuffer([]);
-
-    /**
-     * TxList previousTo.
-     * @member {Uint8Array} previousTo
-     * @memberof TxList
-     * @instance
-     */
-    TxList.prototype.previousTo = $util.newBuffer([]);
-
-    /**
-     * TxList blockHash.
-     * @member {Uint8Array} blockHash
-     * @memberof TxList
-     * @instance
-     */
-    TxList.prototype.blockHash = $util.newBuffer([]);
-
-    /**
-     * Creates a new TxList instance using the specified properties.
-     * @function create
-     * @memberof TxList
-     * @static
-     * @param {ITxList=} [properties] Properties to set
-     * @returns {TxList} TxList instance
-     */
-    TxList.create = function create(properties) {
-        return new TxList(properties);
-    };
-
-    /**
-     * Encodes the specified TxList message. Does not implicitly {@link TxList.verify|verify} messages.
-     * @function encode
-     * @memberof TxList
-     * @static
-     * @param {ITxList} message TxList message or plain object to encode
-     * @param {$protobuf.Writer} [writer] Writer to encode to
-     * @returns {$protobuf.Writer} Writer
-     */
-    TxList.encode = function encode(message, writer) {
-        if (!writer)
-            writer = $Writer.create();
-        if (message.tx != null && message.hasOwnProperty("tx"))
-            $root.Tx.encode(message.tx, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
-        if (message.previousFrom != null && message.hasOwnProperty("previousFrom"))
-            writer.uint32(/* id 2, wireType 2 =*/18).bytes(message.previousFrom);
-        if (message.previousTo != null && message.hasOwnProperty("previousTo"))
-            writer.uint32(/* id 3, wireType 2 =*/26).bytes(message.previousTo);
-        if (message.blockHash != null && message.hasOwnProperty("blockHash"))
-            writer.uint32(/* id 4, wireType 2 =*/34).bytes(message.blockHash);
-        return writer;
-    };
-
-    /**
-     * Encodes the specified TxList message, length delimited. Does not implicitly {@link TxList.verify|verify} messages.
-     * @function encodeDelimited
-     * @memberof TxList
-     * @static
-     * @param {ITxList} message TxList message or plain object to encode
-     * @param {$protobuf.Writer} [writer] Writer to encode to
-     * @returns {$protobuf.Writer} Writer
-     */
-    TxList.encodeDelimited = function encodeDelimited(message, writer) {
-        return this.encode(message, writer).ldelim();
-    };
-
-    /**
-     * Decodes a TxList message from the specified reader or buffer.
-     * @function decode
-     * @memberof TxList
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @param {number} [length] Message length if known beforehand
-     * @returns {TxList} TxList
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    TxList.decode = function decode(reader, length) {
-        if (!(reader instanceof $Reader))
-            reader = $Reader.create(reader);
-        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.TxList();
-        while (reader.pos < end) {
-            var tag = reader.uint32();
-            switch (tag >>> 3) {
-            case 1:
-                message.tx = $root.Tx.decode(reader, reader.uint32());
-                break;
-            case 2:
-                message.previousFrom = reader.bytes();
-                break;
-            case 3:
-                message.previousTo = reader.bytes();
-                break;
-            case 4:
-                message.blockHash = reader.bytes();
-                break;
-            default:
-                reader.skipType(tag & 7);
-                break;
-            }
-        }
-        return message;
-    };
-
-    /**
-     * Decodes a TxList message from the specified reader or buffer, length delimited.
-     * @function decodeDelimited
-     * @memberof TxList
-     * @static
-     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-     * @returns {TxList} TxList
-     * @throws {Error} If the payload is not a reader or valid buffer
-     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-     */
-    TxList.decodeDelimited = function decodeDelimited(reader) {
-        if (!(reader instanceof $Reader))
-            reader = new $Reader(reader);
-        return this.decode(reader, reader.uint32());
-    };
-
-    /**
-     * Verifies a TxList message.
-     * @function verify
-     * @memberof TxList
-     * @static
-     * @param {Object.<string,*>} message Plain object to verify
-     * @returns {string|null} `null` if valid, otherwise the reason why it is not
-     */
-    TxList.verify = function verify(message) {
-        if (typeof message !== "object" || message === null)
-            return "object expected";
-        if (message.tx != null && message.hasOwnProperty("tx")) {
-            var error = $root.Tx.verify(message.tx);
-            if (error)
-                return "tx." + error;
-        }
-        if (message.previousFrom != null && message.hasOwnProperty("previousFrom"))
-            if (!(message.previousFrom && typeof message.previousFrom.length === "number" || $util.isString(message.previousFrom)))
-                return "previousFrom: buffer expected";
-        if (message.previousTo != null && message.hasOwnProperty("previousTo"))
-            if (!(message.previousTo && typeof message.previousTo.length === "number" || $util.isString(message.previousTo)))
-                return "previousTo: buffer expected";
-        if (message.blockHash != null && message.hasOwnProperty("blockHash"))
-            if (!(message.blockHash && typeof message.blockHash.length === "number" || $util.isString(message.blockHash)))
-                return "blockHash: buffer expected";
-        return null;
-    };
-
-    /**
-     * Creates a TxList message from a plain object. Also converts values to their respective internal types.
-     * @function fromObject
-     * @memberof TxList
-     * @static
-     * @param {Object.<string,*>} object Plain object
-     * @returns {TxList} TxList
-     */
-    TxList.fromObject = function fromObject(object) {
-        if (object instanceof $root.TxList)
-            return object;
-        var message = new $root.TxList();
-        if (object.tx != null) {
-            if (typeof object.tx !== "object")
-                throw TypeError(".TxList.tx: object expected");
-            message.tx = $root.Tx.fromObject(object.tx);
-        }
-        if (object.previousFrom != null)
-            if (typeof object.previousFrom === "string")
-                $util.base64.decode(object.previousFrom, message.previousFrom = $util.newBuffer($util.base64.length(object.previousFrom)), 0);
-            else if (object.previousFrom.length)
-                message.previousFrom = object.previousFrom;
-        if (object.previousTo != null)
-            if (typeof object.previousTo === "string")
-                $util.base64.decode(object.previousTo, message.previousTo = $util.newBuffer($util.base64.length(object.previousTo)), 0);
-            else if (object.previousTo.length)
-                message.previousTo = object.previousTo;
-        if (object.blockHash != null)
-            if (typeof object.blockHash === "string")
-                $util.base64.decode(object.blockHash, message.blockHash = $util.newBuffer($util.base64.length(object.blockHash)), 0);
-            else if (object.blockHash.length)
-                message.blockHash = object.blockHash;
-        return message;
-    };
-
-    /**
-     * Creates a plain object from a TxList message. Also converts values to other types if specified.
-     * @function toObject
-     * @memberof TxList
-     * @static
-     * @param {TxList} message TxList
-     * @param {$protobuf.IConversionOptions} [options] Conversion options
-     * @returns {Object.<string,*>} Plain object
-     */
-    TxList.toObject = function toObject(message, options) {
-        if (!options)
-            options = {};
-        var object = {};
-        if (options.defaults) {
-            object.tx = null;
-            object.previousFrom = options.bytes === String ? "" : [];
-            object.previousTo = options.bytes === String ? "" : [];
-            object.blockHash = options.bytes === String ? "" : [];
-        }
-        if (message.tx != null && message.hasOwnProperty("tx"))
-            object.tx = $root.Tx.toObject(message.tx, options);
-        if (message.previousFrom != null && message.hasOwnProperty("previousFrom"))
-            object.previousFrom = options.bytes === String ? $util.base64.encode(message.previousFrom, 0, message.previousFrom.length) : options.bytes === Array ? Array.prototype.slice.call(message.previousFrom) : message.previousFrom;
-        if (message.previousTo != null && message.hasOwnProperty("previousTo"))
-            object.previousTo = options.bytes === String ? $util.base64.encode(message.previousTo, 0, message.previousTo.length) : options.bytes === Array ? Array.prototype.slice.call(message.previousTo) : message.previousTo;
-        if (message.blockHash != null && message.hasOwnProperty("blockHash"))
-            object.blockHash = options.bytes === String ? $util.base64.encode(message.blockHash, 0, message.blockHash.length) : options.bytes === Array ? Array.prototype.slice.call(message.blockHash) : message.blockHash;
-        return object;
-    };
-
-    /**
-     * Converts this TxList to JSON.
-     * @function toJSON
-     * @memberof TxList
-     * @instance
-     * @returns {Object.<string,*>} JSON object
-     */
-    TxList.prototype.toJSON = function toJSON() {
-        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-    };
-
-    return TxList;
-})();
-
 $root.BlockHeader = (function() {
 
     /**
@@ -9173,7 +8905,7 @@ $root.BlockHeader = (function() {
         if (message.stateRoot != null && message.hasOwnProperty("stateRoot"))
             writer.uint32(/* id 3, wireType 2 =*/26).bytes(message.stateRoot);
         if (message.difficulty != null && message.hasOwnProperty("difficulty"))
-            writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.difficulty);
+            writer.uint32(/* id 4, wireType 1 =*/33).double(message.difficulty);
         if (message.timeStamp != null && message.hasOwnProperty("timeStamp"))
             writer.uint32(/* id 5, wireType 0 =*/40).uint64(message.timeStamp);
         if (message.nonce != null && message.hasOwnProperty("nonce"))
@@ -9226,7 +8958,7 @@ $root.BlockHeader = (function() {
                 message.stateRoot = reader.bytes();
                 break;
             case 4:
-                message.difficulty = reader.uint32();
+                message.difficulty = reader.double();
                 break;
             case 5:
                 message.timeStamp = reader.uint64();
@@ -9286,8 +9018,8 @@ $root.BlockHeader = (function() {
             if (!(message.stateRoot && typeof message.stateRoot.length === "number" || $util.isString(message.stateRoot)))
                 return "stateRoot: buffer expected";
         if (message.difficulty != null && message.hasOwnProperty("difficulty"))
-            if (!$util.isInteger(message.difficulty))
-                return "difficulty: integer expected";
+            if (typeof message.difficulty !== "number")
+                return "difficulty: number expected";
         if (message.timeStamp != null && message.hasOwnProperty("timeStamp"))
             if (!$util.isInteger(message.timeStamp) && !(message.timeStamp && $util.isInteger(message.timeStamp.low) && $util.isInteger(message.timeStamp.high)))
                 return "timeStamp: integer|Long expected";
@@ -9333,7 +9065,7 @@ $root.BlockHeader = (function() {
             else if (object.stateRoot.length)
                 message.stateRoot = object.stateRoot;
         if (object.difficulty != null)
-            message.difficulty = object.difficulty >>> 0;
+            message.difficulty = Number(object.difficulty);
         if (object.timeStamp != null)
             if ($util.Long)
                 (message.timeStamp = $util.Long.fromValue(object.timeStamp)).unsigned = true;
@@ -9401,7 +9133,7 @@ $root.BlockHeader = (function() {
         if (message.stateRoot != null && message.hasOwnProperty("stateRoot"))
             object.stateRoot = options.bytes === String ? $util.base64.encode(message.stateRoot, 0, message.stateRoot.length) : options.bytes === Array ? Array.prototype.slice.call(message.stateRoot) : message.stateRoot;
         if (message.difficulty != null && message.hasOwnProperty("difficulty"))
-            object.difficulty = message.difficulty;
+            object.difficulty = options.json && !isFinite(message.difficulty) ? String(message.difficulty) : message.difficulty;
         if (message.timeStamp != null && message.hasOwnProperty("timeStamp"))
             if (typeof message.timeStamp === "number")
                 object.timeStamp = options.longs === String ? String(message.timeStamp) : message.timeStamp;
