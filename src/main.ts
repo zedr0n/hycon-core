@@ -120,12 +120,14 @@ async function main() {
         }
     }
 
-    if (globalOptions.minerAddress === undefined || globalOptions.minerAddress === "") {
-        try {
-            globalOptions.minerAddress = conf.minerAddress = await createDefaultWallet()
-            configChange = true
-        } catch (e) {
-            logger.error(`Failed to initialize default wallet: ${e}`)
+    if (globalOptions.cpuMiners > 0) {
+        if (globalOptions.minerAddress === undefined || globalOptions.minerAddress === "") {
+            try {
+                globalOptions.minerAddress = conf.minerAddress = await createDefaultWallet()
+                configChange = true
+            } catch (e) {
+                logger.error(`Failed to initialize default wallet: ${e}`)
+            }
         }
     }
 
