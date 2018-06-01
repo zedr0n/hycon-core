@@ -63,7 +63,7 @@ export class MinedDatabase {
             let hashData: string = ""
             return new Promise<Hash | undefined>(async (resolved, rejected) => {
                 this.db.all(`SELECT * FROM mineddb ORDER BY timestamp DESC LIMIT 1`, (err, rows) => {
-                    if (rows[0] === undefined) { return resolved(undefined) }
+                    if (rows === undefined) { return resolved(undefined) }
                     hashData = rows[0].blockhash
                     return resolved(Hash.decode(hashData))
                 })

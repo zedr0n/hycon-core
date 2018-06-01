@@ -118,23 +118,27 @@ export class Transaction extends React.Component<any, any> {
     public handleSubmit(event: any) {
         if (this.state.address !== "" && this.state.address !== undefined) {
             if (this.state.amount > 0) {
-                if (this.state.wallet.address === this.state.address) {
-                    alert(`You can not send HYCON to yourself.`)
+                if (hyconfromString(this.state.minerFee).compare(hyconfromString("0")) === 0) {
+                    alert(`Enter a valid miner fee`)
                 } else {
-                    this.setState({ isLoading: true })
-                    this.state.rest.sendTx({ name: this.state.name, password: this.state.password, address: this.state.address, amount: this.state.amount.toString(), minerFee: this.state.minerFee.toString() })
-                        .then((result: boolean) => {
-                            if (result === true) {
-                                alert("A transaction of " + this.state.amount +
-                                    "HYCON has been submitted to " + this.state.address +
-                                    " with " + this.state.minerFee + "HYCON as miner fees.",
-                                )
-                                this.setState({ redirect: true })
-                            } else {
-                                alert("Fail to transfer hycon")
-                                this.setState({ redirect: true })
-                            }
-                        })
+                    if (this.state.wallet.address === this.state.address) {
+                        alert(`You can not send HYCON to yourself.`)
+                    } else {
+                        this.setState({ isLoading: true })
+                        this.state.rest.sendTx({ name: this.state.name, password: this.state.password, address: this.state.address, amount: this.state.amount.toString(), minerFee: this.state.minerFee.toString() })
+                            .then((result: boolean) => {
+                                if (result === true) {
+                                    alert("A transaction of " + this.state.amount +
+                                        "HYCON has been submitted to " + this.state.address +
+                                        " with " + this.state.minerFee + "HYCON as miner fees.",
+                                    )
+                                    this.setState({ redirect: true })
+                                } else {
+                                    alert("Fail to transfer hycon")
+                                    this.setState({ redirect: true })
+                                }
+                            })
+                    }
                 }
             } else {
                 alert("Enter a valid transaction amount")

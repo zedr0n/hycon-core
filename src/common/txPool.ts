@@ -1,6 +1,6 @@
 import { getLogger } from "log4js"
 import Long = require("long")
-import { hyconfromString } from "../api/client/stringUtil"
+import { hyconfromString, hycontoString } from "../api/client/stringUtil"
 import { TxValidity } from "../consensus/database/worldState"
 import { NewTx } from "../serialization/proto"
 import { Server } from "../server"
@@ -23,20 +23,24 @@ export class TxPool implements ITxPool {
     private txsMap: Map<string, SignedTx[]>
 
     private callbacks: ITxCallback[]
-    private minFee: number
+    private minFee: Long
     private lock: AsyncLock
 
-    constructor(server: Server, minFee?: number) {
+    constructor(server: Server, minFee?: Long) {
         this.server = server
         this.addresses = []
         this.callbacks = []
-        this.minFee = minFee === undefined ? 0 : minFee
+        this.minFee = minFee === undefined ? hyconfromString("0.000000001") : minFee
         this.txsMap = new Map<string, SignedTx[]>()
     }
 
     public async putTxs(newTxsOriginal: SignedTx[]): Promise<number> {
         const filteredTxs: Array<{ tx: SignedTx, valid: TxValidity }> = []
         for (const tx of newTxsOriginal) {
+            if (tx.fee.lessThan(this.minFee.toUnsigned())) {
+                logger.debug(`Less than Min fee in txPool`)
+                continue
+            }
             const isValid = await this.server.consensus.txValidity(tx)
             if (isValid === TxValidity.Invalid) {
                 logger.debug(`Invalid Tx : ${new Hash(tx).toString()}`)
@@ -88,9 +92,6 @@ export class TxPool implements ITxPool {
                 if (valid === TxValidity.Valid && txs[0].equals(tx)) {
                     this.setAddresses(fromString, tx)
                 }
-                // For callback index
-                const index = this.getTxs().indexOf(tx)
-                lowestIndex !== undefined ? (index < lowestIndex ? lowestIndex = index : lowestIndex = lowestIndex) : lowestIndex = index
             }
         }
         return newTxsCount
@@ -174,7 +175,6 @@ export class TxPool implements ITxPool {
             if (txsOfAddress === undefined) {
                 continue
             }
-
             while (txsOfAddress.length > 0 && txsOfAddress[0].nonce <= txOriginal.nonce) {
                 this.removeFromAddresses(txsOfAddress[0].from)
                 txsOfAddress.splice(0, 1)
