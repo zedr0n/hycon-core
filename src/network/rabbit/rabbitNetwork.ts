@@ -60,7 +60,7 @@ export class RabbitNetwork implements INetwork {
         this.port = port
         this.publicPort = -1
         this.networkid = networkid
-        this.targetConnectedPeers = 5
+        this.targetConnectedPeers = 25
         this.peers = new Map<number, RabbitPeer>()
         this.endPoints = new Map<number, proto.IPeer>()
         this.pendingConnections = new Map<number, proto.IPeer>()
