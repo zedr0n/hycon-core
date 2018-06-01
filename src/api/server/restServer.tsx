@@ -257,7 +257,7 @@ export class RestServer implements IRest {
                         amount: hycontoString(tx.amount),
                         fee: hycontoString(tx.fee),
                         from: tx.from.toString(),
-                        to: tx.to.toString(),
+                        to: tx.to !== undefined ? tx.to.toString() : "🔥Gimme fuel, gimme fire🔥",
                         signature: tx.signature.toString("hex"),
                         estimated: hycontoString(tx.amount.add(tx.fee)),
                     })
@@ -271,7 +271,7 @@ export class RestServer implements IRest {
                     amount: result.amount,
                     fee: result.fee,
                     from: result.from,
-                    to: result.to,
+                    to: result.to !== undefined ? result.to.toString() : "🔥Gimme fuel, gimme fire🔥",
                     estimated: hycontoString(hyconfromString(result.amount).add(hyconfromString(result.fee))),
                     receiveTime: result.blocktime,
                 }
@@ -320,7 +320,7 @@ export class RestServer implements IRest {
                         hash: new Hash(hyconTx).toString(),
                         fee: hycontoString(hyconTx.fee),
                         from: hyconTx.from.toString(),
-                        to: hyconTx.to.toString(),
+                        to: hyconTx.to !== undefined ? hyconTx.to.toString() : "🔥Gimme fuel, gimme fire🔥",
                         estimated: hycontoString(hyconTx.amount.add(hyconTx.fee)),
                         receiveTime: hyconBlock.header.timeStamp,
                     })
@@ -328,7 +328,7 @@ export class RestServer implements IRest {
                     txs.push({
                         amount: hycontoString(hyconTx.amount),
                         hash: new Hash(hyconTx).toString(),
-                        to: hyconTx.to.toString(),
+                        to: hyconTx.to !== undefined ? hyconTx.to.toString() : "🔥Gimme fuel, gimme fire🔥",
                         estimated: hycontoString(hyconTx.amount),
                         receiveTime: hyconBlock.header.timeStamp,
                     })
@@ -397,14 +397,14 @@ export class RestServer implements IRest {
                             hash: new Hash(tx).toString(),
                             fee: hycontoString(tx.fee),
                             from: tx.from.toString(),
-                            to: tx.to.toString(),
+                            to: tx.to !== undefined ? tx.to.toString() : "🔥Gimme fuel, gimme fire🔥",
                             estimated: hycontoString(tx.amount.add(tx.fee)),
                         })
                     } else {
                         txs.push({
                             amount: hycontoString(tx.amount),
                             hash: new Hash(tx).toString(),
-                            to: tx.to.toString(),
+                            to: tx.to !== undefined ? tx.to.toString() : "🔥Gimme fuel, gimme fire🔥",
                             estimated: hycontoString(tx.amount),
                         })
                     }
@@ -499,7 +499,7 @@ export class RestServer implements IRest {
                         amount: hycontoString(tx.amount),
                         fee: hycontoString(tx.fee),
                         from: tx.from.toString(),
-                        to: tx.to.toString(),
+                        to: tx.to !== undefined ? tx.to.toString() : "🔥Gimme fuel, gimme fire🔥",
                         signature: tx.signature.toString("hex"),
                         estimated: hycontoString(tx.amount.add(tx.fee)),
                     })
@@ -621,7 +621,7 @@ export class RestServer implements IRest {
                 amount: hycontoString(tx.amount),
                 fee: hycontoString(tx.fee),
                 from: tx.from.toString(),
-                to: tx.to.toString(),
+                to: tx.to !== undefined ? tx.to.toString() : "🔥Gimme fuel, gimme fire🔥",
                 signature: tx.signature.toString("hex"),
                 estimated: hycontoString(tx.amount.add(tx.fee)),
             })
