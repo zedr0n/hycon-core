@@ -205,7 +205,7 @@ export class StratumServer {
             targetHex,
         }
         this.mapCandidateBlock.set(this.jobId, job)
-        logger.info(`Created new job(${this.jobId})`)
+        logger.debug(`Created new job(${this.jobId})`)
         return job
     }
 
