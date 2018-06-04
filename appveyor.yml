@@ -1,0 +1,14 @@
+# Test against the latest version of this Node.js version
+
+stack: node 8, mysql
+install:
+  - npm install -g typescript
+version: 1.0.{build}
+branches:
+  only:
+  - linux-docker
+skip_tags: true
+image: Ubuntu
+build_script:
+- sh: >-
+    ./package.sh linux
