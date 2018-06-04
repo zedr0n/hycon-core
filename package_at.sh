@@ -65,4 +65,5 @@ cp -rf ../node_modules/react* ./node_modules/
 
 cd ..
 zip -r $file_name $output_dir
+appveyor PushArtifact $file_name
 
