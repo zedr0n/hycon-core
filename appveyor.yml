@@ -2,7 +2,7 @@
 
 stack: node 8
 install:
-  - sudo apt-get install libboost-all-dev
+  - sudo apt-get install -y libboost-all-dev
   - npm install -g typescript
 version: 1.0.{build}
 branches:
