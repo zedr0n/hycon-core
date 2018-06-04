@@ -45,10 +45,10 @@ then
     cp -f ../node_modules/rocksdb/build/Release/leveldown.node .
     if [ $platform = "macos" ]
     then
-        cp -f ../node_modules/sqlite3/lib/binding/node-v59-darwin-x64/node_sqlite3.node .
+        cp -f ../node_modules/sqlite3/lib/binding/node-*-darwin-x64/node_sqlite3.node .
     elif [ $platform = "linux" ]
     then
-        cp -f ../node_modules/sqlite3/lib/binding/node-v59-linux-x64/node_sqlite3.node .
+        cp -f ../node_modules/sqlite3/lib/binding/node-*-linux-x64/node_sqlite3.node .
     else
         echo "================== Error: platform not recognised ==============="
         exit 1
