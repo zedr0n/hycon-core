@@ -1,7 +1,8 @@
 # Test against the latest version of this Node.js version
 
-stack: node 8, mysql
+stack: node 8
 install:
+  - apt-get install libboost-all-dev
   - npm install -g typescript
 version: 1.0.{build}
 branches:
