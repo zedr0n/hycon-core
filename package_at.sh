@@ -16,7 +16,7 @@ fi
 npm run clear
 npm run block:build
 echo "==================UI build finish==============="
-pkg . --target $platform -o hycon
+./node_modules/.bin/pkg . --target $platform -o hycon
 mkdir $output_dir
 if [ -e "wallet" ]
 then
