@@ -49,6 +49,7 @@ then
     elif [ $platform = "linux" ]
     then
         cp -f ../node_modules/sqlite3/lib/binding/node-*-linux-x64/node_sqlite3.node .
+        cp -f ../node_modules/opn/xdg-open .
     else
         echo "================== Error: platform not recognised ==============="
         exit 1
