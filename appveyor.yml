@@ -3,6 +3,7 @@
 stack: node 8
 install:
   - sudo apt-get install -y libboost-all-dev
+  - sudo apt-get install zip
   - npm install es6-promise    
   - npm install pkg
   - npm install typescript
