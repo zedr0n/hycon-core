@@ -4,6 +4,7 @@ stack: node 8
 install:
   - sudo apt-get install -y libboost-all-dev
   - npm install @types/es6-promise
+  - npm install es6-promise    
   - npm install -g typescript
 version: 1.0.{build}
 branches:
