@@ -1,4 +1,4 @@
-FROM scratch 
+FROM ubuntu 
 WORKDIR /hycon
 ADD ./bundle-* /hycon
 ADD ./bundle-*/data/clientDist /hycon/data/clientDist
