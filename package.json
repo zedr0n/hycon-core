@@ -81,6 +81,7 @@
         "blake2b": "^2.1.2",
         "body-parser": "^1.18.3",
         "command-line-args": "^5.0.2",
+        "es6-promise": "^4.2.4",
         "express": "^4.16.3",
         "fs-extra": "^5.0.0",
         "input": "^1.0.1",

@@ -16,6 +16,7 @@ rawblock*
 txDB*
 minedDB*
 wallet/
+!src/wallet/
 worldstate*
 *.png
 
