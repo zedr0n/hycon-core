@@ -1,4 +1,4 @@
-import { } from "es6-promise/auto"
+require("es6-promise/auto")
 // tslint:disable:ban-types
 export interface IResponseError {
     status: number,
