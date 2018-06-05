@@ -5,4 +5,4 @@ ADD ./bundle-*/data/clientDist /hycon/data/clientDist
 ADD ./bundle-*/data /hycon/data
 RUN chmod +x hycon
 EXPOSE 8148 2442
-CMD ["/hycon/hycon","--api","--peer","218.237.189.116:53237", "--api_port=2442", "--cpuMiners=0"]
+CMD ["/hycon/hycon","--nonLocal","--api","--peer","218.237.189.116:53237", "--api_port=2442", "--cpuMiners=0"]
