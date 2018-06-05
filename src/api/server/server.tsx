@@ -58,7 +58,10 @@ export class HttpServer {
                 message: "resource not found",
             })
         })
-        this.app.listen(port, "localhost", null)
+        process.on('unhandledRejection', (reason) => {
+            logger.info('Reason: ' + reason);
+        });
+        this.app.listen(port, "localhost", null )
         this.hyconServer = hyconServer
         logger.info(">>>>>>> Started RESTful API")
     }
