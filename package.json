@@ -96,6 +96,7 @@
         "node-cryptonight": "git://github.com/dev-jbam/node-cryptonight.git",
         "node-ssdp": "^3.3.0",
         "opn": "^5.3.0",
+        "pkg": "^4.3.1",
         "react": "^16.4.0",
         "react-dom": "^16.4.0",
         "react-router": "^4.2.0",
