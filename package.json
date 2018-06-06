@@ -9,10 +9,10 @@
         "assets": "mnemonic/*"
     },
     "scripts": {
-        "hycon": "./node_modules/.bin/ts-node src/main.ts --port=8148 --str_port=9081 --api --api_port=2442 --cpuMiners=1",
-        "seed": "./node_modules/.bin/ts-node src/main.ts --port=8148 --str_port=9081 --api --api_port=2442 --cpuMiners=0",
+        "hycon": "./node_modules/.bin/ts-node src/main.ts --port=8149 --str_port=9082 --api --api_port=2443 --cpuMiners=1",
+        "seed": "./node_modules/.bin/ts-node src/main.ts --port=8149 --str_port=9082 --api --api_port=2443 --cpuMiners=0",
         "protogen": "pbjs -t static-module -w commonjs -o src/serialization/proto.js proto/main.proto &&  pbts -o src/serialization/proto.d.ts src/serialization/proto.js && ./src/serialization/trim_null.sh",
-        "debug": "./node_modules/.bin/ts-node --inspect=9231 --inspect-brk src/main.ts  --port=8148 --str_port=9081 --cpuMiners=3 --api --api_port=2442 --networkid=`git rev-parse HEAD`",
+        "debug": "./node_modules/.bin/ts-node --inspect=9241 --inspect-brk src/main.ts  --port=8149 --str_port=9082 --cpuMiners=3 --api --api_port=2443 --networkid=`git rev-parse HEAD`",
         "debugTests": "./node_modules/.bin/ts-node  --inspect=9230 --inspect-brk  test/runner.ts",
         "test": "rm -rf build && tsc && istanbul cover node_modules/jasmine/bin/jasmine.js -x **/proto.*  -- --config=jasmine.json && remap-istanbul -i ./coverage/coverage.json -o ./coverage/remap-report -t html",
         "clear": "rm -rf blockdb* worldstate* rawblock* txDB* peerdb* minedDB*",

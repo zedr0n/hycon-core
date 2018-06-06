@@ -10,7 +10,7 @@
     "syslog": false,
     "pools": [
         {
-            "url": "127.0.0.1:9081",
+            "url": "127.0.0.1:9082",
             "user": "userid",
             "pass": "pw",
             "keepalive": true,

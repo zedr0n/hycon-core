@@ -74,7 +74,7 @@ describe("Server", () => {
         expect(net.createServer).toHaveBeenCalled()
     })
     it("Should assign the port to the default port if not specified", () => {
-        expect(server.options.port).toBe(8148)
+        expect(server.options.port).toBe(8149)
     })
     it("Should start the server listening", () => {
         expect(netServer.listen).toHaveBeenCalled()

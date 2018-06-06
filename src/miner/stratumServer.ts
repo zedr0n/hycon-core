@@ -32,7 +32,7 @@ export class StratumServer {
 
     private mapCandidateBlock: Map<number, IJob>
 
-    constructor(minerServer: MinerServer, port: number = 9081) {
+    constructor(minerServer: MinerServer, port: number = 9082) {
         logger.debug(`Stratum Server`)
         this.minerServer = minerServer
         this.port = port
