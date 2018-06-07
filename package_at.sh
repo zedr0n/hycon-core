@@ -36,13 +36,14 @@ then
     cp -f ../launch.sh.command .
     if [ $platform = "macos" ]
     then
-        cp ../node-for-mac/* .
-        #cp -f ../node_modules/sqlite3/lib/binding/node-v59-darwin-x64/node_sqlite3.node .
+        #cp ../node-for-mac/* .
+        cp -f ../node_modules/sqlite3/lib/binding/node-*-darwin-x64/node_sqlite3.node .
+        cp -f ../node_modules/node-cryptonight/build/Release/cryptonight.node .
+        cp -f ../node_modules/rocksdb/build/Release/leveldown.node .
     elif [ $platform = "linux" ]
     then
         cp -f ../node_modules/sqlite3/lib/binding/node-*-linux-x64/node_sqlite3.node .
         cp -f ../node_modules/opn/xdg-open .
-        cp -f ../node_modules/sqlite3/lib/binding/node-v59-linux-x64/node_sqlite3.node .
         cp -f ../node_modules/node-cryptonight/build/Release/cryptonight.node .
         cp -f ../node_modules/rocksdb/build/Release/leveldown.node .
     else
