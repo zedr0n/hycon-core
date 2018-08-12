@@ -1,4 +1,3 @@
-import { } from "es6-promise/auto"
 // tslint:disable:ban-types
 export interface IResponseError {
     status: number,
@@ -24,12 +23,17 @@ export interface ITxProp {
     from?: string
     to?: string
     signature?: string
+    nonce?: number
 }
 export interface IBlock {
     hash: string
     height?: number
     txs: ITxProp[]
     timeStamp: number
+    amount?: string
+    fee?: string
+    length?: number
+    volume?: string
     difficulty: string
     prevBlock?: string
     nonce?: string
@@ -44,6 +48,7 @@ export interface IWalletAddress {
     balance: string
     nonce: number
     txs: ITxProp[]
+    pendings?: ITxProp[]
     minedBlocks?: IMinedInfo[]
     pendingAmount?: string
 }
@@ -58,6 +63,7 @@ export interface IPeer {
     location?: string
     latitude?: number
     longitude?: number
+    successCount?: number
 }
 
 export interface ILocationDetails {
@@ -67,17 +73,27 @@ export interface ILocationDetails {
     count: number
 }
 
+export interface ICreateWallet {
+    passphrase?: string
+    mnemonic?: string
+    language?: string
+    privateKey?: string
+}
+
 export interface IHyconWallet {
     name?: string
+    passphrase?: string
     password?: string
     hint?: string
     mnemonic?: string
     address?: string
     balance?: string
     txs?: ITxProp[]
+    pendings?: ITxProp[]
     language?: string
     pendingAmount?: string
     minedBlocks?: IMinedInfo[]
+    index?: number
 }
 
 export interface IMinedInfo {
@@ -86,6 +102,14 @@ export interface IMinedInfo {
     miner: string
     feeReward: string
 }
+
+export interface IMiner {
+    cpuHashRate: number
+    cpuCount: number
+    networkHashRate: number
+    currentMinerAddress: string
+}
+
 export interface IRest {
     loadingListener(callback: (loading: boolean) => void): void
     setLoading(loading: boolean): void
@@ -94,7 +118,7 @@ export interface IRest {
     getWalletBalance(address: string): Promise<{ balance: string } | IResponseError>
     getWalletTransactions(address: string, nonce?: number): Promise<{ txs: ITxProp[] } | IResponseError>
 
-    outgoingSignedTx(tx: { privateKey: string, from: string, to: string, amount: string, fee: string }, queueTx?: Function): Promise<{ txHash: string } | IResponseError>
+    outgoingSignedTx(tx: { privateKey: string, to: string, amount: string, fee: string, nonce: number }, queueTx?: Function): Promise<{ txHash: string } | IResponseError>
     outgoingTx(tx: { signature: string, from: string, to: string, amount: string, fee: string, nonce: number, recovery: number }, queueTx?: Function): Promise<{ txHash: string } | IResponseError>
 
     // tslint:disable:adjacent-overload-signatures
@@ -103,23 +127,37 @@ export interface IRest {
     deleteWallet(name: string): Promise<boolean>
     generateWallet(Hwallet: IHyconWallet): Promise<string>
     getAddressInfo(address: string): Promise<IWalletAddress>
-    getAllAccounts(name: string): Promise<{ represent: number, accounts: Array<{ address: string, balance: string }> } | boolean>
+    getAllAccounts(name: string, password: string, startIndex: number): Promise<Array<{ address: string, balance: string }> | boolean>
     getBlock(hash: string): Promise<IBlock | IResponseError>
     getBlockList(index: number): Promise<{ blocks: IBlock[], length: number }>
+    getTopTipHeight(): Promise<{ height: number }>
     getMnemonic(lang: string): Promise<string>
     // [ipeer.ts not implemented] getPeerDetails(hash: string): Promise<IPeer>
     // [ipeer.ts not implemented] getPeersList(hash: string): Promise<IPeer[]>
     getTx(hash: string): Promise<ITxProp | IResponseError>
     getWalletDetail(name: string): Promise<IHyconWallet | IResponseError>
-    getWalletList(): Promise<IHyconWallet[]>
+    getWalletList(idx?: number): Promise<{ walletList: IHyconWallet[], length: number }>
     recoverWallet(Hwallet: IHyconWallet): Promise<string | boolean>
     // [Depreciated: Use above] recoverWalletForce(Hwallet: IHyconWallet): Promise<string | boolean>
-    sendTx(tx: { name: string, password: string, address: string, amount: number, minerFee: number }, queueTx?: Function): Promise<{ res: boolean, case?: number }>
+    sendTx(tx: { name: string, password: string, address: string, amount: string, minerFee: string, nonce: number }, queueTx?: Function): Promise<{ res: boolean, case?: number }>
     getPeerList(): Promise<IPeer[]>
-    getPeerConnected(): Promise<IPeer[]>
+    getPeerConnected(index: number): Promise<{ peersInPage: IPeer[], pages: number }>
     getPendingTxs(index: number): Promise<{ txs: ITxProp[], length: number, totalCount: number, totalAmount: string, totalFee: string }>
     getHint(name: string): Promise<string>
     getNextTxs(address: string, txHash: string, index: number): Promise<ITxProp[]>
+    getNextTxsInBlock(blockhash: string, txHash: string, index: number): Promise<ITxProp[]>
     checkDupleName(name: string): Promise<boolean>
     getMinedBlocks(address: string, blockHash: string, index: number): Promise<IMinedInfo[]>
+    getMiner(): Promise<IMiner>
+    setMiner(address: string): Promise<boolean>
+    startGPU(): Promise<boolean>
+    setMinerCount(count: number): Promise<void>
+    getFavoriteList(): Promise<Array<{ alias: string, address: string }>>
+    addFavorite(alias: string, address: string): Promise<boolean>
+    deleteFavorite(alias: string): Promise<boolean>
+    addWalletFile(name: string, password: string, key: string): Promise<boolean>
+    getLedgerWallet(startIndex: number, count: number): Promise<IHyconWallet[] | number>
+    sendTxWithLedger(index: number, from: string, to: string, amount: string, fee: string, queueTx?: Function): Promise<{ res: boolean, case?: number }>
+    possibilityLedger(): Promise<boolean>
+    getMarketCap(): Promise<{ amount: string }>
 }

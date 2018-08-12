@@ -1,9 +1,9 @@
-import { wordlists } from "bip39"
 import { getLogger } from "log4js"
 import Long = require("long")
 import { Address } from "../common/address"
 import { Block } from "../common/block"
 import { BlockHeader } from "../common/blockHeader"
+import { ITxPool } from "../common/itxPool"
 import { DBBlock } from "../consensus/database/dbblock"
 import { WorldState } from "../consensus/database/worldState"
 import { DifficultyAdjuster } from "../consensus/difficultyAdjuster"
@@ -27,6 +27,7 @@ export class MinerServer {
         return DifficultyAdjuster.acceptable(await Hash.hashCryptonight(buffer), target)
     }
 
+    private txpool: ITxPool
     private consensus: IConsensus
     private network: INetwork
     private stratumServer: StratumServer
@@ -34,7 +35,8 @@ export class MinerServer {
     private intervalId: NodeJS.Timer
     private worldState: WorldState
 
-    public constructor(worldState: WorldState, consensus: IConsensus, network: INetwork, cpuMiners: number, stratumPort: number) {
+    public constructor(txpool: ITxPool, worldState: WorldState, consensus: IConsensus, network: INetwork, cpuMiners: number, stratumPort: number) {
+        this.txpool = txpool
         this.worldState = worldState
         this.consensus = consensus
         this.network = network
@@ -53,23 +55,40 @@ export class MinerServer {
         this.cpuMiner.stop()
         this.stratumServer.stop()
     }
+
+    public getMinerInfo(): { hashRate: number, address: string, cpuCount: number } {
+        return { hashRate: this.cpuMiner.hashRate(), address: globalOptions.minerAddress, cpuCount: this.cpuMiner.minerCount }
+    }
+
+    public setMinerCount(count: number) {
+        globalOptions.cpuMiners = count
+        this.cpuMiner.minerCount = count
+    }
+
     private candidate(previousDBBlock: DBBlock, previousHash: Hash): void {
         if (globalOptions.minerAddress === undefined || globalOptions.minerAddress === "") {
             logger.info("Can't mine without miner address")
             return
         }
+
+        if (!globalOptions.bootstrap && ((Date.now() - previousDBBlock.header.timeStamp) > 86400000)) {
+            logger.debug("Last block is more than a day old, waiting for synchronization prior to mining.")
+            return
+        }
+
         const miner: Address = new Address(globalOptions.minerAddress)
         logger.info(`New Candidate Block Difficulty: 0x${previousDBBlock.nextDifficulty.toExponential()} Target: ${DifficultyAdjuster.getTarget(previousDBBlock.nextDifficulty, 32).toString("hex")}`)
         clearInterval(this.intervalId)
-        this._(previousDBBlock, previousHash, miner)
-        this.intervalId = setInterval(() => this._(previousDBBlock, previousHash, miner), 2000)
+        this.createCandidate(previousDBBlock, previousHash, miner)
+        this.intervalId = setInterval(() => this.createCandidate(previousDBBlock, previousHash, miner), 2000)
 
     }
 
-    private async _(previousDBBlock: DBBlock, previousHash: Hash, miner: Address) {
+    private async createCandidate(previousDBBlock: DBBlock, previousHash: Hash, miner: Address) {
         const timeStamp = Math.max(Date.now(), previousDBBlock.header.timeStamp + 50)
 
         const { stateTransition: { currentStateRoot }, validTxs, invalidTxs } = await this.worldState.next(previousDBBlock.header.stateRoot, miner)
+        this.txpool.removeTxs(invalidTxs)
         const block = new Block({
             header: new BlockHeader({
                 difficulty: previousDBBlock.nextDifficulty,

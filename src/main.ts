@@ -1,7 +1,8 @@
 import { configure, getLogger } from "log4js"
+import { showHelp } from "./help"
 configure({
     appenders: {
-        
+
         console: {
             type: "log4js-protractor-appender",
         },
@@ -20,14 +21,19 @@ configure({
 const logger = getLogger("Main")
 
 import commandLineArgs = require("command-line-args")
+// Alphabetical order
 const optionDefinitions = [
     { name: "api", alias: "a", type: Boolean },
     { name: "api_port", alias: "A", type: Number },
     { name: "bootstrap", type: Boolean },
+    { name: "blockchain_info", alias: "B", type: String },
+    { name: "config", alias: "c", type: String },
     { name: "cpuMiners", alias: "m", type: Number },
+    { name: "data", alias: "d", type: String },
     { name: "disable_upnp", alias: "x", type: Boolean },
     { name: "disable_nat", alias: "N", type: Boolean },
     { name: "genesis", alias: "G", type: String },
+    { name: "help", alias: "h", type: Boolean },
     { name: "lite", type: Boolean },
     { name: "minerAddress", alias: "M", type: String },
     { name: "networkid", alias: "n", type: String },
@@ -35,6 +41,7 @@ const optionDefinitions = [
     { name: "peer", type: String, multiple: true, defaultOption: true },
     { name: "port", alias: "p", type: Number },
     { name: "postfix", alias: "P", type: String },
+    { name: "public_rest", alias: "R", type: Boolean },
     { name: "str_port", alias: "s", type: Number },
     { name: "verbose", alias: "v", type: Boolean, defaultOption: false },
     { name: "visualize", alias: "V", type: Boolean },
@@ -44,6 +51,11 @@ const optionDefinitions = [
 
 import conf = require("./settings")
 export const globalOptions = commandLineArgs(optionDefinitions)
+
+if (globalOptions.help) {
+    showHelp()
+    process.exit(0)
+}
 
 if (globalOptions.cpuMiners === undefined) {
     globalOptions.cpuMiners = 1
@@ -66,6 +78,20 @@ if (globalOptions.port === 0) {
 if (globalOptions.postfix === undefined) {
     globalOptions.postfix = ""
 }
+
+if (globalOptions.data === undefined) {
+    globalOptions.data = ""
+} else {
+    const target: string = globalOptions.data
+    if (target.length > 0) {
+        const lastone: string = target.slice(target.length - 1, target.length)
+        if (lastone === "/" || lastone === "\\") {
+        } else {
+            globalOptions.data += "/"
+        }
+    }
+}
+
 if (globalOptions.str_port === 0) {
     globalOptions.str_port = 20000 + Math.floor(40000 * Math.random())
 }
@@ -105,8 +131,18 @@ async function createDefaultWallet(): Promise<string> {
     return address
 }
 
+export async function setMiner(address: string) {
+    globalOptions.minerAddress = conf.minerAddress = address
+    await fs.writeFileSync("./data/config.json", JSON.stringify(conf))
+}
+
 async function main() {
     let configChange = false
+
+    if (globalOptions.os === undefined || globalOptions.os === "") {
+        globalOptions.os = conf.os
+    }
+
     if (globalOptions.minerAddress === undefined || globalOptions.minerAddress === "") {
         globalOptions.minerAddress = conf.minerAddress
     }
@@ -118,6 +154,16 @@ async function main() {
         } catch (e) {
 
         }
+    }
+
+    if (conf.txPoolMaxAddresses === undefined) {
+        conf.txPoolMaxAddresses = 36000
+        await fs.writeFileSync("./data/config.json", JSON.stringify(conf))
+    }
+
+    if (conf.txPoolMaxTxsPerAddress === undefined) {
+        conf.txPoolMaxTxsPerAddress = 64
+        await fs.writeFileSync("./data/config.json", JSON.stringify(conf))
     }
 
     if (globalOptions.cpuMiners > 0) {
@@ -142,4 +188,5 @@ async function main() {
         throw new Error("Lite node not implemented")
     }
 }
+
 main()

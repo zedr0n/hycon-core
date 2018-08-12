@@ -1,6 +1,5 @@
 import * as Base58 from "base-58"
 import { getLogger } from "log4js"
-import * as proto from "../serialization/proto"
 import { Hash } from "../util/hash"
 
 const logger = getLogger("Address")
@@ -22,12 +21,21 @@ function toUint8Array(address: (string | Uint8Array | Buffer)): Uint8Array {
         const check = address.slice(-4)
         address = address.slice(1, -4)
         const out: Uint8Array = Base58.decode(address)
+        if (out.length !== 20) {
+            throw new Error("Address must be 20 bytes long")
+        }
         const expectedChecksum = checkSum(out)
         if (expectedChecksum !== check) {
-            throw new Error(`Address hash invalid checksum '${check}' epected '${expectedChecksum}'`)
+            throw new Error(`Address hash invalid checksum '${check}' expected '${expectedChecksum}'`)
         }
         return out
     }
+
+    if ((typeof address === "number" && address !== 20) || address.length !== 20) {
+        // Danger: typescript claims this line is unreachable, but it is reachable via the slice function
+        throw new Error("Address must be 20 bytes long")
+    }
+
     return address
 }
 
@@ -41,10 +49,9 @@ export class Address extends Uint8Array {
         }
     }
 
-    constructor(address: string | number | Uint8Array | Buffer) {
+    constructor(address: string | Uint8Array | Buffer) {
         // Consensus Critical
-        typeof address === "number" ? super(address) : super(toUint8Array(address))
-        // Need to allow for super constructor for number due to extension of Uint8Array
+        super(toUint8Array(address))
     }
 
     public toString(): string {

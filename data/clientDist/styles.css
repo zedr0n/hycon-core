@@ -11780,8 +11780,9 @@ table {
   float: right;
 }
 
-.accountDialogContent{
+.dialogContent{
   padding: 0px 0px 10px 2px !important;
+  text-align: "center";
 }
 
 .accountList{
@@ -11866,6 +11867,21 @@ table {
 .walletName{
   vertical-align: super;
   padding-left: 10px;
+}
+
+.checkPassphrase{
+  padding: 36px 0;
+}
+
+.dropzone{
+  width: 90%;
+  height: 150px;
+  border : 1px dashed grey;
+  border-radius: 5px;
+  border-width: medium;
+  margin-top: 2%;
+  text-align: center;
+  display: table;
 }.marker {
   /* position: 'absolute';
     width: 40px ;
@@ -11954,7 +11970,7 @@ table {
   max-width: 40%;
 }
 
-input[type="text"],
+/* input[type="text"],
 input[type="number"] {
   width: 100%;
   padding: 12px 20px;
@@ -11963,7 +11979,7 @@ input[type="number"] {
   border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
-}
+} */
 
 .dialogForm {
   border-radius: 5px;

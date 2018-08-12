@@ -1,4 +1,3 @@
-import { BlockHeader } from "./blockHeader"
 import { PriorityQueue } from "./priorityQueue"
 
 interface IPromiseControl { resolve: () => void, reject: (e: any) => void, timer: NodeJS.Timer, timeStamp: number }
@@ -10,7 +9,7 @@ export class DelayQueue {
     private queue: PriorityQueue<IPromiseControl>
 
     constructor(maxLength: number) {
-        this.queue = new PriorityQueue(maxLength)
+        this.queue = new PriorityQueue(maxLength, comparator)
     }
 
     public waitUntil(timeStamp: number) {
@@ -19,11 +18,7 @@ export class DelayQueue {
                 this.queue.pop()
                 resolve()
             }, timeStamp - Date.now())
-            const result = this.queue.insert({ resolve, reject, timer, timeStamp }, comparator)
-            if (result.overflow !== undefined) {
-                result.overflow.reject("Discarding block from the future")
-                clearTimeout(timer)
-            }
+            this.queue.insert({ resolve, reject, timer, timeStamp })
         })
     }
 }

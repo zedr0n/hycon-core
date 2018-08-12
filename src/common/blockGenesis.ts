@@ -15,6 +15,7 @@ export class GenesisBlock implements proto.IBlock {
             return GenesisBlock.decode(file)
         } catch (e) {
             logger.error("Genesis constructor fail : " + e)
+            throw new Error("Genesis constructor fail : " + e)
         }
     }
     public static decode(data: Uint8Array): GenesisBlock {
@@ -34,7 +35,11 @@ export class GenesisBlock implements proto.IBlock {
 
         this.txs = []
         for (const tx of block.txs) {
-            this.txs.push(new GenesisSignedTx(tx))
+            try {
+                this.txs.push(new GenesisSignedTx(tx))
+            } catch (e) {
+                continue
+            }
         }
         if (this.header === undefined) {
             this.header = setGenesisBlockHeader(block.header)

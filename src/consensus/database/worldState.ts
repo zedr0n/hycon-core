@@ -1,28 +1,18 @@
-import { fstat } from "fs"
 import levelup = require("levelup")
 import { getLogger } from "log4js"
 import Long = require("long")
 import rocksdb = require("rocksdb")
-import { hyconfromString, hycontoString } from "../../api/client/stringUtil"
+import { hycontoString } from "../../api/client/stringUtil"
 import { Address } from "../../common/address"
 import { AsyncLock } from "../../common/asyncLock"
-import { Block } from "../../common/block"
 import { GenesisBlock } from "../../common/blockGenesis"
 import { ITxPool } from "../../common/itxPool"
-import { PublicKey } from "../../common/publicKey"
-import { GenesisSignedTx } from "../../common/txGenesisSigned"
 import { SignedTx } from "../../common/txSigned"
-import { Server } from "../../server"
 import { Hash } from "../../util/hash"
-import * as mnemonic from "../../wallet/mnemonic"
-import { Wallet } from "../../wallet/wallet"
-import { Verify } from "../verify"
 import { Account } from "./account"
 import { DBState } from "./dbState"
 import { NodeRef } from "./nodeRef"
 import { StateNode } from "./stateNode"
-// tslint:disable-next-line:no-var-requires
-const assert = require("assert")
 
 const logger = getLogger("WorldState")
 
@@ -98,16 +88,24 @@ export class WorldState {
         }
     }
     public async validateTx(stateRoot: Hash, tx: SignedTx): Promise<TxValidity> {
-        const fromAccount = await this.getAccount(stateRoot, tx.from)
-        let validity
-        if (fromAccount.nonce + 1 === tx.nonce) {
-            validity = TxValidity.Valid
-        } else if (fromAccount.nonce + 1 < tx.nonce) {
-            validity = TxValidity.Waiting
-        } else {
-            validity = TxValidity.Invalid
+        if (tx.from.equals(tx.to)) {
+            return TxValidity.Invalid
         }
-        return validity
+        const fromAccount = await this.getAccount(stateRoot, tx.from)
+        if (fromAccount === undefined || fromAccount.nonce >= tx.nonce) {
+            return TxValidity.Invalid
+        }
+        if (fromAccount.balance.lessThan(tx.amount.add(tx.fee))) {
+            return TxValidity.Invalid
+        }
+        if (fromAccount.nonce + 1 === tx.nonce) {
+            return TxValidity.Valid
+        }
+        if (fromAccount.nonce + 1 < tx.nonce) {
+            return TxValidity.Waiting
+        }
+
+        return TxValidity.Invalid
     }
 
     public async first(genesis: GenesisBlock): Promise<IStateTransition> {
@@ -134,7 +132,9 @@ export class WorldState {
 
     public async next(previousState: Hash, minerAddress: Address, txs?: SignedTx[]): Promise<{ stateTransition: IStateTransition, validTxs: SignedTx[], invalidTxs: SignedTx[] }> {
         // Consensus Critical
-        txs === undefined ? txs = this.txPool.getTxs().slice(0, 4096) : txs = txs
+
+        txs === undefined ? txs = this.txPool.getTxs(4096).slice(0, 4096) : txs = txs
+
         const batch: DBState[] = []
         const changes: IChange[] = []
         const mapAccount: Map<string, DBState> = new Map<string, DBState>()
@@ -143,6 +143,7 @@ export class WorldState {
         const validTxs: SignedTx[] = []
         const invalidTxs: SignedTx[] = []
         return await this.accountLock.critical(async () => {
+
             for (const tx of txs) {
                 const validity = await this.processTx(tx, previousState, mapIndex, changes)
                 switch (validity) {
@@ -157,6 +158,7 @@ export class WorldState {
                         break
                 }
             }
+
             const miner = await this.getModifiedAccount(minerAddress, previousState, mapIndex, changes)
             miner.account.balance = miner.account.balance.add(fees)
             this.putChange(miner, mapIndex, changes)
@@ -206,7 +208,7 @@ export class WorldState {
                             }
                             continue
                         }
-                        const dbChild = await this.getDBState(ref.child).catch((e) => undefined)
+                        const dbChild = await this.getDBState(ref.child).catch((e) => logger.debug(e))
                         if (dbChild) {
                             if (mapAccount.get(ref.child.toString()) === undefined) {
                                 dbChild.refCount++
@@ -243,9 +245,11 @@ export class WorldState {
                 // TODO: Remove this if function and test
                 return TxValidity.Invalid
             }
+
             const from = await this.getModifiedAccount(tx.from, previousState, mapIndex, changes)
+
             if (tx.nonce < (from.account.nonce + 1)) {
-                logger.info(`Tx ${new Hash(tx)} Rejected: TxNonce=${tx.nonce} ${tx.from} Nonce=${from.account.nonce}`)
+                logger.debug(`Tx ${new Hash(tx)} Rejected: TxNonce=${tx.nonce} ${tx.from} Nonce=${from.account.nonce}`)
                 return TxValidity.Invalid
             }
 
@@ -255,20 +259,24 @@ export class WorldState {
 
             const total = tx.amount.add(tx.fee)
             if (from.account.balance.lessThan(total)) {
-                logger.info(`Tx ${new Hash(tx)} Rejected: The balance (${hycontoString(from.account.balance)}) is insufficient (${hycontoString(tx.amount)} + ${hycontoString(tx.fee)} = ${hycontoString(total)})`)
+                logger.debug(`Tx ${new Hash(tx)} Rejected: The balance (${hycontoString(from.account.balance)}) is insufficient (${hycontoString(tx.amount)} + ${hycontoString(tx.fee)} = ${hycontoString(total)})`)
                 return TxValidity.Invalid
             }
 
             from.account.balance = from.account.balance.sub(total)
             from.account.nonce++
-
             if (tx.to === undefined) {
-                logger.warn(`🔥 TX ${new Hash(tx).toString()} burned ${hycontoString(tx.amount)} HYC from ${tx.from.toString()} 🔥`)
+                logger.warn(`TX ${new Hash(tx).toString()} burned ${hycontoString(tx.amount)} HYC from ${tx.from.toString()}`)
             } else {
+
                 const to = await this.getModifiedAccount(tx.to, previousState, mapIndex, changes)
+
                 to.account.balance = to.account.balance.add(tx.amount)
+
                 this.putChange(to, mapIndex, changes)
+
             }
+
             this.putChange(from, mapIndex, changes)
 
             return TxValidity.Valid
@@ -291,7 +299,7 @@ export class WorldState {
         return { account: new Account({ balance: 0, nonce: 0 }), address }
     }
 
-    private async putChange(change: { index?: number, account: Account, address: Address }, mapIndex: Map<string, number>, changes: IChange[]) {
+    private putChange(change: { index?: number, account: Account, address: Address }, mapIndex: Map<string, number>, changes: IChange[]) {
         // Consensus Critical
         if (change.index === undefined) {
             mapIndex.set(change.address.toString(), changes.push(change) - 1)
@@ -397,7 +405,8 @@ export class WorldState {
             } else {
                 object.nodeRefs.push(new NodeRef())
             }
-            object.nodeRefs[i].address = subChanges[0].address.slice(offset, offset + minMatchLength)
+            const addressSlice = new Uint8Array(subChanges[0].address).slice(offset, offset + minMatchLength)
+            object.nodeRefs[i].address = addressSlice
             const prefix2 = concat(prefix, object.nodeRefs[i].address)
 
             object.nodeRefs[i].child = await this.putAccount(batch, mapAccount, subChanges, object.nodeRefs[i].child, offset + minMatchLength, prefix2, objectAddress2)

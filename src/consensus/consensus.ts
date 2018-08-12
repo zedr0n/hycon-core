@@ -1,5 +1,4 @@
 import { EventEmitter } from "events"
-import fs = require("fs")
 import { getLogger } from "log4js"
 import { Address } from "../common/address"
 import { AsyncLock } from "../common/asyncLock"
@@ -10,6 +9,7 @@ import { DelayQueue } from "../common/delayQueue"
 import { ITxPool } from "../common/itxPool"
 import { SignedTx } from "../common/txSigned"
 import { globalOptions } from "../main"
+import { MAX_HEADER_SIZE } from "../network/rabbit/networkConstants"
 import { Hash } from "../util/hash"
 import { Account } from "./database/account"
 import { Database } from "./database/database"
@@ -25,6 +25,14 @@ import { IConsensus, IStatusChange } from "./iconsensus"
 import { BlockStatus } from "./sync"
 import { Verify } from "./verify"
 const logger = getLogger("Consensus")
+
+export const TIMESTAMP_TOLERANCE = 120000
+
+export interface IPutResult {
+    oldStatus: BlockStatus,
+    status?: BlockStatus,
+    dbBlock?: DBBlock,
+}
 
 export class Consensus extends EventEmitter implements IConsensus {
     private txdb?: ITxDatabase
@@ -51,7 +59,7 @@ export class Consensus extends EventEmitter implements IConsensus {
         if (this.lock !== undefined) {
             throw new Error("Multiple calls to init")
         }
-        this.lock = new AsyncLock(true)
+        this.lock = new AsyncLock(1)
         try {
             await this.db.init()
             this.blockTip = await this.db.getBlockTip()
@@ -87,6 +95,33 @@ export class Consensus extends EventEmitter implements IConsensus {
 
     public putHeader(header: BlockHeader): Promise<IStatusChange> {
         return this.put(header)
+    }
+
+    public async putTxBlocks(txBlocks: Array<{ hash: Hash, txs: SignedTx[] }>) {
+        const statusChanges: IStatusChange[] = []
+        for (const txBlock of txBlocks) {
+            const header = await this.getHeaderByHash(txBlock.hash)
+            if (!(header instanceof BlockHeader)) { continue }
+            const block = new Block({ header, txs: txBlock.txs })
+            await this.upgradeHeaders(header)
+            statusChanges.push(await this.putBlock(block))
+        }
+        try {
+            if (this.headerTip.header instanceof BlockHeader) {
+                await this.upgradeHeaders(this.headerTip.header)
+            }
+        } catch (e) {
+            logger.debug(`Failed to upgrade to header tip: ${e}`)
+        }
+        return statusChanges
+    }
+
+    public async getBlockTxs(hash: Hash) {
+        const block = (await this.getBlockByHash(hash))
+        if (!(block instanceof Block)) {
+            throw new Error(`Tried to get txs from genesis block`)
+        }
+        return { hash, txs: block.txs }
     }
 
     public getBlockByHash(hash: Hash): Promise<AnyBlock> {
@@ -144,11 +179,34 @@ export class Consensus extends EventEmitter implements IConsensus {
         return this.txdb.getLastTxs(address, result, idx, count)
     }
 
+    public getTxsInBlock(blockHash: string, count?: number): Promise<{ txs: DBTx[], amount: string, fee: string, length: number }> {
+        if (this.txdb === undefined) {
+            throw new Error(`The database to get txs does not exist.`)
+        }
+        const result: DBTx[] = []
+        const idx: number = 0
+        return this.txdb.getTxsInBlock(blockHash, result, idx, count)
+    }
+
     public async getNextTxs(address: Address, txHash: Hash, index: number, count?: number): Promise<DBTx[]> {
         try {
             if (this.txdb) {
                 const result: DBTx[] = []
                 return await this.txdb.getNextTxs(address, txHash, result, index, count)
+            } else {
+                return Promise.reject(`The database to get txs does not exist.`)
+            }
+        } catch (e) {
+            logger.error(`Fail to getNextTxs : ${e}`)
+            return e
+        }
+    }
+
+    public async getNextTxsInBlock(blockHash: string, txHash: string, index: number, count?: number): Promise<DBTx[]> {
+        try {
+            if (this.txdb) {
+                const result: DBTx[] = []
+                return await this.txdb.getNextTxsInBlock(blockHash, txHash, result, index, count)
             } else {
                 return Promise.reject(`The database to get txs does not exist.`)
             }
@@ -179,12 +237,26 @@ export class Consensus extends EventEmitter implements IConsensus {
         }
         return this.db.getBlockStatus(hash)
     }
-    public getHeaderTip(): { hash: Hash; height: number } {
-        return { hash: new Hash(this.headerTip.header), height: this.headerTip.height }
+
+    public getBlocksTip(): { hash: Hash; height: number, totalwork: number } {
+        return { hash: new Hash(this.blockTip.header), height: this.blockTip.height, totalwork: this.blockTip.totalWork }
     }
-    public getBlocksTip(): { hash: Hash; height: number } {
-        return { hash: new Hash(this.blockTip.header), height: this.blockTip.height }
+
+    public getCurrentDiff(): number {
+        return this.blockTip.header.difficulty
     }
+    public getHeadersTip(): { hash: Hash; height: number, totalwork: number } {
+        return { hash: new Hash(this.headerTip.header), height: this.headerTip.height, totalwork: this.headerTip.totalWork }
+    }
+
+    public getHtip() {
+        return this.headerTip
+    }
+
+    public getBtip() {
+        return this.blockTip
+    }
+
     public async txValidity(tx: SignedTx): Promise<TxValidity> {
         return this.lock.critical(async () => {
             let validity = await this.worldState.validateTx(this.blockTip.header.stateRoot, tx)
@@ -205,98 +277,121 @@ export class Consensus extends EventEmitter implements IConsensus {
         const block = await this.db.getDBBlock(hash)
         return (block !== undefined) ? block.height : undefined
     }
+
+    public async getBlockAtHeight(height: number): Promise<Block | GenesisBlock | undefined> {
+        return this.db.getBlockAtHeight(height)
+    }
+
+    public async getBurnAmount(): Promise<{ amount: Long }> {
+        return this.txdb.getBurnAmount()
+    }
     private async put(header: BlockHeader, block?: Block): Promise<IStatusChange> {
-        if (header.timeStamp > Date.now()) {
-            await this.futureBlockQueue.waitUntil(header.timeStamp)
+        if (header.timeStamp > Date.now() + TIMESTAMP_TOLERANCE) {
+            await this.futureBlockQueue.waitUntil(header.timeStamp - TIMESTAMP_TOLERANCE)
         }
+
+        if (header.merkleRoot.equals(Hash.emptyHash)) {
+            // Block contains no transactions, create a new empty block
+            block = new Block({ header, txs: [] })
+        }
+
         return this.lock.critical(async () => {
             const hash = new Hash(header)
-            const { oldStatus, status, dbBlock, dbBlockHasChanged } = await this.process(hash, header, block)
+            const { oldStatus, status, dbBlock } = await this.process(hash, header, block)
+
             if (status !== undefined && oldStatus !== status) {
                 await this.db.setBlockStatus(hash, status)
             }
-            if (dbBlockHasChanged) {
-                if (dbBlock === undefined) {
-                    logger.warn("dbBlock has become undefined")
-                } else {
-                    await this.db.putDBBlock(hash, dbBlock)
-                }
 
-                if (this.headerTip === undefined || (dbBlock.height - dbBlock.totalWork) > (this.headerTip.height - this.headerTip.totalWork)) {
-                    this.headerTip = dbBlock
-                    await this.db.setHeaderTip(hash)
-                }
+            if (dbBlock === undefined || status < BlockStatus.Header) {
+                return { oldStatus, status }
+            }
 
-                if (block !== undefined && (this.blockTip === undefined || (dbBlock.height - dbBlock.totalWork) > (this.blockTip.height - this.blockTip.totalWork))) {
-                    await this.reorganize(hash, block, dbBlock)
-                    await this.db.setBlockTip(hash)
-                    this.emit("candidate", this.blockTip, hash)
-                }
+            await this.db.putDBBlock(hash, dbBlock)
 
-                logger.info(`Put ${block ? "Block" : "Header"}`
+            if (this.headerTip === undefined || (this.forkChoice(dbBlock, this.headerTip))) {
+                this.headerTip = dbBlock
+                await this.db.setHeaderTip(hash)
+            }
+
+            if (status < BlockStatus.Block) {
+                logger.info(`Received Header`
                     + ` ${hash}(${dbBlock.height}, ${dbBlock.totalWork.toExponential()}),`
                     + ` BTip(${this.blockTip.height}, ${this.blockTip.totalWork.toExponential()}),`
                     + ` HTip(${this.headerTip.height}, ${this.headerTip.totalWork.toExponential()})`)
+                return { oldStatus, status, height: dbBlock.height }
             }
-            return { oldStatus, status }
+
+            if (block !== undefined && (this.blockTip === undefined || this.forkChoice(dbBlock, this.blockTip))) {
+                await this.reorganize(hash, block, dbBlock)
+                await this.db.setBlockTip(hash)
+                this.emit("candidate", this.blockTip, hash)
+            }
+
+            logger.info(`Received Block`
+                + ` ${hash}(${dbBlock.height}, ${dbBlock.totalWork.toExponential()}),`
+                + ` BTip(${this.blockTip.height}, ${this.blockTip.totalWork.toExponential()}),`
+                + ` HTip(${this.headerTip.height}, ${this.headerTip.totalWork.toExponential()})`)
+
+            return { oldStatus, status, height: dbBlock.height }
         })
     }
-    private async process(hash: Hash, header: BlockHeader, block?: Block)
-        : Promise<{
-            oldStatus: BlockStatus,
-            status?: BlockStatus,
-            dbBlock?: DBBlock,
-            dbBlockHasChanged?: boolean,
-        }> {
+    private async process(hash: Hash, header: BlockHeader, block?: Block): Promise<IPutResult> {
         // Consensus Critical
-        const oldStatus = await this.db.getBlockStatus(hash)
-        let status = oldStatus
-        if (oldStatus === BlockStatus.Rejected) {
-            return { oldStatus, status }
+        const result: IPutResult = { oldStatus: await this.db.getBlockStatus(hash) }
+        result.status = result.oldStatus
+
+        if (result.oldStatus === BlockStatus.Rejected) {
+            return result
         }
 
         if (header.previousHash.length <= 0) {
             logger.warn(`Rejecting block(${hash.toString()}): No previousHash`)
-            status = BlockStatus.Rejected
-            return { oldStatus, status }
+            result.status = BlockStatus.Rejected
+            return result
         }
 
-        let dbBlock: DBBlock
-        let dbBlockHasChanged = false
         const previousHash = header.previousHash[0]
+        const previousStatus = await this.db.getBlockStatus(previousHash)
+
+        if (previousStatus <= BlockStatus.Nothing) {
+            return result
+        }
+
         const previousDBBlock = await this.db.getDBBlock(previousHash)
         if (previousDBBlock === undefined) {
-            return { oldStatus, status }
+            return result
         }
-        if (oldStatus === BlockStatus.Nothing) {
-            const headerResult = await Verify.processHeader(previousDBBlock, header, hash)
-            status = headerResult.newStatus
-            dbBlock = headerResult.dbBlock
-            dbBlockHasChanged = true
 
-            if (status === BlockStatus.Rejected) {
-                return { oldStatus, status }
+        if (result.oldStatus === BlockStatus.Nothing) {
+            await Verify.processHeader(previousDBBlock, header, hash, result)
+
+            if (result.status === BlockStatus.Rejected) {
+                return result
             }
         }
 
         if (block === undefined) {
-            return { oldStatus, status, dbBlock, dbBlockHasChanged }
+            return result
         }
 
-        if (oldStatus === BlockStatus.Nothing || oldStatus === BlockStatus.Header) {
-            if (dbBlock === undefined) {
-                dbBlock = await this.db.getDBBlock(hash)
-            }
-            const result = await Verify.processBlock(block, dbBlock, hash, header, previousDBBlock, this.db, this.worldState)
-            if (result.newStatus === BlockStatus.Rejected) {
-                return { oldStatus, status }
-            }
-            if (this.minedDatabase) { await this.minedDatabase.putMinedBlock(hash, block.header.timeStamp, block.txs, block.header.miner) }
-            dbBlockHasChanged = dbBlockHasChanged || result.dbBlockHasChanged
-            status = result.newStatus
+        if (previousStatus < BlockStatus.Block) {
+            return result
         }
 
-        return { oldStatus, status, dbBlock, dbBlockHasChanged }
+        if (result.oldStatus >= BlockStatus.Nothing && result.oldStatus <= BlockStatus.Header) {
+            const dbBlock = (result.dbBlock !== undefined) ? result.dbBlock : await this.db.getDBBlock(hash)
+            await Verify.processBlock(block, dbBlock, hash, header, previousDBBlock, this.db, this.worldState, result)
+            if (result.status === BlockStatus.Rejected) {
+                return result
+            }
+
+            if (this.minedDatabase !== undefined) {
+                this.minedDatabase.putMinedBlock(hash, block.header.timeStamp, block.txs, block.header.miner)
+            }
+        }
+
+        return result
 
     }
 
@@ -322,7 +417,6 @@ export class Consensus extends EventEmitter implements IConsensus {
             block = tmpBlock
             popStopHeight -= 1
         }
-
         let popHeight = this.blockTip.height
         let popHash = new Hash(this.blockTip.header)
         const popCount = popHeight - popStopHeight + 1
@@ -369,6 +463,41 @@ export class Consensus extends EventEmitter implements IConsensus {
         this.blockTip = newDBBlock
         // This must not use await because of lock. So we used then.
         this.txPool.putTxs(popTxs).then(() => this.txPool.removeTxs(removeTxs))
+    }
+
+    private async upgradeHeaders(header: BlockHeader) {
+        logger.debug(`Upgrading headers up to hash: ${new Hash(header).toString()}`)
+        const upgradeQueue: BlockHeader[] = []
+        const maxLength = Math.floor((100 * 1024 * 1024) / MAX_HEADER_SIZE) // 100MB of headers
+        let status: BlockStatus
+        const results: IStatusChange[] = []
+        do {
+            status = await this.getBlockStatus(header.previousHash[0])
+            if (status >= BlockStatus.Block) { break }
+            logger.debug(header.previousHash[0].toString())
+            const previousHeader = await this.getHeaderByHash(header.previousHash[0])
+            if (!(previousHeader instanceof BlockHeader)) {
+                // Header is genesis header
+                break
+            }
+            if (!previousHeader.merkleRoot.equals(Hash.emptyHash)) {
+                throw new Error(`Header merkleRoot is not empty`)
+            }
+            header = previousHeader
+            upgradeQueue.push(header)
+            if (upgradeQueue.length > maxLength) {
+                upgradeQueue.shift()
+            }
+        } while (status < BlockStatus.Block)
+        upgradeQueue.reverse()
+        for (const blockHeader of upgradeQueue) {
+            results.push(await this.putHeader(blockHeader))
+        }
+        return results
+    }
+
+    private forkChoice(newDBBlock: DBBlock, tip: DBBlock): boolean {
+        return newDBBlock.totalWork > tip.totalWork
     }
 
     private async initGenesisBlock(): Promise<GenesisBlock> {

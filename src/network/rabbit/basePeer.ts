@@ -1,8 +1,7 @@
 import { getLogger } from "log4js"
 import { Socket } from "net"
-import { resolve } from "url"
+import { AsyncLock } from "../../common/asyncLock"
 import * as proto from "../../serialization/proto"
-import { Hash } from "../../util/hash"
 import { SocketParser } from "./socketParser"
 
 const logger = getLogger("Network")
@@ -16,6 +15,7 @@ export abstract class BasePeer {
     public socketBuffer: SocketParser
     private replyId: number
     private replyMap: Map<number, { resolved: replyResolve, reject: replyReject, timeout: NodeJS.Timer }>
+    private requestSemaphore = new AsyncLock(0, 30000, 5)
 
     constructor(socket: Socket) {
         this.replyId = 1
@@ -41,7 +41,7 @@ export abstract class BasePeer {
         }
     }
 
-    protected onPacket(route: number, packet: Buffer): void {
+    protected async onPacket(route: number, packet: Buffer): Promise<void> {
         try {
             const res = proto.Network.decode(packet)
             switch (res.request) {
@@ -58,7 +58,8 @@ export abstract class BasePeer {
                 case "getTip":
                 case "putHeaders":
                 case "getHash":
-                    this.respond(route, res, packet)
+                case "getBlockTxs":
+                    this.requestSemaphore.critical(async () => await this.respond(route, res, packet)).catch((e) => logger.debug(e))
                     break
                 case "statusReturn":
                 case "pingReturn":
@@ -73,7 +74,11 @@ export abstract class BasePeer {
                 case "getTipReturn":
                 case "putHeadersReturn":
                 case "getHashReturn":
-                    this.route(route, res, packet)
+                case "getBlockTxsReturn":
+                    if (route === 0) {
+                        logger.debug(`Recieved ${res.request} broadcast`)
+                    }
+                    await this.route(route, res, packet)
                     break
                 default:
                     logger.debug(`Unsupported Protocol=${res.request}`)
@@ -95,12 +100,30 @@ export abstract class BasePeer {
         }
     }
 
+    protected getTimeout(request: proto.INetwork) {
+        // tslint:disable-next-line:forin
+        for (const key in request) {
+            switch (key) {
+                case "getHash":
+                case "getTip":
+                case "status":
+                    return 4000
+                case "getBlockTxs":
+                case "getHeadersByRange":
+                case "getBlocksByRange":
+                    return 120000
+                default:
+                    return BasePeer.DefaultTimeoutTime
+            }
+        }
+    }
+
     protected async sendRequest(request: proto.INetwork): Promise<ReplyAndPacket> {
         const id = this.newReplyID()
         let timeout: NodeJS.Timer
         try {
             return await new Promise<ReplyAndPacket>((resolved, reject) => {
-                timeout = setTimeout(() => reject("Timeout"), BasePeer.DefaultTimeoutTime)
+                timeout = setTimeout(() => reject("Timeout"), this.getTimeout(request))
                 this.replyMap.set(id, { resolved, reject, timeout })
                 this.send(id, request).catch(reject)
             })

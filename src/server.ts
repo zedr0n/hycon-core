@@ -1,17 +1,15 @@
 import { getLogger } from "log4js"
-import { hyconfromString } from "./api/client/stringUtil"
 import { HttpServer } from "./api/server/server"
 import { ITxPool } from "./common/itxPool"
 import { TxPool } from "./common/txPool"
 import { Consensus } from "./consensus/consensus"
-import { Database } from "./consensus/database/database"
 import { WorldState } from "./consensus/database/worldState"
 import { IConsensus } from "./consensus/iconsensus"
 import { Sync } from "./consensus/sync"
 import { globalOptions } from "./main"
 import { MinerServer } from "./miner/minerServer"
 import { INetwork } from "./network/inetwork"
-import { RabbitNetwork } from "./network/rabbit/rabbitNetwork" 
+import { RabbitNetwork } from "./network/rabbit/rabbitNetwork"
 import { RestManager } from "./rest/restManager"
 import { Wallet } from "./wallet/wallet"
 
@@ -32,20 +30,21 @@ export class Server {
     public httpServer: HttpServer
     public sync: Sync
     constructor() {
-
+        const prefix = globalOptions.data
         const postfix = globalOptions.postfix
         this.txPool = new TxPool(this)
-        this.worldState = new WorldState("worldstate" + postfix, this.txPool)
-        this.consensus = new Consensus(this.txPool, this.worldState, "blockdb" + postfix, "rawblock" + postfix, "txDB" + postfix, "minedDB" + postfix)
-        this.network = new RabbitNetwork(this.txPool, this.consensus, globalOptions.port, "peerdb" + postfix, globalOptions.networkid)
-        this.miner = new MinerServer(this.worldState, this.consensus, this.network, globalOptions.cpuMiners, globalOptions.str_port)
+        this.worldState = new WorldState(prefix + "worldstate" + postfix, this.txPool)
+        this.consensus = new Consensus(this.txPool, this.worldState, prefix + "blockdb" + postfix, prefix + "rawblock" + postfix, prefix + "txDB" + postfix, prefix + "minedDB" + postfix)
+        this.network = new RabbitNetwork(this.txPool, this.consensus, globalOptions.port, prefix + "peerdb" + postfix, globalOptions.networkid)
+        this.miner = new MinerServer(this.txPool, this.worldState, this.consensus, this.network, globalOptions.cpuMiners, globalOptions.str_port)
         this.rest = new RestManager(this)
+        this.sync = new Sync(this.consensus, this.network)
     }
     public async run() {
         await this.consensus.init()
         logger.info("Starting server...")
         logger.debug(`API flag is ${globalOptions.api}`)
-        if (globalOptions.api) {
+        if (globalOptions.api !== false) {
             logger.info("Test API")
             logger.info(`API Port ${globalOptions.api_port}`)
             this.httpServer = new HttpServer(this.rest, globalOptions.api_port, globalOptions)
@@ -56,19 +55,10 @@ export class Server {
             for (const peer of globalOptions.peer) {
                 const [ip, port] = peer.split(":")
                 logger.info(`Connecting to ${ip}:${port}`)
-                this.network.connect(ip, port).catch((e) => logger.error(`Failed to connect to client: ${e}`))
+                // add peer and record the database
+                this.network.addPeer(ip, port).catch((e) => logger.error(`Failed to connect to client: ${e}`))
             }
         }
-        await this.runSync()
-    }
-
-    public async runSync(): Promise<void> {
-        logger.debug(`begin sync`)
-        const sync = new Sync(this)
-        await sync.sync()
-        setTimeout(async () => {
-            await this.runSync()
-        }, 5000)
-        logger.debug(`end sync`)
+        this.sync.start()
     }
 }

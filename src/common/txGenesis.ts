@@ -1,7 +1,6 @@
 import { getLogger } from "log4js"
 import * as Long from "long"
 import { Address } from "../common/address"
-import { PublicKey } from "../common/publicKey"
 import * as proto from "../serialization/proto"
 const logger = getLogger("TxGenesis")
 export class GenesisTx implements proto.ITx {
@@ -22,12 +21,15 @@ export class GenesisTx implements proto.ITx {
 
         this.to = new Address(tx.to)
         this.amount = tx.amount instanceof Long ? tx.amount : Long.fromNumber(tx.amount, true)
-        if (!this.amount.unsigned) { logger.fatal(`Protobuf problem with TxGenesis amount`) }
+        if (!this.amount.unsigned) {
+            logger.fatal(`Protobuf problem with TxGenesis amount`)
+            throw new Error("Protobuf problem with TxGenesis amount")
+        }
     }
 
     public equals(tx: GenesisTx): boolean {
         if (!this.to.equals(tx.to)) { return false }
-        if (this.amount !== tx.amount) { return false }
+        if (!this.amount.equals(tx.amount)) { return false }
         return true
     }
     public encode(): Uint8Array {

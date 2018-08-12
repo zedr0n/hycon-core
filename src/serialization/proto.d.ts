@@ -80,6 +80,12 @@ export interface INetwork {
 
     /** Network getHashReturn */
     getHashReturn?: IGetHashReturn;
+
+    /** Network getBlockTxs */
+    getBlockTxs?: IGetBlockTxs;
+
+    /** Network getBlockTxsReturn */
+    getBlockTxsReturn?: IGetBlockTxsReturn;
 }
 
 /** Represents a Network. */
@@ -169,8 +175,14 @@ export class Network implements INetwork {
     /** Network getHashReturn. */
     public getHashReturn?: IGetHashReturn;
 
+    /** Network getBlockTxs. */
+    public getBlockTxs?: IGetBlockTxs;
+
+    /** Network getBlockTxsReturn. */
+    public getBlockTxsReturn?: IGetBlockTxsReturn;
+
     /** Network request. */
-    public request?: ("status"|"statusReturn"|"ping"|"pingReturn"|"putTx"|"putTxReturn"|"getTxs"|"getTxsReturn"|"putBlock"|"putBlockReturn"|"getBlocksByHash"|"getBlocksByHashReturn"|"getHeadersByHash"|"getHeadersByHashReturn"|"getBlocksByRange"|"getBlocksByRangeReturn"|"getHeadersByRange"|"getHeadersByRangeReturn"|"getPeers"|"getPeersReturn"|"getTip"|"getTipReturn"|"putHeaders"|"putHeadersReturn"|"getHash"|"getHashReturn");
+    public request?: ("status"|"statusReturn"|"ping"|"pingReturn"|"putTx"|"putTxReturn"|"getTxs"|"getTxsReturn"|"putBlock"|"putBlockReturn"|"getBlocksByHash"|"getBlocksByHashReturn"|"getHeadersByHash"|"getHeadersByHashReturn"|"getBlocksByRange"|"getBlocksByRangeReturn"|"getHeadersByRange"|"getHeadersByRangeReturn"|"getPeers"|"getPeersReturn"|"getTip"|"getTipReturn"|"putHeaders"|"putHeadersReturn"|"getHash"|"getHashReturn"|"getBlockTxs"|"getBlockTxsReturn");
 
     /**
      * Creates a new Network instance using the specified properties.
@@ -247,7 +259,7 @@ export class Network implements INetwork {
 export interface IStatus {
 
     /** Status version */
-    version?: number|Long;
+    version?: number;
 
     /** Status networkid */
     networkid?: string;
@@ -272,7 +284,7 @@ export class Status implements IStatus {
     constructor(properties?: IStatus);
 
     /** Status version. */
-    public version: (number|Long);
+    public version: number;
 
     /** Status networkid. */
     public networkid: string;
@@ -808,6 +820,282 @@ export class PutTxReturn implements IPutTxReturn {
 
     /**
      * Converts this PutTxReturn to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a GetBlockTxs. */
+export interface IGetBlockTxs {
+
+    /** GetBlockTxs hashes */
+    hashes?: Uint8Array[];
+}
+
+/** Represents a GetBlockTxs. */
+export class GetBlockTxs implements IGetBlockTxs {
+
+    /**
+     * Constructs a new GetBlockTxs.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IGetBlockTxs);
+
+    /** GetBlockTxs hashes. */
+    public hashes: Uint8Array[];
+
+    /**
+     * Creates a new GetBlockTxs instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns GetBlockTxs instance
+     */
+    public static create(properties?: IGetBlockTxs): GetBlockTxs;
+
+    /**
+     * Encodes the specified GetBlockTxs message. Does not implicitly {@link GetBlockTxs.verify|verify} messages.
+     * @param message GetBlockTxs message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: IGetBlockTxs, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified GetBlockTxs message, length delimited. Does not implicitly {@link GetBlockTxs.verify|verify} messages.
+     * @param message GetBlockTxs message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: IGetBlockTxs, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a GetBlockTxs message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns GetBlockTxs
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): GetBlockTxs;
+
+    /**
+     * Decodes a GetBlockTxs message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns GetBlockTxs
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): GetBlockTxs;
+
+    /**
+     * Verifies a GetBlockTxs message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a GetBlockTxs message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns GetBlockTxs
+     */
+    public static fromObject(object: { [k: string]: any }): GetBlockTxs;
+
+    /**
+     * Creates a plain object from a GetBlockTxs message. Also converts values to other types if specified.
+     * @param message GetBlockTxs
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: GetBlockTxs, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this GetBlockTxs to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a BlockTxs. */
+export interface IBlockTxs {
+
+    /** BlockTxs hash */
+    hash?: Uint8Array;
+
+    /** BlockTxs txs */
+    txs?: ITx[];
+}
+
+/** Represents a BlockTxs. */
+export class BlockTxs implements IBlockTxs {
+
+    /**
+     * Constructs a new BlockTxs.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IBlockTxs);
+
+    /** BlockTxs hash. */
+    public hash: Uint8Array;
+
+    /** BlockTxs txs. */
+    public txs: ITx[];
+
+    /**
+     * Creates a new BlockTxs instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns BlockTxs instance
+     */
+    public static create(properties?: IBlockTxs): BlockTxs;
+
+    /**
+     * Encodes the specified BlockTxs message. Does not implicitly {@link BlockTxs.verify|verify} messages.
+     * @param message BlockTxs message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: IBlockTxs, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified BlockTxs message, length delimited. Does not implicitly {@link BlockTxs.verify|verify} messages.
+     * @param message BlockTxs message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: IBlockTxs, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a BlockTxs message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns BlockTxs
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): BlockTxs;
+
+    /**
+     * Decodes a BlockTxs message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns BlockTxs
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): BlockTxs;
+
+    /**
+     * Verifies a BlockTxs message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a BlockTxs message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns BlockTxs
+     */
+    public static fromObject(object: { [k: string]: any }): BlockTxs;
+
+    /**
+     * Creates a plain object from a BlockTxs message. Also converts values to other types if specified.
+     * @param message BlockTxs
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: BlockTxs, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this BlockTxs to JSON.
+     * @returns JSON object
+     */
+    public toJSON(): { [k: string]: any };
+}
+
+/** Properties of a GetBlockTxsReturn. */
+export interface IGetBlockTxsReturn {
+
+    /** GetBlockTxsReturn txBlocks */
+    txBlocks?: IBlockTxs[];
+}
+
+/** Represents a GetBlockTxsReturn. */
+export class GetBlockTxsReturn implements IGetBlockTxsReturn {
+
+    /**
+     * Constructs a new GetBlockTxsReturn.
+     * @param [properties] Properties to set
+     */
+    constructor(properties?: IGetBlockTxsReturn);
+
+    /** GetBlockTxsReturn txBlocks. */
+    public txBlocks: IBlockTxs[];
+
+    /**
+     * Creates a new GetBlockTxsReturn instance using the specified properties.
+     * @param [properties] Properties to set
+     * @returns GetBlockTxsReturn instance
+     */
+    public static create(properties?: IGetBlockTxsReturn): GetBlockTxsReturn;
+
+    /**
+     * Encodes the specified GetBlockTxsReturn message. Does not implicitly {@link GetBlockTxsReturn.verify|verify} messages.
+     * @param message GetBlockTxsReturn message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encode(message: IGetBlockTxsReturn, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Encodes the specified GetBlockTxsReturn message, length delimited. Does not implicitly {@link GetBlockTxsReturn.verify|verify} messages.
+     * @param message GetBlockTxsReturn message or plain object to encode
+     * @param [writer] Writer to encode to
+     * @returns Writer
+     */
+    public static encodeDelimited(message: IGetBlockTxsReturn, writer?: $protobuf.Writer): $protobuf.Writer;
+
+    /**
+     * Decodes a GetBlockTxsReturn message from the specified reader or buffer.
+     * @param reader Reader or buffer to decode from
+     * @param [length] Message length if known beforehand
+     * @returns GetBlockTxsReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): GetBlockTxsReturn;
+
+    /**
+     * Decodes a GetBlockTxsReturn message from the specified reader or buffer, length delimited.
+     * @param reader Reader or buffer to decode from
+     * @returns GetBlockTxsReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): GetBlockTxsReturn;
+
+    /**
+     * Verifies a GetBlockTxsReturn message.
+     * @param message Plain object to verify
+     * @returns `null` if valid, otherwise the reason why it is not
+     */
+    public static verify(message: { [k: string]: any }): (string|null);
+
+    /**
+     * Creates a GetBlockTxsReturn message from a plain object. Also converts values to their respective internal types.
+     * @param object Plain object
+     * @returns GetBlockTxsReturn
+     */
+    public static fromObject(object: { [k: string]: any }): GetBlockTxsReturn;
+
+    /**
+     * Creates a plain object from a GetBlockTxsReturn message. Also converts values to other types if specified.
+     * @param message GetBlockTxsReturn
+     * @param [options] Conversion options
+     * @returns Plain object
+     */
+    public static toObject(message: GetBlockTxsReturn, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+    /**
+     * Converts this GetBlockTxsReturn to JSON.
      * @returns JSON object
      */
     public toJSON(): { [k: string]: any };
@@ -2306,6 +2594,9 @@ export interface IGetTip {
 
     /** GetTip dummy */
     dummy?: number|Long;
+
+    /** GetTip header */
+    header?: boolean;
 }
 
 /** Represents a GetTip. */
@@ -2319,6 +2610,9 @@ export class GetTip implements IGetTip {
 
     /** GetTip dummy. */
     public dummy: (number|Long);
+
+    /** GetTip header. */
+    public header: boolean;
 
     /**
      * Creates a new GetTip instance using the specified properties.
@@ -2402,6 +2696,9 @@ export interface IGetTipReturn {
 
     /** GetTipReturn height */
     height?: number|Long;
+
+    /** GetTipReturn totalwork */
+    totalwork?: number;
 }
 
 /** Represents a GetTipReturn. */
@@ -2421,6 +2718,9 @@ export class GetTipReturn implements IGetTipReturn {
 
     /** GetTipReturn height. */
     public height: (number|Long);
+
+    /** GetTipReturn totalwork. */
+    public totalwork: number;
 
     /**
      * Creates a new GetTipReturn instance using the specified properties.
@@ -3884,6 +4184,9 @@ export interface IPeer {
 
     /** Peer currentQueue */
     currentQueue?: number;
+
+    /** Peer successCount */
+    successCount?: number;
 }
 
 /** Represents a Peer. */
@@ -3915,6 +4218,9 @@ export class Peer implements IPeer {
 
     /** Peer currentQueue. */
     public currentQueue: number;
+
+    /** Peer successCount. */
+    public successCount: number;
 
     /**
      * Creates a new Peer instance using the specified properties.

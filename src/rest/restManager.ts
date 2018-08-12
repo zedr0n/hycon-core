@@ -2,9 +2,8 @@ import { IResponseError } from "../api/client/rest"
 import { Address } from "../common/address"
 import { ITxPool } from "../common/itxPool"
 import { SignedTx } from "../common/txSigned"
-import { Database } from "../consensus/database/database"
-import { WorldState } from "../consensus/database/worldState"
 import { IConsensus } from "../consensus/iconsensus"
+import { MinerServer } from "../miner/minerServer"
 import { INetwork } from "../network/inetwork"
 import { Server } from "../server"
 export class RestManager {
@@ -15,16 +14,20 @@ export class RestManager {
     public consensus: IConsensus
 
     public network: INetwork
+    public miner: MinerServer
     private server: Server
     constructor(server: Server) {
         this.server = server
         this.txQueue = server.txPool
         this.consensus = server.consensus
         this.network = server.network
+        this.miner = server.miner
     }
 
     public broadcastTxs(txList: SignedTx[]) {
-        this.server.network.broadcastTxs(txList)
+        if (txList.length > 0) {
+            this.server.network.broadcastTxs(txList)
+        }
     }
 
     // tslint:disable:object-literal-sort-keys

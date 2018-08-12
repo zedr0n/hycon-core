@@ -41,6 +41,8 @@ $root.Network = (function() {
      * @property {IPutHeadersReturn|null} [putHeadersReturn] Network putHeadersReturn
      * @property {IGetHash|null} [getHash] Network getHash
      * @property {IGetHashReturn|null} [getHashReturn] Network getHashReturn
+     * @property {IGetBlockTxs|null} [getBlockTxs] Network getBlockTxs
+     * @property {IGetBlockTxsReturn|null} [getBlockTxsReturn] Network getBlockTxsReturn
      */
 
     /**
@@ -266,17 +268,33 @@ $root.Network = (function() {
      */
     Network.prototype.getHashReturn = null;
 
+    /**
+     * Network getBlockTxs.
+     * @member {IGetBlockTxs|null|undefined} getBlockTxs
+     * @memberof Network
+     * @instance
+     */
+    Network.prototype.getBlockTxs = null;
+
+    /**
+     * Network getBlockTxsReturn.
+     * @member {IGetBlockTxsReturn|null|undefined} getBlockTxsReturn
+     * @memberof Network
+     * @instance
+     */
+    Network.prototype.getBlockTxsReturn = null;
+
     // OneOf field names bound to virtual getters and setters
     var $oneOfFields;
 
     /**
      * Network request.
-     * @member {"status"|"statusReturn"|"ping"|"pingReturn"|"putTx"|"putTxReturn"|"getTxs"|"getTxsReturn"|"putBlock"|"putBlockReturn"|"getBlocksByHash"|"getBlocksByHashReturn"|"getHeadersByHash"|"getHeadersByHashReturn"|"getBlocksByRange"|"getBlocksByRangeReturn"|"getHeadersByRange"|"getHeadersByRangeReturn"|"getPeers"|"getPeersReturn"|"getTip"|"getTipReturn"|"putHeaders"|"putHeadersReturn"|"getHash"|"getHashReturn"|undefined} request
+     * @member {"status"|"statusReturn"|"ping"|"pingReturn"|"putTx"|"putTxReturn"|"getTxs"|"getTxsReturn"|"putBlock"|"putBlockReturn"|"getBlocksByHash"|"getBlocksByHashReturn"|"getHeadersByHash"|"getHeadersByHashReturn"|"getBlocksByRange"|"getBlocksByRangeReturn"|"getHeadersByRange"|"getHeadersByRangeReturn"|"getPeers"|"getPeersReturn"|"getTip"|"getTipReturn"|"putHeaders"|"putHeadersReturn"|"getHash"|"getHashReturn"|"getBlockTxs"|"getBlockTxsReturn"|undefined} request
      * @memberof Network
      * @instance
      */
     Object.defineProperty(Network.prototype, "request", {
-        get: $util.oneOfGetter($oneOfFields = ["status", "statusReturn", "ping", "pingReturn", "putTx", "putTxReturn", "getTxs", "getTxsReturn", "putBlock", "putBlockReturn", "getBlocksByHash", "getBlocksByHashReturn", "getHeadersByHash", "getHeadersByHashReturn", "getBlocksByRange", "getBlocksByRangeReturn", "getHeadersByRange", "getHeadersByRangeReturn", "getPeers", "getPeersReturn", "getTip", "getTipReturn", "putHeaders", "putHeadersReturn", "getHash", "getHashReturn"]),
+        get: $util.oneOfGetter($oneOfFields = ["status", "statusReturn", "ping", "pingReturn", "putTx", "putTxReturn", "getTxs", "getTxsReturn", "putBlock", "putBlockReturn", "getBlocksByHash", "getBlocksByHashReturn", "getHeadersByHash", "getHeadersByHashReturn", "getBlocksByRange", "getBlocksByRangeReturn", "getHeadersByRange", "getHeadersByRangeReturn", "getPeers", "getPeersReturn", "getTip", "getTipReturn", "putHeaders", "putHeadersReturn", "getHash", "getHashReturn", "getBlockTxs", "getBlockTxsReturn"]),
         set: $util.oneOfSetter($oneOfFields)
     });
 
@@ -356,6 +374,10 @@ $root.Network = (function() {
             $root.GetHash.encode(message.getHash, writer.uint32(/* id 25, wireType 2 =*/202).fork()).ldelim();
         if (message.getHashReturn != null && message.hasOwnProperty("getHashReturn"))
             $root.GetHashReturn.encode(message.getHashReturn, writer.uint32(/* id 26, wireType 2 =*/210).fork()).ldelim();
+        if (message.getBlockTxs != null && message.hasOwnProperty("getBlockTxs"))
+            $root.GetBlockTxs.encode(message.getBlockTxs, writer.uint32(/* id 27, wireType 2 =*/218).fork()).ldelim();
+        if (message.getBlockTxsReturn != null && message.hasOwnProperty("getBlockTxsReturn"))
+            $root.GetBlockTxsReturn.encode(message.getBlockTxsReturn, writer.uint32(/* id 28, wireType 2 =*/226).fork()).ldelim();
         return writer;
     };
 
@@ -467,6 +489,12 @@ $root.Network = (function() {
                 break;
             case 26:
                 message.getHashReturn = $root.GetHashReturn.decode(reader, reader.uint32());
+                break;
+            case 27:
+                message.getBlockTxs = $root.GetBlockTxs.decode(reader, reader.uint32());
+                break;
+            case 28:
+                message.getBlockTxsReturn = $root.GetBlockTxsReturn.decode(reader, reader.uint32());
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -762,6 +790,26 @@ $root.Network = (function() {
                     return "getHashReturn." + error;
             }
         }
+        if (message.getBlockTxs != null && message.hasOwnProperty("getBlockTxs")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.GetBlockTxs.verify(message.getBlockTxs);
+                if (error)
+                    return "getBlockTxs." + error;
+            }
+        }
+        if (message.getBlockTxsReturn != null && message.hasOwnProperty("getBlockTxsReturn")) {
+            if (properties.request === 1)
+                return "request: multiple values";
+            properties.request = 1;
+            {
+                var error = $root.GetBlockTxsReturn.verify(message.getBlockTxsReturn);
+                if (error)
+                    return "getBlockTxsReturn." + error;
+            }
+        }
         return null;
     };
 
@@ -906,6 +954,16 @@ $root.Network = (function() {
             if (typeof object.getHashReturn !== "object")
                 throw TypeError(".Network.getHashReturn: object expected");
             message.getHashReturn = $root.GetHashReturn.fromObject(object.getHashReturn);
+        }
+        if (object.getBlockTxs != null) {
+            if (typeof object.getBlockTxs !== "object")
+                throw TypeError(".Network.getBlockTxs: object expected");
+            message.getBlockTxs = $root.GetBlockTxs.fromObject(object.getBlockTxs);
+        }
+        if (object.getBlockTxsReturn != null) {
+            if (typeof object.getBlockTxsReturn !== "object")
+                throw TypeError(".Network.getBlockTxsReturn: object expected");
+            message.getBlockTxsReturn = $root.GetBlockTxsReturn.fromObject(object.getBlockTxsReturn);
         }
         return message;
     };
@@ -1053,6 +1111,16 @@ $root.Network = (function() {
             if (options.oneofs)
                 object.request = "getHashReturn";
         }
+        if (message.getBlockTxs != null && message.hasOwnProperty("getBlockTxs")) {
+            object.getBlockTxs = $root.GetBlockTxs.toObject(message.getBlockTxs, options);
+            if (options.oneofs)
+                object.request = "getBlockTxs";
+        }
+        if (message.getBlockTxsReturn != null && message.hasOwnProperty("getBlockTxsReturn")) {
+            object.getBlockTxsReturn = $root.GetBlockTxsReturn.toObject(message.getBlockTxsReturn, options);
+            if (options.oneofs)
+                object.request = "getBlockTxsReturn";
+        }
         return object;
     };
 
@@ -1076,7 +1144,7 @@ $root.Status = (function() {
      * Properties of a Status.
      * @exports IStatus
      * @interface IStatus
-     * @property {number|Long|null} [version] Status version
+     * @property {number|null} [version] Status version
      * @property {string|null} [networkid] Status networkid
      * @property {number|null} [port] Status port
      * @property {string|null} [guid] Status guid
@@ -1100,11 +1168,11 @@ $root.Status = (function() {
 
     /**
      * Status version.
-     * @member {number|Long} version
+     * @member {number} version
      * @memberof Status
      * @instance
      */
-    Status.prototype.version = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    Status.prototype.version = 0;
 
     /**
      * Status networkid.
@@ -1163,7 +1231,7 @@ $root.Status = (function() {
         if (!writer)
             writer = $Writer.create();
         if (message.version != null && message.hasOwnProperty("version"))
-            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.version);
+            writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.version);
         if (message.networkid != null && message.hasOwnProperty("networkid"))
             writer.uint32(/* id 2, wireType 2 =*/18).string(message.networkid);
         if (message.port != null && message.hasOwnProperty("port"))
@@ -1207,7 +1275,7 @@ $root.Status = (function() {
             var tag = reader.uint32();
             switch (tag >>> 3) {
             case 1:
-                message.version = reader.int64();
+                message.version = reader.uint32();
                 break;
             case 2:
                 message.networkid = reader.string();
@@ -1257,8 +1325,8 @@ $root.Status = (function() {
         if (typeof message !== "object" || message === null)
             return "object expected";
         if (message.version != null && message.hasOwnProperty("version"))
-            if (!$util.isInteger(message.version) && !(message.version && $util.isInteger(message.version.low) && $util.isInteger(message.version.high)))
-                return "version: integer|Long expected";
+            if (!$util.isInteger(message.version))
+                return "version: integer expected";
         if (message.networkid != null && message.hasOwnProperty("networkid"))
             if (!$util.isString(message.networkid))
                 return "networkid: string expected";
@@ -1287,14 +1355,7 @@ $root.Status = (function() {
             return object;
         var message = new $root.Status();
         if (object.version != null)
-            if ($util.Long)
-                (message.version = $util.Long.fromValue(object.version)).unsigned = false;
-            else if (typeof object.version === "string")
-                message.version = parseInt(object.version, 10);
-            else if (typeof object.version === "number")
-                message.version = object.version;
-            else if (typeof object.version === "object")
-                message.version = new $util.LongBits(object.version.low >>> 0, object.version.high >>> 0).toNumber();
+            message.version = object.version >>> 0;
         if (object.networkid != null)
             message.networkid = String(object.networkid);
         if (object.port != null)
@@ -1320,21 +1381,14 @@ $root.Status = (function() {
             options = {};
         var object = {};
         if (options.defaults) {
-            if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
-                object.version = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
-            } else
-                object.version = options.longs === String ? "0" : 0;
+            object.version = 0;
             object.networkid = "";
             object.port = 0;
             object.guid = "";
             object.publicPort = 0;
         }
         if (message.version != null && message.hasOwnProperty("version"))
-            if (typeof message.version === "number")
-                object.version = options.longs === String ? String(message.version) : message.version;
-            else
-                object.version = options.longs === String ? $util.Long.prototype.toString.call(message.version) : options.longs === Number ? new $util.LongBits(message.version.low >>> 0, message.version.high >>> 0).toNumber() : message.version;
+            object.version = message.version;
         if (message.networkid != null && message.hasOwnProperty("networkid"))
             object.networkid = message.networkid;
         if (message.port != null && message.hasOwnProperty("port"))
@@ -1605,7 +1659,7 @@ $root.Ping = (function() {
      * @memberof Ping
      * @instance
      */
-    Ping.prototype.nonce = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    Ping.prototype.nonce = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
     /**
      * Creates a new Ping instance using the specified properties.
@@ -1632,7 +1686,7 @@ $root.Ping = (function() {
         if (!writer)
             writer = $Writer.create();
         if (message.nonce != null && message.hasOwnProperty("nonce"))
-            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.nonce);
+            writer.uint32(/* id 1, wireType 0 =*/8).uint64(message.nonce);
         return writer;
     };
 
@@ -1668,7 +1722,7 @@ $root.Ping = (function() {
             var tag = reader.uint32();
             switch (tag >>> 3) {
             case 1:
-                message.nonce = reader.int64();
+                message.nonce = reader.uint64();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -1725,13 +1779,13 @@ $root.Ping = (function() {
         var message = new $root.Ping();
         if (object.nonce != null)
             if ($util.Long)
-                (message.nonce = $util.Long.fromValue(object.nonce)).unsigned = false;
+                (message.nonce = $util.Long.fromValue(object.nonce)).unsigned = true;
             else if (typeof object.nonce === "string")
                 message.nonce = parseInt(object.nonce, 10);
             else if (typeof object.nonce === "number")
                 message.nonce = object.nonce;
             else if (typeof object.nonce === "object")
-                message.nonce = new $util.LongBits(object.nonce.low >>> 0, object.nonce.high >>> 0).toNumber();
+                message.nonce = new $util.LongBits(object.nonce.low >>> 0, object.nonce.high >>> 0).toNumber(true);
         return message;
     };
 
@@ -1750,7 +1804,7 @@ $root.Ping = (function() {
         var object = {};
         if (options.defaults)
             if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
+                var long = new $util.Long(0, 0, true);
                 object.nonce = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.nonce = options.longs === String ? "0" : 0;
@@ -1758,7 +1812,7 @@ $root.Ping = (function() {
             if (typeof message.nonce === "number")
                 object.nonce = options.longs === String ? String(message.nonce) : message.nonce;
             else
-                object.nonce = options.longs === String ? $util.Long.prototype.toString.call(message.nonce) : options.longs === Number ? new $util.LongBits(message.nonce.low >>> 0, message.nonce.high >>> 0).toNumber() : message.nonce;
+                object.nonce = options.longs === String ? $util.Long.prototype.toString.call(message.nonce) : options.longs === Number ? new $util.LongBits(message.nonce.low >>> 0, message.nonce.high >>> 0).toNumber(true) : message.nonce;
         return object;
     };
 
@@ -1806,7 +1860,7 @@ $root.PingReturn = (function() {
      * @memberof PingReturn
      * @instance
      */
-    PingReturn.prototype.nonce = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    PingReturn.prototype.nonce = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
     /**
      * Creates a new PingReturn instance using the specified properties.
@@ -1833,7 +1887,7 @@ $root.PingReturn = (function() {
         if (!writer)
             writer = $Writer.create();
         if (message.nonce != null && message.hasOwnProperty("nonce"))
-            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.nonce);
+            writer.uint32(/* id 1, wireType 0 =*/8).uint64(message.nonce);
         return writer;
     };
 
@@ -1869,7 +1923,7 @@ $root.PingReturn = (function() {
             var tag = reader.uint32();
             switch (tag >>> 3) {
             case 1:
-                message.nonce = reader.int64();
+                message.nonce = reader.uint64();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -1926,13 +1980,13 @@ $root.PingReturn = (function() {
         var message = new $root.PingReturn();
         if (object.nonce != null)
             if ($util.Long)
-                (message.nonce = $util.Long.fromValue(object.nonce)).unsigned = false;
+                (message.nonce = $util.Long.fromValue(object.nonce)).unsigned = true;
             else if (typeof object.nonce === "string")
                 message.nonce = parseInt(object.nonce, 10);
             else if (typeof object.nonce === "number")
                 message.nonce = object.nonce;
             else if (typeof object.nonce === "object")
-                message.nonce = new $util.LongBits(object.nonce.low >>> 0, object.nonce.high >>> 0).toNumber();
+                message.nonce = new $util.LongBits(object.nonce.low >>> 0, object.nonce.high >>> 0).toNumber(true);
         return message;
     };
 
@@ -1951,7 +2005,7 @@ $root.PingReturn = (function() {
         var object = {};
         if (options.defaults)
             if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
+                var long = new $util.Long(0, 0, true);
                 object.nonce = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.nonce = options.longs === String ? "0" : 0;
@@ -1959,7 +2013,7 @@ $root.PingReturn = (function() {
             if (typeof message.nonce === "number")
                 object.nonce = options.longs === String ? String(message.nonce) : message.nonce;
             else
-                object.nonce = options.longs === String ? $util.Long.prototype.toString.call(message.nonce) : options.longs === Number ? new $util.LongBits(message.nonce.low >>> 0, message.nonce.high >>> 0).toNumber() : message.nonce;
+                object.nonce = options.longs === String ? $util.Long.prototype.toString.call(message.nonce) : options.longs === Number ? new $util.LongBits(message.nonce.low >>> 0, message.nonce.high >>> 0).toNumber(true) : message.nonce;
         return object;
     };
 
@@ -2372,6 +2426,654 @@ $root.PutTxReturn = (function() {
     return PutTxReturn;
 })();
 
+$root.GetBlockTxs = (function() {
+
+    /**
+     * Properties of a GetBlockTxs.
+     * @exports IGetBlockTxs
+     * @interface IGetBlockTxs
+     * @property {Array.<Uint8Array>|null} [hashes] GetBlockTxs hashes
+     */
+
+    /**
+     * Constructs a new GetBlockTxs.
+     * @exports GetBlockTxs
+     * @classdesc Represents a GetBlockTxs.
+     * @implements IGetBlockTxs
+     * @constructor
+     * @param {IGetBlockTxs=} [properties] Properties to set
+     */
+    function GetBlockTxs(properties) {
+        this.hashes = [];
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * GetBlockTxs hashes.
+     * @member {Array.<Uint8Array>} hashes
+     * @memberof GetBlockTxs
+     * @instance
+     */
+    GetBlockTxs.prototype.hashes = $util.emptyArray;
+
+    /**
+     * Creates a new GetBlockTxs instance using the specified properties.
+     * @function create
+     * @memberof GetBlockTxs
+     * @static
+     * @param {IGetBlockTxs=} [properties] Properties to set
+     * @returns {GetBlockTxs} GetBlockTxs instance
+     */
+    GetBlockTxs.create = function create(properties) {
+        return new GetBlockTxs(properties);
+    };
+
+    /**
+     * Encodes the specified GetBlockTxs message. Does not implicitly {@link GetBlockTxs.verify|verify} messages.
+     * @function encode
+     * @memberof GetBlockTxs
+     * @static
+     * @param {IGetBlockTxs} message GetBlockTxs message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetBlockTxs.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.hashes != null && message.hashes.length)
+            for (var i = 0; i < message.hashes.length; ++i)
+                writer.uint32(/* id 1, wireType 2 =*/10).bytes(message.hashes[i]);
+        return writer;
+    };
+
+    /**
+     * Encodes the specified GetBlockTxs message, length delimited. Does not implicitly {@link GetBlockTxs.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof GetBlockTxs
+     * @static
+     * @param {IGetBlockTxs} message GetBlockTxs message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetBlockTxs.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a GetBlockTxs message from the specified reader or buffer.
+     * @function decode
+     * @memberof GetBlockTxs
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {GetBlockTxs} GetBlockTxs
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetBlockTxs.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetBlockTxs();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                if (!(message.hashes && message.hashes.length))
+                    message.hashes = [];
+                message.hashes.push(reader.bytes());
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a GetBlockTxs message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof GetBlockTxs
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {GetBlockTxs} GetBlockTxs
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetBlockTxs.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a GetBlockTxs message.
+     * @function verify
+     * @memberof GetBlockTxs
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    GetBlockTxs.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.hashes != null && message.hasOwnProperty("hashes")) {
+            if (!Array.isArray(message.hashes))
+                return "hashes: array expected";
+            for (var i = 0; i < message.hashes.length; ++i)
+                if (!(message.hashes[i] && typeof message.hashes[i].length === "number" || $util.isString(message.hashes[i])))
+                    return "hashes: buffer[] expected";
+        }
+        return null;
+    };
+
+    /**
+     * Creates a GetBlockTxs message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof GetBlockTxs
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {GetBlockTxs} GetBlockTxs
+     */
+    GetBlockTxs.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetBlockTxs)
+            return object;
+        var message = new $root.GetBlockTxs();
+        if (object.hashes) {
+            if (!Array.isArray(object.hashes))
+                throw TypeError(".GetBlockTxs.hashes: array expected");
+            message.hashes = [];
+            for (var i = 0; i < object.hashes.length; ++i)
+                if (typeof object.hashes[i] === "string")
+                    $util.base64.decode(object.hashes[i], message.hashes[i] = $util.newBuffer($util.base64.length(object.hashes[i])), 0);
+                else if (object.hashes[i].length)
+                    message.hashes[i] = object.hashes[i];
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a GetBlockTxs message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof GetBlockTxs
+     * @static
+     * @param {GetBlockTxs} message GetBlockTxs
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    GetBlockTxs.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.arrays || options.defaults)
+            object.hashes = [];
+        if (message.hashes && message.hashes.length) {
+            object.hashes = [];
+            for (var j = 0; j < message.hashes.length; ++j)
+                object.hashes[j] = options.bytes === String ? $util.base64.encode(message.hashes[j], 0, message.hashes[j].length) : options.bytes === Array ? Array.prototype.slice.call(message.hashes[j]) : message.hashes[j];
+        }
+        return object;
+    };
+
+    /**
+     * Converts this GetBlockTxs to JSON.
+     * @function toJSON
+     * @memberof GetBlockTxs
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    GetBlockTxs.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return GetBlockTxs;
+})();
+
+$root.BlockTxs = (function() {
+
+    /**
+     * Properties of a BlockTxs.
+     * @exports IBlockTxs
+     * @interface IBlockTxs
+     * @property {Uint8Array|null} [hash] BlockTxs hash
+     * @property {Array.<ITx>|null} [txs] BlockTxs txs
+     */
+
+    /**
+     * Constructs a new BlockTxs.
+     * @exports BlockTxs
+     * @classdesc Represents a BlockTxs.
+     * @implements IBlockTxs
+     * @constructor
+     * @param {IBlockTxs=} [properties] Properties to set
+     */
+    function BlockTxs(properties) {
+        this.txs = [];
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * BlockTxs hash.
+     * @member {Uint8Array} hash
+     * @memberof BlockTxs
+     * @instance
+     */
+    BlockTxs.prototype.hash = $util.newBuffer([]);
+
+    /**
+     * BlockTxs txs.
+     * @member {Array.<ITx>} txs
+     * @memberof BlockTxs
+     * @instance
+     */
+    BlockTxs.prototype.txs = $util.emptyArray;
+
+    /**
+     * Creates a new BlockTxs instance using the specified properties.
+     * @function create
+     * @memberof BlockTxs
+     * @static
+     * @param {IBlockTxs=} [properties] Properties to set
+     * @returns {BlockTxs} BlockTxs instance
+     */
+    BlockTxs.create = function create(properties) {
+        return new BlockTxs(properties);
+    };
+
+    /**
+     * Encodes the specified BlockTxs message. Does not implicitly {@link BlockTxs.verify|verify} messages.
+     * @function encode
+     * @memberof BlockTxs
+     * @static
+     * @param {IBlockTxs} message BlockTxs message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    BlockTxs.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.hash != null && message.hasOwnProperty("hash"))
+            writer.uint32(/* id 1, wireType 2 =*/10).bytes(message.hash);
+        if (message.txs != null && message.txs.length)
+            for (var i = 0; i < message.txs.length; ++i)
+                $root.Tx.encode(message.txs[i], writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified BlockTxs message, length delimited. Does not implicitly {@link BlockTxs.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof BlockTxs
+     * @static
+     * @param {IBlockTxs} message BlockTxs message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    BlockTxs.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a BlockTxs message from the specified reader or buffer.
+     * @function decode
+     * @memberof BlockTxs
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {BlockTxs} BlockTxs
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    BlockTxs.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.BlockTxs();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                message.hash = reader.bytes();
+                break;
+            case 2:
+                if (!(message.txs && message.txs.length))
+                    message.txs = [];
+                message.txs.push($root.Tx.decode(reader, reader.uint32()));
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a BlockTxs message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof BlockTxs
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {BlockTxs} BlockTxs
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    BlockTxs.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a BlockTxs message.
+     * @function verify
+     * @memberof BlockTxs
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    BlockTxs.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.hash != null && message.hasOwnProperty("hash"))
+            if (!(message.hash && typeof message.hash.length === "number" || $util.isString(message.hash)))
+                return "hash: buffer expected";
+        if (message.txs != null && message.hasOwnProperty("txs")) {
+            if (!Array.isArray(message.txs))
+                return "txs: array expected";
+            for (var i = 0; i < message.txs.length; ++i) {
+                var error = $root.Tx.verify(message.txs[i]);
+                if (error)
+                    return "txs." + error;
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Creates a BlockTxs message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof BlockTxs
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {BlockTxs} BlockTxs
+     */
+    BlockTxs.fromObject = function fromObject(object) {
+        if (object instanceof $root.BlockTxs)
+            return object;
+        var message = new $root.BlockTxs();
+        if (object.hash != null)
+            if (typeof object.hash === "string")
+                $util.base64.decode(object.hash, message.hash = $util.newBuffer($util.base64.length(object.hash)), 0);
+            else if (object.hash.length)
+                message.hash = object.hash;
+        if (object.txs) {
+            if (!Array.isArray(object.txs))
+                throw TypeError(".BlockTxs.txs: array expected");
+            message.txs = [];
+            for (var i = 0; i < object.txs.length; ++i) {
+                if (typeof object.txs[i] !== "object")
+                    throw TypeError(".BlockTxs.txs: object expected");
+                message.txs[i] = $root.Tx.fromObject(object.txs[i]);
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a BlockTxs message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof BlockTxs
+     * @static
+     * @param {BlockTxs} message BlockTxs
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    BlockTxs.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.arrays || options.defaults)
+            object.txs = [];
+        if (options.defaults)
+            object.hash = options.bytes === String ? "" : [];
+        if (message.hash != null && message.hasOwnProperty("hash"))
+            object.hash = options.bytes === String ? $util.base64.encode(message.hash, 0, message.hash.length) : options.bytes === Array ? Array.prototype.slice.call(message.hash) : message.hash;
+        if (message.txs && message.txs.length) {
+            object.txs = [];
+            for (var j = 0; j < message.txs.length; ++j)
+                object.txs[j] = $root.Tx.toObject(message.txs[j], options);
+        }
+        return object;
+    };
+
+    /**
+     * Converts this BlockTxs to JSON.
+     * @function toJSON
+     * @memberof BlockTxs
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    BlockTxs.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return BlockTxs;
+})();
+
+$root.GetBlockTxsReturn = (function() {
+
+    /**
+     * Properties of a GetBlockTxsReturn.
+     * @exports IGetBlockTxsReturn
+     * @interface IGetBlockTxsReturn
+     * @property {Array.<IBlockTxs>|null} [txBlocks] GetBlockTxsReturn txBlocks
+     */
+
+    /**
+     * Constructs a new GetBlockTxsReturn.
+     * @exports GetBlockTxsReturn
+     * @classdesc Represents a GetBlockTxsReturn.
+     * @implements IGetBlockTxsReturn
+     * @constructor
+     * @param {IGetBlockTxsReturn=} [properties] Properties to set
+     */
+    function GetBlockTxsReturn(properties) {
+        this.txBlocks = [];
+        if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                if (properties[keys[i]] != null)
+                    this[keys[i]] = properties[keys[i]];
+    }
+
+    /**
+     * GetBlockTxsReturn txBlocks.
+     * @member {Array.<IBlockTxs>} txBlocks
+     * @memberof GetBlockTxsReturn
+     * @instance
+     */
+    GetBlockTxsReturn.prototype.txBlocks = $util.emptyArray;
+
+    /**
+     * Creates a new GetBlockTxsReturn instance using the specified properties.
+     * @function create
+     * @memberof GetBlockTxsReturn
+     * @static
+     * @param {IGetBlockTxsReturn=} [properties] Properties to set
+     * @returns {GetBlockTxsReturn} GetBlockTxsReturn instance
+     */
+    GetBlockTxsReturn.create = function create(properties) {
+        return new GetBlockTxsReturn(properties);
+    };
+
+    /**
+     * Encodes the specified GetBlockTxsReturn message. Does not implicitly {@link GetBlockTxsReturn.verify|verify} messages.
+     * @function encode
+     * @memberof GetBlockTxsReturn
+     * @static
+     * @param {IGetBlockTxsReturn} message GetBlockTxsReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetBlockTxsReturn.encode = function encode(message, writer) {
+        if (!writer)
+            writer = $Writer.create();
+        if (message.txBlocks != null && message.txBlocks.length)
+            for (var i = 0; i < message.txBlocks.length; ++i)
+                $root.BlockTxs.encode(message.txBlocks[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+        return writer;
+    };
+
+    /**
+     * Encodes the specified GetBlockTxsReturn message, length delimited. Does not implicitly {@link GetBlockTxsReturn.verify|verify} messages.
+     * @function encodeDelimited
+     * @memberof GetBlockTxsReturn
+     * @static
+     * @param {IGetBlockTxsReturn} message GetBlockTxsReturn message or plain object to encode
+     * @param {$protobuf.Writer} [writer] Writer to encode to
+     * @returns {$protobuf.Writer} Writer
+     */
+    GetBlockTxsReturn.encodeDelimited = function encodeDelimited(message, writer) {
+        return this.encode(message, writer).ldelim();
+    };
+
+    /**
+     * Decodes a GetBlockTxsReturn message from the specified reader or buffer.
+     * @function decode
+     * @memberof GetBlockTxsReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @param {number} [length] Message length if known beforehand
+     * @returns {GetBlockTxsReturn} GetBlockTxsReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetBlockTxsReturn.decode = function decode(reader, length) {
+        if (!(reader instanceof $Reader))
+            reader = $Reader.create(reader);
+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.GetBlockTxsReturn();
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+            case 1:
+                if (!(message.txBlocks && message.txBlocks.length))
+                    message.txBlocks = [];
+                message.txBlocks.push($root.BlockTxs.decode(reader, reader.uint32()));
+                break;
+            default:
+                reader.skipType(tag & 7);
+                break;
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Decodes a GetBlockTxsReturn message from the specified reader or buffer, length delimited.
+     * @function decodeDelimited
+     * @memberof GetBlockTxsReturn
+     * @static
+     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+     * @returns {GetBlockTxsReturn} GetBlockTxsReturn
+     * @throws {Error} If the payload is not a reader or valid buffer
+     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+     */
+    GetBlockTxsReturn.decodeDelimited = function decodeDelimited(reader) {
+        if (!(reader instanceof $Reader))
+            reader = new $Reader(reader);
+        return this.decode(reader, reader.uint32());
+    };
+
+    /**
+     * Verifies a GetBlockTxsReturn message.
+     * @function verify
+     * @memberof GetBlockTxsReturn
+     * @static
+     * @param {Object.<string,*>} message Plain object to verify
+     * @returns {string|null} `null` if valid, otherwise the reason why it is not
+     */
+    GetBlockTxsReturn.verify = function verify(message) {
+        if (typeof message !== "object" || message === null)
+            return "object expected";
+        if (message.txBlocks != null && message.hasOwnProperty("txBlocks")) {
+            if (!Array.isArray(message.txBlocks))
+                return "txBlocks: array expected";
+            for (var i = 0; i < message.txBlocks.length; ++i) {
+                var error = $root.BlockTxs.verify(message.txBlocks[i]);
+                if (error)
+                    return "txBlocks." + error;
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Creates a GetBlockTxsReturn message from a plain object. Also converts values to their respective internal types.
+     * @function fromObject
+     * @memberof GetBlockTxsReturn
+     * @static
+     * @param {Object.<string,*>} object Plain object
+     * @returns {GetBlockTxsReturn} GetBlockTxsReturn
+     */
+    GetBlockTxsReturn.fromObject = function fromObject(object) {
+        if (object instanceof $root.GetBlockTxsReturn)
+            return object;
+        var message = new $root.GetBlockTxsReturn();
+        if (object.txBlocks) {
+            if (!Array.isArray(object.txBlocks))
+                throw TypeError(".GetBlockTxsReturn.txBlocks: array expected");
+            message.txBlocks = [];
+            for (var i = 0; i < object.txBlocks.length; ++i) {
+                if (typeof object.txBlocks[i] !== "object")
+                    throw TypeError(".GetBlockTxsReturn.txBlocks: object expected");
+                message.txBlocks[i] = $root.BlockTxs.fromObject(object.txBlocks[i]);
+            }
+        }
+        return message;
+    };
+
+    /**
+     * Creates a plain object from a GetBlockTxsReturn message. Also converts values to other types if specified.
+     * @function toObject
+     * @memberof GetBlockTxsReturn
+     * @static
+     * @param {GetBlockTxsReturn} message GetBlockTxsReturn
+     * @param {$protobuf.IConversionOptions} [options] Conversion options
+     * @returns {Object.<string,*>} Plain object
+     */
+    GetBlockTxsReturn.toObject = function toObject(message, options) {
+        if (!options)
+            options = {};
+        var object = {};
+        if (options.arrays || options.defaults)
+            object.txBlocks = [];
+        if (message.txBlocks && message.txBlocks.length) {
+            object.txBlocks = [];
+            for (var j = 0; j < message.txBlocks.length; ++j)
+                object.txBlocks[j] = $root.BlockTxs.toObject(message.txBlocks[j], options);
+        }
+        return object;
+    };
+
+    /**
+     * Converts this GetBlockTxsReturn to JSON.
+     * @function toJSON
+     * @memberof GetBlockTxsReturn
+     * @instance
+     * @returns {Object.<string,*>} JSON object
+     */
+    GetBlockTxsReturn.prototype.toJSON = function toJSON() {
+        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+    };
+
+    return GetBlockTxsReturn;
+})();
+
 $root.GetTxs = (function() {
 
     /**
@@ -2402,7 +3104,7 @@ $root.GetTxs = (function() {
      * @memberof GetTxs
      * @instance
      */
-    GetTxs.prototype.minFee = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    GetTxs.prototype.minFee = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
     /**
      * Creates a new GetTxs instance using the specified properties.
@@ -2429,7 +3131,7 @@ $root.GetTxs = (function() {
         if (!writer)
             writer = $Writer.create();
         if (message.minFee != null && message.hasOwnProperty("minFee"))
-            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.minFee);
+            writer.uint32(/* id 1, wireType 0 =*/8).uint64(message.minFee);
         return writer;
     };
 
@@ -2465,7 +3167,7 @@ $root.GetTxs = (function() {
             var tag = reader.uint32();
             switch (tag >>> 3) {
             case 1:
-                message.minFee = reader.int64();
+                message.minFee = reader.uint64();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -2522,13 +3224,13 @@ $root.GetTxs = (function() {
         var message = new $root.GetTxs();
         if (object.minFee != null)
             if ($util.Long)
-                (message.minFee = $util.Long.fromValue(object.minFee)).unsigned = false;
+                (message.minFee = $util.Long.fromValue(object.minFee)).unsigned = true;
             else if (typeof object.minFee === "string")
                 message.minFee = parseInt(object.minFee, 10);
             else if (typeof object.minFee === "number")
                 message.minFee = object.minFee;
             else if (typeof object.minFee === "object")
-                message.minFee = new $util.LongBits(object.minFee.low >>> 0, object.minFee.high >>> 0).toNumber();
+                message.minFee = new $util.LongBits(object.minFee.low >>> 0, object.minFee.high >>> 0).toNumber(true);
         return message;
     };
 
@@ -2547,7 +3249,7 @@ $root.GetTxs = (function() {
         var object = {};
         if (options.defaults)
             if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
+                var long = new $util.Long(0, 0, true);
                 object.minFee = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.minFee = options.longs === String ? "0" : 0;
@@ -2555,7 +3257,7 @@ $root.GetTxs = (function() {
             if (typeof message.minFee === "number")
                 object.minFee = options.longs === String ? String(message.minFee) : message.minFee;
             else
-                object.minFee = options.longs === String ? $util.Long.prototype.toString.call(message.minFee) : options.longs === Number ? new $util.LongBits(message.minFee.low >>> 0, message.minFee.high >>> 0).toNumber() : message.minFee;
+                object.minFee = options.longs === String ? $util.Long.prototype.toString.call(message.minFee) : options.longs === Number ? new $util.LongBits(message.minFee.low >>> 0, message.minFee.high >>> 0).toNumber(true) : message.minFee;
         return object;
     };
 
@@ -4541,7 +5243,7 @@ $root.GetBlocksByRange = (function() {
      * @memberof GetBlocksByRange
      * @instance
      */
-    GetBlocksByRange.prototype.fromHeight = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    GetBlocksByRange.prototype.fromHeight = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
     /**
      * GetBlocksByRange count.
@@ -4549,7 +5251,7 @@ $root.GetBlocksByRange = (function() {
      * @memberof GetBlocksByRange
      * @instance
      */
-    GetBlocksByRange.prototype.count = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    GetBlocksByRange.prototype.count = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
     /**
      * Creates a new GetBlocksByRange instance using the specified properties.
@@ -4576,9 +5278,9 @@ $root.GetBlocksByRange = (function() {
         if (!writer)
             writer = $Writer.create();
         if (message.fromHeight != null && message.hasOwnProperty("fromHeight"))
-            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.fromHeight);
+            writer.uint32(/* id 1, wireType 0 =*/8).uint64(message.fromHeight);
         if (message.count != null && message.hasOwnProperty("count"))
-            writer.uint32(/* id 2, wireType 0 =*/16).int64(message.count);
+            writer.uint32(/* id 2, wireType 0 =*/16).uint64(message.count);
         return writer;
     };
 
@@ -4614,10 +5316,10 @@ $root.GetBlocksByRange = (function() {
             var tag = reader.uint32();
             switch (tag >>> 3) {
             case 1:
-                message.fromHeight = reader.int64();
+                message.fromHeight = reader.uint64();
                 break;
             case 2:
-                message.count = reader.int64();
+                message.count = reader.uint64();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -4677,22 +5379,22 @@ $root.GetBlocksByRange = (function() {
         var message = new $root.GetBlocksByRange();
         if (object.fromHeight != null)
             if ($util.Long)
-                (message.fromHeight = $util.Long.fromValue(object.fromHeight)).unsigned = false;
+                (message.fromHeight = $util.Long.fromValue(object.fromHeight)).unsigned = true;
             else if (typeof object.fromHeight === "string")
                 message.fromHeight = parseInt(object.fromHeight, 10);
             else if (typeof object.fromHeight === "number")
                 message.fromHeight = object.fromHeight;
             else if (typeof object.fromHeight === "object")
-                message.fromHeight = new $util.LongBits(object.fromHeight.low >>> 0, object.fromHeight.high >>> 0).toNumber();
+                message.fromHeight = new $util.LongBits(object.fromHeight.low >>> 0, object.fromHeight.high >>> 0).toNumber(true);
         if (object.count != null)
             if ($util.Long)
-                (message.count = $util.Long.fromValue(object.count)).unsigned = false;
+                (message.count = $util.Long.fromValue(object.count)).unsigned = true;
             else if (typeof object.count === "string")
                 message.count = parseInt(object.count, 10);
             else if (typeof object.count === "number")
                 message.count = object.count;
             else if (typeof object.count === "object")
-                message.count = new $util.LongBits(object.count.low >>> 0, object.count.high >>> 0).toNumber();
+                message.count = new $util.LongBits(object.count.low >>> 0, object.count.high >>> 0).toNumber(true);
         return message;
     };
 
@@ -4711,12 +5413,12 @@ $root.GetBlocksByRange = (function() {
         var object = {};
         if (options.defaults) {
             if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
+                var long = new $util.Long(0, 0, true);
                 object.fromHeight = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.fromHeight = options.longs === String ? "0" : 0;
             if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
+                var long = new $util.Long(0, 0, true);
                 object.count = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.count = options.longs === String ? "0" : 0;
@@ -4725,12 +5427,12 @@ $root.GetBlocksByRange = (function() {
             if (typeof message.fromHeight === "number")
                 object.fromHeight = options.longs === String ? String(message.fromHeight) : message.fromHeight;
             else
-                object.fromHeight = options.longs === String ? $util.Long.prototype.toString.call(message.fromHeight) : options.longs === Number ? new $util.LongBits(message.fromHeight.low >>> 0, message.fromHeight.high >>> 0).toNumber() : message.fromHeight;
+                object.fromHeight = options.longs === String ? $util.Long.prototype.toString.call(message.fromHeight) : options.longs === Number ? new $util.LongBits(message.fromHeight.low >>> 0, message.fromHeight.high >>> 0).toNumber(true) : message.fromHeight;
         if (message.count != null && message.hasOwnProperty("count"))
             if (typeof message.count === "number")
                 object.count = options.longs === String ? String(message.count) : message.count;
             else
-                object.count = options.longs === String ? $util.Long.prototype.toString.call(message.count) : options.longs === Number ? new $util.LongBits(message.count.low >>> 0, message.count.high >>> 0).toNumber() : message.count;
+                object.count = options.longs === String ? $util.Long.prototype.toString.call(message.count) : options.longs === Number ? new $util.LongBits(message.count.low >>> 0, message.count.high >>> 0).toNumber(true) : message.count;
         return object;
     };
 
@@ -5010,7 +5712,7 @@ $root.GetHeadersByRange = (function() {
      * @memberof GetHeadersByRange
      * @instance
      */
-    GetHeadersByRange.prototype.fromHeight = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    GetHeadersByRange.prototype.fromHeight = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
     /**
      * GetHeadersByRange count.
@@ -5018,7 +5720,7 @@ $root.GetHeadersByRange = (function() {
      * @memberof GetHeadersByRange
      * @instance
      */
-    GetHeadersByRange.prototype.count = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    GetHeadersByRange.prototype.count = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
     /**
      * Creates a new GetHeadersByRange instance using the specified properties.
@@ -5045,9 +5747,9 @@ $root.GetHeadersByRange = (function() {
         if (!writer)
             writer = $Writer.create();
         if (message.fromHeight != null && message.hasOwnProperty("fromHeight"))
-            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.fromHeight);
+            writer.uint32(/* id 1, wireType 0 =*/8).uint64(message.fromHeight);
         if (message.count != null && message.hasOwnProperty("count"))
-            writer.uint32(/* id 2, wireType 0 =*/16).int64(message.count);
+            writer.uint32(/* id 2, wireType 0 =*/16).uint64(message.count);
         return writer;
     };
 
@@ -5083,10 +5785,10 @@ $root.GetHeadersByRange = (function() {
             var tag = reader.uint32();
             switch (tag >>> 3) {
             case 1:
-                message.fromHeight = reader.int64();
+                message.fromHeight = reader.uint64();
                 break;
             case 2:
-                message.count = reader.int64();
+                message.count = reader.uint64();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -5146,22 +5848,22 @@ $root.GetHeadersByRange = (function() {
         var message = new $root.GetHeadersByRange();
         if (object.fromHeight != null)
             if ($util.Long)
-                (message.fromHeight = $util.Long.fromValue(object.fromHeight)).unsigned = false;
+                (message.fromHeight = $util.Long.fromValue(object.fromHeight)).unsigned = true;
             else if (typeof object.fromHeight === "string")
                 message.fromHeight = parseInt(object.fromHeight, 10);
             else if (typeof object.fromHeight === "number")
                 message.fromHeight = object.fromHeight;
             else if (typeof object.fromHeight === "object")
-                message.fromHeight = new $util.LongBits(object.fromHeight.low >>> 0, object.fromHeight.high >>> 0).toNumber();
+                message.fromHeight = new $util.LongBits(object.fromHeight.low >>> 0, object.fromHeight.high >>> 0).toNumber(true);
         if (object.count != null)
             if ($util.Long)
-                (message.count = $util.Long.fromValue(object.count)).unsigned = false;
+                (message.count = $util.Long.fromValue(object.count)).unsigned = true;
             else if (typeof object.count === "string")
                 message.count = parseInt(object.count, 10);
             else if (typeof object.count === "number")
                 message.count = object.count;
             else if (typeof object.count === "object")
-                message.count = new $util.LongBits(object.count.low >>> 0, object.count.high >>> 0).toNumber();
+                message.count = new $util.LongBits(object.count.low >>> 0, object.count.high >>> 0).toNumber(true);
         return message;
     };
 
@@ -5180,12 +5882,12 @@ $root.GetHeadersByRange = (function() {
         var object = {};
         if (options.defaults) {
             if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
+                var long = new $util.Long(0, 0, true);
                 object.fromHeight = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.fromHeight = options.longs === String ? "0" : 0;
             if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
+                var long = new $util.Long(0, 0, true);
                 object.count = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.count = options.longs === String ? "0" : 0;
@@ -5194,12 +5896,12 @@ $root.GetHeadersByRange = (function() {
             if (typeof message.fromHeight === "number")
                 object.fromHeight = options.longs === String ? String(message.fromHeight) : message.fromHeight;
             else
-                object.fromHeight = options.longs === String ? $util.Long.prototype.toString.call(message.fromHeight) : options.longs === Number ? new $util.LongBits(message.fromHeight.low >>> 0, message.fromHeight.high >>> 0).toNumber() : message.fromHeight;
+                object.fromHeight = options.longs === String ? $util.Long.prototype.toString.call(message.fromHeight) : options.longs === Number ? new $util.LongBits(message.fromHeight.low >>> 0, message.fromHeight.high >>> 0).toNumber(true) : message.fromHeight;
         if (message.count != null && message.hasOwnProperty("count"))
             if (typeof message.count === "number")
                 object.count = options.longs === String ? String(message.count) : message.count;
             else
-                object.count = options.longs === String ? $util.Long.prototype.toString.call(message.count) : options.longs === Number ? new $util.LongBits(message.count.low >>> 0, message.count.high >>> 0).toNumber() : message.count;
+                object.count = options.longs === String ? $util.Long.prototype.toString.call(message.count) : options.longs === Number ? new $util.LongBits(message.count.low >>> 0, message.count.high >>> 0).toNumber(true) : message.count;
         return object;
     };
 
@@ -5505,7 +6207,7 @@ $root.GetPeers = (function() {
         if (!writer)
             writer = $Writer.create();
         if (message.count != null && message.hasOwnProperty("count"))
-            writer.uint32(/* id 2, wireType 0 =*/16).int32(message.count);
+            writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.count);
         return writer;
     };
 
@@ -5541,7 +6243,7 @@ $root.GetPeers = (function() {
             var tag = reader.uint32();
             switch (tag >>> 3) {
             case 2:
-                message.count = reader.int32();
+                message.count = reader.uint32();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -5597,7 +6299,7 @@ $root.GetPeers = (function() {
             return object;
         var message = new $root.GetPeers();
         if (object.count != null)
-            message.count = object.count | 0;
+            message.count = object.count >>> 0;
         return message;
     };
 
@@ -5873,6 +6575,7 @@ $root.GetTip = (function() {
      * @exports IGetTip
      * @interface IGetTip
      * @property {number|Long|null} [dummy] GetTip dummy
+     * @property {boolean|null} [header] GetTip header
      */
 
     /**
@@ -5896,7 +6599,15 @@ $root.GetTip = (function() {
      * @memberof GetTip
      * @instance
      */
-    GetTip.prototype.dummy = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    GetTip.prototype.dummy = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
+
+    /**
+     * GetTip header.
+     * @member {boolean} header
+     * @memberof GetTip
+     * @instance
+     */
+    GetTip.prototype.header = false;
 
     /**
      * Creates a new GetTip instance using the specified properties.
@@ -5923,7 +6634,9 @@ $root.GetTip = (function() {
         if (!writer)
             writer = $Writer.create();
         if (message.dummy != null && message.hasOwnProperty("dummy"))
-            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.dummy);
+            writer.uint32(/* id 1, wireType 0 =*/8).uint64(message.dummy);
+        if (message.header != null && message.hasOwnProperty("header"))
+            writer.uint32(/* id 2, wireType 0 =*/16).bool(message.header);
         return writer;
     };
 
@@ -5959,7 +6672,10 @@ $root.GetTip = (function() {
             var tag = reader.uint32();
             switch (tag >>> 3) {
             case 1:
-                message.dummy = reader.int64();
+                message.dummy = reader.uint64();
+                break;
+            case 2:
+                message.header = reader.bool();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -5999,6 +6715,9 @@ $root.GetTip = (function() {
         if (message.dummy != null && message.hasOwnProperty("dummy"))
             if (!$util.isInteger(message.dummy) && !(message.dummy && $util.isInteger(message.dummy.low) && $util.isInteger(message.dummy.high)))
                 return "dummy: integer|Long expected";
+        if (message.header != null && message.hasOwnProperty("header"))
+            if (typeof message.header !== "boolean")
+                return "header: boolean expected";
         return null;
     };
 
@@ -6016,13 +6735,15 @@ $root.GetTip = (function() {
         var message = new $root.GetTip();
         if (object.dummy != null)
             if ($util.Long)
-                (message.dummy = $util.Long.fromValue(object.dummy)).unsigned = false;
+                (message.dummy = $util.Long.fromValue(object.dummy)).unsigned = true;
             else if (typeof object.dummy === "string")
                 message.dummy = parseInt(object.dummy, 10);
             else if (typeof object.dummy === "number")
                 message.dummy = object.dummy;
             else if (typeof object.dummy === "object")
-                message.dummy = new $util.LongBits(object.dummy.low >>> 0, object.dummy.high >>> 0).toNumber();
+                message.dummy = new $util.LongBits(object.dummy.low >>> 0, object.dummy.high >>> 0).toNumber(true);
+        if (object.header != null)
+            message.header = Boolean(object.header);
         return message;
     };
 
@@ -6039,17 +6760,21 @@ $root.GetTip = (function() {
         if (!options)
             options = {};
         var object = {};
-        if (options.defaults)
+        if (options.defaults) {
             if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
+                var long = new $util.Long(0, 0, true);
                 object.dummy = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.dummy = options.longs === String ? "0" : 0;
+            object.header = false;
+        }
         if (message.dummy != null && message.hasOwnProperty("dummy"))
             if (typeof message.dummy === "number")
                 object.dummy = options.longs === String ? String(message.dummy) : message.dummy;
             else
-                object.dummy = options.longs === String ? $util.Long.prototype.toString.call(message.dummy) : options.longs === Number ? new $util.LongBits(message.dummy.low >>> 0, message.dummy.high >>> 0).toNumber() : message.dummy;
+                object.dummy = options.longs === String ? $util.Long.prototype.toString.call(message.dummy) : options.longs === Number ? new $util.LongBits(message.dummy.low >>> 0, message.dummy.high >>> 0).toNumber(true) : message.dummy;
+        if (message.header != null && message.hasOwnProperty("header"))
+            object.header = message.header;
         return object;
     };
 
@@ -6076,6 +6801,7 @@ $root.GetTipReturn = (function() {
      * @property {boolean|null} [success] GetTipReturn success
      * @property {Uint8Array|null} [hash] GetTipReturn hash
      * @property {number|Long|null} [height] GetTipReturn height
+     * @property {number|null} [totalwork] GetTipReturn totalwork
      */
 
     /**
@@ -6115,7 +6841,15 @@ $root.GetTipReturn = (function() {
      * @memberof GetTipReturn
      * @instance
      */
-    GetTipReturn.prototype.height = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    GetTipReturn.prototype.height = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
+
+    /**
+     * GetTipReturn totalwork.
+     * @member {number} totalwork
+     * @memberof GetTipReturn
+     * @instance
+     */
+    GetTipReturn.prototype.totalwork = 0;
 
     /**
      * Creates a new GetTipReturn instance using the specified properties.
@@ -6146,7 +6880,9 @@ $root.GetTipReturn = (function() {
         if (message.hash != null && message.hasOwnProperty("hash"))
             writer.uint32(/* id 2, wireType 2 =*/18).bytes(message.hash);
         if (message.height != null && message.hasOwnProperty("height"))
-            writer.uint32(/* id 3, wireType 0 =*/24).int64(message.height);
+            writer.uint32(/* id 3, wireType 0 =*/24).uint64(message.height);
+        if (message.totalwork != null && message.hasOwnProperty("totalwork"))
+            writer.uint32(/* id 4, wireType 1 =*/33).double(message.totalwork);
         return writer;
     };
 
@@ -6188,7 +6924,10 @@ $root.GetTipReturn = (function() {
                 message.hash = reader.bytes();
                 break;
             case 3:
-                message.height = reader.int64();
+                message.height = reader.uint64();
+                break;
+            case 4:
+                message.totalwork = reader.double();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -6234,6 +6973,9 @@ $root.GetTipReturn = (function() {
         if (message.height != null && message.hasOwnProperty("height"))
             if (!$util.isInteger(message.height) && !(message.height && $util.isInteger(message.height.low) && $util.isInteger(message.height.high)))
                 return "height: integer|Long expected";
+        if (message.totalwork != null && message.hasOwnProperty("totalwork"))
+            if (typeof message.totalwork !== "number")
+                return "totalwork: number expected";
         return null;
     };
 
@@ -6258,13 +7000,15 @@ $root.GetTipReturn = (function() {
                 message.hash = object.hash;
         if (object.height != null)
             if ($util.Long)
-                (message.height = $util.Long.fromValue(object.height)).unsigned = false;
+                (message.height = $util.Long.fromValue(object.height)).unsigned = true;
             else if (typeof object.height === "string")
                 message.height = parseInt(object.height, 10);
             else if (typeof object.height === "number")
                 message.height = object.height;
             else if (typeof object.height === "object")
-                message.height = new $util.LongBits(object.height.low >>> 0, object.height.high >>> 0).toNumber();
+                message.height = new $util.LongBits(object.height.low >>> 0, object.height.high >>> 0).toNumber(true);
+        if (object.totalwork != null)
+            message.totalwork = Number(object.totalwork);
         return message;
     };
 
@@ -6285,10 +7029,11 @@ $root.GetTipReturn = (function() {
             object.success = false;
             object.hash = options.bytes === String ? "" : [];
             if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
+                var long = new $util.Long(0, 0, true);
                 object.height = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.height = options.longs === String ? "0" : 0;
+            object.totalwork = 0;
         }
         if (message.success != null && message.hasOwnProperty("success"))
             object.success = message.success;
@@ -6298,7 +7043,9 @@ $root.GetTipReturn = (function() {
             if (typeof message.height === "number")
                 object.height = options.longs === String ? String(message.height) : message.height;
             else
-                object.height = options.longs === String ? $util.Long.prototype.toString.call(message.height) : options.longs === Number ? new $util.LongBits(message.height.low >>> 0, message.height.high >>> 0).toNumber() : message.height;
+                object.height = options.longs === String ? $util.Long.prototype.toString.call(message.height) : options.longs === Number ? new $util.LongBits(message.height.low >>> 0, message.height.high >>> 0).toNumber(true) : message.height;
+        if (message.totalwork != null && message.hasOwnProperty("totalwork"))
+            object.totalwork = options.json && !isFinite(message.totalwork) ? String(message.totalwork) : message.totalwork;
         return object;
     };
 
@@ -6762,7 +7509,7 @@ $root.GetHash = (function() {
      * @memberof GetHash
      * @instance
      */
-    GetHash.prototype.height = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    GetHash.prototype.height = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
 
     /**
      * Creates a new GetHash instance using the specified properties.
@@ -6789,7 +7536,7 @@ $root.GetHash = (function() {
         if (!writer)
             writer = $Writer.create();
         if (message.height != null && message.hasOwnProperty("height"))
-            writer.uint32(/* id 1, wireType 0 =*/8).int64(message.height);
+            writer.uint32(/* id 1, wireType 0 =*/8).uint64(message.height);
         return writer;
     };
 
@@ -6825,7 +7572,7 @@ $root.GetHash = (function() {
             var tag = reader.uint32();
             switch (tag >>> 3) {
             case 1:
-                message.height = reader.int64();
+                message.height = reader.uint64();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -6882,13 +7629,13 @@ $root.GetHash = (function() {
         var message = new $root.GetHash();
         if (object.height != null)
             if ($util.Long)
-                (message.height = $util.Long.fromValue(object.height)).unsigned = false;
+                (message.height = $util.Long.fromValue(object.height)).unsigned = true;
             else if (typeof object.height === "string")
                 message.height = parseInt(object.height, 10);
             else if (typeof object.height === "number")
                 message.height = object.height;
             else if (typeof object.height === "object")
-                message.height = new $util.LongBits(object.height.low >>> 0, object.height.high >>> 0).toNumber();
+                message.height = new $util.LongBits(object.height.low >>> 0, object.height.high >>> 0).toNumber(true);
         return message;
     };
 
@@ -6907,7 +7654,7 @@ $root.GetHash = (function() {
         var object = {};
         if (options.defaults)
             if ($util.Long) {
-                var long = new $util.Long(0, 0, false);
+                var long = new $util.Long(0, 0, true);
                 object.height = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
             } else
                 object.height = options.longs === String ? "0" : 0;
@@ -6915,7 +7662,7 @@ $root.GetHash = (function() {
             if (typeof message.height === "number")
                 object.height = options.longs === String ? String(message.height) : message.height;
             else
-                object.height = options.longs === String ? $util.Long.prototype.toString.call(message.height) : options.longs === Number ? new $util.LongBits(message.height.low >>> 0, message.height.high >>> 0).toNumber() : message.height;
+                object.height = options.longs === String ? $util.Long.prototype.toString.call(message.height) : options.longs === Number ? new $util.LongBits(message.height.low >>> 0, message.height.high >>> 0).toNumber(true) : message.height;
         return object;
     };
 
@@ -9789,6 +10536,7 @@ $root.Peer = (function() {
      * @property {number|Long|null} [lastAttempt] Peer lastAttempt
      * @property {boolean|null} [active] Peer active
      * @property {number|null} [currentQueue] Peer currentQueue
+     * @property {number|null} [successCount] Peer successCount
      */
 
     /**
@@ -9863,6 +10611,14 @@ $root.Peer = (function() {
     Peer.prototype.currentQueue = 0;
 
     /**
+     * Peer successCount.
+     * @member {number} successCount
+     * @memberof Peer
+     * @instance
+     */
+    Peer.prototype.successCount = 0;
+
+    /**
      * Creates a new Peer instance using the specified properties.
      * @function create
      * @memberof Peer
@@ -9900,6 +10656,8 @@ $root.Peer = (function() {
             writer.uint32(/* id 6, wireType 0 =*/48).bool(message.active);
         if (message.currentQueue != null && message.hasOwnProperty("currentQueue"))
             writer.uint32(/* id 7, wireType 0 =*/56).int32(message.currentQueue);
+        if (message.successCount != null && message.hasOwnProperty("successCount"))
+            writer.uint32(/* id 8, wireType 0 =*/64).int32(message.successCount);
         return writer;
     };
 
@@ -9954,6 +10712,9 @@ $root.Peer = (function() {
                 break;
             case 7:
                 message.currentQueue = reader.int32();
+                break;
+            case 8:
+                message.successCount = reader.int32();
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -10011,6 +10772,9 @@ $root.Peer = (function() {
         if (message.currentQueue != null && message.hasOwnProperty("currentQueue"))
             if (!$util.isInteger(message.currentQueue))
                 return "currentQueue: integer expected";
+        if (message.successCount != null && message.hasOwnProperty("successCount"))
+            if (!$util.isInteger(message.successCount))
+                return "successCount: integer expected";
         return null;
     };
 
@@ -10054,6 +10818,8 @@ $root.Peer = (function() {
             message.active = Boolean(object.active);
         if (object.currentQueue != null)
             message.currentQueue = object.currentQueue | 0;
+        if (object.successCount != null)
+            message.successCount = object.successCount | 0;
         return message;
     };
 
@@ -10086,6 +10852,7 @@ $root.Peer = (function() {
                 object.lastAttempt = options.longs === String ? "0" : 0;
             object.active = false;
             object.currentQueue = 0;
+            object.successCount = 0;
         }
         if (message.host != null && message.hasOwnProperty("host"))
             object.host = message.host;
@@ -10107,6 +10874,8 @@ $root.Peer = (function() {
             object.active = message.active;
         if (message.currentQueue != null && message.hasOwnProperty("currentQueue"))
             object.currentQueue = message.currentQueue;
+        if (message.successCount != null && message.hasOwnProperty("successCount"))
+            object.successCount = message.successCount;
         return object;
     };
 

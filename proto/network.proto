@@ -44,11 +44,14 @@ message Network {
 
         GetHash getHash=25;
         GetHashReturn getHashReturn=26;
+
+        GetBlockTxs getBlockTxs=27;
+        GetBlockTxsReturn getBlockTxsReturn=28;
     }
 }
 
 message Status {
-    int64 version = 1;
+    uint32 version = 1;
     string networkid = 2;
     int32 port=5;
     string guid=6;
@@ -61,10 +64,10 @@ message StatusReturn {
 }
 
 message Ping {
-    int64 nonce =1;
+    uint64 nonce =1;
 }
 message PingReturn {
-    int64 nonce =1;
+    uint64 nonce =1;
 }
 
 message PutTx {
@@ -75,17 +78,27 @@ message PutTxReturn {
     bool success=1;
 }
 
+message GetBlockTxs {
+    repeated bytes hashes=1;
+}
+
+message BlockTxs {
+    bytes hash=1;
+    repeated Tx txs=2;
+}
+
+message GetBlockTxsReturn {
+    repeated BlockTxs txBlocks=1;
+}
 
 message GetTxs {
-    int64 minFee=1;
+    uint64 minFee=1;
 }
 
 message GetTxsReturn {
     bool success=1;
     repeated Tx txs=2;
 }
-
-
 
 message PutBlock {
     repeated Block blocks=1;
@@ -95,12 +108,9 @@ message PutBlockReturn {
     repeated StatusChange statusChanges = 1;
 }
 
-
-
 message NewTx {
     repeated Tx txs=1;
 }
-
 
 message NewBlock {
     repeated Block blocks=1;
@@ -115,8 +125,6 @@ message GetBlocksByHashReturn {
     repeated Block blocks= 2;
 }
 
-
-
 message GetHeadersByHash {    
     repeated bytes hashes = 1;
 }
@@ -126,10 +134,9 @@ message GetHeadersByHashReturn {
     repeated BlockHeader headers = 2;
 }
 
-        
 message GetBlocksByRange {
-    int64 fromHeight= 1;
-    int64 count=2;
+    uint64 fromHeight= 1;
+    uint64 count=2;
 }
 
 message GetBlocksByRangeReturn {
@@ -137,10 +144,9 @@ message GetBlocksByRangeReturn {
     repeated Block blocks= 2;
 }
 
-
 message GetHeadersByRange {    
-    int64 fromHeight= 1;
-    int64 count=2;
+    uint64 fromHeight= 1;
+    uint64 count=2;
 }
 
 message GetHeadersByRangeReturn {
@@ -148,9 +154,8 @@ message GetHeadersByRangeReturn {
     repeated BlockHeader headers = 2;
 }
 
-
 message GetPeers {        
-    int32 count=2;
+    uint32 count=2;
 }
 
 message GetPeersReturn {  
@@ -159,13 +164,15 @@ message GetPeersReturn {
 }
 
 message GetTip {   
-    int64 dummy=1;
+    uint64 dummy=1;
+    bool header=2;
 }
 
 message GetTipReturn {
     bool success=1;
     bytes hash=2;
-    int64 height=3;    
+    uint64 height=3;
+    double totalwork=4;
 }
 
 message PutHeaders {   
@@ -177,7 +184,7 @@ message PutHeadersReturn {
 }
 
 message GetHash {   
-    int64 height=1;
+    uint64 height=1;
 }
 
 message GetHashReturn {

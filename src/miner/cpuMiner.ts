@@ -15,7 +15,6 @@ interface IAsyncCpuMiner {
 export class CpuMiner {
     public static mine(preHash: Uint8Array, difficulty: number, prefix: number, startNonce: number = 0, maxNonce: number = 0xFFFFFFFF): IAsyncCpuMiner {
         let calculate = true
-        const hashrate = 0
         let currentNonce = startNonce
         const startTime = Date.now()
         let endTime: number
@@ -70,7 +69,7 @@ export class CpuMiner {
         this.minerServer = minerServer
         this.minerCount = minerCount
         this.miners = []
-        setInterval(() => logger.info(`CPU Hashrate: ${this.hashRate()} H/s`), 10000)
+        setInterval(() => logger.info(`CPU Hashrate: ${this.hashRate()} H/s / CPU Count : ${this.minerCount}`), 10000)
     }
 
     public hashRate() {

@@ -3,9 +3,9 @@ import { Socket } from "net"
 import { AsyncLock } from "../../common/asyncLock"
 import { globalOptions } from "../../main"
 import { Hash } from "../../util/hash"
+import { MAX_PACKET_SIZE } from "./networkConstants"
 
 const logger = getLogger("SocketBuffer")
-const defaultMaxPacketSize = 10 * 1024 * 1024
 enum ParseState {
     HeaderPrefix,
     HeaderRoute,
@@ -35,48 +35,42 @@ export class SocketParser {
         // These buffers will be held for the duration of the connection, and do not need to be intialized
         this.scrapBuffer = Buffer.allocUnsafeSlow(scrapBufferLength)
         this.writeBuffer = Buffer.allocUnsafeSlow(writeBufferLength)
-        this.sendLock = new AsyncLock(false, 30000)
+        this.sendLock = new AsyncLock(0, 30000)
         this.parseReset()
         this.socket.on("data", (data) => this.receive(data))
         this.socket.on("drain", () => {
-            logger.warn(`Resuming socket ${this.socket.remoteAddress}:${this.socket.remotePort}`)
+            logger.debug(`Resuming socket(${this.socket.bufferSize}) ${this.socket.remoteAddress}:${this.socket.remotePort}`)
             this.socket.resume()
             this.sendLock.releaseLock()
         })
     }
 
     public async send(route: number, buffer: Uint8Array): Promise<void> {
-        if (buffer.length > defaultMaxPacketSize) {
+        if (buffer.length > MAX_PACKET_SIZE) {
             throw new Error("Buffer too large")
         }
 
-        // true: all queued to kernel buffer
-        // false: user memory is used
-
-        let kernel = true
         await this.sendLock.getLock()
         this.writeBuffer.writeUInt32LE(route, 0)
         this.writeBuffer.writeUInt32LE(buffer.length, 4)
-        // using array buffer directly doesn't work
-        kernel = kernel && this.socket.write(Buffer.from(headerPrefix))
-        kernel = kernel && this.socket.write(this.writeBuffer)
-        kernel = kernel && this.socket.write(Buffer.from(buffer))
-        if (kernel) {
+        this.socket.write(Buffer.from(headerPrefix))
+        this.socket.write(this.writeBuffer)
+        this.socket.write(Buffer.from(buffer))
+        if (this.socket.bufferSize === undefined || this.socket.bufferSize < 1024 * 1024) {
             this.sendLock.releaseLock()
         } else {
             // for this case, user memory is used
             // it will be released in "drain" event
-            logger.warn(`Pausing socket ${this.socket.remoteAddress}:${this.socket.remotePort}`)
             this.socket.pause()
         }
     }
 
     public destroy(e?: Error): void {
-
         this.sendLock.rejectAll()
         if (this.socket) {
             logger.debug(`Disconnecting from ${this.socket.remoteAddress}:${this.socket.remotePort} due to protocol error: ${e}, ${e ? e.stack : ""}`)
             logger.debug(`Disconnect ${this.getInfo()}`)
+            this.socket.end()
             this.socket.unref()
             this.socket.destroy()
         }
@@ -195,7 +189,7 @@ export class SocketParser {
     private parseHeaderBodyLength(newData: Buffer, newDataIndex: number): number {
         const result = this.parseUInt32LE(newData, newDataIndex)
         if (result.uint32 !== undefined) {
-            if (result.uint32 > defaultMaxPacketSize) {
+            if (result.uint32 > MAX_PACKET_SIZE) {
                 logger.debug(`Disconnecting client ${this.socket.remoteAddress}:${this.socket.remotePort}, packet too large`)
                 this.destroy(new Error(`Packet size(${result.uint32}) too large`))
                 return

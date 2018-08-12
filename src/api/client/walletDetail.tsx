@@ -1,4 +1,5 @@
-import { Dialog } from "material-ui"
+import { Button, Dialog, Grid, Icon, Radio } from "@material-ui/core"
+import { IconButton, TextField } from "material-ui"
 import Avatar from "material-ui/Avatar"
 import { Tab, Tabs } from "material-ui/Tabs"
 import * as QRCode from "qrcode.react"
@@ -8,6 +9,7 @@ import * as CopyToClipboard from "react-copy-to-clipboard"
 import * as ReactPaginate from "react-paginate"
 import { Redirect } from "react-router"
 import { Link } from "react-router-dom"
+import { Login } from "./login"
 import { MinedBlockLine } from "./minedBlockLine"
 import { NotFound } from "./notFound"
 import { IHyconWallet, IMinedInfo, IResponseError, IRest, ITxProp } from "./rest"
@@ -34,14 +36,20 @@ export class WalletDetail extends React.Component<any, any> {
             hasMore: true,
             hasMoreMinedInfo: true,
             index: 1,
+            login: false,
             minedBlocks: [],
             minerIndex: 1,
             name: props.name,
             notFound: false,
+            password: "",
+            pendings: [],
             rest: props.rest,
+            showDialog1: false,
             txs: [],
             visible: false,
+            walletIndex: 0,
         }
+        this.handleInputChange = this.handleInputChange.bind(this)
     }
     public componentWillUnmount() {
         this.mounted = false
@@ -53,16 +61,13 @@ export class WalletDetail extends React.Component<any, any> {
         this.props.rest.getWalletDetail(this.state.name).then((data: IHyconWallet & IResponseError) => {
             this.state.rest.setLoading(false)
             if (this.mounted && data.address) {
-                this.setState({ wallet: data, address: data.address, txs: data.txs, minedBlocks: data.minedBlocks })
+                this.setState({ wallet: data, address: data.address, txs: data.txs, minedBlocks: data.minedBlocks, pendings: data.pendings })
             } else {
                 this.setState({ notFound: true })
             }
         }).catch((e: Error) => {
             alert(e)
         })
-    }
-    public handleSelectAccount(option: any) {
-        this.setState({ represent: option.target.value })
     }
     public deleteWallet() {
         if (confirm(this.msg1)) {
@@ -77,36 +82,46 @@ export class WalletDetail extends React.Component<any, any> {
         }
     }
     public accountSelected() {
-        this.state.rest.setLoading(true)
-        this.state.rest.changeAccount(this.state.name, this.state.represent).then((isChanged: boolean) => {
-            if (isChanged) {
-                this.setState({ visible: false, wallet: undefined })
-                this.state.rest.getWalletDetail(this.state.name).then((data: IHyconWallet) => {
-                    this.state.rest.setLoading(false)
-                    if (this.mounted) {
-                        this.setState({ wallet: data })
-                    }
-                })
-            } else {
-                alert(this.msg4)
-                this.setState({ visible: false })
-                this.state.rest.setLoading(false)
-            }
-        })
+        // this.state.rest.setLoading(true)
+        // this.state.rest.changeAccount(this.state.name, this.state.walletIndex).then((isChanged: boolean) => {
+        //     if (isChanged) {
+        //         this.setState({ visible: false, wallet: undefined })
+        //         this.state.rest.getWalletDetail(this.state.name).then((data: IHyconWallet) => {
+        //             this.state.rest.setLoading(false)
+        //             if (this.mounted) {
+        //                 this.setState({ wallet: data })
+        //             }
+        //         })
+        //     } else {
+        //         alert(this.msg4)
+        //         this.setState({ visible: false })
+        //         this.state.rest.setLoading(false)
+        //     }
+        // })
     }
     public cancelDialog() {
-        this.setState({ visible: false })
+        this.setState({ login: false })
     }
     public searchAllAccounts() {
-        this.state.rest.getAllAccounts(this.state.name).then((result: { represent: number, accounts: Array<{ address: string, balance: number }> } | boolean) => {
-            if (typeof result === "boolean") { alert("Fail to load accounts information") } else {
-                this.setState({ visible: true, accounts: result.accounts, represent: result.represent })
-            }
-        })
+        // this.state.rest.getAllAccounts(this.state.name).then((result: { accounts: Array<{ address: string, balance: number }> } | boolean) => {
+        //     if (typeof result === "boolean") { alert("Fail to load accounts information") } else {
+        //         this.setState({ visible: true, accounts: result })
+        //     }
+        // })
+    }
+
+    public handleInputChange(event: any) {
+        const name = event.target.name
+        const value = event.target.value
+        this.setState({ [name]: value })
     }
 
     public transfer() {
         this.setState({ isTransfer: true })
+    }
+
+    public login() {
+        this.setState({ login: true })
     }
     public render() {
         let accountIndex = 0
@@ -129,6 +144,8 @@ export class WalletDetail extends React.Component<any, any> {
                     <thead>
                         <tr>
                             <td colSpan={2} className="walletDetailFunctionTd">
+                                <button onClick={() => { this.login() }} className="mdl-button">
+                                    <i className="material-icons">assignment_ind</i>CLAIM</button>
                                 <button onClick={() => { this.transfer() }} className="mdl-button">
                                     <i className="material-icons">send</i>TRANSFER</button>
                                 <button onClick={() => { this.deleteWallet() }} className="mdl-button">
@@ -151,9 +168,6 @@ export class WalletDetail extends React.Component<any, any> {
                                                     <Avatar style={{ width: "35px", height: "35px" }} icon={<i className="material-icons walletIcon_white">account_balance_wallet</i>} />
                                                 </span>
                                                 <span className="walletName">{this.state.name}</span>
-
-                                                {/* <button onClick={() => { this.searchAllAccounts() }} className="mdl-button">
-                                                    <i className="material-icons">find_replace</i></button> */}
                                             </td>
                                         </tr>
                                         <tr>
@@ -181,6 +195,7 @@ export class WalletDetail extends React.Component<any, any> {
                                                 <div className="flaotLeft addressDiv">
                                                     {this.state.wallet.address}
                                                 </div>
+                                                {/* <IconButton iconStyle={{ color: "grey", fontSize: "20px" }} onClick={() => this.setState({ showDialog1: true })}><Icon>find_replace</Icon></IconButton> */}
                                             </td>
                                         </tr>
                                     </tbody>
@@ -195,6 +210,17 @@ export class WalletDetail extends React.Component<any, any> {
                 </table>
                 <Tabs style={{ paddingTop: "2px" }} inkBarStyle={{ backgroundColor: "#000" }}>
                     <Tab label="Transaction" style={{ backgroundColor: "#FFF", color: "#000" }}>
+                        {this.state.pendings.map((tx: ITxProp) => {
+                            return (
+                                <div key={accountIndex++}>
+                                    <TxLine tx={tx} rest={this.state.rest} />
+                                    {tx.from === this.state.address ?
+                                        (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent txAmtBtn">-{tx.estimated} HYCON</button>)
+                                        :
+                                        (<button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored txAmtBtn">{tx.amount} HYCON</button>)}
+                                </div>
+                            )
+                        })}
                         {this.state.txs.map((tx: ITxProp) => {
                             return (
                                 <div key={accountIndex++}>
@@ -234,38 +260,59 @@ export class WalletDetail extends React.Component<any, any> {
                             (<div></div>)}
                     </Tab>
                 </Tabs>
-                {/* <Dialog className="dialog" open={this.state.visible}>
-                    <h4 className="contentTitle">Select account to use.</h4>
-                    <div className="mdl-dialog__content accountDialogContent">
-                        <p>List of currently available accounts. To add a new account, please click the 'New Account' button below.</p>
-                    </div>
-                    <div className="accountList">
-                        <form className="leftAlignForm">
-                            {this.state.accounts.map((account: { address: string, balance: number }) => {
-                                const key = accountIndex + 1
-                                return (
-                                    <div key={key}>
-                                        <label className="displayBlock">
-                                            <input type="radio" name="account" value={key}
-                                                checked={this.state.represent === key ? true : false}
-                                                onChange={(option) => { this.handleSelectAccount(option) }} />
-                                            <span> {account.address}</span> <span className="balanceOfAccount">{account.balance} HYC</span>
-                                        </label>
-                                    </div>
-                                )
-                            })}
-                        </form>
-                    </div>
-                    <div className="mdl-dialog__actions">
-                        <button onClick={() => { this.cancelDialog() }} className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent addAccountBtn" >
-                            Cancel</button>
-                        <button onClick={() => { this.accountSelected() }} className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored addAccountBtn" >
-                            Select</button>
-                        <button className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" >
-                            <Link to="/wallet/addWallet">
-                                New Account</Link></button>
-                    </div>
-                </Dialog> */}
+                <Dialog open={this.state.login} onClose={() => { this.setState({ login: false }) }}>
+                    <Login address={this.state.wallet.address} rest={this.props.rest} cancelDialog={this.cancelDialog.bind(this)} />
+                    <Button color="primary" id="modal_cancel" onClick={this.cancelDialog.bind(this)} >Close</Button>
+                </Dialog>
+                <Dialog open={this.state.showDialog1} onClose={() => { this.setState({ showDialog1: false }) }} style={{ textAlign: "center" }}>
+                    <h4 style={{ color: "grey" }}>Using multiple wallets</h4>
+                    {(!this.state.visible ?
+                        (
+                            <div style={{ margin: "1%" }}>
+                                <div style={{ color: "grey" }}>If you want to load multiple wallets, Type your password here.</div>
+                                <TextField type="password" floatingLabelText="Password" floatingLabelFixed={true} autoComplete="off"
+                                    value={this.state.password}
+                                    name="password"
+                                    onChange={this.handleInputChange}
+                                    onKeyPress={(event) => { if (event.key === "Enter") { event.preventDefault(); this.searchAllAccounts() } }}
+                                />
+                                <Grid container direction={"row"} justify={"center"} alignItems={"center"}>
+                                    <Button color="primary" id="modal_cancel" onClick={() => this.searchAllAccounts()} >Next</Button>
+                                </Grid>
+                            </div>
+                        )
+                        :
+                        (<div style={{ margin: "1%" }}>
+                            <div style={{ color: "grey" }}>You can select wallet to use.</div>
+                            <table className="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style={{ width: "100%", border: "0" }}>
+                                <thead>
+                                    <tr>
+                                        <th className="mdl-data-table__cell--non-numeric"> </th>
+                                        <th className="mdl-data-table__cell--non-numeric">Your Address</th>
+                                        <th className="mdl-data-table__cell--numeric" style={{ paddingRight: "10%" }}>Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {this.state.accounts.map((account: IHyconWallet, idx: number) => {
+                                        return (
+                                            <tr key={idx}>
+                                                <td className="mdl-data-table__cell--non-numeric" style={{ padding: "0 0 0 0" }}>
+                                                    <Radio
+                                                        checked={this.state.selectedAccounts === String(idx)}
+                                                        onChange={this.handleInputChange}
+                                                        value={String(idx)}
+                                                        name="selectedAccounts"
+                                                    />
+                                                </td>
+                                                <td className="mdl-data-table__cell--non-numeric">{account.address}</td>
+                                                <td className="mdl-data-table__cell--numeric" style={{ paddingRight: "10%" }}>{account.balance} HYCON</td>
+                                            </tr>
+                                        )
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>))}
+                </Dialog>
             </div >
         )
     }

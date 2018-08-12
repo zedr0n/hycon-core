@@ -2,9 +2,8 @@ import { getLogger } from "log4js"
 import merkle = require("merkle-lib")
 import * as proto from "../serialization/proto"
 import { Hash } from "../util/hash"
-import { Address } from "./address"
 import { GenesisBlock } from "./blockGenesis"
-import { AnyBlockHeader, BlockHeader } from "./blockHeader"
+import { BlockHeader } from "./blockHeader"
 import { SignedTx } from "./txSigned"
 
 const logger = getLogger("Block")
@@ -14,7 +13,7 @@ export type AnyBlock = (Block | GenesisBlock)
 export class Block implements proto.IBlock {
     public static decode(data: Uint8Array): AnyBlock {
         const block = proto.Block.decode(data)
-        if (block.header !== undefined) {
+        if (block.header) {
             if (block.header.previousHash === undefined || block.header.previousHash.length === 0) {
                 return new GenesisBlock(block)
             }

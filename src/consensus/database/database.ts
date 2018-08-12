@@ -1,30 +1,15 @@
-import { createCipher } from "crypto"
 import levelup = require("levelup")
 import { getLogger } from "log4js"
 import rocksdb = require("rocksdb")
-import { AsyncLock } from "../../common/asyncLock"
 import { AnyBlock, Block } from "../../common/block"
 import { GenesisBlock } from "../../common/blockGenesis"
-import { AnyBlockHeader, BlockHeader } from "../../common/blockHeader"
-import { GenesisSignedTx } from "../../common/txGenesisSigned"
-import { SignedTx } from "../../common/txSigned"
 import { Hash } from "../../util/hash"
-import { DifficultyAdjuster } from "../difficultyAdjuster"
 import { BlockStatus } from "../sync"
 import { BlockFile } from "./blockFile"
 import { DBBlock } from "./dbblock"
 
 const logger = getLogger("Database")
 
-function uint8ArrayEqual(first: Uint8Array, second: Uint8Array): boolean {
-    if (first.length !== second.length) { return false }
-    for (let i = 0; i < second.length; i++) {
-        if (first[i] !== second[i]) {
-            return false
-        }
-    }
-    return true
-}
 export class DecodeError extends Error {
     public hash: Hash
 }
@@ -34,16 +19,12 @@ export class DecodeError extends Error {
 export class Database {
     private database: levelup.LevelUp
     private blockFile: BlockFile
-    private headerLock: AsyncLock
-    private blockLock: AsyncLock
     private fileNumber: number
 
     constructor(dbPath: string, filePath: string) {
 
         const rocks: any = rocksdb(dbPath)
         this.database = levelup(rocks)
-        this.headerLock = new AsyncLock()
-        this.blockLock = new AsyncLock()
         this.blockFile = new BlockFile(filePath)
     }
 
@@ -82,6 +63,13 @@ export class Database {
             logger.error(`Fail to getHashAtHeight : ${e}`)
             throw e
         }
+    }
+
+    public async getBlockAtHeight(height: number): Promise<Block | GenesisBlock> {
+        const hashData = await this.database.get(height)
+        const hash = new Hash(hashData)
+        const block = await this.getDBBlock(hash)
+        return this.dbBlockToBlock(block)
     }
 
     public async setBlockStatus(hash: Hash, status: BlockStatus): Promise<void> {
