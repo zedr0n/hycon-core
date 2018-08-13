@@ -1,23 +1,19 @@
-#!/bin/bash
-set -e
-
 time=$(date +"%Y%m%d_%H%M")
-foldername="HYCON_0.0.7_"$time
+foldername="HYCON_0.0.4_"$time
 #build_time=${1:?"requires an argument DateTime" }
-os=${1:?"requires an argument macos | linux | win | all" }
+platform=${1:?"requires an argument macos | linux | win" }
 
-if [ $os != "linux" ] && [ $os != "win" ] && [ $os != "macos" ] && [ $os != "all" ] 
+if [ $platform != "linux" ] && [ $platform != "win" ] && [ $platform != "macos" ]
 then
     echo "================== Error: platform not supported  ==============="
     exit 1
 fi
 
-output_dir=bundle-$os
+output_dir=bundle-$platform
 #build_time=$(date +"%Y%m%d_%I%M")
-file_name=$foldername'_'$os'.zip'
+file_name=$foldername'_'$platform'.zip'
 npm i
 npm run clear
-npm run test
 rm -rf build
 tsc
 echo "=============== npm  tsc init finish============="
@@ -29,54 +25,53 @@ fi
 npm run clear
 npm run block:build
 echo "==================UI build finish==============="
-function platform_dependent() {
-    local platform=$1
-    local output_dir=bundle-$platform
-    #build_time=$(date +"%Y%m%d_%I%M")
-    local file_name=$foldername'_'$platform'.zip'
-    pkg . --target $platform -o hycon
-    mkdir $output_dir
-    if [ -e $output_dir ]
-    then
-        rm -rf $output_dir
-    fi
-    mkdir $output_dir
-    cd $output_dir
-    cp -rf ../data . 
+./node_modules/.bin/pkg . --target $platform -o hycon
+mkdir $output_dir
+#if [ -e $output_dir ]
+#then
+#    rm -rf $output_dir
+#fi
+#mkdir $output_dir
+cd $output_dir
+cp -rf ../data . 
 
-    cp -f ../platform/$platform/node-modules/* .
-
-    if [ $platform == "win" ]
+if [ -e "../hycon.exe" ]
+then
+    cp -f ../hycon.exe .       
+    cp -f ../launch.bat .
+elif [ -e "../hycon" ]
+then
+    cp -f ../hycon .
+    cp -f ../launch.sh.command .
+    if [ $platform = "macos" ]
     then
-        cp -f ../hycon.exe .       
-        cp -f ../launch.bat .
-        rm -rf ../hycon.exe
-    elif [ $platform == "linux" ] || [ $platform == "macos" ]
+        #cp ../node-for-mac/* .
+        cp -f ../node_modules/sqlite3/lib/binding/node-*-darwin-x64/node_sqlite3.node .
+        cp -f ../node_modules/node-cryptonight/build/Release/cryptonight.node .
+        cp -f ../node_modules/rocksdb/build/Release/leveldown.node .
+    elif [ $platform = "linux" ]
     then
-        cp -f ../hycon .
-        cp -f ../launch.sh.command .
+        cp -f ../node_modules/sqlite3/lib/binding/node-*-linux-x64/node_sqlite3.node .
+        cp -f ../node_modules/opn/xdg-open .
+        cp -f ../node_modules/node-cryptonight/build/Release/cryptonight.node .
+        cp -f ../node_modules/rocksdb/build/Release/leveldown.node .
+        cp -f ../node_modules/heapdump/build/Release/addon.node .
     else
-        echo "================== Error: platform not found ==============="
+        echo "================== Error: platform not recognised ==============="
         exit 1
     fi
-    cp -f ../documents/* .
-    mkdir node_modules
-    cp -rf ../node_modules/react* ./node_modules/
-
-    rm data/config.json
-    cp ../platform/$platform/config/* data/
-    cp ../platform/$platform/miner/* .
-
-    cd ..
-    zip -r $file_name $output_dir
-}
-
-if [ $os == "all" ]
-then
-    platform_dependent "win"
-    platform_dependent "linux"
-    platform_dependent "macos"
-    wait
 else
-    platform_dependent $os
+    echo "================== Error: Executable not found ==============="
+    exit 1
 fi
+cp -f ../documents/* .
+mkdir node_modules
+cp -rf ../node_modules/react* ./node_modules/
+
+rm data/config.json
+cp ../platform/$platform/config/* data/
+cp ../platform/$platform/miner/* .
+
+cd ..
+#zip -r $file_name $output_dir
+

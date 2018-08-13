@@ -552,6 +552,9 @@ export class RabbitPeer extends BasePeer implements IPeer {
             } else {
                 tip = await this.consensus.getBlocksTip()
             }
+            if (this.getVersion() < 7)
+                tip.totalwork = 0
+
             message = { getTipReturn: { success: true, hash: tip.hash, height: tip.height, totalwork: tip.totalwork } }
         } catch (e) {
             logger.error(`Failed to getTip: ${e}`)

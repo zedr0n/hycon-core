@@ -34,7 +34,7 @@ export class Server {
         const postfix = globalOptions.postfix
         this.txPool = new TxPool(this)
         this.worldState = new WorldState(prefix + "worldstate" + postfix, this.txPool)
-        this.consensus = new Consensus(this.txPool, this.worldState, prefix + "blockdb" + postfix, prefix + "rawblock" + postfix, prefix + "txDB" + postfix, prefix + "minedDB" + postfix)
+        this.consensus = new Consensus(this.txPool, this.worldState, prefix + "blockdb" + postfix, prefix + "rawblock" + postfix, undefined, prefix + "minedDB" + postfix)
         this.network = new RabbitNetwork(this.txPool, this.consensus, globalOptions.port, prefix + "peerdb" + postfix, globalOptions.networkid)
         this.miner = new MinerServer(this.txPool, this.worldState, this.consensus, this.network, globalOptions.cpuMiners, globalOptions.str_port)
         this.rest = new RestManager(this)
