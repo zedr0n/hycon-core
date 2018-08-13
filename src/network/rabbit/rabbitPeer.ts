@@ -87,6 +87,10 @@ export class RabbitPeer extends BasePeer implements IPeer {
         return this.getTip(false)
     }
 
+    public getIp() {
+        return (this.socketBuffer === null) ? "" : this.socketBuffer.getIp()
+    }
+
     public async getHash(height: number): Promise<Hash | undefined> {
         try {
             const { reply, packet } = await this.sendRequest({ getHash: { height } })

@@ -6,6 +6,7 @@ export interface INetwork {
     start(): Promise<boolean>
     getRandomPeer(): IPeer
     getRandomPeers(count: number): IPeer[]
+    checkPersistentPeers(): Promise<void>
     connect(ip: string, port: number): Promise<IPeer>
     getPeerDb(): Promise<proto.IPeer[]>
     getConnection(): Promise<proto.IPeer[]>

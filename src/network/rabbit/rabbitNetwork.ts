@@ -46,6 +46,7 @@ export class RabbitNetwork implements INetwork {
     private upnpServer: UpnpServer
     private upnpClient: UpnpClient
     private natUpnp: NatUpnp
+    private persistentPeers: string[] = globalOptions.persistent
 
     constructor(txPool: ITxPool, consensus: IConsensus, port: number = 8148, peerDbPath: string = "peerdb", networkid: string = "hycon") {
         RabbitNetwork.socketTimeout = 300000
@@ -253,6 +254,25 @@ export class RabbitNetwork implements INetwork {
             peers.push(peer)
         }
         return peers
+    }
+
+    public getPersistentPeers() {
+        var peers: RabbitPeer[] = []
+        for (const peer of this.peers.values()) {
+            if (this.persistentPeers.indexOf(peer.getIp()) !== -1)
+                peers.push(peer)
+        }
+        return peers
+    }
+
+    public async checkPersistentPeers() {
+        const connectedPeers = this.getPersistentPeers().filter(p => p !== undefined).map(p => p.getIp())
+        for (const ip of this.persistentPeers) {
+            if (connectedPeers.lastIndexOf(ip) == -1) {
+                logger.info(`Reconnecting to persistent peer ${ip}:8148`)
+                this.connect(ip, 8148)
+            }
+        }
     }
 
     public async connect(host: string, port: number, save: boolean = true): Promise<RabbitPeer> {
