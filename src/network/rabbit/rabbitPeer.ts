@@ -466,9 +466,13 @@ export class RabbitPeer extends BasePeer implements IPeer {
             this.receivedBroadcasts = Math.max(0, this.receivedBroadcasts - decay)
 
             request.blocks = request.blocks.slice(0, 1)
+            if (request.blocks.length === 0)
+                return
             let block: Block
             try {
                 block = new Block(request.blocks[0])
+                if (!block)
+                    return
 
                 if (this.blockBroadcastCondition(block) && this.receivedBroadcasts <= BROADCAST_LIMIT) {
                     rebroadcast()
@@ -488,9 +492,11 @@ export class RabbitPeer extends BasePeer implements IPeer {
                     }
                 }
             } catch (e) {
-                const idx = RabbitPeer.receivedBlocks.indexOf(block.header.timeStamp)
-                if (idx !== -1)
-                    RabbitPeer.receivedBlocks.splice(idx, 1)
+                if (block) {
+                    const idx = RabbitPeer.receivedBlocks.indexOf(block.header.timeStamp)
+                    if (idx !== -1)
+                        RabbitPeer.receivedBlocks.splice(idx, 1)
+                }
                 logger.debug(e)
             }
         })
