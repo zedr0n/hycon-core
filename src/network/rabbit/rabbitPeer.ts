@@ -256,13 +256,13 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public async headerSync(remoteTip: ITip) {
         const startHeight = Math.min(this.consensus.getHtip().height, remoteTip.height)
         const { height: commonHeight, hash: commonHash } = await this.commonSearch(startHeight, remoteTip.height - 1, BlockStatus.Header)
-        logger.debug(`Found Start Header=${commonHeight}`)
+        logger.info(`Found Start Header=${commonHeight}`)
         return this.getHeaders(commonHeight, commonHash, remoteTip.height)
     }
     public async blockSync(remoteBlockTip: ITip) {
         const startHeight = Math.min(this.consensus.getBtip().height, remoteBlockTip.height)
         const { height: commonHeight, hash: commonHash } = await this.commonSearch(startHeight, remoteBlockTip.height - 1, BlockStatus.Block)
-        logger.debug(`Found Start Block=${commonHeight}`)
+        logger.info(`Found Start Block=${commonHeight}`)
         return this.getBlocks(commonHeight, commonHash, remoteBlockTip.height)
     }
 
@@ -474,20 +474,23 @@ export class RabbitPeer extends BasePeer implements IPeer {
                     rebroadcast()
                 }
                 if (RabbitPeer.receivedBlocks.indexOf(block.header.timeStamp) === -1) {
+                    RabbitPeer.receivedBlocks.push(block.header.timeStamp)
                     const result = await this.consensus.putBlock(block)
 
                     if (result && (result.oldStatus >= BlockStatus.Block || result.status >= BlockStatus.Block)) {
                         logger.info(`Received block ${result.height} mined by ${block.header.miner} from ${this.socketBuffer.getSocket().remoteAddress}`)
-
-                        RabbitPeer.receivedBlocks.push(block.header.timeStamp)
-                        if (RabbitPeer.receivedBlocks.length > 100)
-                            RabbitPeer.receivedBlocks.shift()
+                    }
+                    else {
+                        logger.info(`Failed to receive block ${result.height} mined by ${block.header.miner} from ${this.socketBuffer.getSocket().remoteAddress}`)
+                        RabbitPeer.receivedBlocks.splice(RabbitPeer.receivedBlocks.indexOf(block.header.timeStamp), 1)
                     }
                 }
             } catch (e) {
                 logger.debug(e)
             }
         })
+        if (RabbitPeer.receivedBlocks.length > 100)
+            RabbitPeer.receivedBlocks.shift()
 
         return { putBlockReturn: { statusChanges: [] } }
     }
