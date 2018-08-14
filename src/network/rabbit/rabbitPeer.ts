@@ -35,7 +35,6 @@ export class RabbitPeer extends BasePeer implements IPeer {
     private receivedBroadcasts: number
     private lastReceivedTime: number
     private version: number
-    static receivedBlocks: number[] = []
 
     constructor(socket: Socket, network: RabbitNetwork, consensus: IConsensus, txPool: ITxPool, peerDB: IPeerDatabase) {
         super(socket)
@@ -465,25 +464,19 @@ export class RabbitPeer extends BasePeer implements IPeer {
             this.lastReceivedTime = Date.now()
             this.receivedBroadcasts = Math.max(0, this.receivedBroadcasts - decay)
 
+            if (this.receivedBroadcasts > BROADCAST_LIMIT) {
+                return
+            }
+
             request.blocks = request.blocks.slice(0, 1)
             let block: Block
             try {
                 block = new Block(request.blocks[0])
 
-                if (this.blockBroadcastCondition(block) && this.receivedBroadcasts <= BROADCAST_LIMIT) {
+                if (this.blockBroadcastCondition(block)) {
                     rebroadcast()
                 }
-                if (RabbitPeer.receivedBlocks.indexOf(block.header.timeStamp) === -1) {
-                    const result = await this.consensus.putBlock(block)
-
-                    if (result && (result.oldStatus >= BlockStatus.Block || result.status >= BlockStatus.Block)) {
-                        logger.info(`Received block ${result.height} mined by ${block.header.miner} from ${this.socketBuffer.getSocket().remoteAddress}`)
-
-                        RabbitPeer.receivedBlocks.push(block.header.timeStamp)
-                        if (RabbitPeer.receivedBlocks.length > 100)
-                            RabbitPeer.receivedBlocks.shift()
-                    }
-                }
+                await this.consensus.putBlock(block)
             } catch (e) {
                 logger.debug(e)
             }
