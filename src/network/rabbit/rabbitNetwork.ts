@@ -287,6 +287,7 @@ export class RabbitNetwork implements INetwork {
             const peerPromise = new Promise<RabbitPeer>(async (resolve, reject) => {
                 logger.debug(`Attempting to connect to ${host}:${port}...`)
                 const socket = new net.Socket()
+                socket.setTimeout(3 * 1000)
                 socket.once("error", () => reject(`Failed to connect to ${key}: ${host}:${port}`))
                 socket.once("timeout", () => reject(`Timeout to connect to ${key}: ${host}:${port}`))
                 socket.connect({ host, port }, async () => {
