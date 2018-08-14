@@ -482,15 +482,10 @@ export class RabbitPeer extends BasePeer implements IPeer {
                     }
                     else {
                         logger.info(`Failed to receive block ${result.height} mined by ${block.header.miner} from ${this.socketBuffer.getSocket().remoteAddress}`)
-                        const idx = RabbitPeer.receivedBlocks.indexOf(block.header.timeStamp)
-                        if (idx !== -1)
-                            RabbitPeer.receivedBlocks.splice(idx, 1)
+                        RabbitPeer.receivedBlocks.splice(RabbitPeer.receivedBlocks.indexOf(block.header.timeStamp), 1)
                     }
                 }
             } catch (e) {
-                const idx = RabbitPeer.receivedBlocks.indexOf(block.header.timeStamp)
-                if (idx !== -1)
-                    RabbitPeer.receivedBlocks.splice(idx, 1)
                 logger.debug(e)
             }
         })
