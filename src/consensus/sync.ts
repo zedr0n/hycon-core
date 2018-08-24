@@ -137,7 +137,7 @@ export class Sync {
                 }
             }
         } catch (e) {
-            logger.debug(e)
+            logger.error(e)
         }
         if (this.go) {
             setTimeout(() => this.blockSync().catch((e) => logger.fatal(`??? ${e}`)), delay)
