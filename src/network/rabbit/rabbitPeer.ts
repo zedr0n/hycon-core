@@ -689,12 +689,11 @@ export class RabbitPeer extends BasePeer implements IPeer {
         let height = commonHeight + 1
 
         do {
-
             const timeout = new Promise<Block[]>((resolve, reject) => {
                 const wait = setTimeout(() => {
                     clearTimeout(wait);
-                    resolve(undefined)
-                }, 2000)
+                    resolve([])
+                }, 3000)
             })
             blocks = await Promise.race([this.getBlocksByRange(height, MAX_BLOCKS_PER_PACKET), timeout])
             for (const block of blocks) {
