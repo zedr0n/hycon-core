@@ -381,6 +381,8 @@ export class Consensus extends EventEmitter implements IConsensus {
 
         if (result.oldStatus >= BlockStatus.Nothing && result.oldStatus <= BlockStatus.Header) {
             const dbBlock = (result.dbBlock !== undefined) ? result.dbBlock : await this.db.getDBBlock(hash)
+            if (dbBlock === undefined)
+                logger.warn(`Block ${hash} not in DB`)
             await Verify.processBlock(block, dbBlock, hash, header, previousDBBlock, this.db, this.worldState, result)
             if (result.status === BlockStatus.Rejected) {
                 return result
