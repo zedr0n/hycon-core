@@ -363,7 +363,7 @@ export class Consensus extends EventEmitter implements IConsensus {
             return result
         }
 
-        if (result.oldStatus === BlockStatus.Nothing) {
+        if (result.oldStatus < BlockStatus.Block) {
             await Verify.processHeader(previousDBBlock, header, hash, result)
 
             if (result.status === BlockStatus.Rejected) {
