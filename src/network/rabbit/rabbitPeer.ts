@@ -476,7 +476,10 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 if (this.blockBroadcastCondition(block)) {
                     rebroadcast()
                 }
-                await this.consensus.putBlock(block)
+                const result = await this.consensus.putBlock(block)
+                if (result.height)
+                    logger.info(`Received block ${result.height} mined  by ${block.header.miner} from ${this.socketBuffer.getSocket().remoteAddress}`)
+
             } catch (e) {
                 logger.debug(e)
             }
@@ -692,6 +695,8 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 this.validatePut(height, previousHash, result, block.header, BlockStatus.Block)
                 height++
                 previousHash = new Hash(block.header)
+                logger.info(`Broadcasting block (${height},${previousHash})`)
+                this.network.broadcastBlocks([block])
             }
 
         } while (height < maxHeight && blocks.length > 0)
