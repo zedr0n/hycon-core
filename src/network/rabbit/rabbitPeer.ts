@@ -687,8 +687,16 @@ export class RabbitPeer extends BasePeer implements IPeer {
         let blocks: AnyBlock[]
         let previousHash = commonHash
         let height = commonHeight + 1
+
         do {
-            blocks = await this.getBlocksByRange(height, MAX_BLOCKS_PER_PACKET)
+
+            const timeout = new Promise<Block[]>((resolve, reject) => {
+                const wait = setTimeout(() => {
+                    clearTimeout(wait);
+                    resolve(undefined)
+                }, 2000)
+            })
+            blocks = await Promise.race([this.getBlocksByRange(height, MAX_BLOCKS_PER_PACKET), timeout])
             for (const block of blocks) {
                 if (!(block instanceof Block)) {
                     throw new Error(`Received Genesis Block during sync`)
