@@ -363,7 +363,7 @@ export class Consensus extends EventEmitter implements IConsensus {
             return result
         }
 
-        if (result.oldStatus < BlockStatus.Block) {
+        if (result.oldStatus === BlockStatus.Nothing) {
             await Verify.processHeader(previousDBBlock, header, hash, result)
 
             if (result.status === BlockStatus.Rejected) {
@@ -380,9 +380,11 @@ export class Consensus extends EventEmitter implements IConsensus {
         }
 
         if (result.oldStatus >= BlockStatus.Nothing && result.oldStatus <= BlockStatus.Header) {
-            const dbBlock = (result.dbBlock !== undefined) ? result.dbBlock : await this.db.getDBBlock(hash)
-            if (dbBlock === undefined)
-                logger.warn(`Block ${hash} not in DB`)
+            var dbBlock = (result.dbBlock !== undefined) ? result.dbBlock : await this.db.getDBBlock(hash)
+            if (dbBlock === undefined) {
+                await Verify.processHeader(previousDBBlock, header, hash, result)
+                dbBlock = result.dbBlock
+            }
             await Verify.processBlock(block, dbBlock, hash, header, previousDBBlock, this.db, this.worldState, result)
             if (result.status === BlockStatus.Rejected) {
                 return result
