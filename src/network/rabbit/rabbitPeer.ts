@@ -695,8 +695,11 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 this.validatePut(height, previousHash, result, block.header, BlockStatus.Block)
                 height++
                 previousHash = new Hash(block.header)
-                logger.info(`Broadcasting block (${height},${previousHash})`)
-                this.network.broadcastBlocks([block])
+                // don't rebroadcast blocks older than 5 minutes
+                if (block.header.timeStamp > Date.now() - 1000 * 60 * 5) {
+                    logger.info(`Broadcasting block (${height},${previousHash})`)
+                    this.network.broadcastBlocks([block])
+                }
             }
 
         } while (height < maxHeight && blocks.length > 0)
