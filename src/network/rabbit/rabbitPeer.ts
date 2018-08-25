@@ -18,6 +18,7 @@ import { IPeerDatabase } from "../ipeerDatabase"
 import { BasePeer } from "./basePeer"
 import { BYTES_OVERHEAD, HASH_SIZE, MAX_BLOCKS_PER_PACKET, MAX_HEADERS_PER_PACKET, MAX_PACKET_SIZE, MAX_TX_SIZE, MAX_TXS_PER_BLOCK, REPEATED_OVERHEAD } from "./networkConstants"
 import { RabbitNetwork } from "./rabbitNetwork"
+import delay from "delay"
 const logger = getLogger("NetPeer")
 
 const DIFFICULTY_TOLERANCE = 0.05
@@ -25,8 +26,8 @@ const BROADCAST_LIMIT = 10
 
 export interface IBlockTxs { hash: Hash, txs: SignedTx[] }
 export class RabbitPeer extends BasePeer implements IPeer {
-    public static seenBlocksSet: Set<Hash> = new Set<Hash>()
-    public static seenBlocks: Hash[] = []
+    public static seenBlocksSet: Set<String> = new Set<String>()
+    public static seenBlocks: String[] = []
     public listenPort: number
     public guid: string
     private consensus: IConsensus
@@ -432,12 +433,13 @@ export class RabbitPeer extends BasePeer implements IPeer {
         }
 
         const blockHash = new Hash(block.header)
+        const blockHashstring = blockHash.toString()
         const status = await this.consensus.getBlockStatus(blockHash)
         if (status < BlockStatus.Nothing || status >= BlockStatus.Block) {
             return false
         }
 
-        if (RabbitPeer.seenBlocksSet.has(blockHash)) {
+        if (RabbitPeer.seenBlocksSet.has(blockHashstring)) {
             return false
         }
 
@@ -447,12 +449,12 @@ export class RabbitPeer extends BasePeer implements IPeer {
             return false
         }
 
-        RabbitPeer.seenBlocksSet.add(blockHash)
+        RabbitPeer.seenBlocksSet.add(blockHashstring)
         if (RabbitPeer.seenBlocks.length > 1000) {
             const [old] = RabbitPeer.seenBlocks.splice(0, 1)
             RabbitPeer.seenBlocksSet.delete(old)
         }
-        RabbitPeer.seenBlocks.push(blockHash)
+        RabbitPeer.seenBlocks.push(blockHashstring)
 
         return true
     }
