@@ -130,11 +130,11 @@ export class Sync {
             if (reply.length > 0) {
                 const { peer, tip } = reply[0]
                 logger.info(`Syncing blocks from peer with tip ${tip.height}, ${tip.totalwork > this.consensus.getBtip().totalWork ? `${tip.totalwork} > ${this.consensus.getBtip().totalWork}` : `${tip.height} > ${this.consensus.getBtip().height}`}`)
-                if (peer.getVersion() > 5) {
-                    await peer.txSync(tip)
-                } else {
-                    await peer.blockSync(tip)
-                }
+                //if (peer.getVersion() > 5) {
+                //    await peer.txSync(tip)
+                //} else {
+                await peer.blockSync(tip)
+                //}
             }
         } catch (e) {
             logger.error(e)
