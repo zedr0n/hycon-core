@@ -707,7 +707,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 previousHash = new Hash(block.header)
                 // don't rebroadcast blocks older than 5 minutes
                 if (block.header.timeStamp > Date.now() - 1000 * 60 * 5) {
-                    logger.info(`Broadcasting block (${height},${previousHash})`)
+                    logger.info(`Broadcasting block (${height - 1},${previousHash})`)
                     this.network.broadcastBlocks([block])
                 }
             }
