@@ -1,12 +1,13 @@
-import { ListItemText } from "@material-ui/core"
+import { CircularProgress } from "@material-ui/core"
+import { Dialog } from "@material-ui/core"
 import Button from "@material-ui/core/Button"
 import CardContent from "@material-ui/core/CardContent"
 import Grid from "@material-ui/core/Grid"
 import Icon from "@material-ui/core/Icon"
-import { Card, CircularProgress, List, ListItem, TextField } from "material-ui"
-import Dialog from "material-ui/Dialog"
+import { Card, TextField } from "material-ui"
 import * as React from "react"
 import { Redirect } from "react-router"
+import { AddressBook } from "./addressBook"
 import { IHyconWallet } from "./rest"
 import { hyconfromString } from "./stringUtil"
 
@@ -26,6 +27,8 @@ export class Transaction extends React.Component<any, any> {
             isLoading: false,
             minerFee: 1,
             name: props.name,
+            nonce: props.nonce,
+            password: "",
             piggyBank: "0",
             rest: props.rest,
         }
@@ -81,7 +84,7 @@ export class Transaction extends React.Component<any, any> {
             return
         }
 
-        if (hyconfromString(this.state.amount).add(hyconfromString(this.state.minerFee)).greaterThan(hyconfromString(this.state.piggyBank).sub(hyconfromString(this.state.wallet.pendingAmount)))) {
+        if (this.state.nonce === undefined && hyconfromString(this.state.amount).add(hyconfromString(this.state.minerFee)).greaterThan(hyconfromString(this.state.piggyBank).sub(hyconfromString(this.state.wallet.pendingAmount)))) {
             alert("You can't spend the money you don't have")
             return
         }
@@ -107,19 +110,21 @@ export class Transaction extends React.Component<any, any> {
         }
 
         this.setState({ isLoading: true })
-        this.state.rest.sendTx({ name: this.state.name, password: this.state.password, address: this.state.address, amount: this.state.amount.toString(), minerFee: this.state.minerFee.toString() })
+        this.state.rest.sendTx({ name: this.state.name, password: this.state.password, address: this.state.address, amount: this.state.amount.toString(), minerFee: this.state.minerFee.toString(), nonce: this.state.nonce })
             .then((result: { res: boolean, case?: number }) => {
+                this.setState({ isLoading: false })
                 if (result.res === true) {
                     alert(`A transaction of ${this.state.amount} HYCON has been submitted to ${this.state.address} with ${this.state.minerFee} HYCON as miner fees.`)
                     this.setState({ redirect: true })
-                } else if (result.case === 1) {
+                    return
+                }
+                if (result.case === 1) {
+                    this.setState({ password: "" })
                     alert("Invalid password: You can see a hint about password pressing 'HINT'")
-                    window.location.reload()
                 } else if (result.case === 2) {
                     alert("Invalid address: Please check 'To Address' input")
-                    window.location.reload()
                 } else if (result.case === 3) {
-                    alert("Fail to transfer hycon")
+                    alert("Failed to transfer hycon")
                     this.setState({ redirect: true })
                 }
             })
@@ -144,20 +149,37 @@ export class Transaction extends React.Component<any, any> {
                             <h3 style={{ color: "grey" }}><Icon style={{ transform: "rotate(-25deg)", marginRight: "10px", color: "grey" }}>send</Icon>Send Transaction</h3><br />
                             <Grid container direction={"row"} justify={"flex-end"} alignItems={"flex-end"}>
                                 <Button variant="raised" onClick={() => { this.setState({ dialog: true }) }} style={{ backgroundColor: "#f2d260", color: "white", float: "right", margin: "0 10px" }}>
-                                    <Icon>star</Icon><span style={{ marginLeft: "5px" }}>Favorites</span>
+                                    <Icon>bookmark</Icon><span style={{ marginLeft: "5px" }}>Address Book</span>
                                 </Button>
                             </Grid>
-                            <TextField style={{ width: "330px" }} floatingLabelText="From Address" type="text" disabled={true} value={this.state.wallet.address} />
-                            <TextField name="address" floatingLabelFixed={true} style={{ marginLeft: "30px", width: "330px" }} floatingLabelText="To Address" type="text" value={this.state.address} onChange={this.handleInputChange} />
-                            <br />
-                            <TextField style={{ width: "330px" }} floatingLabelText="Balance" type="text" disabled={true} value={this.state.piggyBank} />
-                            <TextField style={{ marginLeft: "30px", width: "330px" }} name="amount" floatingLabelFixed={true} floatingLabelText="Amount" type="text" value={this.state.amount} max={this.state.piggyBank} onChange={this.handleInputChange} />
-                            <br />
-                            <TextField floatingLabelText="Pending Amount" style={{ width: "330px" }} type="text" disabled={true} value={this.state.wallet.pendingAmount} />
-                            <TextField name="minerFee" floatingLabelFixed={true} style={{ marginLeft: "30px", width: "330px" }} floatingLabelText="Miner Fee" type="text" value={this.state.minerFee} onChange={this.handleInputChange} />
-                            <br />
-                            <TextField name="password" floatingLabelFixed={true} style={{ marginRight: "20px", width: "330px" }} floatingLabelText="Wallet Password" type="password" autoComplete="off" onChange={(data) => { this.handlePassword(data) }} />
-                            {this.state.isHint ? (<span style={{ fontSize: "12px" }}>(Password Hint: {this.state.hint})</span>) : (<Button onClick={(e) => this.showHint(e)}>Hint</Button>)}
+
+                            <Grid container direction={"row"} justify={"flex-end"} alignItems={"flex-end"} spacing={24}>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <TextField style={{ width: "330px" }} floatingLabelText="From Address" type="text" disabled={true} value={this.state.wallet.address} />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <TextField name="address" floatingLabelFixed={true} style={{ width: "330px" }} floatingLabelText="To Address" type="text" value={this.state.address} onChange={this.handleInputChange} />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <TextField style={{ width: "330px" }} floatingLabelText="Balance" type="text" disabled={true} value={this.state.piggyBank} />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <TextField style={{ width: "330px" }} name="amount" floatingLabelFixed={true} floatingLabelText="Amount" type="text" value={this.state.amount} max={this.state.piggyBank} onChange={this.handleInputChange} />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <TextField floatingLabelText="Pending Amount" style={{ width: "330px" }} type="text" disabled={true} value={this.state.wallet.pendingAmount} />
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <TextField name="minerFee" floatingLabelFixed={true} style={{ width: "330px" }} floatingLabelText="Miner Fee" type="text" value={this.state.minerFee} onChange={this.handleInputChange} /></Grid>
+
+                                <Grid item xs zeroMinWidth />
+                                <Grid item xs={8}>
+                                    <TextField name="password" value={this.state.password} floatingLabelFixed={true} style={{ marginRight: "20px", width: "330px" }} floatingLabelText="Wallet Password" type="password" autoComplete="off" onChange={(data) => { this.handlePassword(data) }} />
+                                    {this.state.isHint ? (<span style={{ fontSize: "12px" }}>(Password Hint: {this.state.hint})</span>) : (<Button onClick={(e) => this.showHint(e)}>Hint</Button>)}
+                                </Grid>
+                                <Grid item xs zeroMinWidth />
+                            </Grid>
+
                             <br /><br />
                             <Grid container direction={"row"} justify={"flex-end"} alignItems={"flex-end"}>
                                 <Button variant="raised" onClick={this.handleSubmit} style={{ backgroundColor: "#50aaff", color: "white", float: "right", margin: "0 10px" }}>
@@ -171,35 +193,18 @@ export class Transaction extends React.Component<any, any> {
                     </CardContent>
                 </Card >
 
-                {/* FAVORITES */}
-                <Dialog open={this.state.dialog}>
-                    <h3 style={{ color: "grey", textAlign: "center" }}><Icon style={{ transform: "rotate(-25deg)", marginRight: "10px", color: "grey" }}>star</Icon>Favorite Addresses</h3>
-                    <div style={{ margin: "0 auto", width: "50%" }}>
-                        {(this.state.favorites.length === 0) ? (<h5 style={{ color: "grey", textAlign: "center" }}>No favorite address</h5>) : (<div></div>)}
-                        <List>
-                            {this.state.favorites.map((favorite: { alias: string, address: string }) => (
-                                <ListItem onClick={() => { this.handleListItemClick(favorite.address) }} key={favorite.alias}>
-                                    <Grid container direction={"row"} justify={"center"} alignItems={"center"}>
-                                        <Icon style={{ color: "grey" }}>person</Icon>
-                                        <ListItemText primary={favorite.alias} secondary={favorite.address} />
-                                    </Grid>
-                                </ListItem>
-                            ))}
-                        </List>
-                    </div>
-                    <Grid container direction={"row"} justify={"flex-end"} alignItems={"flex-end"}>
-                        <Button variant="raised" onClick={() => { this.setState({ dialog: false }) }} style={{ backgroundColor: "rgb(225, 0, 80)", color: "white", float: "right" }}>
-                            <span style={{ marginRight: "5px" }}>Cancel</span><Icon>close</Icon>
-                        </Button>
-                    </Grid>
+                {/* ADDRESS BOOK */}
+                <Dialog open={this.state.dialog} onClose={() => { this.setState({ dialog: false }) }}>
+                    <AddressBook rest={this.state.rest} favorites={this.state.favorites} isWalletView={false} callback={(address: string) => { this.handleListItemClick(address) }} />
                 </Dialog>
 
                 {/* LOADING */}
                 <Dialog open={this.state.isLoading} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" >
-                    <div style={{ textAlign: "center" }}>
-                        <CircularProgress style={{ marginRight: "5px" }} size={50} thickness={2} /> LOADING
+                    <div style={{ textAlign: "center", margin: "1em" }}>
+                        <CircularProgress style={{ marginRight: "5px" }} size={50} thickness={2} />
                     </div>
                 </Dialog>
+
             </div >
         )
     }

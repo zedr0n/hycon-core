@@ -1,7 +1,4 @@
 syntax = "proto3";
-import "tx.proto";
-import "blockHeader.proto";
-import "difficulty.proto";
 
 message Block {
     BlockHeader header = 1;
@@ -23,4 +20,5 @@ message BlockDB {
     double pEMA = 7;
     double nextDifficulty = 8;
     double totalWork = 9;
+    bool uncle = 10; 
 }
