@@ -392,12 +392,12 @@ export class RabbitPeer extends BasePeer implements IPeer {
 
         if (bTip) {
             this.bTip = bTip
-            if (RabbitPeer.headerSync === undefined && this.consensus.getHtip().totalWork < bTip.totalwork) {
+            if (RabbitPeer.headerSync === undefined && (this.consensus.getHtip().totalWork < bTip.totalwork || this.consensus.getHtip().height < bTip.height)) {
                 logger.debug(`Starting header download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
                 RabbitPeer.headerSync = this.headerSync(bTip).then(() => RabbitPeer.headerSync = undefined, () => RabbitPeer.headerSync = undefined)
             }
 
-            if (RabbitPeer.blockSync === undefined && this.consensus.getBtip().totalWork < bTip.totalwork) {
+            if (RabbitPeer.blockSync === undefined && (this.consensus.getHtip().totalWork < bTip.totalwork || this.consensus.getHtip().height < bTip.height)) {
                 if (this.version > 5) {
                     logger.debug(`Starting block tx download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
                     RabbitPeer.blockSync = this.txSync(bTip).then(() => RabbitPeer.blockSync = undefined, () => RabbitPeer.blockSync = undefined)
@@ -519,7 +519,9 @@ export class RabbitPeer extends BasePeer implements IPeer {
             let block: Block
             try {
                 block = new Block(request.blocks[0])
-                await this.consensus.putBlock(block, rebroadcast, this.socketBuffer.getIp())
+                const result = await this.consensus.putBlock(block, rebroadcast, this.socketBuffer.getIp())
+                if (result.height)
+                    logger.info(`Received block ${result.height} mined  by ${block.header.miner} from ${this.socketBuffer.getSocket().remoteAddress}`)
             } catch (e) {
                 logger.debug(e)
             }

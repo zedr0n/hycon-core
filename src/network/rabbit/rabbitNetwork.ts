@@ -184,6 +184,26 @@ export class RabbitNetwork implements INetwork {
         return true
     }
 
+    public getRandomPeer(): IPeer {
+        const index = Math.floor(Math.random() * this.peers.size)
+        const key = Array.from(this.peers.keys())[index]
+        return this.peers.get(key)
+    }
+
+    public getRandomPeers(count: number = 1): IPeer[] {
+        const randomList: number[] = []
+        const iPeer: IPeer[] = []
+        const key: string[] = Array.from(this.peers.keys())
+        while (randomList.length < count) {
+            const index = Math.floor(Math.random() * this.peers.size)
+            if (randomList.indexOf(index) === -1) {
+                randomList.push(index)
+                iPeer.push(this.peers.get(key[index]))
+            }
+        }
+        return iPeer
+    }
+
     public getPeers(): IPeer[] {
         const peers: IPeer[] = []
         for (const peer of this.peers.values()) {
@@ -216,6 +236,7 @@ export class RabbitNetwork implements INetwork {
         await this.peerDatabase.connecting(host, port)
         let owned = false
         const socket = new net.Socket()
+        socket.setTimeout(3 * 1000)
         socket.on("error", async (e) => logger.debug(e))
         return await new Promise<RabbitPeer>((resolve, reject) => {
             socket.on("close", async () => {
