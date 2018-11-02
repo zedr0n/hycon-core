@@ -126,7 +126,8 @@ export class Consensus extends EventEmitter implements IConsensus {
     }
 
     public minimumVersionNumber() {
-        if (this.blockTip.height < Consensus.lastNakamotoBlock) {
+        logger.info(`BlockTip : ${this.blockTip.height}`)
+        if (!this.blockTip || this.blockTip.height < Consensus.lastNakamotoBlock) {
             return 3
         }
         return 12
@@ -542,12 +543,12 @@ export class Consensus extends EventEmitter implements IConsensus {
 
                 const timeDelta = Date.now() - header.timeStamp
                 if (status < BlockStatus.Block) {
-                    if (timeDelta < TIMESTAMP_TOLERANCE) {
-                        logger.info(`Processed ${block !== undefined ? "BHeader" : "Header "}`
-                            + ` ${hash}\t(${dbBlock.height}, ${dbBlock.totalWork.toExponential(3)}),`
-                            + `\tBTip(${this.blockTip.height}, ${this.blockTip.totalWork.toExponential(3)}),`
-                            + `\tHTip(${this.headerTip.height}, ${this.headerTip.totalWork.toExponential(3)})`)
-                    }
+                    //if (timeDelta < TIMESTAMP_TOLERANCE) {
+                    logger.info(`Processed ${block !== undefined ? "BHeader" : "Header "}`
+                        + ` ${hash}\t(${dbBlock.height}, ${dbBlock.totalWork.toExponential(3)}),`
+                        + `\tBTip(${this.blockTip.height}, ${this.blockTip.totalWork.toExponential(3)}),`
+                        + `\tHTip(${this.headerTip.height}, ${this.headerTip.totalWork.toExponential(3)})`)
+                    //}
                     return { oldStatus, status, height: dbBlock.height }
                 }
 
@@ -570,13 +571,13 @@ export class Consensus extends EventEmitter implements IConsensus {
                     }
                 }
 
-                if (timeDelta < TIMESTAMP_TOLERANCE) {
-                    logger.info(`Processed Block(${hash})`
-                        + `\t(${dbBlock.height}, ${dbBlock.totalWork.toExponential(3)}),`
-                        + `\tUncles: ${(dbBlock.header as BlockHeader).previousHash.length - 1}`
-                        + `\tBTip(${this.blockTip.height}, ${this.blockTip.totalWork.toExponential(3)}),`
-                        + `\tHTip(${this.headerTip.height}, ${this.headerTip.totalWork.toExponential(3)})`)
-                }
+                //if (timeDelta < TIMESTAMP_TOLERANCE) {
+                logger.info(`Processed Block(${hash})`
+                    + `\t(${dbBlock.height}, ${dbBlock.totalWork.toExponential(3)}),`
+                    + `\tUncles: ${(dbBlock.header as BlockHeader).previousHash.length - 1}`
+                    + `\tBTip(${this.blockTip.height}, ${this.blockTip.totalWork.toExponential(3)}),`
+                    + `\tHTip(${this.headerTip.height}, ${this.headerTip.totalWork.toExponential(3)})`)
+                //}
 
                 return { oldStatus, status, height: dbBlock.height }
             })
