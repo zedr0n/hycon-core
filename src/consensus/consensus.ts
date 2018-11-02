@@ -54,7 +54,7 @@ export class Consensus extends EventEmitter implements IConsensus {
         }
         return GhostConsensus.getTarget(p)
     }
-    private static readonly lastNakamotoBlock = conf.ghostHeight
+    private static readonly lastNakamotoBlock = 317713
     private txdb?: ITxDatabase
     private minedDatabase: MinedDatabase
     private txPool: ITxPool
