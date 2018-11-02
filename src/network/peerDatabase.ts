@@ -36,7 +36,7 @@ export class PeerDatabase implements IPeerDatabase {
         }
     }
 
-    public async connecting(host: string, port: number): Promise<void> {
+    public async connecting(host: string, port: number): Promise<boolean> {
         return this.dbLock.critical(async () => {
             let peerData = await this.connection.manager.findOne(PeerModel, { where: { host, port } })
             if (peerData === undefined) {
@@ -49,13 +49,16 @@ export class PeerDatabase implements IPeerDatabase {
             }
             peerData.lastAttempt = Date.now()
             if (peerData.active === 1) {
-                throw new Error("Already connecting to peer")
+                //throw new Error("Already connecting to peer")
+                return true
             }
             if (peerData.active === 2) {
-                throw new Error("Already connected to peer")
+                //throw new Error("Already connected to peer")
+                return true
             }
             peerData.active = 1
             await this.connection.manager.save(peerData)
+            return false
         })
     }
     public async inBoundConnection(host: string, port: number): Promise<void> {

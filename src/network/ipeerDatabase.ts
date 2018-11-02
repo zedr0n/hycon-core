@@ -3,7 +3,7 @@ import { PeerModel } from "./peerModel"
 
 export interface IPeerDatabase {
     putPeers(peers: proto.IPeer[]): Promise<void>
-    connecting(host: string, port: number): Promise<void>
+    connecting(host: string, port: number): Promise<boolean>
     inBoundConnection(host: string, port: number): Promise<void>
     outBoundConnection(host: string, port: number): Promise<void>
     failedToConnect(host: string, port: number): Promise<void>

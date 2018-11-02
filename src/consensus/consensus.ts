@@ -126,7 +126,6 @@ export class Consensus extends EventEmitter implements IConsensus {
     }
 
     public minimumVersionNumber() {
-        logger.info(`BlockTip : ${this.blockTip.height}`)
         if (!this.blockTip || this.blockTip.height < Consensus.lastNakamotoBlock) {
             return 3
         }

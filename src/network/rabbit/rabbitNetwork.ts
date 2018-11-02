@@ -233,7 +233,8 @@ export class RabbitNetwork implements INetwork {
 
     public async connect(host: string, port: number, save: boolean = true): Promise<RabbitPeer> {
         host = RabbitNetwork.normalizeHost(host)
-        await this.peerDatabase.connecting(host, port)
+        if (await this.peerDatabase.connecting(host, port))
+            return undefined
         let owned = false
         const socket = new net.Socket()
         socket.setTimeout(3 * 1000)
