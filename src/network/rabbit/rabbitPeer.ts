@@ -270,14 +270,14 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public async headerSync(remoteTip: ITip) {
         const startHeight = Math.min(this.consensus.getHtip().height, remoteTip.height)
         const { height: commonHeight, hash: commonHash } = await this.commonSearch(startHeight, remoteTip.height - 1, BlockStatus.Header)
-        logger.debug(`Found Start Header=${commonHeight}`)
+        logger.info(`Found Start Header=${commonHeight}`)
         await this.getHeaders(commonHeight, commonHash, remoteTip.height)
         return
     }
     public async blockSync(remoteBlockTip: ITip) {
         const startHeight = Math.min(this.consensus.getBtip().height, remoteBlockTip.height)
         const { height: commonHeight, hash: commonHash } = await this.commonSearch(startHeight, remoteBlockTip.height - 1, BlockStatus.Block)
-        logger.debug(`Found Start Block=${commonHeight}`)
+        logger.info(`Found Start Block=${commonHeight}`)
         await this.getBlocks(commonHeight, commonHash, remoteBlockTip.height)
         return
     }
@@ -398,13 +398,13 @@ export class RabbitPeer extends BasePeer implements IPeer {
             }
 
             if (RabbitPeer.blockSync === undefined && (this.consensus.getHtip().totalWork < bTip.totalwork || this.consensus.getHtip().height < bTip.height)) {
-                if (this.version > 5) {
-                    logger.debug(`Starting block tx download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
-                    RabbitPeer.blockSync = this.txSync(bTip).then(() => RabbitPeer.blockSync = undefined, () => RabbitPeer.blockSync = undefined)
-                } else {
-                    logger.debug(`Starting block download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
-                    RabbitPeer.blockSync = this.blockSync(bTip).then(() => RabbitPeer.blockSync = undefined, () => RabbitPeer.blockSync = undefined)
-                }
+                //if (this.version > 5) {
+                //    logger.debug(`Starting block tx download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
+                //    RabbitPeer.blockSync = this.txSync(bTip).then(() => RabbitPeer.blockSync = undefined, () => RabbitPeer.blockSync = undefined)
+                //} else {
+                logger.debug(`Starting block download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
+                RabbitPeer.blockSync = this.blockSync(bTip).then(() => RabbitPeer.blockSync = undefined, () => RabbitPeer.blockSync = undefined)
+                //}
             }
         }
         const now = Date.now()
