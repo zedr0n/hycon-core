@@ -772,8 +772,10 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 }, 3000)
             })
             blocks = await Promise.race([this.getBlocksByRange(height, MAX_BLOCKS_PER_PACKET), timeout])
-            if (height < maxHeight && blocks.length == 0)
-                logger.info(`Block sync timeout : ${height} on ${this.socketBuffer.getIp()}`)
+            if (height < maxHeight && blocks.length == 0) {
+                logger.error(`Block sync timeout : ${height} on ${this.socketBuffer.getIp()}`)
+                throw new Error("Block sync timeout")
+            }
             for (const block of blocks) {
                 RabbitPeer.lastProcessedBlock = Date.now()
                 if (!(block instanceof Block)) {
