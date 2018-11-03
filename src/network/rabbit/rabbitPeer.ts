@@ -414,6 +414,9 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 //}
             }
         }
+        else
+            logger.warn(`Peer ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()} failed to return tip`)
+
         const now = Date.now()
         const duration = now - this.lastPoll
         this.lastPoll = now
