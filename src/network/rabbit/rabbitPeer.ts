@@ -384,7 +384,11 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
 
     private async tipPoll() {
-        const bTip: ITip | void = await this.getBTip().then((v) => v, () => undefined)
+        const bTip: ITip | void = await this.getBTip().then((v) => v, (e) => {
+            if (e !== undefined)
+                logger.error(e)
+            return undefined
+        })
         const timeSinceLastMessage = Date.now() - this.socketBuffer.lastReceive
         if (timeSinceLastMessage > 60000) {
             logger.debug(`Disconnecting from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}, ${timeSinceLastMessage.toFixed(0)}ms since last reply`)
