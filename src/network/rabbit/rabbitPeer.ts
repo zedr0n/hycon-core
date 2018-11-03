@@ -418,8 +418,11 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 //}
             }
         }
-        else
+        else {
             logger.warn(`Peer ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()} failed to return tip`)
+            this.disconnect()
+            return
+        }
 
         const now = Date.now()
         const duration = now - this.lastPoll
