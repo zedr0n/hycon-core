@@ -28,6 +28,7 @@ import { TxValidity, WorldState } from "./database/worldState"
 import { DifficultyAdjuster } from "./difficultyAdjuster"
 import { IConsensus, IStatusChange } from "./iconsensus"
 import { BlockStatus } from "./sync"
+import { RabbitPeer } from "../network/rabbit/rabbitPeer";
 const logger = getLogger("Consensus")
 
 const REBROADCAST_DIFFICULTY_TOLERANCE = 0.05
@@ -822,6 +823,11 @@ export class Consensus extends EventEmitter implements IConsensus {
 
             logger.info(`Syncing headers ${headerProgress.toFixed(3)}% complete approximately ${headersRemaining} remaining`)
         }
+
+        // if no blocks were processed since last call reset sync
+        if (RabbitPeer.lastProcessedBlock < now - 10000 && RabbitPeer.blockSync !== undefined)
+            RabbitPeer.blockSync = undefined
+
         setTimeout(() => this.syncStatus(), 10000)
     }
 

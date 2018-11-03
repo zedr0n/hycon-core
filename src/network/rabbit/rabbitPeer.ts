@@ -28,8 +28,9 @@ const TIP_POLL_INTERVAL = 1000
 
 export interface IBlockTxs { hash: Hash, txs: SignedTx[] }
 export class RabbitPeer extends BasePeer implements IPeer {
-    private static headerSync: Promise<void> | void = undefined
-    private static blockSync: Promise<void> | void = undefined
+    public static headerSync: Promise<void> | void = undefined
+    public static blockSync: Promise<void> | void = undefined
+    public static lastProcessedBlock: number
     public listenPort: number
     public guid: string
     private consensus: IConsensus
@@ -774,6 +775,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
             if (height < maxHeight && blocks.length == 0)
                 logger.info(`Block sync timeout : ${height} on ${this.socketBuffer.getIp()}`)
             for (const block of blocks) {
+                RabbitPeer.lastProcessedBlock = Date.now()
                 if (!(block instanceof Block)) {
                     throw new Error(`Received Genesis Block during sync`)
                 }
