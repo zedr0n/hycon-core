@@ -825,8 +825,10 @@ export class Consensus extends EventEmitter implements IConsensus {
         }
 
         // if no blocks were processed since last call reset sync
-        if (RabbitPeer.lastProcessedBlock < now - 10000 && RabbitPeer.blockSync !== undefined)
+        if (RabbitPeer.lastProcessedBlock < now - 10000 && RabbitPeer.blockSync !== undefined) {
+            logger.info(`Sync running but no blocks received within last 10 seconds, resetting sync`)
             RabbitPeer.blockSync = undefined
+        }
 
         setTimeout(() => this.syncStatus(), 10000)
     }
