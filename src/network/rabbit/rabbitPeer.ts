@@ -31,6 +31,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public static headerSync: Promise<void> | void = undefined
     public static blockSync: Promise<void> | void = undefined
     public static lastProcessedBlock: number
+    public syncFailed: boolean = false
     public listenPort: number
     public guid: string
     private consensus: IConsensus
@@ -388,6 +389,11 @@ export class RabbitPeer extends BasePeer implements IPeer {
         if (timeSinceLastMessage > 60000) {
             logger.debug(`Disconnecting from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}, ${timeSinceLastMessage.toFixed(0)}ms since last reply`)
             this.disconnect()
+            return
+        }
+
+        if (this.syncFailed) {
+            logger.info(`Sync failed on the peer ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()} - ignoring`)
             return
         }
 
@@ -769,11 +775,12 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 const wait = setTimeout(() => {
                     clearTimeout(wait);
                     resolve([])
-                }, 30000)
+                }, 3000)
             })
             blocks = await Promise.race([this.getBlocksByRange(height, MAX_BLOCKS_PER_PACKET), timeout])
             if (height < maxHeight && blocks.length == 0) {
                 logger.error(`Block sync timeout : ${height} on ${this.socketBuffer.getIp()}`)
+                this.syncFailed = true
                 throw new Error("Block sync timeout")
             }
             for (const block of blocks) {
