@@ -767,6 +767,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
             const timeout = new Promise<Block[]>((resolve, reject) => {
                 const wait = setTimeout(() => {
                     clearTimeout(wait);
+                    logger.info(`Block sync timeout : ${height}`)
                     resolve([])
                 }, 3000)
             })
