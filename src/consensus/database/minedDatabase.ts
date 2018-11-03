@@ -1,17 +1,20 @@
 import { getLogger } from "log4js"
+import Long = require("long")
 import * as sqlite3 from "sqlite3"
-import { hyconfromString, hycontoString } from "../../api/client/stringUtil"
+import { hycontoString } from "../../api/client/stringUtil"
 import { Address } from "../../common/address"
-import { Block } from "../../common/block"
+import { AnyBlock, Block } from "../../common/block"
 import { BlockHeader } from "../../common/blockHeader"
 import { SignedTx } from "../../common/txSigned"
+
 import { Hash } from "../../util/hash"
-import { AnySignedTx, IConsensus } from "../iconsensus"
+import { IConsensus } from "../iconsensus"
 import { BlockStatus } from "../sync"
 import { DBMined } from "./dbMined"
 const sqlite = sqlite3.verbose()
 const logger = getLogger("MinedDB")
 
+export interface IMinedDB { blockhash: Hash, blocktime: number, miner: Address, reward?: Long, txs?: SignedTx[] }
 export class MinedDatabase {
     private db: sqlite3.Database
     private consensus: IConsensus
@@ -21,12 +24,14 @@ export class MinedDatabase {
     public async init(consensus: IConsensus, tipHeight?: number) {
         this.consensus = consensus
         this.db.serialize(() => {
-            this.db.run(`CREATE TABLE IF NOT EXISTS mineddb(idx INTEGER PRIMARY KEY AUTOINCREMENT,
-                                                        blockhash TEXT,
+            this.db.run(`PRAGMA synchronous = OFF;`)
+            this.db.run(`PRAGMA journal_mode = MEMORY;`)
+            this.db.run(`CREATE TABLE IF NOT EXISTS mineddb(blockhash TEXT PRIMARY KEY,
                                                         blocktime INTEGER,
                                                         feeReward TEXT,
-                                                        miner TEXT,
-                                                        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)`)
+                                                        miner TEXT)`)
+            this.db.run(`CREATE INDEX IF NOT EXISTS miner ON mineddb(miner);`)
+            this.db.run(`CREATE INDEX IF NOT EXISTS blocktime ON mineddb(blocktime);`)
         })
         if (tipHeight !== undefined) {
             let status: BlockStatus
@@ -46,13 +51,8 @@ export class MinedDatabase {
             }
 
             if (lastHeight < tipHeight) {
-                const blocks = await this.consensus.getBlocksRange(lastHeight + 1)
-                for (const block of blocks) {
-                    const blockHash = new Hash(block.header)
-                    if (block instanceof Block && block.header.miner !== undefined) {
-                        await this.putMinedBlock(blockHash, block.header.timeStamp, block.txs, block.header.miner)
-                    }
-                }
+                const { nakamotoBlocks, ghostBlocks } = await this.consensus.getBlocksRanges(lastHeight + 1)
+                await this.putMinedBlock(nakamotoBlocks, ghostBlocks)
             }
         }
     }
@@ -61,7 +61,7 @@ export class MinedDatabase {
         try {
             let hashData: string = ""
             return new Promise<Hash | undefined>(async (resolved, rejected) => {
-                this.db.all(`SELECT * FROM mineddb ORDER BY timestamp DESC LIMIT 1`, (err, rows) => {
+                this.db.all(`SELECT * FROM mineddb ORDER BY blocktime DESC LIMIT 1`, (err, rows) => {
                     if (rows === undefined || rows.length < 1) { return resolved(undefined) }
                     hashData = rows[0].blockhash
                     return resolved(Hash.decode(hashData))
@@ -73,24 +73,48 @@ export class MinedDatabase {
         }
     }
 
-    public async putMinedBlock(blockHash: Hash, timestamp: number, txs: AnySignedTx[], miner: Address): Promise<void> {
-        const isExist = await this.get(blockHash)
-        if (!isExist) {
-            const stmtInsert = this.db.prepare(`INSERT INTO mineddb (blockhash, feeReward, blocktime, miner) VALUES ($blockhash, $feeReward, $blocktime, $miner)`)
-            let feeReward = hyconfromString("240")
-            for (const tx of txs) { tx instanceof SignedTx ? feeReward = feeReward.add(tx.fee) : feeReward = feeReward }
-            const params = {
-                $blockhash: blockHash.toString(),
-                $blocktime: timestamp,
-                $feeReward: hycontoString(feeReward),
-                $miner: miner.toString(),
-            }
-            stmtInsert.run(params)
-            stmtInsert.finalize()
+    public async applyReorganize(blocks: IMinedDB[], uncles: IMinedDB[]) {
+        const insertArray: any[] = []
+        for (const block of blocks) {
+            if (block.txs === undefined || block.reward === undefined) { continue }
+            insertArray.push({
+                $blockhash: block.blockhash.toString(),
+                $blocktime: block.blocktime,
+                $feeReward: this.calculateFeeReward(block.reward, block.txs),
+                $miner: block.miner.toString(),
+            })
         }
+        for (const uncle of uncles) {
+            if (uncle.reward === undefined) { continue }
+            insertArray.push({
+                $blockhash: uncle.blockhash.toString(),
+                $blocktime: uncle.blocktime,
+                $feeReward: hycontoString(uncle.reward),
+                $miner: uncle.miner.toString(),
+            })
+        }
+        await this.put(insertArray)
     }
 
-    public async getMinedBlocks(address: Address, count: number, index: number, blockHash?: Hash, result: DBMined[] = []): Promise<DBMined[]> {
+    public async putMinedBlock(nakamotoBlocks: AnyBlock[], ghostBlocks: AnyBlock[]): Promise<void> {
+        const insertArray: any[] = []
+        const nakamotoLength = nakamotoBlocks.length
+        const blocks = nakamotoBlocks.concat(ghostBlocks)
+        for (let i = 0; i < blocks.length; i++) {
+            const block = blocks[i]
+            if (!(block instanceof Block) || !(block.header instanceof BlockHeader)) { continue }
+            const reward = i < nakamotoLength ? Long.fromNumber(240e9) : Long.fromNumber(120e9)
+            insertArray.push({
+                $blockhash: (new Hash(block.header)).toString(),
+                $blocktime: block.header.timeStamp,
+                $feeReward: this.calculateFeeReward(reward, block.txs),
+                $miner: block.header.miner.toString(),
+            })
+        }
+        await this.put(insertArray)
+    }
+
+    public async getMinedBlocks(address: Address, count: number, index: number, blockHash?: string, result: DBMined[] = []): Promise<DBMined[]> {
         const params = {
             $count: count - result.length,
             $miner: address.toString(),
@@ -108,8 +132,9 @@ export class MinedDatabase {
         return new Promise<DBMined[]>(async (resolved, rejected) => {
             this.db.all(query, params, async (err, rows) => {
                 for (const row of rows) {
-                    const status = await this.consensus.getBlockStatus(row.blockhash)
-                    if (status === BlockStatus.MainChain) {
+                    const hash = Hash.decode(row.blockhash)
+                    const status = await this.consensus.getBlockStatus(hash)
+                    if (status === BlockStatus.MainChain || await this.consensus.isUncleBlock(hash)) {
                         result.push(new DBMined(row.blockhash, row.feeReward, row.blocktime, row.miner))
                     }
                     if (result.length === count) { break }
@@ -125,13 +150,27 @@ export class MinedDatabase {
         })
     }
 
-    public async get(key: Hash): Promise<boolean> {
-        const params = { $blockhash: key.toString() }
-        return new Promise<boolean>(async (resolved, rejected) => {
-            this.db.all(`SELECT blockhash, feeReward, blocktime, miner FROM mineddb WHERE blockhash = $blockhash`, params, async (err, rows) => {
-                if (rows === undefined || rows.length === 0) { return resolved(false) }
-                return resolved(true)
+    private async put(insertArray: any[]) {
+        const insertsql = `INSERT OR REPLACE INTO mineddb (blockhash, feeReward, blocktime, miner) VALUES ($blockhash, $feeReward, $blocktime, $miner)`
+        return new Promise<void>((resolve, reject) => {
+            const insert = this.db.prepare(insertsql, (err) => {
+                if (err) {
+                    reject(err)
+                    return
+                }
+                this.db.parallelize(() => {
+                    for (const param of insertArray) { insert.run(param) }
+                })
+                insert.finalize((error) => {
+                    if (error) { reject(error) } else { resolve() }
+                })
             })
         })
+    }
+
+    private calculateFeeReward(reward: Long, txs: SignedTx[]): string {
+        let feeReward = reward
+        for (const tx of txs) { feeReward = feeReward.add(tx.fee) }
+        return hycontoString(feeReward)
     }
 }

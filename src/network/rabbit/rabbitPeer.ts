@@ -1,3 +1,4 @@
+import ipaddr = require("ipaddr.js")
 import { getLogger } from "log4js"
 import * as Long from "long"
 import { Socket } from "net"
@@ -6,27 +7,31 @@ import { AnyBlockHeader, BlockHeader } from "../../common/blockHeader"
 import { BaseBlockHeader } from "../../common/genesisHeader"
 import { ITxPool } from "../../common/itxPool"
 import { SignedTx } from "../../common/txSigned"
-import { TIMESTAMP_TOLERANCE } from "../../consensus/consensus"
+import { maxNumberOfUncles, maxUncleHeightDelta } from "../../consensus/consensusGhost"
 import { IConsensus, IStatusChange } from "../../consensus/iconsensus"
 import { BlockStatus, ITip } from "../../consensus/sync"
 import { globalOptions } from "../../main"
-import { MinerServer } from "../../miner/minerServer"
 import * as proto from "../../serialization/proto"
 import { Hash } from "../../util/hash"
 import { IPeer } from "../ipeer"
 import { IPeerDatabase } from "../ipeerDatabase"
 import { BasePeer } from "./basePeer"
-import { BYTES_OVERHEAD, HASH_SIZE, MAX_BLOCKS_PER_PACKET, MAX_HEADERS_PER_PACKET, MAX_PACKET_SIZE, MAX_TX_SIZE, MAX_TXS_PER_BLOCK, REPEATED_OVERHEAD } from "./networkConstants"
+import { BYTES_OVERHEAD, HASH_SIZE, MAX_BLOCKS_PER_PACKET, MAX_HEADERS_PER_PACKET, MAX_TX_SIZE, MAX_TXS_PER_BLOCK, REPEATED_OVERHEAD, TARGET_PACKET_SIZE } from "./networkConstants"
 import { RabbitNetwork } from "./rabbitNetwork"
+
 const logger = getLogger("NetPeer")
 
-const DIFFICULTY_TOLERANCE = 0.05
+const PEER_EXCHANGE_MINIMUM_INTERVAL = 1000 * 60 * 60 * 3
+const PEER_EXCHANGE_INTERVAL_VARIATION = 1000 * 60 * 30
 const BROADCAST_LIMIT = 10
+const TIP_POLL_INTERVAL = 1000
 
 export interface IBlockTxs { hash: Hash, txs: SignedTx[] }
 export class RabbitPeer extends BasePeer implements IPeer {
-    public static seenBlocksSet: Set<String> = new Set<String>()
-    public static seenBlocks: String[] = []
+    public static headerSync: Promise<void> | void = undefined
+    public static blockSync: Promise<void> | void = undefined
+    public static lastProcessedBlock: number
+    public syncFailed: boolean = false
     public listenPort: number
     public guid: string
     private consensus: IConsensus
@@ -35,23 +40,34 @@ export class RabbitPeer extends BasePeer implements IPeer {
     private receivedBroadcasts: number
     private lastReceivedTime: number
     private version: number
+    private peerDatabase: IPeerDatabase
+    private lastPoll: number
+    private bTip: ITip
 
-    constructor(socket: Socket, network: RabbitNetwork, consensus: IConsensus, txPool: ITxPool, peerDB: IPeerDatabase) {
+    constructor(socket: Socket, network: RabbitNetwork, consensus: IConsensus, txPool: ITxPool, peerDatabase: IPeerDatabase) {
         super(socket)
         // tslint:disable-next-line:max-line-length
-        logger.debug(`New Netpeer Local=${RabbitNetwork.ipNormalise(socket.localAddress)}:${socket.localPort} --> Remote=${RabbitNetwork.ipNormalise(socket.remoteAddress)}:${socket.remotePort}`)
+        logger.debug(`New Netpeer Local=${socket.localAddress}:${socket.localPort} --> Remote=${socket.remoteAddress}:${socket.remotePort}`)
         this.network = network
         this.consensus = consensus
         this.txPool = txPool
         this.receivedBroadcasts = 0
         this.lastReceivedTime = 0
+        this.peerDatabase = peerDatabase
     }
 
     public async detectStatus(): Promise<proto.IStatus> {
         try {
             const status = await this.status()
+            this.listenPort = status.port
+            this.guid = status.guid
+            this.version = status.version
+
             if (status === undefined) {
                 throw new Error("Peer did not respond to status request")
+            }
+            if (status.version < this.consensus.minimumVersionNumber()) {
+                throw new Error(`Peer needs to upgrade, current version (${status.version}) is too old`)
             }
             if (status.networkid !== globalOptions.networkid) {
                 throw new Error(`Peer is using different NetworkID(${status.networkid}) to expected value(${globalOptions.networkid})`)
@@ -59,18 +75,20 @@ export class RabbitPeer extends BasePeer implements IPeer {
             if (status.guid === this.network.guid) {
                 throw new Error(`Connected to self`)
             }
-            for (const peer of this.network.peers.values()) {
-                if (status.guid === peer.guid) {
-                    throw new Error(`Already connected to peer`)
-                }
+            if (this.network.peers.has(status.guid)) {
+                throw new Error(`Already connected to peer`)
+            }
+            this.socketBuffer.getSocket().on("close", () => this.network.peers.delete(status.guid))
+            this.network.peers.set(status.guid, this)
+            if (status.version > this.network.version) {
+                logger.warn(`Peer is using a newer release(${status.version}) than this release(${this.network.version})`)
+            }
+            if (status.version > 3) {
+                this.peerExchangeLoop()
             }
 
-            this.listenPort = status.port
-            this.guid = status.guid
-            this.version = status.version
-            if (status.version > this.network.version) {
-                logger.warn(`Peer is using a higher version number(${status.version}) than current version(${this.network.version})`)
-            }
+            this.lastPoll = Date.now()
+            this.tipPoll()
             return status
         } catch (e) {
             logger.debug(`Disconnecting from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}: ${e}`)
@@ -212,17 +230,16 @@ export class RabbitPeer extends BasePeer implements IPeer {
         return blocks
     }
 
-    public async getHeadersByHashes(hashes: Hash[]): Promise<AnyBlockHeader[]> {
+    public async getHeadersByHashes(hashes: Hash[]): Promise<number> {
         const { reply, packet } = await this.sendRequest({ getHeadersByHash: { hashes } })
         if (reply.getHeadersByHashReturn === undefined) {
             this.protocolError(new Error(`Reply has no 'getHeadersByHashReturn': ${JSON.stringify(reply)}`))
             throw new Error("Invalid response")
         }
-        const headers: AnyBlockHeader[] = []
         for (const header of reply.getHeadersByHashReturn.headers) {
-            headers.push(new BlockHeader(header))
+            await this.consensus.putHeader(new BlockHeader(header))
         }
-        return headers
+        return reply.getHeadersByHashReturn.headers.length
     }
 
     public async getBlocksByRange(fromHeight: number, count: number): Promise<Block[]> {
@@ -255,14 +272,14 @@ export class RabbitPeer extends BasePeer implements IPeer {
     public async headerSync(remoteTip: ITip) {
         const startHeight = Math.min(this.consensus.getHtip().height, remoteTip.height)
         const { height: commonHeight, hash: commonHash } = await this.commonSearch(startHeight, remoteTip.height - 1, BlockStatus.Header)
-        logger.debug(`Found Start Header=${commonHeight}`)
+        logger.info(`Found Start Header=${commonHeight}`)
         await this.getHeaders(commonHeight, commonHash, remoteTip.height)
         return
     }
     public async blockSync(remoteBlockTip: ITip) {
         const startHeight = Math.min(this.consensus.getBtip().height, remoteBlockTip.height)
         const { height: commonHeight, hash: commonHash } = await this.commonSearch(startHeight, remoteBlockTip.height - 1, BlockStatus.Block)
-        logger.debug(`Found Start Block=${commonHeight}`)
+        logger.info(`Found Start Block=${commonHeight}`)
         await this.getBlocks(commonHeight, commonHash, remoteBlockTip.height)
         return
     }
@@ -271,12 +288,15 @@ export class RabbitPeer extends BasePeer implements IPeer {
         const blockHashes: Hash[] = []
         let header = this.consensus.getHtip().header
         let status: BlockStatus
+        let firstHash: Hash
         do {
-            status = await this.consensus.getBlockStatus(new Hash(header))
+            const hash = new Hash(header)
+            status = await this.consensus.getBlockStatus(hash)
             if (status >= BlockStatus.Block) { break }
             if (!(header instanceof BlockHeader)) { continue }
+            if (firstHash === undefined) { firstHash = hash }
             if (!header.merkleRoot.equals(Hash.emptyHash)) {
-                blockHashes.unshift(new Hash(header))
+                blockHashes.unshift(hash)
             }
             if (blockHashes.length > MAX_HEADERS_PER_PACKET) {
                 blockHashes.pop()
@@ -288,6 +308,13 @@ export class RabbitPeer extends BasePeer implements IPeer {
             logger.debug(`Receiving transactions from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
             return this.getTxBlocks(blockHashes)
         }
+        if (firstHash !== undefined) {
+            return this.getTxBlocks([firstHash])
+        }
+    }
+
+    public getTipHeight() {
+        return this.bTip ? this.bTip.height : undefined
     }
 
     // this is called in BasePeer's onPacket
@@ -296,7 +323,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
         const reply = id !== 0
         const rebroadcast = () => {
             if (id === 0) {
-                setImmediate(() => this.network.broadcast(packet))
+                setImmediate(() => this.network.broadcast(packet, this))
             }
         }
         switch (request.request) {
@@ -337,7 +364,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 response = await this.respondGetTip(reply, request[request.request])
                 break
             case "putHeaders":
-                response = await this.respondPutHeaders(reply, request[request.request])
+                response = await this.respondPutHeaders(reply, request[request.request], rebroadcast)
                 break
             case "getHash":
                 response = await this.respondGetHash(reply, request[request.request])
@@ -354,6 +381,53 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 logger.debug(`Message response could not be delived: ${e}`)
             }
         }
+    }
+
+    private async tipPoll() {
+        const bTip: ITip | void = await this.getBTip().then((v) => v, (e) => {
+            if (e !== undefined)
+                logger.error(e)
+            return undefined
+        })
+        const timeSinceLastMessage = Date.now() - this.socketBuffer.lastReceive
+        if (timeSinceLastMessage > 60000) {
+            logger.debug(`Disconnecting from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}, ${timeSinceLastMessage.toFixed(0)}ms since last reply`)
+            this.disconnect()
+            return
+        }
+
+        if (this.syncFailed) {
+            logger.info(`Sync failed on the peer ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()} - ignoring`)
+            return
+        }
+
+        if (bTip) {
+            this.bTip = bTip
+            if (RabbitPeer.headerSync === undefined && (this.consensus.getHtip().totalWork < bTip.totalwork || this.consensus.getHtip().height < bTip.height)) {
+                logger.info(`Starting header download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
+                RabbitPeer.headerSync = this.headerSync(bTip).then(() => RabbitPeer.headerSync = undefined, () => RabbitPeer.headerSync = undefined)
+            }
+
+            if (RabbitPeer.blockSync === undefined && (this.consensus.getHtip().totalWork < bTip.totalwork || this.consensus.getHtip().height < bTip.height)) {
+                //if (this.version > 5) {
+                //    logger.debug(`Starting block tx download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
+                //    RabbitPeer.blockSync = this.txSync(bTip).then(() => RabbitPeer.blockSync = undefined, () => RabbitPeer.blockSync = undefined)
+                //} else {
+                logger.info(`Starting block download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
+                RabbitPeer.blockSync = this.blockSync(bTip).then(() => RabbitPeer.blockSync = undefined, () => RabbitPeer.blockSync = undefined)
+                //}
+            }
+        }
+        else {
+            logger.warn(`Peer ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()} failed to return tip`)
+            this.disconnect()
+            return
+        }
+
+        const now = Date.now()
+        const duration = now - this.lastPoll
+        this.lastPoll = now
+        setTimeout(() => this.tipPoll(), Math.max(0, TIP_POLL_INTERVAL - duration))
     }
 
     private async getTip(header = false): Promise<{ hash: Hash, height: number, totalwork: number }> {
@@ -391,7 +465,31 @@ export class RabbitPeer extends BasePeer implements IPeer {
     private async respondGetPeers(reply: boolean, request: proto.IGetPeers): Promise<proto.INetwork> {
         try {
             const num = request.count
-            const peers = this.network.getIPeers(this)
+            const myPeers = this.network.getIPeers(this)
+            myPeers.sort(() => Math.random() < 0.5 ? -1 : 1)
+            const peers = myPeers.filter(({ host }) => {
+                try {
+                    const ipAddress = ipaddr.parse(host)
+                    switch (ipAddress.range()) {
+                        case "unspecified":
+                        case "broadcast":
+                        case "linkLocal":
+                        case "multicast":
+                        case "linkLocal":
+                        case "loopback":
+                        case "carrierGradeNat":
+                        case "private":
+                        case "reserved":
+                            return false
+                        case "unicast":
+                        default:
+                            return true
+                    }
+                } catch (e) {
+                    return false
+                }
+            }).slice(0, num)
+
             return { getPeersReturn: { success: true, peers } }
         } catch (e) {
             logger.error(`Could not get recent active Peers: ${e}`)
@@ -423,43 +521,6 @@ export class RabbitPeer extends BasePeer implements IPeer {
         return { getTxsReturn: { success: false, txs: [] } }
     }
 
-    private async blockBroadcastCondition(block: Block) {
-        const timeDelta = Math.abs(block.header.timeStamp - Date.now())
-        if (timeDelta > TIMESTAMP_TOLERANCE) {
-            return false
-        }
-        const merkleRoot = Block.calculateMerkleRoot(block.txs)
-        if (!block.header.merkleRoot.equals(merkleRoot)) {
-            return false
-        }
-
-        const blockHash = new Hash(block.header)
-        const blockHashstring = blockHash.toString()
-        const status = await this.consensus.getBlockStatus(blockHash)
-        if (status < BlockStatus.Nothing || status >= BlockStatus.Block) {
-            return false
-        }
-
-        if (RabbitPeer.seenBlocksSet.has(blockHashstring)) {
-            return false
-        }
-
-        const proximalDifficulty = this.consensus.getHtip().header.difficulty * (1 + DIFFICULTY_TOLERANCE)
-        const prehash = block.header.preHash()
-        if (!MinerServer.checkNonce(prehash, block.header.nonce, proximalDifficulty)) {
-            return false
-        }
-
-        RabbitPeer.seenBlocksSet.add(blockHashstring)
-        if (RabbitPeer.seenBlocks.length > 1000) {
-            const [old] = RabbitPeer.seenBlocks.splice(0, 1)
-            RabbitPeer.seenBlocksSet.delete(old)
-        }
-        RabbitPeer.seenBlocks.push(blockHashstring)
-
-        return true
-    }
-
     private async respondPutBlock(reply: boolean, request: proto.IPutBlock, rebroadcast: () => void): Promise<proto.INetwork> {
         setImmediate(async () => {
             this.receivedBroadcasts += 1
@@ -475,14 +536,9 @@ export class RabbitPeer extends BasePeer implements IPeer {
             let block: Block
             try {
                 block = new Block(request.blocks[0])
-
-                if (this.blockBroadcastCondition(block)) {
-                    rebroadcast()
-                }
-                const result = await this.consensus.putBlock(block)
+                const result = await this.consensus.putBlock(block, rebroadcast, this.socketBuffer.getIp())
                 if (result.height)
                     logger.info(`Received block ${result.height} mined  by ${block.header.miner} from ${this.socketBuffer.getSocket().remoteAddress}`)
-
             } catch (e) {
                 logger.debug(e)
             }
@@ -544,7 +600,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
         try {
             const fromHeight = Number(request.fromHeight)
             const count = Number(request.count)
-            const headers = await this.consensus.getHeadersRange(fromHeight, count)
+            const headers = await this.consensus.getHeadersChainRange(fromHeight, count)
             message = { getHeadersByRangeReturn: { success: true, headers } }
         } catch (e) {
             logger.error(`Failed to getHeadersByRange: ${e}`)
@@ -573,7 +629,32 @@ export class RabbitPeer extends BasePeer implements IPeer {
         return message
     }
 
-    private async respondPutHeaders(reply: boolean, request: proto.IPutHeaders): Promise<proto.INetwork> {
+    private async respondPutHeaders(reply: boolean, request: proto.IPutHeaders, rebroadcast: () => void): Promise<proto.INetwork> {
+        setImmediate(async () => {
+            this.receivedBroadcasts += 1
+            const decay = (Date.now() - this.lastReceivedTime) / 1000
+            this.lastReceivedTime = Date.now()
+            this.receivedBroadcasts = Math.max(0, this.receivedBroadcasts - decay)
+
+            if (this.receivedBroadcasts > BROADCAST_LIMIT) {
+                return
+            }
+
+            request.headers = request.headers.slice(0, maxNumberOfUncles)
+
+            try {
+                const headers = request.headers.map((header) => this.consensus.putHeader(new BlockHeader(header)))
+                const statusChanges = await Promise.all(headers)
+                if (statusChanges.length === 0) {
+                    return
+                }
+                if (statusChanges.every((statusChange) => statusChange.status !== BlockStatus.Rejected)) {
+                    rebroadcast()
+                }
+            } catch (e) {
+                logger.debug(e)
+            }
+        })
         return { putHeadersReturn: { statusChanges: [] } }
     }
 
@@ -598,11 +679,12 @@ export class RabbitPeer extends BasePeer implements IPeer {
             for (const ihash of request.hashes) {
                 const hash = new Hash(ihash)
                 const txBlock = await this.consensus.getBlockTxs(hash)
-                txBlocks.push(txBlock)
-                packetSize += HASH_SIZE + BYTES_OVERHEAD + REPEATED_OVERHEAD + txBlock.txs.length * MAX_TX_SIZE
-                if (packetSize > MAX_PACKET_SIZE - MAX_TXS_PER_BLOCK * MAX_TX_SIZE) {
+                const thisTxBlock = HASH_SIZE + BYTES_OVERHEAD + REPEATED_OVERHEAD + txBlock.txs.length * MAX_TX_SIZE
+                if (packetSize + thisTxBlock > TARGET_PACKET_SIZE) {
                     break
                 }
+                txBlocks.push(txBlock)
+                packetSize += thisTxBlock
             }
 
             message = { getBlockTxsReturn: { txBlocks } }
@@ -672,14 +754,23 @@ export class RabbitPeer extends BasePeer implements IPeer {
         let height = commonHeight + 1
         do {
             headers = await this.getHeadersByRange(height, MAX_HEADERS_PER_PACKET)
+            let uncleCount = 0
             for (const header of headers) {
                 if (!(header instanceof BlockHeader)) {
                     throw new Error(`Received Genesis Block Header during sync`)
                 }
                 const result = await this.consensus.putHeader(header)
-                this.validatePut(height, previousHash, result, header, BlockStatus.Header)
-                height++
-                previousHash = new Hash(header)
+                if (previousHash.equals(header.previousHash[0])) {
+                    this.validatePut(height, previousHash, result, header, BlockStatus.Header)
+                    height++
+                    previousHash = new Hash(header)
+                } else {
+                    uncleCount++
+                    if (uncleCount > maxNumberOfUncles) { throw new Error(`Received too many uncles.`) }
+                    if ((result.height !== undefined) && (height - result.height > maxUncleHeightDelta || result.height >= height)) {
+                        throw new Error(`Received invalid uncle height while header syncing.`)
+                    }
+                }
             }
         } while (height < maxHeight && headers.length > 0)
     }
@@ -697,7 +788,13 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 }, 3000)
             })
             blocks = await Promise.race([this.getBlocksByRange(height, MAX_BLOCKS_PER_PACKET), timeout])
+            if (height < maxHeight && blocks.length == 0) {
+                logger.error(`Block sync timeout : ${height} on ${this.socketBuffer.getIp()}`)
+                this.syncFailed = true
+                throw new Error("Block sync timeout")
+            }
             for (const block of blocks) {
+                RabbitPeer.lastProcessedBlock = Date.now()
                 if (!(block instanceof Block)) {
                     throw new Error(`Received Genesis Block during sync`)
                 }
@@ -732,7 +829,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
 
     private async getTxBlocks(blockHashes: Hash[]) {
         const requestSize = blockHashes.length * (HASH_SIZE + BYTES_OVERHEAD) + REPEATED_OVERHEAD
-        const numRequests = Math.ceil(requestSize / MAX_PACKET_SIZE)
+        const numRequests = Math.ceil(requestSize / TARGET_PACKET_SIZE)
         const txBlocksPerRequest = Math.floor(blockHashes.length / numRequests)
 
         for (let i = 0; i < numRequests; i++) {
@@ -747,5 +844,45 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 }
             }
         }
+    }
+
+    private async peerExchangeLoop(count: number = 100) {
+        try {
+            const newIPeers = await this.getPeers(count)
+            const normalizedPeers = newIPeers.map(({ host, port }) => ({ host: RabbitNetwork.normalizeHost(host), port }))
+            const filteredPeers = newIPeers.filter(({ host }) => {
+                try {
+                    const ipAddress = ipaddr.parse(host)
+                    switch (ipAddress.range()) {
+                        case "unspecified":
+                        case "broadcast":
+                        case "linkLocal":
+                        case "multicast":
+                        case "linkLocal":
+                        case "loopback":
+                        case "carrierGradeNat":
+                        case "private":
+                        case "reserved":
+                            return false
+                        case "unicast":
+                        default:
+                            return true
+                    }
+                } catch (e) {
+                    return false
+                }
+            })
+
+            if (filteredPeers.length < count) {
+                return this.peerDatabase.putPeers(filteredPeers)
+            }
+
+            filteredPeers.sort(() => Math.random() < 0.5 ? -1 : 1)
+            return this.peerDatabase.putPeers(filteredPeers.slice(0, count))
+        } catch (e) {
+            logger.debug(`Failed to get peers from ${this.socketBuffer.getIp()}: ${e}`)
+        }
+
+        setTimeout(() => this.peerExchangeLoop(), PEER_EXCHANGE_MINIMUM_INTERVAL + Math.random() * PEER_EXCHANGE_INTERVAL_VARIATION)
     }
 }

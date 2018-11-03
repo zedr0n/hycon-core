@@ -69,7 +69,7 @@ export class MinerView extends React.Component<IMinerViewProps, IMinerView> {
                             <div>
                                 <Icon style={{ marginRight: "10px", color: "grey", fontSize: "40px", paddingTop: "1%" }}>multiline_chart</Icon>
                                 <span style={{ float: "right", color: "grey", fontSize: "25px", paddingTop: "2%" }}>
-                                    <span style={{ float: "right", color: "grey" }}>{this.state.miner.networkHashRate.toLocaleString()} H/s</span><br />
+                                    <span style={{ float: "right", color: "grey" }}>{this.state.miner.networkHashRate}</span><br />
                                     <span style={{ float: "right", color: "grey", fontSize: "12px" }}>Estimated Average Network Hash Rate</span>
                                 </span>
                             </div>
@@ -144,7 +144,15 @@ export class MinerView extends React.Component<IMinerViewProps, IMinerView> {
         this.state.rest.setLoading(true)
         this.state.rest.getWalletList().then((data: { walletList: IHyconWallet[], length: number }) => {
             if (this.mounted) {
-                this.setState({ wallets: data.walletList, dialogOpen: true })
+                this.setState({ wallets: update(this.state.wallets, { $splice: [[0, this.state.wallets.length]] }) })
+                for (const wallet of data.walletList) {
+                    if (wallet.address !== undefined && wallet.address !== "") {
+                        this.setState({
+                            wallets: update(this.state.wallets, { $push: [wallet] }),
+                        })
+                    }
+                }
+                this.setState({ dialogOpen: true })
             }
             this.state.rest.setLoading(false)
         })
@@ -190,6 +198,9 @@ export class MinerView extends React.Component<IMinerViewProps, IMinerView> {
         } else {
             this.state.rest.setMinerCount(this.state.tmpCpuCount).then(() => {
                 this.setState({ cpuMinerCount: this.state.tmpCpuCount, adjustCpuMiner: false })
+                this.state.rest.getMiner().then((data: IMiner) => {
+                    this.setState({ miner: data, minerAddress: data.currentMinerAddress, cpuMinerCount: data.cpuCount })
+                })
             })
         }
     }

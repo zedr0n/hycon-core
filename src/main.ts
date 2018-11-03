@@ -38,6 +38,7 @@ const optionDefinitions = [
     { name: "minerAddress", alias: "M", type: String },
     { name: "networkid", alias: "n", type: String },
     { name: "nonLocal", alias: "l", type: Boolean },
+    { name: "noGUI", type: Boolean },
     { name: "peer", type: String, multiple: true, defaultOption: true },
     { name: "port", alias: "p", type: Number },
     { name: "postfix", alias: "P", type: String },
@@ -164,6 +165,11 @@ async function main() {
 
     if (conf.txPoolMaxTxsPerAddress === undefined) {
         conf.txPoolMaxTxsPerAddress = 64
+        await fs.writeFileSync("./data/config.json", JSON.stringify(conf))
+    }
+
+    if (conf.ghostHeight === undefined) {
+        conf.ghostHeight = 317713
         await fs.writeFileSync("./data/config.json", JSON.stringify(conf))
     }
 
