@@ -391,7 +391,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
         })
         const timeSinceLastMessage = Date.now() - this.socketBuffer.lastReceive
         if (timeSinceLastMessage > 60000) {
-            logger.debug(`Disconnecting from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}, ${timeSinceLastMessage.toFixed(0)}ms since last reply`)
+            logger.info(`Disconnecting from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}, ${timeSinceLastMessage.toFixed(0)}ms since last reply`)
             this.disconnect()
             return
         }
