@@ -408,7 +408,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 RabbitPeer.headerSync = this.headerSync(bTip).then(() => RabbitPeer.headerSync = undefined, () => RabbitPeer.headerSync = undefined)
             }
 
-            if (RabbitPeer.blockSync === undefined && (this.consensus.getHtip().totalWork < bTip.totalwork || this.consensus.getHtip().height < bTip.height)) {
+            if (RabbitPeer.blockSync === undefined && (this.consensus.getBtip().totalWork < bTip.totalwork || this.consensus.getBtip().height < bTip.height)) {
                 //if (this.version > 5) {
                 //    logger.debug(`Starting block tx download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
                 //    RabbitPeer.blockSync = this.txSync(bTip).then(() => RabbitPeer.blockSync = undefined, () => RabbitPeer.blockSync = undefined)
