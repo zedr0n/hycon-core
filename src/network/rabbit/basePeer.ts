@@ -111,7 +111,7 @@ export abstract class BasePeer {
                 case "getHash":
                 case "getTip":
                 case "status":
-                    return 4000
+                    return 8000
                 case "getBlockTxs":
                 case "getHeadersByRange":
                 case "getBlocksByRange":
