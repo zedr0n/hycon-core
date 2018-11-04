@@ -387,6 +387,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
         const bTip: ITip | void = await this.getBTip().then((v) => v, (e) => {
             if (e !== undefined)
                 logger.error(e)
+            this.syncFailed = true
             return undefined
         })
         const timeSinceLastMessage = Date.now() - this.socketBuffer.lastReceive
@@ -403,7 +404,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
 
         if (bTip) {
             this.bTip = bTip
-            logger.info(`${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()} : tip ${bTip.height}`)
+            //logger.info(`${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()} : tip ${bTip.height}`)
             if (RabbitPeer.headerSync === undefined && (this.consensus.getHtip().totalWork < bTip.totalwork || this.consensus.getHtip().height < bTip.height)) {
                 logger.info(`Starting header download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
                 RabbitPeer.headerSync = this.headerSync(bTip).then(() => RabbitPeer.headerSync = undefined, () => RabbitPeer.headerSync = undefined)
