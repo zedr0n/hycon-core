@@ -271,6 +271,8 @@ export class RabbitPeer extends BasePeer implements IPeer {
 
     public async headerSync(remoteTip: ITip) {
         const startHeight = Math.min(this.consensus.getHtip().height, remoteTip.height)
+        if (startHeight == remoteTip.height)
+            return
         const { height: commonHeight, hash: commonHash } = await this.commonSearch(startHeight, remoteTip.height - 1, BlockStatus.Header)
         logger.info(`Found Start Header=${commonHeight}`)
         await this.getHeaders(commonHeight, commonHash, remoteTip.height)
@@ -278,6 +280,8 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
     public async blockSync(remoteBlockTip: ITip) {
         const startHeight = Math.min(this.consensus.getBtip().height, remoteBlockTip.height)
+        if (startHeight == remoteBlockTip.height)
+            return
         logger.info(`Found startHeight = ${startHeight}`)
         const { height: commonHeight, hash: commonHash } = await this.commonSearch(startHeight, remoteBlockTip.height - 1, BlockStatus.Block)
         logger.info(`Found Start Block=${commonHeight}`)
