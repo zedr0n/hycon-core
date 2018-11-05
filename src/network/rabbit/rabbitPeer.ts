@@ -278,6 +278,7 @@ export class RabbitPeer extends BasePeer implements IPeer {
     }
     public async blockSync(remoteBlockTip: ITip) {
         const startHeight = Math.min(this.consensus.getBtip().height, remoteBlockTip.height)
+        logger.info(`Found startHeight = ${startHeight}`)
         const { height: commonHeight, hash: commonHash } = await this.commonSearch(startHeight, remoteBlockTip.height - 1, BlockStatus.Block)
         logger.info(`Found Start Block=${commonHeight}`)
         await this.getBlocks(commonHeight, commonHash, remoteBlockTip.height)
