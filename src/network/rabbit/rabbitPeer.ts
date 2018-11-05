@@ -411,7 +411,8 @@ export class RabbitPeer extends BasePeer implements IPeer {
             this.bTip = bTip
             //logger.info(`${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()} : tip ${bTip.height}`)
             if (RabbitPeer.headerSync === undefined && (this.consensus.getHtip().totalWork < bTip.totalwork || this.consensus.getHtip().height < bTip.height)) {
-                logger.info(`Starting header download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
+                if (this.consensus.getHtip().height < bTip.height)
+                    logger.info(`Starting header download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
                 RabbitPeer.headerSync = this.headerSync(bTip).then(() => RabbitPeer.headerSync = undefined, () => RabbitPeer.headerSync = undefined)
             }
 
@@ -420,7 +421,8 @@ export class RabbitPeer extends BasePeer implements IPeer {
                 //    logger.debug(`Starting block tx download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
                 //    RabbitPeer.blockSync = this.txSync(bTip).then(() => RabbitPeer.blockSync = undefined, () => RabbitPeer.blockSync = undefined)
                 //} else {
-                logger.info(`Starting block download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
+                if (this.consensus.getBtip().height < bTip.height)
+                    logger.info(`Starting block download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
                 RabbitPeer.blockSync = this.blockSync(bTip).then(() => RabbitPeer.blockSync = undefined, () => RabbitPeer.blockSync = undefined)
                 //}
             }
