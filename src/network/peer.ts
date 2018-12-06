@@ -424,7 +424,10 @@ export class Peer extends BasePeer {
                 //logger.debug(`Starting block tx download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
                 //Peer.blockSync = this.txSync(bTip).then(() => Peer.blockSync = undefined, () => Peer.blockSync = undefined)
                 logger.info(`Starting block download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
-                Peer.blockSync = this.blockSync(bTip).then(() => Peer.blockSync = undefined, () => Peer.blockSync = undefined)
+                Peer.blockSync = this.blockSync(bTip).then(() => Peer.blockSync = undefined, (e) => {
+                    Peer.blockSync = undefined
+                    logger.info(e)
+                })
             }
         }
         else {

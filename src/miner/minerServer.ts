@@ -64,6 +64,7 @@ export class MinerServer {
     }
 
     private candidate(previousDBBlock: DBBlock, previousHash: Hash, difficulty: number, minerReward: number, uncleCandidates: IUncleCandidate[] = []): void {
+        return
         if (userOptions.cpuMiners > 0 && (userOptions.minerAddress === undefined || userOptions.minerAddress === "")) {
             logger.info("Can't mine without miner address")
             return
