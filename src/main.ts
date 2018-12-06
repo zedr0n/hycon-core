@@ -58,7 +58,7 @@ async function main() {
     logger.info(`Verbose=${userOptions.verbose}`)
     logger.info(`Port=${userOptions.port}`)
     logger.info(`Stratum Port=${userOptions.str_port}`)
-    await userOptions.setMiner()
+    //await userOptions.setMiner()
 
     const hycon = new Server()
     hycon.run()

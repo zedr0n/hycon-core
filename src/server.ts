@@ -52,9 +52,5 @@ export class Server {
                 this.network.addPeer(ip, Number(port)).catch((e) => logger.error(`Failed to connect to client: ${e}`))
             }
         }
-
-        if (globalOptions.persistent && globalOptions.persistent.length > 0)
-            setInterval(() => this.network.checkPersistentPeers(), 1000 * 30)
-
     }
 }

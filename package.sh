@@ -1,9 +1,9 @@
 time=$(date +"%Y%m%d_%H%M")
 foldername="HYCON_0.0.4_"$time
 #build_time=${1:?"requires an argument DateTime" }
-platform=${1:?"requires an argument macos | linux | win" }
+platform=${1:?"requires an argument mac | linux | win" }
 
-if [ $platform != "linux" ] && [ $platform != "win" ] && [ $platform != "macos" ]
+if [ $platform != "linux" ] && [ $platform != "win" ] && [ $platform != "mac" ]
 then
     echo "================== Error: platform not supported  ==============="
     exit 1
@@ -17,7 +17,7 @@ npm run clear
 rm -rf build
 tsc
 echo "=============== npm  tsc init finish============="
-if [[ -e "./src/api/clientDist" ]]
+if [ -e "./src/api/clientDist" ]
 then    
     rm -rf ./src/api/clientDist
 fi
@@ -43,7 +43,7 @@ elif [ -e "../hycon" ]
 then
     cp -f ../hycon .
     cp -f ../launch.sh.command .
-    if [ $platform = "macos" ]
+    if [ $platform = "mac" ]
     then
         #cp ../node-for-mac/* .
         cp -f ../node_modules/sqlite3/lib/binding/node-*-darwin-x64/node_sqlite3.node .

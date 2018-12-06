@@ -29,6 +29,7 @@ export interface IBlockTxs { hash: Hash, txs: SignedTx[] }
 export class Peer extends BasePeer {
     private static headerSync: Promise<void> | void = undefined
     private static blockSync: Promise<void> | void = undefined
+    private syncFailed: boolean = false
     public listenPort: number
     public guid: string
     private consensus: Consensus
@@ -269,8 +270,17 @@ export class Peer extends BasePeer {
 
     public async headerSync(remoteTip: ITip) {
         const { height: commonHeight, hash: commonHash } = await this.commonSearch(remoteTip.height, BlockStatus.Header)
-        logger.debug(`Found Start Header=${commonHeight}`)
+        logger.info(`Found Start Header=${commonHeight}`)
         return this.getHeaders(commonHeight, commonHash, remoteTip.height)
+    }
+
+    public async blockSync(remoteBlockTip: ITip) {
+        const startHeight = Math.min(this.consensus.getBtip().height, remoteBlockTip.height)
+        logger.info(`Found startHeight = ${startHeight}`)
+        const { height: commonHeight, hash: commonHash } = await this.commonSearch(startHeight, BlockStatus.Block)
+        logger.info(`Found Start Block=${commonHeight}`)
+        await this.getBlocks(commonHeight, commonHash, remoteBlockTip.height)
+        return
     }
 
     public async txSync(remoteTip: ITip) {
@@ -403,14 +413,18 @@ export class Peer extends BasePeer {
 
         if (bTip) {
             this.bTip = bTip
-            if (Peer.headerSync === undefined && this.consensus.getHtip().totalWork < bTip.totalwork) {
-                logger.debug(`Starting header download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
+            if (Peer.headerSync === undefined &&
+                (this.consensus.getHtip().totalWork < bTip.totalwork || this.consensus.getHtip().height < bTip.height)) {
+                logger.info(`Starting header download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
                 Peer.headerSync = this.headerSync(bTip).then(() => Peer.headerSync = undefined, () => Peer.headerSync = undefined)
             }
 
-            if (this.version > 5 && Peer.blockSync === undefined && this.consensus.getBtip().totalWork < bTip.totalwork) {
-                logger.debug(`Starting block tx download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
-                Peer.blockSync = this.txSync(bTip).then(() => Peer.blockSync = undefined, () => Peer.blockSync = undefined)
+            if (this.version > 5 && Peer.blockSync === undefined
+                && (this.consensus.getBtip().totalWork < bTip.totalwork || this.consensus.getBtip().height < bTip.height)) {
+                //logger.debug(`Starting block tx download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
+                //Peer.blockSync = this.txSync(bTip).then(() => Peer.blockSync = undefined, () => Peer.blockSync = undefined)
+                logger.info(`Starting block download from ${this.socketBuffer.getIp()}:${this.socketBuffer.getPort()}`)
+                Peer.blockSync = this.blockSync(bTip).then(() => Peer.blockSync = undefined, () => Peer.blockSync = undefined)
             }
         }
         else {
@@ -787,7 +801,6 @@ export class Peer extends BasePeer {
                 throw new Error("Block sync timeout")
             }
             for (const block of blocks) {
-                RabbitPeer.lastProcessedBlock = Date.now()
                 if (!(block instanceof Block)) {
                     throw new Error(`Received Genesis Block during sync`)
                 }

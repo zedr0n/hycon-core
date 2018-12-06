@@ -54,7 +54,6 @@ export class Network {
     private upnpServer: UpnpServer
     private upnpClient: UpnpClient
     private natUpnp: NatUpnp
-    private persistentPeers: string[] = globalOptions.persistent
 
     constructor(txPool: TxPool, consensus: Consensus, port: number = 8148, peerDbPath: string = "peerdb", networkid: string = "hycon") {
         this.txPool = txPool
