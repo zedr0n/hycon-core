@@ -17,7 +17,7 @@ npm run clear
 rm -rf build
 tsc
 echo "=============== npm  tsc init finish============="
-if [ -e "./src/api/clientDist" ]
+if [[ -e "./src/api/clientDist" ]]
 then    
     rm -rf ./src/api/clientDist
 fi

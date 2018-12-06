@@ -1,6 +1,6 @@
 {
     "name": "hycon",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "HYCON Full-node",
     "main": "index.js",
     "bin": "build/src/main.js",
@@ -11,6 +11,7 @@
     "scripts": {
         "hycon": "./node_modules/.bin/ts-node src/main.ts --port=8148 --str_port=9081 --api --api_port=2442 --cpuMiners=1",
         "nogui": "./node_modules/.bin/ts-node src/main.ts --port=8148 --str_port=9081 --api --api_port=2442 --cpuMiners=1 --noGUI",
+        "testnet": "./node_modules/.bin/ts-node src/main.ts --port=8148 --str_port=9081 --api --api_port=2442 --cpuMiners=1 --noGUI --networkid=ouroboros --bootstrap",
         "seed": "./node_modules/.bin/ts-node src/main.ts --port=8148 --str_port=9081 --api --api_port=2442 --cpuMiners=0",
         "protogen": "pbjs -t static-module -w commonjs -o src/serialization/proto.js proto/main.proto &&  pbts -o src/serialization/proto.d.ts src/serialization/proto.js && ./src/serialization/trim_null.sh",
         "debug": "./node_modules/.bin/ts-node --inspect=9231 --inspect-brk src/main.ts  --port=8148 --str_port=9081 --cpuMiners=3 --api --api_port=2442 --networkid=`git rev-parse HEAD` --bootstrap",
@@ -70,8 +71,8 @@
         "ts-node": "4.0.1",
         "tslint": "^5.10.0",
         "typescript": "^2.9.1",
-        "webpack": "^4.10.2",
-        "webpack-cli": "^2.1.5"
+        "webpack": "^4.20.2",
+        "webpack-cli": "^3.1.1"
     },
     "dependencies": {
         "@glosfer/bitbox-app-hycon": "0.0.3",
@@ -84,6 +85,7 @@
         "blake2b": "^2.1.2",
         "body-parser": "^1.18.3",
         "command-line-args": "^5.0.2",
+        "es5class": "^2.3.1",
         "express": "^4.16.3",
         "fs-extra": "^5.0.0",
         "hdkey": "^1.0.0",
